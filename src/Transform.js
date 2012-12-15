@@ -3,16 +3,16 @@
 exports.methods = {
 
     // Transform an expression into a formal parameter list
-	transformFormals: function(expr) {
-	
-	    if (expr === null)
-	        return [];
-	        
-	    var list = (expr.type === "SequenceExpression") ? expr.expressions : [expr],
-	        params = [],
-	        param,
-	        node,
-	        i;
+    transformFormals: function(expr) {
+    
+        if (expr === null)
+            return [];
+            
+        var list = (expr.type === "SequenceExpression") ? expr.expressions : [expr],
+            params = [],
+            param,
+            node,
+            i;
     
         for (i = 0; i < list.length; ++i) {
         
@@ -29,14 +29,14 @@ exports.methods = {
             
             this.transformPatternElement(param, true);
         }
-	    
-	    return params;
-	},
-	
-	transformArrayPattern: function(node, binding) {
-	
-	    node.type = "ArrayPattern";
-	    
+        
+        return params;
+    },
+    
+    transformArrayPattern: function(node, binding) {
+    
+        node.type = "ArrayPattern";
+        
         var elems = node.elements,
             elem,
             rest,
@@ -71,9 +71,9 @@ exports.methods = {
             if (elem.rest) this.transformPattern(elem.pattern, binding);
             else this.transformPatternElement(elem, binding);
         }
-	},
-	
-	transformObjectPattern: function(node, binding) {
+    },
+    
+    transformObjectPattern: function(node, binding) {
 
         node.type = "ObjectPattern";
         
@@ -116,24 +116,24 @@ exports.methods = {
             if (prop.pattern) this.transformPatternElement(prop, binding);
             else this.transformPattern(prop.name, binding);
         }
-	},
-	
-	transformPatternElement: function(elem, binding) {
-	
-	    var node = elem.pattern;
-	    
-	    // Split assignment into pattern and initializer
-	    if (node.type === "AssignmentExpression" && node.operator === "=") {
-	    
-	        elem.pattern = node.left;
-	        elem.init = node.right;
-	    }
-	    
-	    this.transformPattern(elem.pattern, binding);
-	},
-	
-	// Transforms an expression into a pattern
-	transformPattern: function(node, binding) {
+    },
+    
+    transformPatternElement: function(elem, binding) {
+    
+        var node = elem.pattern;
+        
+        // Split assignment into pattern and initializer
+        if (node.type === "AssignmentExpression" && node.operator === "=") {
+        
+            elem.pattern = node.left;
+            elem.init = node.right;
+        }
+        
+        this.transformPattern(elem.pattern, binding);
+    },
+    
+    // Transforms an expression into a pattern
+    transformPattern: function(node, binding) {
 
         switch (node.type) {
         
@@ -165,6 +165,6 @@ exports.methods = {
         }
         
         return node;
-	}
+    }
     
 };

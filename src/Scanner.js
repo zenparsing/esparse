@@ -34,11 +34,11 @@ var Unicode = (function() {
 
 // === Unicode Matching Patterns ===
 var unicodeLetter = Unicode.Lu + Unicode.Ll + Unicode.Lt + Unicode.Lm + Unicode.Lo + Unicode.Nl,
-	identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
-	identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
-	identifierEscape = /\\u([0-9a-fA-F]{4})/g,
-	whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
-	newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
+    identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
+    identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
+    identifierEscape = /\\u([0-9a-fA-F]{4})/g,
+    whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
+    newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
 
 
 // === Reserved Words ===
@@ -67,8 +67,8 @@ var multiCharPunctuator = new RegExp("^(?:" +
 
 // === Miscellaneous Patterns ===
 var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
-	blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
-	hexChar = /[0-9a-f]/i;
+    blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
+    hexChar = /[0-9a-f]/i;
 
 // === Character Types ===
 var WHITESPACE = 1,
@@ -115,22 +115,22 @@ var charTable = (function() {
 // Performs a binary search on an array
 function binarySearch(array, val) {
 
-	var right = array.length - 1,
-		left = 0,
-		mid,
-		test;
-	
-	while (left <= right) {
-		
-		mid = (left + right) >> 1;
-		test = array[mid];
-		
-		if (val > test) left = mid + 1;
-		else if (val < test) right = mid - 1;
-		else return mid;
-	}
-	
-	return left;
+    var right = array.length - 1,
+        left = 0,
+        mid,
+        test;
+    
+    while (left <= right) {
+        
+        mid = (left + right) >> 1;
+        test = array[mid];
+        
+        if (val > test) left = mid + 1;
+        else if (val < test) right = mid - 1;
+        else return mid;
+    }
+    
+    return left;
 }
 
 // Returns true if the character is a valid identifier part
@@ -227,92 +227,92 @@ Scanner.prototype = {
     next: function(context) {
 
         if (this.type !== "COMMENT")
-    		this.newlineBefore = false;
-		
-		this.error = "";
-		
-		var type = null, 
-		    start;
-		
-		while (type === null) {
-		
-		    start = this.offset;
-			type = start >= this.length ? "EOF" : this.Start(context);
-		}
-		
-		this.type = type;
-		this.start = start;
-		this.end = this.offset;
-		
-		return type;
-	},
-	
-	raw: function(token) {
-	
-	    token || (token = this);
-	    return this.input.slice(this.start, this.end);
-	},
-	
-	position: function(token) {
-	
-	    token || (token = this);
-	    
-		var offset = token.start,
-		    i = binarySearch(this.lines, offset);
-		
-		return { 
-		
-			offset: offset, 
-			line: i, 
-			col: offset - this.lines[i - 1]
-		};
-	},
-	
-	addLineBreak: function(offset) {
-	
-		this.lines.push(offset);
-	},
-	
-	readOctalEscape: function() {
-	
-	    var m = octalEscape.exec(this.input.slice(this.offset, this.offset + 3)),
-	        val = m ? m[0] : "";
-	    
-	    this.offset += val.length;
-	    
-	    return val;
-	},
-	
-	readStringEscape: function() {
-	
-	    this.offset++;
-	    
-	    var chr, esc;
-	    
-	    switch (chr = this.input[this.offset++]) {
-	    
-	        case "t": return "\t";
-	        case "b": return "\b";
-	        case "v": return "\v";
-	        case "f": return "\f";
-	        case "r": return "\r";
-	        case "n": return "\n";
-	
-	        case "\r":
-	        
-	            this.addLineBreak(this.offset - 1);
-	            
-	            if (this.input[this.offset] === "\n")
-	                this.offset++;
-	            
-	            return "";
-	        
-	        case "\n":
-	        case "\u2028":
+            this.newlineBefore = false;
+        
+        this.error = "";
+        
+        var type = null, 
+            start;
+        
+        while (type === null) {
+        
+            start = this.offset;
+            type = start >= this.length ? "EOF" : this.Start(context);
+        }
+        
+        this.type = type;
+        this.start = start;
+        this.end = this.offset;
+        
+        return type;
+    },
+    
+    raw: function(token) {
+    
+        token || (token = this);
+        return this.input.slice(this.start, this.end);
+    },
+    
+    position: function(token) {
+    
+        token || (token = this);
+        
+        var offset = token.start,
+            i = binarySearch(this.lines, offset);
+        
+        return { 
+        
+            offset: offset, 
+            line: i, 
+            col: offset - this.lines[i - 1]
+        };
+    },
+    
+    addLineBreak: function(offset) {
+    
+        this.lines.push(offset);
+    },
+    
+    readOctalEscape: function() {
+    
+        var m = octalEscape.exec(this.input.slice(this.offset, this.offset + 3)),
+            val = m ? m[0] : "";
+        
+        this.offset += val.length;
+        
+        return val;
+    },
+    
+    readStringEscape: function() {
+    
+        this.offset++;
+        
+        var chr, esc;
+        
+        switch (chr = this.input[this.offset++]) {
+        
+            case "t": return "\t";
+            case "b": return "\b";
+            case "v": return "\v";
+            case "f": return "\f";
+            case "r": return "\r";
+            case "n": return "\n";
+    
+            case "\r":
+            
+                this.addLineBreak(this.offset - 1);
+                
+                if (this.input[this.offset] === "\n")
+                    this.offset++;
+                
+                return "";
+            
+            case "\n":
+            case "\u2028":
             case "\u2029":
-	        
-	            this.addLineBreak(this.offset - 1);
-	            return "";
+            
+                this.addLineBreak(this.offset - 1);
+                return "";
 
             case "0":
             case "1":
@@ -350,76 +350,76 @@ Scanner.prototype = {
                 esc = this.readHex(4);
                 return (esc.length < 4) ? null : String.fromCharCode(parseInt(esc, 16));
             
-	        default: 
-	        
-	            return chr;
-	    }
-	},
-	
-	readRange: function(low, high) {
-	
-	    var start = this.offset,
-	        code;
-	    
-	    while (code = this.input.charCodeAt(this.offset)) {
-	    
-	        if (code >= low && code <= high) this.offset++;
-	        else break;
-	    }
-	    
-	    return this.input.slice(start, this.offset);
-	},
-	
-	readInteger: function() {
-	
-	    var start = this.offset,
-	        code;
-	    
-	    while (code = this.input.charCodeAt(this.offset)) {
-	    
-	        if (code >= 48 && code <= 57) this.offset++;
-	        else break;
-	    }
-	    
-	    return this.input.slice(start, this.offset);
-	},
-	
-	readHex: function(maxLen) {
-	    
-	    var str = "", 
-	        chr;
-	    
-	    while (chr = this.input[this.offset]) {
-	    
-	        if (!hexChar.test(chr))
-	            break;
-	        
-	        str += chr;
-	        this.offset++;
-	        
-	        if (str.length === maxLen)
-	            break;
-	    }
-	    
-	    return str;
-	},
+            default: 
+            
+                return chr;
+        }
+    },
     
-	Start: function(context) {
-	
-	    var code = this.input.charCodeAt(this.offset),
-	        next;
-	        
-	    switch (charTable[code]) {
-	    
-	        case WHITESPACE: return this.Whitespace();
+    readRange: function(low, high) {
+    
+        var start = this.offset,
+            code;
+        
+        while (code = this.input.charCodeAt(this.offset)) {
+        
+            if (code >= low && code <= high) this.offset++;
+            else break;
+        }
+        
+        return this.input.slice(start, this.offset);
+    },
+    
+    readInteger: function() {
+    
+        var start = this.offset,
+            code;
+        
+        while (code = this.input.charCodeAt(this.offset)) {
+        
+            if (code >= 48 && code <= 57) this.offset++;
+            else break;
+        }
+        
+        return this.input.slice(start, this.offset);
+    },
+    
+    readHex: function(maxLen) {
+        
+        var str = "", 
+            chr;
+        
+        while (chr = this.input[this.offset]) {
+        
+            if (!hexChar.test(chr))
+                break;
+            
+            str += chr;
+            this.offset++;
+            
+            if (str.length === maxLen)
+                break;
+        }
+        
+        return str;
+    },
+    
+    Start: function(context) {
+    
+        var code = this.input.charCodeAt(this.offset),
+            next;
+            
+        switch (charTable[code]) {
+        
+            case WHITESPACE: return this.Whitespace();
 
-	        case NEWLINE: return this.Newline();
-	        
-	        case IDENTIFIER: return this.Identifier(context);
-	        
-	        case PUNCTUATOR: return this.Punctuator();
-	        
-	        case DECIMAL_DIGIT: return this.Number();
+            case NEWLINE: return this.Newline();
+            
+            case IDENTIFIER: return this.Identifier(context);
+            
+            case PUNCTUATOR: return this.Punctuator();
+            
+            case DECIMAL_DIGIT: return this.Number();
             
             case TEMPLATE: return this.Template();
             
@@ -458,311 +458,311 @@ Scanner.prototype = {
             
                 if (context === "template") return this.Template();
                 else return this.Punctuator();
-	    }
-		
-		var chr = this.input[this.offset];
-		
-		// Unicode newlines
-		if (isNewlineChar(chr))
-			return this.Newline();
-		
-		// Unicode whitespace
-		if (whitespaceChars.test(chr))
+        }
+        
+        var chr = this.input[this.offset];
+        
+        // Unicode newlines
+        if (isNewlineChar(chr))
+            return this.Newline();
+        
+        // Unicode whitespace
+        if (whitespaceChars.test(chr))
             return this.UnicodeWhitespace();
         
         // Unicode identifier chars
         if (identifierStart.test(chr))
-			return this.Identifier(context);
-		
-		return this.Error();
-	},
-	
-	Whitespace: function() {
-	
-	    this.offset++;
-	    
-	    while (charTable[this.input.charCodeAt(this.offset)] === WHITESPACE)
-	        this.offset++;
-		
-		return null;
-	},
-	
-	UnicodeWhitespace: function() {
-	
-	    this.offset++;
-	    
-	    while (whitespaceChars.test(this.input[this.offset]))
-	        this.offset++;
-		
-		return null;
-	},
-	
-	Newline: function() {
-		
-		this.addLineBreak(this.offset);
-		
-		if (this.input[this.offset++] === "\r" && this.input[this.offset] === "\n")
-		    this.offset++;
-		
-		this.newlineBefore = true;
-		
-		return null;
-	},
-	
-	Punctuator: function(code) {
-	    
-		var op = this.input[this.offset++], 
-		    chr,
-			next;
-		
-		while (
-		    isPunctuatorNext(chr = this.input[this.offset]) &&
-		    multiCharPunctuator.test(next = op + chr)) {
-		
-		    this.offset++;
+            return this.Identifier(context);
+        
+        return this.Error();
+    },
+    
+    Whitespace: function() {
+    
+        this.offset++;
+        
+        while (charTable[this.input.charCodeAt(this.offset)] === WHITESPACE)
+            this.offset++;
+        
+        return null;
+    },
+    
+    UnicodeWhitespace: function() {
+    
+        this.offset++;
+        
+        while (whitespaceChars.test(this.input[this.offset]))
+            this.offset++;
+        
+        return null;
+    },
+    
+    Newline: function() {
+        
+        this.addLineBreak(this.offset);
+        
+        if (this.input[this.offset++] === "\r" && this.input[this.offset] === "\n")
+            this.offset++;
+        
+        this.newlineBefore = true;
+        
+        return null;
+    },
+    
+    Punctuator: function(code) {
+        
+        var op = this.input[this.offset++], 
+            chr,
+            next;
+        
+        while (
+            isPunctuatorNext(chr = this.input[this.offset]) &&
+            multiCharPunctuator.test(next = op + chr)) {
+        
+            this.offset++;
             op = next;
-		}
-		
-		return op;
-	},
-	
-	Template: function() {
-	
-	    var first = this.input[this.offset++],
-	        end = false, 
-	        val = "", 
-	        esc,
-	        chr;
-	    
-	    while (chr = this.input[this.offset]) {
-	        
-	        if (chr === "`") {
-	        
-	            end = true;
-	            break;
-	        }
-	        
-	        if (chr === "$" && this.input[this.offset + 1] === "{") {
-	        
-	            this.offset++;
-	            break;
-	        }
-	        
-	        if (chr === "\\") {
-			
-			    esc = this.readStringEscape();
-			    
-			    if (!esc) 
-			        return this.Error();
-			    
-			    val += esc;
-			    
-			} else {
-			
-			    val += chr;
-			    this.offset++;
-			}
-	    }
-	    
-	    if (!chr)
-			return this.Error();
-	    
-	    this.offset++;
-	    
-	    this.value = val;
-	    this.templateEnd = end;
-	    
-	    return "TEMPLATE";
-	},
-	
-	String: function() {
-	
-		var delim = this.input[this.offset++],
-			val = "",
-			esc,
-			chr;
-		
-		while (chr = this.input[this.offset]) {
-		
-			if (chr === delim)
-				break;
-			
-			if (isNewlineChar(chr))
-			    return this.Error();
-			
-			if (chr === "\\") {
-			
-			    esc = this.readStringEscape();
-			    
-			    if (esc === null)
-			        return this.Error();
-			    
-			    val += esc;
-			    
-			} else {
-			
-			    val += chr;
-			    this.offset++;
-			}
-		}
-		
-		if (!chr)
-			return this.Error();
-		
-		this.offset++;
-		this.value = val;
-		
-		return "STRING";
-	},
-	
-	RegularExpression: function() {
-	
-	    this.offset++;
-		
-		var backslash = false, 
-			inClass = false,
-			flags = null,
-			val = "", 
-			chr;
-		
-		while ((chr = this.input[this.offset++])) {
-		
-			if (isNewlineChar(chr))
-				return this.Error();
-			
-			if (backslash) {
-			
-				val += "\\" + chr;
-				backslash = false;
-			
-			} else if (chr == "[") {
-			
-				inClass = true;
-				val += chr;
-			
-			} else if (chr == "]" && inClass) {
-			
-				inClass = false;
-				val += chr;
-			
-			} else if (chr == "/" && !inClass) {
-			
-				break;
-			
-			} else if (chr == "\\") {
-			
-				backslash = true;
-				
-			} else {
-			
-				val += chr;
-			}
-		}
-		
-		if (!chr)
-			return this.Error();
-		
-		if (isIdentifierPart(this.input[this.offset]))
-			flags = this.Identifier("name").value;
-		
-		this.value = val;
-		this.regexFlags = flags;
-		
-		return "REGEX";
-	},
-	
-	LegacyOctalNumber: function() {
-	
-	    this.offset++;
-	    
-	    var start = this.offset,
-	        code;
-	    
-	    while (code = this.input.charCodeAt(this.offset)) {
-	    
-	        if (code >= 48 && code <= 55)
-	            this.offset++;
-	        else
-	            break;
-	    }
-	    
-	    if (this.strict)
-	        return this.Error("Octal literals are not allowed in strict mode");
-	    
-	    this.value = parseInt(this.input.slice(start, this.offset), 8);
-	    
-	    return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-	},
-	
-	Number: function() {
-	
-	    var start = this.offset,
-	        next;
-	    
-	    this.readInteger();
-	    
-	    if (this.input[this.offset] === ".") {
-	    
-	        this.offset++;
-	        this.readInteger();
-	    }
-	    
-	    next = this.input[this.offset];
-	    
-	    if (next === "e" || next === "E") {
-	    
-	        this.offset++;
-	        
-	        next = this.input[this.offset];
-	        
-	        if (next === "+" || next === "-")
-	            this.offset++;
-	        
-	        if (!this.readInteger())
-	            return this.Error();
-	    }
-	    
-	    this.value = parseFloat(this.input.slice(start, this.offset));
-	    
-	    return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-	},
-	
-	BinaryNumber: function() {
-	
-	    this.offset += 2;
-	    this.value = parseInt(this.readRange(48, 49), 2);
-	    
-	    return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-	},
+        }
+        
+        return op;
+    },
+    
+    Template: function() {
+    
+        var first = this.input[this.offset++],
+            end = false, 
+            val = "", 
+            esc,
+            chr;
+        
+        while (chr = this.input[this.offset]) {
+            
+            if (chr === "`") {
+            
+                end = true;
+                break;
+            }
+            
+            if (chr === "$" && this.input[this.offset + 1] === "{") {
+            
+                this.offset++;
+                break;
+            }
+            
+            if (chr === "\\") {
+            
+                esc = this.readStringEscape();
+                
+                if (!esc) 
+                    return this.Error();
+                
+                val += esc;
+                
+            } else {
+            
+                val += chr;
+                this.offset++;
+            }
+        }
+        
+        if (!chr)
+            return this.Error();
+        
+        this.offset++;
+        
+        this.value = val;
+        this.templateEnd = end;
+        
+        return "TEMPLATE";
+    },
+    
+    String: function() {
+    
+        var delim = this.input[this.offset++],
+            val = "",
+            esc,
+            chr;
+        
+        while (chr = this.input[this.offset]) {
+        
+            if (chr === delim)
+                break;
+            
+            if (isNewlineChar(chr))
+                return this.Error();
+            
+            if (chr === "\\") {
+            
+                esc = this.readStringEscape();
+                
+                if (esc === null)
+                    return this.Error();
+                
+                val += esc;
+                
+            } else {
+            
+                val += chr;
+                this.offset++;
+            }
+        }
+        
+        if (!chr)
+            return this.Error();
+        
+        this.offset++;
+        this.value = val;
+        
+        return "STRING";
+    },
+    
+    RegularExpression: function() {
+    
+        this.offset++;
+        
+        var backslash = false, 
+            inClass = false,
+            flags = null,
+            val = "", 
+            chr;
+        
+        while ((chr = this.input[this.offset++])) {
+        
+            if (isNewlineChar(chr))
+                return this.Error();
+            
+            if (backslash) {
+            
+                val += "\\" + chr;
+                backslash = false;
+            
+            } else if (chr == "[") {
+            
+                inClass = true;
+                val += chr;
+            
+            } else if (chr == "]" && inClass) {
+            
+                inClass = false;
+                val += chr;
+            
+            } else if (chr == "/" && !inClass) {
+            
+                break;
+            
+            } else if (chr == "\\") {
+            
+                backslash = true;
+                
+            } else {
+            
+                val += chr;
+            }
+        }
+        
+        if (!chr)
+            return this.Error();
+        
+        if (isIdentifierPart(this.input[this.offset]))
+            flags = this.Identifier("name").value;
+        
+        this.value = val;
+        this.regexFlags = flags;
+        
+        return "REGEX";
+    },
+    
+    LegacyOctalNumber: function() {
+    
+        this.offset++;
+        
+        var start = this.offset,
+            code;
+        
+        while (code = this.input.charCodeAt(this.offset)) {
+        
+            if (code >= 48 && code <= 55)
+                this.offset++;
+            else
+                break;
+        }
+        
+        if (this.strict)
+            return this.Error("Octal literals are not allowed in strict mode");
+        
+        this.value = parseInt(this.input.slice(start, this.offset), 8);
+        
+        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+    },
+    
+    Number: function() {
+    
+        var start = this.offset,
+            next;
+        
+        this.readInteger();
+        
+        if (this.input[this.offset] === ".") {
+        
+            this.offset++;
+            this.readInteger();
+        }
+        
+        next = this.input[this.offset];
+        
+        if (next === "e" || next === "E") {
+        
+            this.offset++;
+            
+            next = this.input[this.offset];
+            
+            if (next === "+" || next === "-")
+                this.offset++;
+            
+            if (!this.readInteger())
+                return this.Error();
+        }
+        
+        this.value = parseFloat(this.input.slice(start, this.offset));
+        
+        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+    },
+    
+    BinaryNumber: function() {
+    
+        this.offset += 2;
+        this.value = parseInt(this.readRange(48, 49), 2);
+        
+        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+    },
     
     OctalNumber: function() {
     
         this.offset += 2;
-	    this.value = parseInt(this.readRange(48, 55), 8);
-	    
-	    return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+        this.value = parseInt(this.readRange(48, 55), 8);
+        
+        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
     },
     
-	HexNumber: function() {
-	
-	    this.offset += 2;
-	    this.value = parseInt(this.readHex(0), 16);
-	    
-	    return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-	},
-	
-	Identifier: function(context) {
-	
-		var start = this.offset,
-		    id = "",
-		    chr,
-		    hex;
+    HexNumber: function() {
+    
+        this.offset += 2;
+        this.value = parseInt(this.readHex(0), 16);
+        
+        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+    },
+    
+    Identifier: function(context) {
+    
+        var start = this.offset,
+            id = "",
+            chr,
+            hex;
 
-		while (isIdentifierPart(chr = this.input[this.offset])) {
-		
-		    if (chr === "\\") {
-		    
-		        id += this.input.slice(start, this.offset++);
+        while (isIdentifierPart(chr = this.input[this.offset])) {
+        
+            if (chr === "\\") {
+            
+                id += this.input.slice(start, this.offset++);
                 
                 if (this.input[this.offset++] !== "u")
                     return this.Error();
@@ -775,82 +775,82 @@ Scanner.prototype = {
                 id += String.fromCharCode(parseInt(hex, 16));
                 start = this.offset;
                 
-		    } else {
-		    
-		        this.offset++;
-		    }
-		}
-		
-		id += this.input.slice(start, this.offset);
+            } else {
+            
+                this.offset++;
+            }
+        }
         
-		if (context !== "name")
-		    if (reservedWord.test(id) || this.strict && strictReservedWord.test(id))
-    		    return id;
-		
-		this.value = id;
-		
-		return "IDENTIFIER";
-	},
-	
-	LineComment: function() {
-	
-	    this.offset += 2;
-	    
-	    var start = this.offset,
-	        chr;
-	    
-	    while (chr = this.input[this.offset]) {
-	    
-	        if (isNewlineChar(chr))
-	            break;
-	        
-	        this.offset++;
-	    }
-	    
-	    this.value = this.input.slice(start, this.offset);
-	    
-	    return "COMMENT";
-	},
-	
-	BlockComment: function() {
-	
-	    this.offset += 2;
-	    
-		var pattern = blockCommentPattern,
-			start = this.offset,
-			m;
-		
-		while (true) {
-		
-			pattern.lastIndex = this.offset;
-			
-			m = pattern.exec(this.input);
-			if (!m) return this.Error();
-			
-			this.offset = m.index + m[0].length;
-			
-			if (m[0] === "*/")
-				break;
-			
-			this.newlineBefore = true;
-			this.addLineBreak(m.index);
-		}
-		
-		this.value = this.input.slice(start, this.offset - 2);
-		
-		return "COMMENT";
-	},
-	
-	Error: function(msg) {
-	
-	    this.offset++;
-	    
-	    if (msg)
-    	    this.error = msg;
-	    
-	    return "ILLEGAL";
-	}
-	
+        id += this.input.slice(start, this.offset);
+        
+        if (context !== "name")
+            if (reservedWord.test(id) || this.strict && strictReservedWord.test(id))
+                return id;
+        
+        this.value = id;
+        
+        return "IDENTIFIER";
+    },
+    
+    LineComment: function() {
+    
+        this.offset += 2;
+        
+        var start = this.offset,
+            chr;
+        
+        while (chr = this.input[this.offset]) {
+        
+            if (isNewlineChar(chr))
+                break;
+            
+            this.offset++;
+        }
+        
+        this.value = this.input.slice(start, this.offset);
+        
+        return "COMMENT";
+    },
+    
+    BlockComment: function() {
+    
+        this.offset += 2;
+        
+        var pattern = blockCommentPattern,
+            start = this.offset,
+            m;
+        
+        while (true) {
+        
+            pattern.lastIndex = this.offset;
+            
+            m = pattern.exec(this.input);
+            if (!m) return this.Error();
+            
+            this.offset = m.index + m[0].length;
+            
+            if (m[0] === "*/")
+                break;
+            
+            this.newlineBefore = true;
+            this.addLineBreak(m.index);
+        }
+        
+        this.value = this.input.slice(start, this.offset - 2);
+        
+        return "COMMENT";
+    },
+    
+    Error: function(msg) {
+    
+        this.offset++;
+        
+        if (msg)
+            this.error = msg;
+        
+        return "ILLEGAL";
+    }
+    
 };
 
 exports.Scanner = Scanner;
