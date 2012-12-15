@@ -119,4 +119,23 @@
     }]
 },
 
+// Binding to "arguments" should throw if function is strict mode
+
+/** (arguments) => { "use strict"; } **/
+{},
+
+/** ({ arguments }) => { "use strict"; } **/
+{},
+
+/** ({ args: arguments }) => { "use strict"; } **/
+{},
+
+/** ({ args: arguments }) => { "use strict"; } **/
+{},
+
+// Duplicate parameters should throw in strict mode
+
+/** (a, a) => { "use strict"; } **/
+{},
+
 ];

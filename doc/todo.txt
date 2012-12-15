@@ -1,22 +1,8 @@
-== ES6 Features ==
+== TODO ==
 
-- Generators, Generator Expressions, Array Comprehensions
-- We currently don't allow the following binding form: { x = 123 }.
-
-== Issues ==
-
-- Can we parse "let" when we're not in strict mode?
-- Hate using "kind" as a subtype.  Is "subtype" any better?
-- For-in/of needs validation work.
-- In strict mode, we need to go back and check the binding identifiers
-  for the parameters of the function.
-- It is a SyntaxError if any Identifier value occurs more than once within a 
-  FormalParameterList of a strict mode FunctionDeclaration or FunctionExpression.
+- Extended string unicode escapes u{ HexDigits }
 - Error messages should probably be constants.
-- Make sure that we always call fail with a token, if appropriate.
 - Should directives be a list, instead of just the one?
-- Arrow functions are always strict.  There are other details...
-- Research unicode issues.
 
 == Future ==
 

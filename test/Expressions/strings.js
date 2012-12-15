@@ -7,8 +7,7 @@
     {   type: "ExpressionStatement",
         expression:
         {   type: "String",
-            value: "hello",
-            newlineBefore: false
+            value: "hello"
         }
     }]
 },
@@ -20,23 +19,73 @@
     {   type: "ExpressionStatement",
         expression: 
         {   type: "String",
-            value: "world",
-            newlineBefore: false
+            value: "world"
         }
     }]
 },
 
-/** "\nnewline"; **/
+/** "\r"; **/
 {   type: "Script",
     statements: [
     
     {   type: "ExpressionStatement",
         expression: 
         {   type: "String",
-            value: "\nnewline",
-            newlineBefore: false
+            value: "\r"
         }
     }]
 },
+
+/** "\n"; **/
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression: 
+        {   type: "String",
+            value: "\n"
+        }
+    }]
+},
+
+/** "\t"; **/
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression: 
+        {   type: "String",
+            value: "\t"
+        }
+    }]
+},
+
+/** "line\
+continuation"; **/
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression: 
+        {   type: "String",
+            value: "linecontinuation"
+        }
+    }]
+},
+
+/** "\101"; **/
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression: 
+        {   type: "String",
+            value: "A"
+        }
+    }]
+},
+
+/** "use strict"; "\101"; **/
+{},
 
 ];

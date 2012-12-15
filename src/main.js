@@ -1,16 +1,17 @@
 "use strict";
 
-var Parser = require("./Parser.js").Parser;
+var Parser = require("./Parser.js").Parser,
+    Scanner = require("./Scanner.js").Scanner;
 
 function parse(input, options) {
 
     var ast = {
         
         input: input,
-        root: new Parser(options).parse(input),
+        root: new Parser(input, options).parse(),
         forEachChild: forEachChild,
         replace: function(replacer) { return replace(ast, replacer); },
-        visit: function(visitor) { return visit(ast, visitor); }
+        traverse: function(visitor) { return traverse(ast, visitor); }
 
     };
     
@@ -81,17 +82,20 @@ function replace(ast, replacer) {
     var input = ast.input,
         $ = { type: "$", root: ast.root, start: 0, end: input.length };
     
-    visit($);
+    visit($, 0);
     
     return $.innerText;
     
-    function visit(node) {
+    function visit(node, previousEnd) {
     
+        var prev = null;
+        
         forEachChild(node, function(child) {
         
             child.parentNode = node;
-            visit(child);
+            visit(child, prev ? prev.end : child.start);
             delete child.parentNode;
+            prev = child;
         });
         
         var offset = node.start,
@@ -99,8 +103,8 @@ function replace(ast, replacer) {
             replaced = null,
             leadingText = "";
         
-        if (node.previousEnd !== undefined)
-            leadingText = input.slice(node.previousEnd, node.start);
+        if (previousEnd < node.start)
+            leadingText = input.slice(previousEnd, node.start);
         
         // Build innerText and outerText
         
@@ -135,6 +139,7 @@ function replace(ast, replacer) {
 }
 
 exports.Parser = Parser;
+exports.Scanner = Scanner;
 exports.parse = parse;
 exports.replace = replace;
 exports.traverse = traverse;

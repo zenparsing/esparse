@@ -1,3 +1,5 @@
+"use strict";
+
 var FS = require("fs"),
     Path = require("path"),
     Util = require("util");
@@ -5,16 +7,15 @@ var FS = require("fs"),
 var Parser = require("../src/main.js");
 
 var HOP = Object.prototype.hasOwnProperty,
-    TEST_COMMENT = /\/\*\*[\s\S]+?\*\*\//g,
-    COMMENT_TRIM = /^\/\*\*|\*\*\/$/g;
+    TEST_COMMENT = /\/\*\*!?[\s\S]+?\*\*\//g,
+    COMMENT_TRIM = /^\/\*\*!?|\*\*\/$/g;
 
 var SKIP_KEYS = {
 
     "start": 1,
     "end": 1,
-    "previousEnd": 1,
     "newlineBefore": 1,
-    "trailingComma": 1
+    "message": 1
 }
 
 // Returns true if the argument is an object
@@ -57,6 +58,7 @@ function astLike(a, b) {
 }
 
 function astLikeFail(msg) {
+
     console.log(msg);
     return false;
 }
@@ -130,7 +132,9 @@ function readFile(filename) {
 // Parses a list of test inputs from comments
 function parseTestComments(text) {
 
-    return text.match(TEST_COMMENT).map(function(source) {
+    var list = text.match(TEST_COMMENT) || [];
+    
+    return list.map(function(source) {
     
         return source.replace(COMMENT_TRIM, "").trim();
     });
@@ -149,7 +153,8 @@ function run() {
     walkDirectory(__dirname, function(path) {
     
         var group = groupName(path),
-            name = Path.basename(path, ".js");
+            name = Path.basename(path, ".js"),
+            tree;
         
         // Only javascript files in nested directories
         if (!group || Path.extname(path) !== ".js")
@@ -167,7 +172,18 @@ function run() {
         
         for (i = 0; i < programs.length; ++i) {
         
-            tree = Parser.parse(programs[i]).root;
+            try { 
+            
+                tree = Parser.parse(programs[i]).root;
+            
+            } catch (err) {
+            
+                if (err instanceof SyntaxError)
+                    tree = { message: err.message };
+                else
+                    throw err;
+            }
+            
             pass = astLike(tree, outputs[i]);
             
             printResult(name + "[" + i + "]", pass);

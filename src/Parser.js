@@ -1,338 +1,428 @@
 "use strict";
 
-var AbstractParser = require("./AbstractParser.js").AbstractParser,
-	Scanner = require("./Scanner.js").Scanner,
-	Class = require("./Class.js").Class,
+var Scanner = require("./Scanner.js").Scanner,
 	Transform = require("./Transform.js"),
-	Keys = require("./Keys.js"),
-	KeySet = Keys.KeySet;
+	Validate = require("./Validate.js");
 
-var assignmentOp = new KeySet("=", "*=", "/=", "%=", "+=", "-=", ">>=", "<<=", ">>>=", "&=", "^=", "|="),
-	unaryOp = new KeySet("delete", "void", "typeof", "!", "~", "+", "-"),
-	incrementOp = new KeySet("++", "--"),
-	equalityOp = new KeySet("==", "===", "!=", "!=="),
-	relationalOp = new KeySet("<=", ">=", ">", "<", "instanceof", "in"),
-	relationalOpNoIn = new KeySet("<=", ">=", ">", "<", "instanceof"),
-	shiftOp = new KeySet(">>>", ">>", "<<"),
-	additiveOp = new KeySet("+", "-"),
-	multiplicativeOp = new KeySet("*", "/", "%");
+// Binary operator precedence levels
+var operatorPrecedence = {
 
-var nameFlags = { name: true, div: false, quasi: false },
-	divFlags = { name: false, div: true, quasi: false },
-	quasiFlags = { name: true, div: false, quasi: true };
+    "||": 1,
+    "&&": 2,
+    "|": 3,
+    "^": 4,
+    "&": 5,
+    "==": 6, "!=": 6, "===": 6, "!==": 6,
+    "<=": 7, ">=": 7, ">": 7, "<": 7, "instanceof": 7, "in": 7,
+    ">>>": 8, ">>": 8, "<<": 8,
+    "+": 9, "-": 9,
+    "*": 10, "/": 10, "%": 10
+};
 
-// Returns true if the specified name is a restricted identifier in strict mode
-function isPoisonIdent(name) {
+// Object literal property name flags
+var PROP_NORMAL = 1,
+    PROP_ASSIGN = 2,
+    PROP_GET = 4,
+    PROP_SET = 8;
 
-    return name === "eval" || name === "arguments";
+// Returns true if the specified operator is an increment operator
+function isIncrement(op) {
+
+    return op === "++" || op === "--";
 }
 
-// Function template for left-associative operator expressions
-function BinaryOperator(op, higher) {
+// Returns true if the specified operator is an assignment operator
+function isAssignment(op) {
 
-	var isMap = (typeof op !== "string");
+    if (op === "=")
+        return true;
+    
+    switch (op) {
+    
+        case "*=": 
+	    case "&=": 
+	    case "^=": 
+	    case "|=": 
+	    case "<<=": 
+	    case ">>=": 
+	    case ">>>=": 
+	    case "%=": 
+	    case "+=": 
+	    case "-=": 
+	    case "/=":
+	        return true;
+	}
 	
-	return function(noIn) {
-	
-		var endNode = this.begin(),
-		    expr = this[higher](noIn), 
-		    next;
-		    
-		while (next = this.peekDiv().type) {
-		
-			if (isMap && !op.has(next) || !isMap && next !== op)
-				break;
-			
-			this.readDiv();
-			
-			expr = endNode({ 
-			
-			    type: "BinaryExpression", 
-			    operator: next, 
-			    left: expr, 
-			    right: this[higher](noIn)
-			});
-		}
-		
-		return expr;
-	};
+	return false;
 }
 
-var Parser = new Class(AbstractParser, {
+// Returns true if the specified operator is a unary operator
+function isUnary(op) {
+    
+    switch (op) {
+    
+        case "delete":
+        case "void": 
+        case "typeof":
+        case "!":
+        case "~":
+        case "+":
+        case "-":
+            return true;
+    }
+    
+    return false;
+}
 
-    constructor: function() {
-        
-        AbstractParser.call(this, Scanner);
+// Returns a copy of the specified token
+function copyToken(token) {
+
+    return {
+        type: token.type,
+        value: token.value,
+        newlineBefore: token.newlineBefore,
+        start: token.start,
+        end: token.end,
+        regexFlags: token.regexFlags,
+        templateEnd: token.templateEnd
+    };
+}
+
+// Adds methods to the Parser prototype
+function addMethods(source) {
+
+    Object.keys(source).forEach(function(k) { Parser.prototype[k] = source[k]; });
+}
+
+function Parser(input, offset) {
+
+    var scanner = new Scanner(input, offset);
+		
+	this.scanner = scanner;
+	this.input = input;
+	
+	this.peek0 = null;
+	this.peek1 = null;
+	this.endOffset = scanner.offset;
+	
+	this.contextStack = [];
+	this.pushContext(false);
+}
+
+Parser.prototype = {
+
+    get startOffset() {
+    
+        return this.peekToken().start;
     },
-
-	// Contextual Scanning Shortcuts
-	readName: function(type) { return this.read(type, nameFlags); },
-	peekName: function(index) { return this.peek(index, nameFlags); },
-	peekNameUntil: function(type, index) { return this.peekUntil(type, index, nameFlags); },
+    
+    parse: function() { 
+    
+        return this.Script();
+    },
+    
+    nextToken: function(context) {
+    
+        var scanner = this.scanner,
+            type = null;
+        
+        while (!type || type === "COMMENT")
+            type = scanner.next(context);
+        
+        return scanner;
+    },
+    
+    readToken: function(type, context) {
 	
-	readDiv: function(type) { return this.read(type, divFlags); },
-	peekDiv: function(index) { return this.peek(index, divFlags); },
-	peekDivUntil: function(type, index) { return this.peekUntil(type, index, divFlags); },
+	    var token = this.peek0 || this.nextToken(context);
+	    
+	    this.peek0 = this.peek1;
+	    this.peek1 = null;
+	    this.endOffset = token.end;
+	    
+	    if (type && token.type !== type)
+			this.fail("Unexpected token " + token.type, token);
+		
+		return token;
+	},
 	
-	readQuasi: function() { return this.read("Quasi", quasiFlags); },
-	peekQuasi: function(index) { return this.peek(index, quasiFlags); },
-	peekQuasiUntil: function(type, index) { return this.peekUntil("Quasi", index, quasiFlags); },
+	read: function(type, context) {
 	
-	// Contextual Keywords
+	    return this.readToken(type, context).type;
+	},
+	
+	peekToken: function(context, index) {
+	
+	    if (index === 0 || index === void 0) {
+	    
+	        return this.peek0 || (this.peek0 = this.nextToken(context));
+	    
+	    } else if (index === 1) {
+	    
+	        if (this.peek1) {
+	        
+	            return this.peek1;
+	        
+	        } else if (this.peek0) {
+	        
+	            this.peek0 = copyToken(this.peek0);
+                return this.peek1 = this.nextToken(context);
+	        }
+	    }
+	    
+	    throw new Error("Invalid lookahead");
+	},
+	
+	peek: function(context, index) {
+	
+	    return this.peekToken(context, index).type;
+	},
+	
+    unpeek: function() {
+	
+	    if (this.peek0) {
+	    
+	        this.scanner.offset = this.peek0.start;
+	        this.peek0 = null;
+	        this.peek1 = null;
+	    }
+	},
+	
+	peekUntil: function(type, context) {
+	
+		var tok = this.peek(context);
+		return tok !== "EOF" && tok !== type ? tok : null;
+	},
+	
+	fail: function(msg, loc) {
+	
+		var pos = this.scanner.position(loc || this.peek0);
+		throw new SyntaxError(msg + " (line " + pos.line + ", col " + pos.col + ")");
+	},
+	
     readKeyword: function(word) {
     
-        var token = this.read();
+        var token = this.readToken();
         
-        if (token.type === word || (token.type === "Identifier" && token.value === word))
+        if (token.type === word || (token.type === "IDENTIFIER" && token.value === word))
             return token;
         
-        this.fail("Expected keyword '" + word + "'");
+        this.fail("Unexpected token " + token.type, token);
     },
     
     peekKeyword: function(word, noNewlineBefore) {
     
-        var token = this.peek();
+        var token = this.peekToken();
         
-        if (token.type === "word")
+        if (token.type === word)
             return true;
         
-        return token.type === word ||
-            token.type === "Identifier" && 
-            token.value === word && 
-            !(noNewlineBefore && token.newlineBefore);
+        return  token.type === word ||
+                token.type === "IDENTIFIER" && 
+                token.value === word && 
+                !(noNewlineBefore && token.newlineBefore);
     },
-	
-	// Checks an assignment target for strict mode restrictions
-	checkAssignTarget: function(node) {
-	
-		if (!this.context.strict)
-		    return;
-		
-		if (node.type === "Identifier" && isPoisonIdent(node.value))
-			this.fail("Cannot modify " + node.value + " in strict mode", node);
-	},
-	
-	// Checks a binding identifier for strict mode restrictions
-	checkBindingIdent: function(node) {
-	
-	    var name = node.value;
-	    
-	    if (this.context.strict && isPoisonIdent(name))
-		    this.fail("Binding cannot be created for '" + name + "' in strict mode", node);
-		
-		// Add to bindings map
-		// TODO: fail if already present?
-		this.bindings[name] = 1;
-	},
-	
-	// Checks function formal parameters for strict mode restrictions
-	checkParameters: function(params) {
-	
-	    if (!this.context.strict)
-	        return;
-	    
-	    var names = new KeySet(), name, i;
-	    
-	    for (i = 0; i < params.length; ++i) {
-	    
-	        if (params[i].type !== "Identifier")
-	            continue;
-	        
-	        name = params[i].value;
-	        
-	        if (isPoisonIdent(name))
-	            this.fail("Parameter name " + name + " is not allowed in strict mode");
-	        
-	        if (names.has(name))
-	            this.fail("Strict mode function may not have duplicate parameter names");
-	        
-	        names.add(name);
-	    }
-	},
-	
-	// Performs validation on the init portion of a for, for-in, or for-of statement
-	checkForInit: function(init, type) {
-	
-	    if (type === "for") {
-	    
-	        // TODO: Fail if const declaration is not initialized?
-	        
-	    } else {
-	    
-	        if (init.type === "VariableDeclaration") {
-	        
-	            // For-in/of may only have one variable declaration
-	            if (init.declarations.length !== 1)
-	                this.fail("for-" + type + " statement may not have more than one variable declaration", init);
-	            
-	            var decl = init.declarations[0];
-	            
-	            // A variable initializer is only allowed in for-in where 
-	            // variable type is "var" and it is not a pattern
-	            
-	            if (decl.init && (
-	                type === "of" ||
-	                init.kind !== "var" ||
-	                decl.pattern.type !== "Identifier")) {
-	                
-	                this.fail("Invalid initializer in for-" + type + " statement", init);
-	            }
-	            
-	        } else {
-	        
-	            // Transform to LHS
-	            this.transformPattern(init, false);
-	        }
-	    }
-	},
 	
 	// Context management
 	pushContext: function(isFunction) {
 	
 		this.context = { 
 			
-			strict: (this.context ? this.context.strict : false),
+			strict: this.context ? this.context.strict : false,
 			isFunction: isFunction,
 			labelSet: {},
 			switchDepth: 0,
-			varNames: {}
+			invalidNodes: null,
+			coveredProperties: null
 		};
 		
-		this._contextStack.push(this.context);
+		this.contextStack.push(this.context);
 		this.scanner.strict = this.context.strict;
-		
-		this.pushScope();
 	},
 	
 	popContext: function() {
 	
-		this._contextStack.pop();
-		this.context = this._contextStack[this._contextStack.length - 1];
+		this.contextStack.pop();
+		this.context = this.contextStack[this.contextStack.length - 1];
 		this.scanner.strict = this.context ? this.context.strict : false;
-		
-		this.popScope();
 	},
 	
-	// Lexical scope management
-	pushScope: function() {
-	
-	    this.bindings = {};
-	    this._scopeStack.push(this.bindings);
-	    
-	    return this.bindings;
-	},
-	
-	popScope: function() {
-	
-	    return this._scopeStack.pop();
-	},
-	
-	setStrictMode: function() {
+	setStrict: function() {
 	
 		this.context.strict = true;
 		this.scanner.strict = true;
 	},
 	
-	Start: function() {
+	maybeEnd: function() {
 	
-		this._contextStack = [];
-		this._scopeStack = [];
+		var token = this.peekToken();
 		
-		this.pushContext(false);
-		var statements = this.StatementList(true, true);
-		this.popContext();
+		if (!token.newlineBefore) {
+			
+			switch (token.type) {
+			
+				case "EOF":
+				case "}":
+				case ";":
+					break;
+				
+				default:
+					return true;
+			}
+		}
 		
-		return { type: "Script", statements: statements };
+		return false;
+	},
+	
+	peekModule: function() {
+	
+	    if (this.peekToken().value === "module") {
+        
+            var p = this.peekToken("div", 1);
+            return (p.type === "IDENTIFIER" && !p.newlineBefore);
+        }
+        
+        return false;
+	},
+	
+	addInvalidNode: function(node, error) {
+	
+	    var context = this.context,
+	        list = context.invalidNodes;
+	    
+	    node.error = error;
+	    
+	    if (!list) context.invalidNodes = [node];
+	    else list.push(node);
+	},
+	
+	// === Top Level ===
+	
+	Script: function() {
+	
+		var start = this.startOffset,
+		    statements = this.StatementList(true, true);
+		
+		return { 
+		    type: "Script", 
+		    statements: statements,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	// === Expressions ===
 	
 	Expression: function(noIn) {
 	
-	    var expr = this.AssignmentExpression(noIn),
-	        list = null,
-	        next;
+	    var start = this.startOffset,
+	        expr = this.AssignmentExpression(noIn),
+	        list = null;
 		    
-		while (this.peekDiv().type === ",") {
+		while (this.peek("div") === ",") {
 		
 		    // If the next token after "," is "...", we might be
 		    // trying to parse an arrow function formal parameter
 		    // list with a trailing rest parameter.  Return the 
 		    // expression up to, but not including ",".
 		    
-		    if (this.peek(1).type === "...")
+		    if (this.peek(null, 1) === "...")
 		        break;
 		    
-			this.readDiv();
+			this.read();
 			
 			if (list === null) {
 			
 			    list = [expr];
-			    expr = { type: "SequenceExpression", expressions: list };
+			    
+			    expr = { 
+			        type: "SequenceExpression", 
+			        expressions: list, 
+			        start: start,
+			        end: -1
+			    };
 			}
 			
 			list.push(this.AssignmentExpression(noIn));
 		}
+		
+		if (list)
+		    expr.end = this.endOffset;
 		
 		return expr;
 	},
 	
 	AssignmentExpression: function(noIn) {
 	
-		var left = this.ConditionalExpression(noIn);
+		var start = this.startOffset,
+		    left,
+		    lhs;
+		
+		if (this.peek() === "yield")
+		    return this.YieldExpression();
+		
+		left = this.ConditionalExpression(noIn);
 		
 		// Check for assignment operator
-		if (!assignmentOp.has(this.peekDiv().type))
+		if (!isAssignment(this.peek("div")))
 			return left;
 		
+		// Binding forms can be contained within parens
+		for (lhs = left; lhs.type === "ParenExpression"; lhs = lhs.expression);
+		
 		// Make sure that left hand side is assignable
-		switch (left.type) {
+		switch (lhs.type) {
 		
 			case "MemberExpression":
 			case "CallExpression":
 				break;
 				
 			case "Identifier":
-				this.checkAssignTarget(left);
+				this.checkAssignTarget(lhs);
 				break;
 		
 			default:
-			
-			    left = this.transformPattern(left, false);
+			    this.transformPattern(lhs, false);
     			break;
 		}
 		
 		return {
 		
 		    type: "AssignmentExpression",
-		    operator: this.readDiv().type,
+		    operator: this.read(),
 		    left: left,
-		    right: this.AssignmentExpression(noIn)
+		    right: this.AssignmentExpression(noIn),
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	SpreadAssignment: function(noIn) {
 	
-	    if (this.peek().type === "...") {
+	    if (this.peek() === "...") {
 	    
+	        var start = this.startOffset;
+	        
+	        this.read();
+	        
 	        return {
 	            type: "SpreadExpression",
-	            expression: this.AssignmentExpression(noIn)
+	            expression: this.AssignmentExpression(noIn),
+	            start: start,
+	            end: this.endOffset
 	        };
 	    }
 	    
 	    return this.AssignmentExpression(noIn);
 	},
 	
-	/*
 	YieldExpression: function() {
 	
-	    // TODO:  readKeyword?
 	    this.read("yield");
 	    
 	    var delegate = false;
 	    
-	    if (this.peek().type === "*") {
+	    if (this.peek() === "*") {
 	    
 	        this.read();
 	        delegate = true;
@@ -342,17 +432,17 @@ var Parser = new Class(AbstractParser, {
 	        type: "YieldExpression",
 	        delegate: delegate,
 	        expression: this.AssignmentExpression()
-	    };
+	    };  
 	},
-	*/
 	
 	ConditionalExpression: function(noIn) {
 	
-		var left = this.OrExpression(noIn),
+		var start = this.startOffset,
+		    left = this.BinaryExpression(noIn),
 			middle,
 			right;
 		
-		if (this.peekDiv().type !== "?")
+		if (this.peek("div") !== "?")
 			return left;
 		
 		this.read("?");
@@ -365,36 +455,76 @@ var Parser = new Class(AbstractParser, {
 		    type: "ConditionalExpression",
 		    test: left,
 		    alternate: middle,
-		    consequent: right
+		    consequent: right,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
-	OrExpression: BinaryOperator("||", "AndExpression"),
-	AndExpression: BinaryOperator("&&", "BitwiseOrExpression"),
-	BitwiseOrExpression: BinaryOperator("|", "BitwiseXorExpression"),
-	BitwiseXorExpression: BinaryOperator("^", "BitwiseAndExpression"),
-	BitwiseAndExpression: BinaryOperator("&", "EqualityExpression"),
-	EqualityExpression: BinaryOperator(equalityOp, "RelationalExpression"),
+	BinaryExpression: function(noIn) {
 	
-	RelationalExpression: function(noIn) {
-	
-		return noIn ? this.RelationalExpressionNoIn() : this.RelationalExpressionIn();
+	    return this.PartialBinaryExpression(this.UnaryExpression(), 0, noIn);
 	},
 	
-	RelationalExpressionIn: BinaryOperator(relationalOp, "ShiftExpression"),
-	RelationalExpressionNoIn: BinaryOperator(relationalOpNoIn, "ShiftExpression"),
+	PartialBinaryExpression: function(lhs, minPrec, noIn) {
 	
-	ShiftExpression: BinaryOperator(shiftOp, "AdditiveExpression"),
-	AdditiveExpression: BinaryOperator(additiveOp, "MultiplicativeExpression"),
-	MultiplicativeExpression: BinaryOperator(multiplicativeOp, "UnaryExpression"),
+	    var prec,
+	        next, 
+	        max, 
+	        rhs,
+	        op;
+	    
+	    while (next = this.peek("div")) {
+	        
+	        // Exit if operator is "in" and in is not allowed
+	        if (next === "in" && noIn)
+	            break;
+	        
+	        prec = operatorPrecedence[next];
+	        
+	        // Exit if not a binary operator or lower precendence
+	        if (prec === void 0 || prec < minPrec)
+	            break;
+	        
+	        this.read();
+	        
+	        op = next;
+	        max = prec;
+	        rhs = this.UnaryExpression();
+	        
+	        while (next = this.peek("div")) {
+	        
+	            prec = operatorPrecedence[next];
+	            
+	            // Exit if not a binary operator or equal or higher precendence
+	            if (prec === void 0 || prec <= max)
+	                break;
+	            
+	            rhs = this.PartialBinaryExpression(rhs, prec, noIn);
+	        }
+	        
+	        lhs = {
+	        
+	            type: "BinaryExpression",
+	            operator: op,
+	            left: lhs,
+	            right: rhs,
+	            start: lhs.start,
+	            end: rhs.end
+	        };
+	    }
+	    
+	    return lhs;
+	},
 	
 	UnaryExpression: function() {
 	
-		var token = this.peek(),
-			type = token.type,
+		var start = this.startOffset,
+		    type = this.peek(),
+		    token,
 			expr;
 		
-		if (incrementOp.has(type)) {
+		if (isIncrement(type)) {
 		
 			this.read();
 			expr = this.MemberExpression(true);
@@ -405,11 +535,13 @@ var Parser = new Class(AbstractParser, {
 			    type: "UpdateExpression", 
 			    operator: type, 
 			    expression: expr,
-			    prefix: true
+			    prefix: true,
+			    start: start,
+			    end: this.endOffset
 			};
 		}
 		
-		if (unaryOp.has(type)) {
+		if (isUnary(type)) {
 		
 			this.read();
 			expr = this.UnaryExpression();
@@ -421,16 +553,18 @@ var Parser = new Class(AbstractParser, {
 			
 			    type: "UnaryExpression",
 			    operator: type,
-			    expression: expr
+			    expression: expr,
+			    start: start,
+			    end: this.endOffset
 			};
 		}
 		
 		expr = this.MemberExpression(true);
-		token = this.peekDiv();
+		token = this.peekToken("div");
 		type = token.type;
 		
 		// Check for postfix operator
-		if (incrementOp.has(type) && !token.newlineBefore) {
+		if (isIncrement(type) && !token.newlineBefore) {
 		
 			this.read();
 			this.checkAssignTarget(expr);
@@ -440,7 +574,9 @@ var Parser = new Class(AbstractParser, {
 			    type: "UpdateExpression",
 			    operator: type,
 			    expression: expr,
-			    prefix: false
+			    prefix: false,
+			    start: start,
+			    end: this.endOffset
 			};
 		}
 		
@@ -449,32 +585,34 @@ var Parser = new Class(AbstractParser, {
 	
 	MemberExpression: function(allowCall) {
 	
-		var endNode = this.begin(),
-		    token = this.peek(),
+		var start = this.startOffset,
+		    type = this.peek(),
 			exit = false,
 			prop,
 			expr;
 		
 		expr = 
-		    (token.type === "new") ? this.NewExpression() :
-		    (token.type === "super") ? this.SuperExpression() :
+		    type === "new" ? this.NewExpression() :
+		    type === "super" ? this.SuperExpression() :
 		    this.PrimaryExpression();
 		
-		while (!exit && (token = this.peekDiv())) {
+		while (!exit && (type = this.peek("div"))) {
 		
-			switch (token.type) {
+			switch (type) {
 			
 				case ".":
 				
 				    this.read();
 				    
-				    expr = endNode({ 
+				    expr = { 
 				    
                         type: "MemberExpression", 
                         object: expr, 
-                        property: this.readName("IdentifierName"),
-                        computed: false
-                    });
+                        property: this.Identifier(true),
+                        computed: false,
+                        start: start,
+                        end: this.endOffset
+                    };
                     
 					break;
 				
@@ -484,13 +622,15 @@ var Parser = new Class(AbstractParser, {
                     prop = this.Expression();
                     this.read("]");
                     
-                    expr = endNode({ 
+                    expr = { 
                     
                         type: "MemberExpression", 
                         object: expr, 
                         property: prop,
-                        computed: true
-                    });
+                        computed: true,
+                        start: start,
+                        end: this.endOffset
+                    };
 		
 					break;
 				
@@ -502,30 +642,34 @@ var Parser = new Class(AbstractParser, {
 					    break;
 					}
 					
-                    expr = endNode({
+                    expr = {
                     
                         type: "CallExpression",
                         callee: expr,
-                        arguments: this.ArgumentList()
-                    });
+                        arguments: this.ArgumentList(),
+                        start: start,
+                        end: this.endOffset
+                    };
                     
                     break;
                 
-                case "Quasi":
+                case "TEMPLATE":
                 
-                    expr = endNode({
+                    expr = {
                     
-                        type: "TaggedQuasiExpression",
+                        type: "TaggedTemplateExpression",
                         tag: expr,
-                        quasi: this.QuasiExpresion()
-                    });
+                        template: this.TemplateExpression(),
+                        start: start,
+                        end: this.endOffset
+                    };
                     
                     break;
 				
 				default:
 				
 				    if (expr.type === "SuperExpression")
-				        this.fail("Invalid super expression");
+				        this.fail("Invalid super expression", expr);
 				    
 					exit = true;
 					break;
@@ -537,22 +681,33 @@ var Parser = new Class(AbstractParser, {
 	
 	NewExpression: function() {
 	
+	    var start = this.startOffset;
+	    
 		this.read("new");
 		
 		var expr = this.MemberExpression(false),
-			args = (this.peekDiv().type === "(") ? this.ArgumentList() : null;
+			args = this.peek("div") === "(" ? this.ArgumentList() : null;
 		
 		return {
 	        type: "NewExpression",
 	        callee: expr,
-	        arguments: args
+	        arguments: args,
+	        start: start,
+	        end: this.endOffset
 	    };
 	},
 	
 	SuperExpression: function() {
 	
+	    var start = this.startOffset;
+	    
 	    this.read("super");
-	    return { type: "SuperExpression" };
+	    
+	    return { 
+	        type: "SuperExpression", 
+	        start: start,
+	        end: this.endOffset
+	    };
 	},
 	
 	ArgumentList: function() {
@@ -576,7 +731,8 @@ var Parser = new Class(AbstractParser, {
 	
 	PrimaryExpression: function() {
 	
-		var type = this.peek().type;
+		var tok = this.peekToken(),
+		    type = tok.type;
 		
 		switch (type) {
 		    
@@ -585,43 +741,117 @@ var Parser = new Class(AbstractParser, {
 			case "[": return this.ArrayExpression();
 			case "{": return this.ObjectExpression();
 			case "(": return this.ParenExpression();
-			case "Quasi": return this.QuasiExpression();
+			case "TEMPLATE": return this.TemplateExpression();
+			case "NUMBER": return this.Number();
+			case "STRING": return this.String();
 			
-			case "Identifier":
+			case "IDENTIFIER":
 			
-			    return (this.peekDiv(1).type === "=>") ?
-			        this.ArrowFunction(this.BindingIdentifier()) :
-			        this.read();
-			
-			case "null": 
-		        this.read();
-		        return { type: "Null", value: null };
-		    
-		    case "true": 
-		        this.read();
-		        return { type: "Boolean", value: true };
-		        
-		    case "false": 
-		        this.read();
-		        return { type: "Boolean", value: false };
-		        
-		    case "this": 
-		        this.read();
-		        return { type: "ThisExpression" };
-		    
-			case "Number":
-			case "RegularExpression":
-			case "String":
-			
-			    return this.read();
+			    return this.peek("div", 1) === "=>" ?
+                    this.ArrowFunction(this.BindingIdentifier(), null, tok.start) :
+                    this.Identifier();
+            
+            case "REGEX":
+            
+                this.read();
+                
+                return {
+                    type: "RegularExpression",
+                    value: tok.value,
+                    start: tok.start,
+                    end: tok.end,
+                    flags: tok.regexFlags
+                };
+            
+            case "null":
+            
+                this.read();
+                
+                return { 
+                    type: "Null", 
+                    value: null, 
+                    start: tok.start, 
+                    end: tok.end 
+                };
+            
+            case "true":
+            case "false":
+            
+                this.read();
+                
+                return { 
+                    type: "Boolean", 
+                    value: (type === "true"), 
+                    start: tok.start, 
+                    end: tok.end
+                };
+            
+            case "this":
+            
+                this.read();
+                
+                return {
+                    type: "ThisExpression",
+                    start: tok.start,
+                    end: tok.end
+                };
 		}
 		
 		this.fail("Unexpected token " + type);
 	},
 	
+	Identifier: function(name) {
+	
+	    var token = this.readToken("IDENTIFIER", name ? "name" : null);
+	    
+	    return {
+	        type: "Identifier",
+	        value: token.value,
+	        start: token.start,
+	        end: token.end
+	    };
+	},
+	
+	String: function() {
+	
+	    var token = this.readToken("STRING");
+	    
+	    return {
+	        type: "String",
+	        value: token.value,
+	        start: token.start,
+	        end: token.end
+	    };
+	},
+	
+	Number: function() {
+	
+	    var token = this.readToken("NUMBER");
+	    
+	    return {
+	        type: "Number",
+	        value: token.value,
+	        start: token.start,
+	        end: token.end
+	    };
+	},
+	
+	Template: function() {
+	
+	    var token = this.readToken("TEMPLATE", "template");
+	    
+	    return {
+	        type: "Template",
+	        value: token.value,
+	        templateEnd: token.templateEnd,
+	        start: token.start,
+	        end: token.end
+	    };
+	},
+	
 	BindingIdentifier: function() {
 	
-		var node = this.read("Identifier");
+		var node = this.Identifier();
 		
 		this.checkBindingIdent(node);
 		return node;
@@ -631,7 +861,7 @@ var Parser = new Class(AbstractParser, {
 	
 	    var node;
 	    
-	    switch (this.peek().type) {
+	    switch (this.peek()) { 
 	    
 	        case "{":
 	            node = this.ObjectExpression();
@@ -648,19 +878,20 @@ var Parser = new Class(AbstractParser, {
 	    
 	    // Transform expressions to patterns
 	    if (node.type !== "Identifier")
-            node = this.transformPattern(node, true);
+            this.transformPattern(node, true);
         
         return node;
 	},
 	
 	ParenExpression: function() {
 
-	    var expr = null,
+	    var start = this.startOffset,
+	        expr = null,
 	        rest = null;
 	    
 	    this.read("(");
 	    
-	    switch (this.peek().type) {
+	    switch (this.peek()) {
 	    
 	        // An empty arrow function formal list
 	        case ")":
@@ -677,11 +908,12 @@ var Parser = new Class(AbstractParser, {
 	            break;
 	    }
 	    
-	    // Look for a trailing rest formal parameter within an
-	    // arrow formal list
-	    if (!rest && 
-	        this.peek().type === "," && 
-	        this.peek(1).type === "...") {
+	    // Look for generator comprehensions
+	    if (expr && this.peek() === "for")
+	        return this.GeneratorComprehension(expr, start);
+	    
+	    // Look for a trailing rest formal parameter within an arrow formal list
+	    if (!rest && this.peek() === "," && this.peek(null, 1) === "...") {
 	    
 	        this.read();
 	        rest = this.RestParameter();
@@ -690,29 +922,31 @@ var Parser = new Class(AbstractParser, {
 		this.read(")");
 		
 		// Determine whether this is a paren expression or an arrow function
-		if (!expr || rest || this.peekDiv().type === "=>")
-		    return this.ArrowFunction(expr, rest);
-			
-		return expr;
+		if (expr === null || rest !== null || this.peek("div") === "=>")
+		    return this.ArrowFunction(expr, rest, start);
+		
+		return {
+		    type: "ParenExpression",
+		    expression: expr,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	ObjectExpression: function() {
 	
-		var list = [], 
-		    comma = 0,
+		var start = this.startOffset,
+		    list = [],
 			nameSet = {};
 		
 		this.read("{");
 		
-		while (this.peekNameUntil("}")) {
+		while (this.peekUntil("}", "name")) {
 		
-			if (list.length > 0) {
-			
+			if (list.length > 0)
 				this.read(",");
-				++comma;
-			}
 			
-			if (this.peekName().type !== "}")
+			if (this.peek("name") !== "}")
 				list.push(this.PropertyDefinition(nameSet));
 		}
 		
@@ -721,114 +955,129 @@ var Parser = new Class(AbstractParser, {
 		return { 
 		    type: "ObjectExpression", 
 		    properties: list,
-		    trailingComma: comma >= list.length
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	PropertyDefinition: function(nameSet) {
 		
-		var flags = 1, node;
+		var start = this.startOffset,
+		    flag = PROP_NORMAL, 
+		    node,
+		    name;
 		
-		this.peekName();
-		
-		switch (this.peekName(1).type) {
+		switch (this.peek("name", 1)) {
 		
 		    case "(":
-		    case "IdentifierName":
-		    case "String":
-		    case "Number":
+		    case "IDENTIFIER":
+		    case "STRING":
+		    case "NUMBER":
 		        
 		        node = this.MethodDefinition();
 		        
-		        switch (node.kind) {
+		        switch (node.modifier) {
                 
-                    case "get": flags = 2; break;
-                    case "set": flags = 4; break;
-                    default: flags = 8; break;
+                    case "get": flag = PROP_GET; break;
+                    case "set": flag = PROP_SET; break;
                 }
                 
                 break;
             
             case ":":
                 
+                flag = PROP_ASSIGN;
+                
                 node = {
                     type: "PropertyDefinition",
                     name: this.PropertyName(),
-                    expression: (this.read(":"), this.AssignmentExpression())
+                    expression: (this.read(), this.AssignmentExpression()),
+                    start: start,
+                    end: this.endOffset
                 };
+                
+                break;
+            
+            case "=":
+            
+                this.unpeek();
+                
+                node = {
+                    type: "CoveredPatternProperty",
+                    name: this.Identifier(),
+                    pattern: null,
+                    init: (this.read(), this.AssignmentExpression()),
+                    start: start,
+                    end: this.endOffset
+                };
+                
+                this.addInvalidNode(node, "Invalid property definition in object literal");
                 
                 break;
                 
             default:
             
+                // Re-read token as an identifier
+                this.unpeek();
+            
                 node = {
                     type: "PropertyDefinition",
-                    name: this.read("IdentifierName"),
-                    expression: null
+                    name: this.Identifier(),
+                    expression: null,
+                    start: start,
+                    end: this.endOffset
                 };
-                
-                // TODO: Syntax error if name is a reserved word!
                 
                 break;
 		}
-        
-        var name = node.name.value;
-        
-        if (nameSet[name]) {
-        
-            /*
-            
-            TODO:
-            
-            It is a Syntax Error if PropertyNameList of PropertyDefinitionList 
-            contains any duplicate enties, unless one of the following conditions 
-            are true for each duplicate entry:
-            
-            1. The source code corresponding to PropertyDefinitionList is not strict 
-               code and all occurances in the list of the duplicated entry were 
-               obtained from productions of the form 
-               PropertyDefinition : PropertyName : AssignmentExpression.
-            2. The duplicated entry occurs exactly twice in the list and one 
-               occurrence was obtained from a get accessor MethodDefinition and the 
-               other occurrence was obtained from a set accessor MethodDefinition.
-            
-            */
-        }
-        
-        // Set name flags
-        nameSet[name] |= flags;
+		
+		// Check for duplicate names
+		if (this.isDuplicateName(flag, nameSet[name = "." + node.name.value]))
+		    this.addInvalidNode(node, "Duplicate property names in object literal");
+		
+		// Set name flag
+        nameSet[name] |= flag;
         
         return node;
 	},
 	
 	PropertyName: function() {
 	
-	    var token = this.readName();
+	    var type = this.peek("name");
 	    
-		switch (token.type) {
+		switch (type) {
 		
-			case "IdentifierName":
-			case "String":
-			case "Number":
-				break;
-			
-			default:
-				this.fail("Unexpected token " + token.type, token);
+			case "IDENTIFIER": return this.Identifier();
+			case "STRING": return this.String();
+			case "NUMBER": return this.Number();
 		}
 		
-		return token;
+		this.fail("Unexpected token " + type);
 	},
 	
 	MethodDefinition: function() {
 	
-	    var name = this.PropertyName(),
-	        kind = "method";
+	    var start = this.startOffset,
+	        modifier = "",
+	        params,
+	        name;
 	    
-	    if (name.type === "IdentifierName" && this.peekName().type !== "(") {
+	    if (this.peek("name") === "*") {
 	    
-	        if (name.value === "get" || name.value === "set") {
+	        this.read();
 	        
-	            kind = name.value;
+	        modifier = "*";
+	        name = this.PropertyName();
+	    
+	    } else {
+	    
+	        name = this.PropertyName();
+	        
+	        if (name.type === "Identifier" && 
+	            this.peek("name") !== "(" &&
+	            (name.value === "get" || name.value === "set")) {
+	        
+	            modifier = name.value;
 	            name = this.PropertyName();
 	        }
 	    }
@@ -836,23 +1085,34 @@ var Parser = new Class(AbstractParser, {
 	    return {
 	        type: "MethodDefinition",
 	        name: name,
-	        kind: kind,
-	        params: this.FormalParameters(),
-	        body: this.FunctionBody()
+	        modifier: modifier,
+	        generator: modifier === "*",
+	        params: (params = this.FormalParameters()),
+	        body: this.FunctionBody(params),
+	        start: start,
+	        end: this.endOffset
 	    };
 	},
 	
 	ArrayExpression: function() {
 	
-		var list = [],
+		var start = this.startOffset,
+		    list = [],
 			comma = false,
-			token;
+			next,
+			type;
 		
 		this.read("[");
 		
-		while (token = this.peekUntil("]")) {
+		while (type = this.peekUntil("]")) {
 			
-			if (token.type === ",") {
+			if (type === "for" && 
+			    list.length === 1 && 
+			    next.type !== "SpreadExpression") {
+			
+			    return this.ArrayComprehension(list[0], start);
+			    
+			} else if (type === ",") {
 			
 				this.read();
 				
@@ -863,7 +1123,7 @@ var Parser = new Class(AbstractParser, {
 			
 			} else {
 			
-				list.push(this.SpreadAssignment());
+				list.push(next = this.SpreadAssignment());
 				comma = false;
 			}
 		}
@@ -872,40 +1132,111 @@ var Parser = new Class(AbstractParser, {
 		
 		return { 
 		    type: "ArrayExpression", 
-		    elements: list, 
-		    trailingComma: comma
+		    elements: list,
+		    trailingComma: comma,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
-	QuasiExpression: function() {
+	ArrayComprehension: function(expr, start) {
 	
-	    var token = this.read("Quasi"),
-	        lit = [ token ],
+	    var list = [], 
+	        test = null;
+	    
+	    while (this.peek() === "for")
+	        list.push(this.ComprehensionFor());
+	    
+        if (this.peek() === "if") {
+        
+            this.read();
+            test = this.Expression();
+        }
+        
+        this.read("]");
+        
+        return {
+            type: "ArrayComprehension",
+            expression: expr,
+            list: list,
+            test: test,
+            start: start,
+            end: this.endOffset
+        };
+	},
+	
+	GeneratorComprehension: function(expr, start) {
+	
+	    var list = [], 
+	        test = null;
+	    
+	    while (this.peek() === "for")
+	        list.push(this.ComprehensionFor());
+	    
+        if (this.peek() === "if") {
+        
+            this.read();
+            test = this.Expression();
+        }
+        
+        this.read(")");
+        
+	    return {
+	        type: "GeneratorComprehension",
+	        expression: expr,
+	        list: list,
+	        test: test,
+	        start: start,
+	        end: this.endOffset
+	    };
+	},
+	
+	ComprehensionFor: function() {
+	
+	    this.read("for");
+	    
+	    return {
+	        type: "ComprehensionFor",
+	        binding: this.BindingPattern(),
+	        of: (this.readKeyword("of"), this.Expression())
+	    };
+	},
+	
+	TemplateExpression: function() {
+	
+	    var atom = this.Template(),
+	        start = atom.start,
+	        lit = [ atom ],
 	        sub = [];
 	    
-	    while (!token.quasiEnd) {
+	    while (!atom.templateEnd) {
 	    
 	        sub.push(this.Expression());
 	        
-	        // Discard any tokens that have been scanned so that we can 
-	        // rescan contextually.
+	        // Discard any tokens that have been scanned using a different context
 	        this.unpeek();
 	        
-	        lit.push(token = this.readQuasi());
+	        lit.push(atom = this.Template());
 	    }
 	    
-	    return { type: "QuasiExpression", literals: lit, substitutions: sub };
+	    return { 
+	        type: "TemplateExpression", 
+	        literals: lit, 
+	        substitutions: sub,
+	        start: start,
+	        end: this.endOffset
+	    };
 	},
 	
 	// === Statements ===
 	
 	Statement: function() {
 	
-		switch (this.peek().type) {
+		switch (this.peek()) {
 			
-			case "Identifier":
+			case "IDENTIFIER":
 			
-				return (this.peekDiv(1).type === ":") ?
+				return this.peek("div", 1) === ":" ?
 					this.LabelledStatement() :
 					this.ExpressionStatement();
 			
@@ -918,7 +1249,7 @@ var Parser = new Class(AbstractParser, {
 			case "throw": return this.ThrowStatement();
 			case "debugger": return this.DebuggerStatement();
 			case "if": return this.IfStatement();
-			case "do": return this.DoStatement();
+			case "do": return this.DoWhileStatement();
 			case "while": return this.WhileStatement();
 			case "for": return this.ForStatement();
 			case "with": return this.WithStatement();
@@ -947,47 +1278,71 @@ var Parser = new Class(AbstractParser, {
 	
 	Block: function() {
 		
+		var start = this.startOffset;
+		
 		this.read("{");
-		var node = { type: "Block", statements: this.StatementList(false) };
+		var list = this.StatementList(false);
 		this.read("}");
 		
-		return node;
+		return { 
+		    type: "Block", 
+		    statements: list,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	Semicolon: function() {
 	
-		var token = this.peek(),
+		var token = this.peekToken(),
 			type = token.type;
 		
-		if (type === ";" || !(type === "}" || type === "eof" || token.newlineBefore))
+		if (type === ";" || !(type === "}" || type === "EOF" || token.newlineBefore))
 			this.read(";");
 	},
 	
 	LabelledStatement: function() {
 	
-	    var label = this.read("Identifier");
+	    var start = this.startOffset,
+	        label = this.Identifier();
 		
 		this.read(":");
 		
 		return { 
 		    type: "LabelledStatement", 
 		    label: label, 
-		    statement: this.StatementWithLabel(label)
+		    statement: this.StatementWithLabel(label),
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	ExpressionStatement: function() {
 	
-		var expr = this.Expression();
+		var start = this.startOffset,
+		    expr = this.Expression();
 		
 		this.Semicolon();
-		return { type: "ExpressionStatement", expression: expr };
+		
+		return { 
+		    type: "ExpressionStatement", 
+		    expression: expr,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	EmptyStatement: function() {
 	
-		this.Semicolon();	
-		return { type: "EmptyStatement" };
+	    var start = this.startOffset;
+	    
+		this.Semicolon();
+		
+		return { 
+		    type: "EmptyStatement", 
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	VariableStatement: function() {
@@ -995,70 +1350,74 @@ var Parser = new Class(AbstractParser, {
 		var node = this.VariableDeclaration(false);
 		
 		this.Semicolon();
+		node.end = this.endOffset;
+		
 		return node;
 	},
 	
 	VariableDeclaration: function(noIn) {
 	
-		var kind = this.read().type,
+		var start = this.startOffset,
+		    keyword = this.peek(),
+		    isConst = false,
 		    list = [];
 		
-		switch (kind) {
+		switch (keyword) {
 		
 		    case "var":
 		    case "let":
+		        break;
+		        
 		    case "const":
+		        isConst = true;
 		        break;
 		        
 		    default:
 		        this.fail("Expected var, const, or let");
 		}
 		
+		this.read();
+		
 		while (true) {
 		
-			list.push(this.VariableDeclarator(noIn));
+			list.push(this.VariableDeclarator(noIn, isConst));
 			
-			if (this.peek().type === ",") this.read();
+			if (this.peek() === ",") this.read();
 			else break;
 		}
 		
-		return { type: "VariableDeclaration", declarations: list, kind: kind };
+		return { 
+		    type: "VariableDeclaration", 
+		    keyword: keyword,
+		    declarations: list, 
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
-	VariableDeclarator: function(noIn) {
+	VariableDeclarator: function(noIn, isConst) {
 	
-		var pattern = this.BindingPattern(),
+		var start = this.startOffset,
+		    pattern = this.BindingPattern(),
 			init = null;
 		
-		if (pattern.type !== "Identifier" || 
-		    this.peek().type === "=") {
+		if (pattern.type !== "Identifier" || this.peek() === "=") {
 		
 			this.read("=");
 			init = this.AssignmentExpression(noIn);
+			
+		} else if (isConst) {
+		
+		    this.fail("Missing const initializer", pattern);
 		}
 		
-		return { type: "VariableDeclarator", pattern: pattern, init: init };
-	},
-	
-	MaybeEnd: function() {
-	
-		var token = this.peek();
-		
-		if (!token.newlineBefore) {
-			
-			switch (token.type) {
-			
-				case "eof":
-				case "}":
-				case ";":
-					break;
-				
-				default:
-					return true;
-			}
-		}
-		
-		return false;
+		return { 
+		    type: "VariableDeclarator", 
+		    pattern: pattern, 
+		    init: init,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	ReturnStatement: function() {
@@ -1066,21 +1425,31 @@ var Parser = new Class(AbstractParser, {
 		if (!this.context.isFunction)
 			this.fail("Return statement outside of function");
 		
+		var start = this.startOffset;
+		
 		this.read("return");
-		var init = this.MaybeEnd() ? this.Expression() : null;
+		var init = this.maybeEnd() ? this.Expression() : null;
+		
 		this.Semicolon();
 		
-		return { type: "ReturnStatement", argument: init };
+		return { 
+		    type: "ReturnStatement", 
+		    argument: init,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	BreakOrContinueStatement: function() {
 	
-		var token = this.read(),
-			keyword = token.value,
+		var start = this.startOffset,
+		    token = this.readToken(),
+			keyword = token.type,
 			labelSet = this.context.labelSet,
 			label;
 		
-		label = this.MaybeEnd() ? this.read("Identifier") : null;
+		label = this.maybeEnd() ? this.Identifier() : null;
+		
 		this.Semicolon();
 		
 		if (label) {
@@ -1094,88 +1463,123 @@ var Parser = new Class(AbstractParser, {
 				this.fail("Invalid " + keyword + " statement", token);
 		}
 		
-		return { type: keyword === "break" ? "Break" : "Continue", label: label };
+		return { 
+		    type: keyword === "break" ? "Break" : "Continue", 
+		    label: label,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	ThrowStatement: function() {
 	
+	    var start = this.startOffset;
+	    
 		this.read("throw");
 		
-		var expr = this.MaybeEnd() ? this.Expression() : null;
+		var expr = this.maybeEnd() ? this.Expression() : null;
 		
 		if (expr === null)
 			this.fail("Missing throw expression");
 		
 		this.Semicolon();
 		
-		return { type: "ThrowStatement", expression: expr };
+		return { 
+		    type: "ThrowStatement", 
+		    expression: expr,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	DebuggerStatement: function() {
 	
+	    var start = this.startOffset;
+	    
 		this.read("debugger");
 		this.Semicolon();
 		
-		return { type: "DebuggerStatement" };
+		return { 
+		    type: "DebuggerStatement",
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	IfStatement: function() {
 	
+	    var start = this.startOffset;
+	    
 		this.read("if");
 		
-		var cond = this.ParenExpression(),
+		var test = this.ParenExpression(),
 			body = this.Statement(),
 			elseBody = null;
 		
-		if (this.peek().type === "else") {
+		if (this.peek() === "else") {
 		
-			this.read("else");
+			this.read();
 			elseBody = this.Statement();
 		}
 		
 		return { 
 		    type: "IfStatement", 
-		    test: cond, 
+		    test: test, 
 		    consequent: body, 
-		    alternate: elseBody
+		    alternate: elseBody,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
-	DoStatement: function() {
+	DoWhileStatement: function() {
 	
-		var body, cond;
+		var start = this.startOffset,
+		    body, 
+		    test;
 		
 		this.read("do");
 		body = this.StatementWithLabel();
 		
 		this.read("while");
-		cond = this.ParenExpression();
+		test = this.ParenExpression();
 		
-		// No semicolon required for ES6
-		
-		return { type: "DoStatement", body: body, test: cond };
+		return { 
+		    type: "DoWhileStatement", 
+		    body: body, 
+		    test: test,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	WhileStatement: function() {
 	
+	    var start = this.startOffset;
+	    
 		this.read("while");
 		
 		return {
 		    type: "WhileStatement",
 		    test: this.ParenExpression(),
-		    body: this.StatementWithLabel()
+		    body: this.StatementWithLabel(),
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	ForStatement: function() {
 	
+	    var start = this.startOffset,
+	        init = null,
+	        test,
+	        step;
+	    
 		this.read("for");
 		this.read("(");
 		
-		var init = null, cond, step;
-		
         // Get loop initializer
-        switch (this.peek().type) {
+        switch (this.peek()) {
         
             case ";":
                 break;
@@ -1191,33 +1595,35 @@ var Parser = new Class(AbstractParser, {
                 break;
         }
 		
-		if (this.peekKeyword("in"))
-		    return this.ForInStatement(init);
+		if (init) {
 		
-		if (this.peekKeyword("of"))
-		    return this.ForOfStatement(init);
+		    if (this.peekKeyword("in"))
+		        return this.ForInStatement(init, start);
 		
-		if (init)
-    		this.checkForInit(init, "for");
+		    if (this.peekKeyword("of"))
+		        return this.ForOfStatement(init, start);
+		}
 		
         this.read(";");
-        cond = (this.peek().type === ";") ? null : this.Expression();
+        test = this.peek() === ";" ? null : this.Expression();
         
         this.read(";");
-        step = (this.peek().type === ")") ? null : this.Expression();
+        step = this.peek() === ")" ? null : this.Expression();
         
         this.read(")");
         
         return {
             type: "ForStatement",
             init: init,
-            test: cond,
+            test: test,
             update: step,
-            body: this.StatementWithLabel()
+            body: this.StatementWithLabel(),
+            start: start,
+            end: this.endOffset
         };
 	},
 	
-	ForInStatement: function(init) {
+	ForInStatement: function(init, start) {
 	
 	    this.checkForInit(init, "in");
 	    
@@ -1229,11 +1635,13 @@ var Parser = new Class(AbstractParser, {
             type: "ForInStatement",
             left: init,
             right: expr,
-            body: this.StatementWithLabel()
+            body: this.StatementWithLabel(),
+            start: start,
+            end: this.endOffset
         };
 	},
 	
-	ForOfStatement: function(init) {
+	ForOfStatement: function(init, start) {
 	
 	    this.checkForInit(init, "of");
 	    
@@ -1245,7 +1653,9 @@ var Parser = new Class(AbstractParser, {
             type: "ForOfStatement",
             left: init,
             right: expr,
-            body: this.StatementWithLabel()
+            body: this.StatementWithLabel(),
+            start: start,
+            end: this.endOffset
         };
 	},
 	
@@ -1253,18 +1663,24 @@ var Parser = new Class(AbstractParser, {
 	
 		if (this.context.strict)
 			this.fail("With statement is not allowed in strict mode");
-		
+	
+	    var start = this.startOffset;
+	    
 		this.read("with");
 		
 		return {
 		    type: "WithStatement",
 		    object: this.ParenExpression(),
-		    body: this.Statement()
+		    body: this.Statement(),
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	SwitchStatement: function() {
 	
+	    var start = this.startOffset;
+	    
 		this.read("switch");
 		
 		var head = this.ParenExpression(),
@@ -1296,19 +1712,22 @@ var Parser = new Class(AbstractParser, {
 		return {
 		    type: "SwitchStatement",
 		    descriminant: head,
-		    cases: cases
+		    cases: cases,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	Case: function() {
 	
-		var expr = null, 
+		var start = this.startOffset,
+		    expr = null, 
 			list = [],
-			token;
+			type;
 		
-		if (this.peek().type === "default") {
+		if (this.peek() === "default") {
 		
-			this.read("default");
+			this.read();
 		
 		} else {
 		
@@ -1318,9 +1737,9 @@ var Parser = new Class(AbstractParser, {
 		
 		this.read(":");
 		
-		while (token = this.peekUntil("}")) {
+		while (type = this.peekUntil("}")) {
 		
-			if (token.type === "case" || token.type === "default")
+			if (type === "case" || type === "default")
 				break;
 			
 			list.push(this.Statement());
@@ -1329,22 +1748,26 @@ var Parser = new Class(AbstractParser, {
 		return {
 		    type: "SwitchCase",
 		    test: expr,
-		    consequent: list
+		    consequent: list,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	TryStatement: function() {
 	
+	    var start = this.startOffset;
+	    
 		this.read("try");
 		
 		var tryBlock = this.Block(),
 			handler = null,
 			fin = null;
 		
-		if (this.peek().type === "catch")
+		if (this.peek() === "catch")
 			handler = this.Catch();
 		
-		if (this.peek().type === "finally") {
+		if (this.peek() === "finally") {
 		
 			this.read("finally");
 			fin = this.Block();
@@ -1354,12 +1777,16 @@ var Parser = new Class(AbstractParser, {
 		    type: "TryStatement",
 		    block: tryBlock,
 		    handler: handler,
-		    finalizer: fin
+		    finalizer: fin,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	Catch: function() {
 	
+	    var start = this.startOffset;
+	    
 		this.read("catch");
 		this.read("(");
 	
@@ -1370,7 +1797,9 @@ var Parser = new Class(AbstractParser, {
 		return {
 		    type: "CatchClause",
 		    param: param,
-		    body: this.Block()
+		    body: this.Block(),
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
@@ -1380,11 +1809,10 @@ var Parser = new Class(AbstractParser, {
 	
 		var list = [],
 			element,
-			tok,
-			str,
+			node,
 			dir;
 		
-		while (tok = this.peekUntil("}")) {
+		while (this.peekUntil("}")) {
 		
 			list.push(element = this.Declaration(moduleBody));
 			
@@ -1394,26 +1822,26 @@ var Parser = new Class(AbstractParser, {
                 element.expression.type === "String") {
                 
                 // Get the non-escaped literal text of the string
-                tok = element.expression;
-                dir = this.input.slice(tok.start + 1, tok.end - 1);
+                node = element.expression;
+                dir = this.input.slice(node.start + 1, node.end - 1);
                 
                 // Check for strict mode
                 if (dir === "use strict")
-                    this.setStrictMode();
+                    this.setStrict();
             }
             
             prologue = false;
 		}
+		
+		// Check for invalid nodes
+		this.checkInvalidNodes();
 		
 		return list;
 	},
 	
 	Declaration: function(moduleBody) {
 	
-	    var tok = this.peek(),
-	        next;
-	    
-	    switch (tok.type) {
+	    switch (this.peek()) {
 		    
             case "function": return this.FunctionDeclaration();
             case "class": return this.ClassDeclaration();
@@ -1434,12 +1862,14 @@ var Parser = new Class(AbstractParser, {
                 
                 break;
             
-            case "Identifier":
+            /*
+            case "IDENTIFIER":
                 
                 if (moduleBody && this.peekModule())
                     return this.ModuleDeclaration();
                 
                 break;
+            */
         }
         
         return this.Statement();
@@ -1450,6 +1880,8 @@ var Parser = new Class(AbstractParser, {
 	    var node = this.VariableDeclaration(false);
 		
 		this.Semicolon();
+		node.end = this.endOffset;
+		
 		return node;
 	},
 	
@@ -1457,25 +1889,51 @@ var Parser = new Class(AbstractParser, {
 	
 	FunctionDeclaration: function() {
 	
+	    var start = this.startOffset,
+	        gen = false,
+	        params;
+	    
 		this.read("function");
+		
+		if (this.peek() === "*") {
+		    
+		    this.read();
+		    gen = true;
+		}
 		
 		return { 
 		    type: "FunctionDeclaration", 
-		    id: this.BindingIdentifier(),
-		    params: this.FormalParameters(),
-		    body: this.FunctionBody()
+		    generator: gen,
+		    ident: this.BindingIdentifier(),
+		    params: (params = this.FormalParameters()),
+		    body: this.FunctionBody(params),
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	FunctionExpression: function() {
 	
+	    var start = this.startOffset,
+	        gen = false,
+	        params;
+	    
 		this.read("function");
+		
+		if (this.peek() === "*") {
+		    
+		    this.read();
+		    gen = true;
+		}
 	    
 		return { 
 		    type: "FunctionExpression", 
-		    id: (this.peek().type !== "(" ? this.BindingIdentifier() : null),
-		    params: this.FormalParameters(),
-		    body: this.FunctionBody()
+		    generator: gen,
+		    ident: this.peek() !== "(" ? this.BindingIdentifier() : null,
+		    params: (params = this.FormalParameters()),
+		    body: this.FunctionBody(params),
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
@@ -1491,7 +1949,7 @@ var Parser = new Class(AbstractParser, {
 				this.read(",");
 			
 			// Parameter list may have a trailing rest parameter
-			if (this.peek().type === "...") {
+			if (this.peek() === "...") {
 			
 			    list.push(this.RestParameter());
 			    break;
@@ -1507,45 +1965,62 @@ var Parser = new Class(AbstractParser, {
 	
 	FormalParameter: function() {
 	
-	    var pattern = this.BindingPattern(),
+	    var start = this.startOffset,
+	        pattern = this.BindingPattern(),
 			init = null;
 		
-		if (this.peek().type === "=") {
+		if (this.peek() === "=") {
 		
 			this.read("=");
 			init = this.AssignmentExpression();
 		}
 		
-		return { type: "FormalParameter", pattern: pattern, init: init };
+		return { 
+		    type: "FormalParameter", 
+		    pattern: pattern, 
+		    init: init,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	RestParameter: function() {
 	
+	    var start = this.startOffset;
+	    
 	    this.read("...");
 	    
 	    return { 
 	        type: "RestParameter", 
-	        id: this.BindingIdentifier()
+	        ident: this.BindingIdentifier(),
+	        start: start,
+	        end: this.endOffset
 	    };
 	},
 	
-	FunctionBody: function() {
+	FunctionBody: function(params) {
     
 		this.pushContext(true);
+		
+		var start = this.startOffset;
 		
 		this.read("{");
 		var statements = this.StatementList(true);
 		this.read("}");
 		
+		this.checkParameters(params);
+		
 		this.popContext();
 		
 		return {
 		    type: "FunctionBody",
-		    statements: statements
+		    statements: statements,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
-	ArrowFunction: function(formals, rest) {
+	ArrowFunction: function(formals, rest, start) {
 	
 	    this.read("=>");
 	    
@@ -1555,52 +2030,60 @@ var Parser = new Class(AbstractParser, {
 	    if (rest)
 	        params.push(rest);
 	    
-        body = this.peek().type === "{" ?
-            this.FunctionBody() :
-            this.AssignmentExpression();
-		
+	    if (this.peek() === "{") {
+	    
+	        body = this.FunctionBody(params);
+	        
+	    } else {
+	    
+	        // Check parameters in the current context
+	        this.checkParameters(params);
+	        body = this.AssignmentExpression();
+	    }
+	    
 		return {
 		    type: "ArrowFunction",
 		    params: params,
-		    body: body
+		    body: body,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	// === Modules ===
 	
-	peekModule: function() {
-	
-	    if (this.peek().value === "module") {
-        
-            var p = this.peekDiv(1);
-            return (p.type === "Identifier" && !p.newlineBefore);
-        }
-        
-        return false;
-	},
-	
+	/*
 	ModuleBody: function() {
 	
 	    this.pushContext(false);
 	    
+	    var start = this.startOffset;
+	    
 	    this.read("{");
-		var node = { type: "ModuleBody", statements: this.StatementList(true, true) };
+	    var list = this.StatementList(true, true);
 		this.read("}");
 		
 		this.popContext();
 		
-		return node;
+		return {
+		    type: "ModuleBody", 
+		    statements: list,
+		    start: start,
+		    end: this.endOffset
+		};
 	},
 	
 	ModuleDeclaration: function() {
 	    
+	    var start = this.startOffset;
+	    
 	    this.readKeyword("module");
 	    
-	    var id = this.BindingIdentifier(),
+	    var ident = this.BindingIdentifier(),
 	        path = null,
 	        body = null;
 	    
-	    if (this.peek().type === "=") {
+	    if (this.peek() === "=") {
 	    
 	        this.read();
 	        path = this.ModulePath();
@@ -1613,63 +2096,65 @@ var Parser = new Class(AbstractParser, {
 	    
 	    return { 
 	        type: "ModuleDeclaration", 
-	        id: id, 
+	        ident: ident, 
 	        path: path,
-	        body: body
+	        body: body,
+	        start: start,
+	        end: this.endOffset
 	    };
 	},
+	*/
 	
 	ImportDeclaration: function() {
 	
+	    var start = this.startOffset,
+	        list = [];
+	        
 	    this.read("import");
 	    
-	    var binding, from;
+	    while (true) {
 	    
-	    switch (this.peek().type) {
-	    
-	        case "*":
-	            binding = this.read();
-	            break;
+	        list.push(this.ImportClause());
 	        
-	        case "{":
-	            binding = this.ImportSpecifierSet();
-	            break;
-	        
-	        default:
-	            binding = this.BindingIdentifier();
-	            
-	            if (this.peek().type === "=") {
-	            
-	                this.read();
-	                from = this.read("String");
-	                this.Semicolon();
-	                
-	                return {
-	                
-	                    type: "ModuleImport",
-	                    id: binding,
-	                    from: from
-	                };
-	            }
-	                
-	            break;
+	        if (this.peek() === ",") this.read();
+	        else break;
 	    }
-
-	    this.readKeyword("from");
 	    
-	    from = this.ModuleSpecifier();
 	    this.Semicolon();
 	    
 	    return { 
-	        type: "ImportDeclaration", 
-	        binding: binding, 
-	        from: from 
+	        type: "ImportDeclaration",
+	        bindings: list
+	    };
+	},
+	
+	ImportClause: function() {
+	    
+	    var start = this.startOffset,
+	        binding,
+	        from;
+	    
+	    binding = this.peek() === "{" ?
+	        this.ImportSpecifierSet() :
+	        this.Identifier();
+	    
+	    this.readKeyword("from");
+	    
+	    from = this.String();
+	    
+	    return {
+	        type: "ImportClause",
+	        binding: binding,
+	        from: from,
+	        start: start,
+	        end: this.endOffset
 	    };
 	},
 	
 	ImportSpecifierSet: function() {
 	    
-	    var list = [];
+	    var start = this.startOffset,
+	        list = [];
 	    
 	    this.read("{");
 	    
@@ -1677,47 +2162,49 @@ var Parser = new Class(AbstractParser, {
 	    
 	        list.push(this.ImportSpecifier());
 	        
-	        if (this.peekDiv().type === ",") this.read();
+	        if (this.peek("div") === ",") this.read();
 	        else break;
 	    }
 	    
 	    this.read("}");
 	    
-	    return { type: "ImportSpecifierSet", specifiers: list };
+	    return { 
+	        type: "ImportSpecifierSet", 
+	        specifiers: list,
+	        start: start,
+	        end: this.endOffset
+	    };
 	},
 	
 	ImportSpecifier: function() {
 	
-	    var name = this.read("Identifier"),
-            id = null;
+	    var start = this.startOffset,
+	        name = this.Identifier(),
+            ident = null;
         
-        if (this.peek().type === ":") {
+        if (this.peek() === ":") {
         
             this.read();
-            id = this.BindingIdentifier();
+            ident = this.BindingIdentifier();
         }
         
-        return { type: "ImportSpecifier", name: name, id: id };
+        return { 
+            type: "ImportSpecifier", 
+            name: name, 
+            ident: ident,
+            start: start,
+            end: this.endOffset
+        };
 	},
 	
 	ExportDeclaration: function() {
 	
+	    var start = this.startOffset,
+	        binding = null;
+	    
 	    this.read("export");
 	    
-	    var tok = this.peek(),
-	        from = null,
-	        binding;
-	    
-	    switch (tok.type) {
-	    
-	        case "*":
-	        
-	            binding = this.read();
-	            
-                this.readKeyword("from");
-                from = this.ModuleSpecifier();
-	            this.Semicolon();
-	            break;
+	    switch (this.peek()) {
 	            
 	        case "var":
 	        case "let":
@@ -1725,6 +2212,7 @@ var Parser = new Class(AbstractParser, {
 	        
 	            binding = this.VariableDeclaration(false);
 	            this.Semicolon();
+	            
 	            break;
 	        
 	        case "function":
@@ -1737,23 +2225,24 @@ var Parser = new Class(AbstractParser, {
 	            binding = this.ClassDeclaration();
 	            break;
 	        
-	        case "Identifier":
+	        case "=":
 	        
-	            if (this.peekModule()) {
-	            
-	                binding = this.ModuleDeclaration();
-	            
-	            } else {
-	            
-	                binding = this.read();
-	                this.Semicolon();
-	            }
+	            this.read();
+	            binding = this.Expression();
+	            this.Semicolon();
 	            
 	            break;
 	        
 	        default:
 	        
-	            binding = this.ExportSpecifierSet();
+	            while (true) {
+	            
+	                list.push(this.ExportClause());
+	                
+	                if (this.peek() === ",") this.read();
+	                else break;
+	            }
+	            
 	            this.Semicolon();
 	            break;
 	    }
@@ -1761,13 +2250,40 @@ var Parser = new Class(AbstractParser, {
 	    return { 
 	        type: "ExportDeclaration", 
 	        binding: binding,
-	        from: from
+	        start: start,
+	        end: this.endOffset
+	    };
+	},
+	
+	ExportClause: function() {
+	
+	    var start = this.startOffset, 
+	        binding,
+	        from = null;
+	    
+	    binding = this.peek() === "*" ? 
+	        this.read() : 
+	        this.ExportSpecifierSet();
+	    
+	    if (this.peekKeyword("from")) {
+	    
+	        this.read();
+	        from = this.String();
+	    }
+	    
+	    return {
+	        type: "ExportClause",
+	        binding: binding,
+	        from: from,
+	        start: start,
+	        end: this.endOffset
 	    };
 	},
 	
 	ExportSpecifierSet: function() {
 	
-        var list = [];
+        var start = this.startOffset,
+            list = [];
 	    
 	    this.read("{");
 	    
@@ -1775,77 +2291,91 @@ var Parser = new Class(AbstractParser, {
 	    
 	        list.push(this.ExportSpecifier());
 	        
-	        if (this.peekDiv().type === ",") this.read();
+	        if (this.peek("div") === ",") this.read();
 	        else break;
 	    }
 	    
 	    this.read("}");
 	    
-	    return { type: "ExportSpecifierSet", specifiers: list };
+	    return { 
+	        type: "ExportSpecifierSet", 
+	        specifiers: list,
+	        start: start,
+	        end: this.endOffset
+	    };
 	},
 	
 	ExportSpecifier: function() {
 	
-	    var id = this.read("Identifier"),
-	        from = null;
+	    var start = this.startOffset,
+	        ident = this.Identifier(),
+	        path = null;
 	        
-        if (this.peek().type === ":") {
+        if (this.peek() === ":") {
         
             this.read();
-            from = this.ModulePath();
+            path = this.ModulePath();
         }
 	    
-	    return { type: "ExportSpecifier", id: id, from: from };
-	},
-	
-	ModuleSpecifier: function() {
-	
-	    return this.peek().type !== "Identifier" ?
-	        this.read("String") :
-	        this.ModulePath();
+	    return { 
+	        type: "ExportSpecifier", 
+	        ident: ident, 
+	        path: path,
+	        start: start,
+	        end: this.endOffset
+	    };
 	},
 	
 	ModulePath: function() {
 	
-	    var path = [];
+	    var start = this.startOffset,
+	        path = [];
 	    
 	    while (true) {
 	    
-	        path.push(this.read("Identifier"));
+	        path.push(this.readToken("IDENTIFIER").value);
 	        
-	        if (this.peekDiv().type === ".") this.read();
+	        if (this.peek("div") === ".") this.read();
 	        else break;
 	    }
 	    
-	    return { type: "Path", elements: path };
+	    return { 
+	        type: "Path", 
+	        elements: path,
+	        start: start,
+	        end: this.endOffset
+	    };
 	},
 	
 	// === Classes ===
 	
 	ClassDeclaration: function() {
 	
+	    var start = this.startOffset;
+	    
 	    this.read("class");
 	    
-	    return this.ClassLiteral("ClassDeclaration", this.BindingIdentifier());
+	    return this.ClassLiteral("ClassDeclaration", this.BindingIdentifier(), start);
 	},
 	
 	ClassExpression: function() {
 	
+	    var start = this.startOffset, 
+	        ident = null;
+	    
 	    this.read("class");
 	    
-	    var id = null;
+	    if (this.peek() === "IDENTIFIER")
+	        ident = this.BindingIdentifier();
 	    
-	    if (this.peek().type === "Identifier")
-	        id = this.BindingIdentifier();
-	    
-	    return this.ClassLiteral("ClassExpression", id);
+	    return this.ClassLiteral("ClassExpression", ident, start);
 	},
 	
-	ClassLiteral: function(type, id) {
+	ClassLiteral: function(type, ident, start) {
 	
 	    var base = null;
 	    
-	    if (this.peek().type === "extends") {
+	    if (this.peek() === "extends") {
 	    
 	        this.read();
 	        base = this.AssignmentExpression();
@@ -1853,50 +2383,64 @@ var Parser = new Class(AbstractParser, {
 	    
 	    return {
 	        type: type,
-	        id: id,
+	        ident: ident,
 	        base: base,
-	        body: this.ClassBody()
+	        body: this.ClassBody(),
+	        start: start,
+	        end: this.endOffset
 	    };
 	},
 	
 	ClassBody: function() {
 	
-	    var nameSet = {}, list = [];
+	    var start = this.startOffset,
+	        nameSet = {}, 
+	        list = [];
 	    
 	    this.read("{");
 		
-		while (this.peekNameUntil("}"))
+		while (this.peekUntil("}", "name"))
             list.push(this.ClassElement(nameSet));
 		
 		this.read("}");
 		
+		this.checkInvalidNodes();
+		
 		return {
 		    type: "ClassBody",
-		    elements: list
+		    elements: list,
+		    start: start,
+		    end: this.endOffset
 		};
 	},
 	
 	ClassElement: function(nameSet) {
 	
-	    var node = this.MethodDefinition();
+	    var node = this.MethodDefinition(),
+	        flag = PROP_NORMAL,
+	        name;
 	    
-	    /*
-	    
-	    TODO: It is a Syntax Error if MethodNameList of ClassStatementList contains 
-	    any duplicate enties, unless the following condition is true for each 
-	    duplicate entry: The duplicated entry occurs exactly twice in the list 
-	    and one occurrence was obtained from a get accessor MethodDefinition and 
-	    the other occurrence was obtained from a set accessor MethodDefinition.
-	    
-	    */
-	    
+	    switch (node.modifier) {
+        
+            case "get": flag = PROP_GET; break;
+            case "set": flag = PROP_SET; break;
+        }
+        
+        // Check for duplicate names
+		if (this.isDuplicateName(flag, nameSet[name = "." + node.name.value]))
+		    this.addInvalidNode(node, "Duplicate element name in class definition.");
+		
+		// Set name flag
+        nameSet[name] |= flag;
+        
 	    return node;
 	}
 	
 	
-});
+};
 
-// Add transformation methods
-Keys.set(Parser.prototype, Transform.methods);
+// Add externally defined methods
+addMethods(Transform.methods);
+addMethods(Validate.methods);
 
 exports.Parser = Parser;

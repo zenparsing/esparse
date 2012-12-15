@@ -6,58 +6,55 @@
     
     {   type: "ImportDeclaration",
     
-        binding:
-        {   type: "Identifier",
-            value: "x"
-        },
+        bindings: [
         
-        from:
-        {   type: "String",
-            value: "x.js"
-        }
+        {   type: "ImportClause",
+            
+            binding: 
+            {   type: "Identifier",
+                value: "x"
+            },
+            
+            from:
+            {   type: "String",
+                value: "x.js"
+            }
+        }]
     }]
 },
 
-/** import x from A.B; **/
+/** import { x } from "x.js"; **/
 {   type: "Script",
     statements: [
     
     {   type: "ImportDeclaration",
     
-        binding:
-        {   type: "Identifier",
-            value: "x"
-        },
+        bindings: [
         
-        from:
-        {   type: "Path",
-            elements: [
-            {   type: "Identifier",
-                value: "A"
+        {   type: "ImportClause",
+            
+            binding: 
+            
+            {   type: "ImportSpecifierSet",
+            
+                specifiers: [
+                
+                {   type: "ImportSpecifier",
+                    name: 
+                    {   type: "Identifier",
+                        value: "x"
+                    },
+                    ident: null
+                }]
             },
-            {   type: "Identifier",
-                value: "B"
-            }]
-        }
+            
+            from:
+            {   type: "String",
+                value: "x.js"
+            }
+        }]
     }]
 },
 
-/** import x = "x.js"; **/
-{   type: "Script",
-    statements: [
-    
-    {   type: "ModuleImport",
-    
-        id:
-        {   type: "Identifier",
-            value: "x"
-        },
-        
-        from:
-        {   type: "String",
-            value: "x.js"
-        }
-    }]
-},
 
 ];

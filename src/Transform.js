@@ -1,3 +1,5 @@
+"use strict";
+
 exports.methods = {
 
     // Transform an expression into a formal parameter list
@@ -22,8 +24,7 @@ exports.methods = {
                 pattern: node,
                 init: null,
                 start: node.start,
-                end: node.end,
-                previousEnd: node.previousEnd
+                end: node.end
             });
             
             this.transformPatternElement(param, true);
@@ -59,8 +60,7 @@ exports.methods = {
                     init: null,
                     rest: rest,
                     start: elem.start,
-                    end: elem.end,
-                    previousEnd: elem.previousEnd
+                    end: elem.end
                 };
                 
                 // No trailing comma allowed after rest
@@ -88,8 +88,14 @@ exports.methods = {
             switch (prop.type) {
             
                 case "PatternProperty":
+                
                     break;
                 
+                case "CoveredPatternProperty":
+                    
+                    prop.type = "PatternProperty";
+                    break;
+                    
                 case "PropertyDefinition":
                     
                     prop.type = "PatternProperty";
@@ -100,11 +106,15 @@ exports.methods = {
                     break;
                 
                 default:
+                
                     this.fail("Invalid pattern", prop);
             }
             
-            if (prop.pattern)
-                this.transformPatternElement(prop, binding);
+            if (prop.error)
+                delete prop.error;
+            
+            if (prop.pattern) this.transformPatternElement(prop, binding);
+            else this.transformPattern(prop.name, binding);
         }
 	},
 	
@@ -122,15 +132,15 @@ exports.methods = {
 	    this.transformPattern(elem.pattern, binding);
 	},
 	
-	// Transforms an expression to a pattern
+	// Transforms an expression into a pattern
 	transformPattern: function(node, binding) {
 
         switch (node.type) {
         
             case "Identifier":
             
-                if (binding) this.checkBindingIdent(node);
-                else this.checkAssignTarget(node);
+                if (binding) this.checkBindingIdent(node, true);
+                else this.checkAssignTarget(node, true);
                 
                 break;
             
