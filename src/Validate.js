@@ -12,7 +12,9 @@ function isPoisonIdent(name) {
     return name === "eval" || name === "arguments";
 }
 
-exports.methods = {
+function Validate() {}
+
+Validate.prototype = {
 
     // Checks an assignment target for strict mode restrictions
     checkAssignTarget: function(node, strict) {
@@ -134,3 +136,5 @@ exports.methods = {
     }
     
 };
+
+exports.Validate = Validate;

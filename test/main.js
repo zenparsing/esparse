@@ -174,7 +174,7 @@ function run() {
         
             try { 
             
-                tree = Parser.parse(programs[i]).root;
+                tree = Parser.parse(programs[i]);
             
             } catch (err) {
             

@@ -1,8 +1,8 @@
 "use strict";
 
 var Scanner = require("./Scanner.js").Scanner,
-    Transform = require("./Transform.js"),
-    Validate = require("./Validate.js");
+    Transform = require("./Transform.js").Transform,
+    Validate = require("./Validate.js").Validate;
 
 // Binary operator precedence levels
 var operatorPrecedence = {
@@ -89,9 +89,12 @@ function copyToken(token) {
 }
 
 // Adds methods to the Parser prototype
-function addMethods(source) {
+function mixin(source) {
 
-    Object.keys(source).forEach(function(k) { Parser.prototype[k] = source[k]; });
+    Object.keys(source.prototype).forEach(function(k) { 
+    
+        Parser.prototype[k] = source.prototype[k];
+    });
 }
 
 function Parser(input, offset) {
@@ -2440,7 +2443,7 @@ Parser.prototype = {
 };
 
 // Add externally defined methods
-addMethods(Transform.methods);
-addMethods(Validate.methods);
+mixin(Transform);
+mixin(Validate);
 
 exports.Parser = Parser;

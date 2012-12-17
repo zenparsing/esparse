@@ -1,6 +1,8 @@
 "use strict";
 
-exports.methods = {
+function Transform() {}
+
+Transform.prototype = {
 
     // Transform an expression into a formal parameter list
     transformFormals: function(expr) {
@@ -168,3 +170,5 @@ exports.methods = {
     }
     
 };
+
+exports.Transform = Transform;
