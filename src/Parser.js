@@ -277,12 +277,20 @@ Parser.prototype = {
         return false;
     },
     
-    peekModule: function() {
+    peekModule: function(allowURL) {
     
         if (this.peekToken().value === "module") {
         
             var p = this.peekToken("div", 1);
-            return (p.type === "IDENTIFIER" && !p.newlineBefore);
+            
+            if (!p.newlineBefore) {
+            
+                switch (p.type) {
+                
+                    case "IDENTIFIER": return true;
+                    case "STRING": return allowURL;
+                }
+            }
         }
         
         return false;
@@ -457,8 +465,8 @@ Parser.prototype = {
         
             type: "ConditionalExpression",
             test: left,
-            alternate: middle,
-            consequent: right,
+            consequent: middle,
+            alternate: right,
             start: start,
             end: this.endOffset
         };
@@ -1851,12 +1859,7 @@ Parser.prototype = {
             case "let": 
             case "const": return this.LexicalDeclaration();
             
-            case "import":
-                
-                if (moduleBody) 
-                    return this.ImportDeclaration();
-                
-                break;
+            case "import": return this.ImportDeclaration();
             
             case "export":
                 
@@ -1865,14 +1868,12 @@ Parser.prototype = {
                 
                 break;
             
-            /*
             case "IDENTIFIER":
                 
-                if (moduleBody && this.peekModule())
+                if (this.peekModule(true))
                     return this.ModuleDeclaration();
                 
                 break;
-            */
         }
         
         return this.Statement();
@@ -2055,7 +2056,6 @@ Parser.prototype = {
     
     // === Modules ===
     
-    /*
     ModuleBody: function() {
     
         this.pushContext(false);
@@ -2082,71 +2082,62 @@ Parser.prototype = {
         
         this.readKeyword("module");
         
+        if (this.peek() === "STRING") {
+        
+            return {
+                type: "ModuleRegistration",
+                url: this.String(),
+                body: this.ModuleBody(),
+                start: start,
+                end: this.endOffset
+            };
+        }
+        
         var ident = this.BindingIdentifier(),
-            path = null,
-            body = null;
+            spec;
         
         if (this.peek() === "=") {
         
             this.read();
-            path = this.ModulePath();
+            spec = this.peek() === "STRING" ? this.String() : this.BindingPath();
             this.Semicolon();
             
-        } else {
-        
-            body = this.ModuleBody();
+            return {
+                type: "ModuleAlias",
+                ident: ident,
+                specifier: spec,
+                start: start,
+                end: this.endOffset
+            };
         }
         
         return { 
             type: "ModuleDeclaration", 
             ident: ident, 
-            path: path,
-            body: body,
+            body: this.ModuleBody(),
             start: start,
             end: this.endOffset
         };
     },
-    */
     
     ImportDeclaration: function() {
     
         var start = this.startOffset,
-            list = [];
-            
-        this.read("import");
-        
-        while (true) {
-        
-            list.push(this.ImportClause());
-            
-            if (this.peek() === ",") this.read();
-            else break;
-        }
-        
-        this.Semicolon();
-        
-        return { 
-            type: "ImportDeclaration",
-            bindings: list
-        };
-    },
-    
-    ImportClause: function() {
-        
-        var start = this.startOffset,
             binding,
             from;
+            
+        this.read("import");
         
         binding = this.peek() === "{" ?
             this.ImportSpecifierSet() :
             this.Identifier();
         
         this.readKeyword("from");
+        from = this.peek() === "STRING" ? this.String() : this.BindingPath();
+        this.Semicolon();
         
-        from = this.String();
-        
-        return {
-            type: "ImportClause",
+        return { 
+            type: "ImportDeclaration",
             binding: binding,
             from: from,
             start: start,
@@ -2203,7 +2194,8 @@ Parser.prototype = {
     ExportDeclaration: function() {
     
         var start = this.startOffset,
-            binding = null;
+            binding = null,
+            from = null;
         
         this.read("export");
         
@@ -2236,46 +2228,35 @@ Parser.prototype = {
                 
                 break;
             
+            case "IDENTIFIER":
+            
+                if (this.peekModule(false)) {
+                
+                    binding = this.ModuleDeclaration();
+                    break;
+                }
+            
             default:
             
-                while (true) {
+                switch (this.peek()) {
                 
-                    list.push(this.ExportClause());
-                    
-                    if (this.peek() === ",") this.read();
-                    else break;
+                    case "*": binding = null; break;
+                    case "IDENTIFIER": binding = this.Identifier(); break;
+                    default: binding = this.ExportSpecifierSet(); break;
                 }
                 
+                if (this.peekKeyword("from")) {
+                
+                    this.read();
+                    from = this.peek() === "STRING" ? this.String() : this.BindingPath();
+                }
+            
                 this.Semicolon();
                 break;
         }
         
         return { 
             type: "ExportDeclaration", 
-            binding: binding,
-            start: start,
-            end: this.endOffset
-        };
-    },
-    
-    ExportClause: function() {
-    
-        var start = this.startOffset, 
-            binding,
-            from = null;
-        
-        binding = this.peek() === "*" ? 
-            this.read() : 
-            this.ExportSpecifierSet();
-        
-        if (this.peekKeyword("from")) {
-        
-            this.read();
-            from = this.String();
-        }
-        
-        return {
-            type: "ExportClause",
             binding: binding,
             from: from,
             start: start,
@@ -2317,7 +2298,7 @@ Parser.prototype = {
         if (this.peek() === ":") {
         
             this.read();
-            path = this.ModulePath();
+            path = this.BindingPath();
         }
         
         return { 
@@ -2329,7 +2310,7 @@ Parser.prototype = {
         };
     },
     
-    ModulePath: function() {
+    BindingPath: function() {
     
         var start = this.startOffset,
             path = [];
@@ -2343,7 +2324,7 @@ Parser.prototype = {
         }
         
         return { 
-            type: "Path", 
+            type: "BindingPath", 
             elements: path,
             start: start,
             end: this.endOffset

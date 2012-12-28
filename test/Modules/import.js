@@ -6,20 +6,15 @@
     
     {   type: "ImportDeclaration",
     
-        bindings: [
+        binding: 
+        {   type: "Identifier",
+            value: "x"
+        },
         
-        {   type: "ImportClause",
-            
-            binding: 
-            {   type: "Identifier",
-                value: "x"
-            },
-            
-            from:
-            {   type: "String",
-                value: "x.js"
-            }
-        }]
+        from:
+        {   type: "String",
+            value: "x.js"
+        }
     }]
 },
 
@@ -28,31 +23,26 @@
     statements: [
     
     {   type: "ImportDeclaration",
-    
-        bindings: [
+            
+        binding: 
         
-        {   type: "ImportClause",
+        {   type: "ImportSpecifierSet",
+        
+            specifiers: [
             
-            binding: 
-            
-            {   type: "ImportSpecifierSet",
-            
-                specifiers: [
-                
-                {   type: "ImportSpecifier",
-                    name: 
-                    {   type: "Identifier",
-                        value: "x"
-                    },
-                    ident: null
-                }]
-            },
-            
-            from:
-            {   type: "String",
-                value: "x.js"
-            }
-        }]
+            {   type: "ImportSpecifier",
+                name: 
+                {   type: "Identifier",
+                    value: "x"
+                },
+                ident: null
+            }]
+        },
+        
+        from:
+        {   type: "String",
+            value: "x.js"
+        }
     }]
 },
 
