@@ -119,9 +119,14 @@ Parser.prototype = {
         return this.peekToken().start;
     },
     
-    parse: function() { 
+    parseScript: function() { 
     
         return this.Script();
+    },
+    
+    parseModule: function() {
+    
+        return this.Module();
     },
     
     nextToken: function(context) {
@@ -311,10 +316,26 @@ Parser.prototype = {
     Script: function() {
     
         var start = this.startOffset,
-            statements = this.StatementList(true, true);
+            statements = this.StatementList(true, false);
         
         return { 
             type: "Script", 
+            statements: statements,
+            start: start,
+            end: this.endOffset
+        };
+    },
+    
+    Module: function() {
+    
+        // Modules are always strict
+        this.setStrict();
+        
+        var start = this.startOffset,
+            statements = this.StatementList(true, true);
+        
+        return { 
+            type: "Module", 
             statements: statements,
             start: start,
             end: this.endOffset
@@ -1820,7 +1841,7 @@ Parser.prototype = {
     
     // === Declarations ===
     
-    StatementList: function(prologue, moduleBody) {
+    StatementList: function(prologue, isModule) {
     
         var list = [],
             element,
@@ -1829,7 +1850,7 @@ Parser.prototype = {
         
         while (this.peekUntil("}")) {
         
-            list.push(element = this.Declaration(moduleBody));
+            list.push(element = this.Declaration(isModule));
             
             // Check for directives
             if (prologue && 
@@ -1854,7 +1875,7 @@ Parser.prototype = {
         return list;
     },
     
-    Declaration: function(moduleBody) {
+    Declaration: function(isModule) {
     
         switch (this.peek()) {
             
@@ -1867,7 +1888,7 @@ Parser.prototype = {
             
             case "export":
                 
-                if (moduleBody)
+                if (isModule)
                     return this.ExportDeclaration();
                 
                 break;

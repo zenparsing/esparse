@@ -3,9 +3,14 @@
 var Parser = require("./Parser.js").Parser,
     Scanner = require("./Scanner.js").Scanner;
 
-function parse(input, options) {
+function parseModule(input, options) {
 
-    return new Parser(input, options).parse();
+    return new Parser(input, options).parseModule();
+}
+
+function parseScript(input, options) {
+
+    return new Parser(input, options).parseScript();
 }
 
 function forEachChild(node, fn) {
@@ -41,5 +46,6 @@ function forEachChild(node, fn) {
 exports.Parser = Parser;
 exports.Scanner = Scanner;
 
-exports.parse = parse;
+exports.parseScript = parseScript;
+exports.parseModule = parseModule;
 exports.forEachChild = forEachChild;
