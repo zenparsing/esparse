@@ -3,6 +3,12 @@
 - Extended string unicode escapes u{ HexDigits }
 - Error messages should probably be constants.
 - Should directives be a list, instead of just the one?
+- Implicit Strict Mode:
+  - ModuleBody
+  - ClassBody
+  - FunctionBody for generators, arrows
+  ? FunctionBody for object methods
+  
 
 == Future ==
 

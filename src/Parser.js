@@ -227,16 +227,15 @@ Parser.prototype = {
     },
     
     // Context management
-    pushContext: function(isFunction) {
+    pushContext: function(isFunction, isStrict) {
     
         this.context = { 
             
-            strict: this.context ? this.context.strict : false,
+            strict: isStrict || (this.context ? this.context.strict : false),
             isFunction: isFunction,
             labelSet: {},
             switchDepth: 0,
-            invalidNodes: null,
-            coveredProperties: null
+            invalidNodes: null
         };
         
         this.contextStack.push(this.context);
@@ -1070,6 +1069,8 @@ Parser.prototype = {
     
         var start = this.startOffset,
             modifier = "",
+            isStrict = true,
+            gen = false,
             params,
             name;
         
@@ -1078,6 +1079,7 @@ Parser.prototype = {
             this.read();
             
             modifier = "*";
+            gen = true;
             name = this.PropertyName();
         
         } else {
@@ -1090,16 +1092,17 @@ Parser.prototype = {
             
                 modifier = name.value;
                 name = this.PropertyName();
+                isStrict = false;
             }
         }
         
         return {
             type: "MethodDefinition",
-            name: name,
             modifier: modifier,
-            generator: modifier === "*",
+            name: name,
+            generator: gen,
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params),
+            body: this.FunctionBody(params, isStrict),
             start: start,
             end: this.endOffset
         };
@@ -1214,7 +1217,7 @@ Parser.prototype = {
     },
     
     TemplateExpression: function() {
-    
+        
         var atom = this.Template(),
             start = atom.start,
             lit = [ atom ],
@@ -1376,11 +1379,12 @@ Parser.prototype = {
         switch (keyword) {
         
             case "var":
-            case "let":
                 break;
-                
+            
             case "const":
                 isConst = true;
+            
+            case "let":
                 break;
                 
             default:
@@ -1910,7 +1914,7 @@ Parser.prototype = {
             generator: gen,
             ident: this.BindingIdentifier(),
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params),
+            body: this.FunctionBody(params, gen),
             start: start,
             end: this.endOffset
         };
@@ -1935,7 +1939,7 @@ Parser.prototype = {
             generator: gen,
             ident: this.peek() !== "(" ? this.BindingIdentifier() : null,
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params),
+            body: this.FunctionBody(params, gen),
             start: start,
             end: this.endOffset
         };
@@ -2002,9 +2006,9 @@ Parser.prototype = {
         };
     },
     
-    FunctionBody: function(params) {
+    FunctionBody: function(params, isStrict) {
     
-        this.pushContext(true);
+        this.pushContext(true, isStrict);
         
         var start = this.startOffset;
         
@@ -2036,7 +2040,7 @@ Parser.prototype = {
         
         if (this.peek() === "{") {
         
-            body = this.FunctionBody(params);
+            body = this.FunctionBody(params, true);
             
         } else {
         
@@ -2055,26 +2059,6 @@ Parser.prototype = {
     },
     
     // === Modules ===
-    
-    ModuleBody: function() {
-    
-        this.pushContext(false);
-        
-        var start = this.startOffset;
-        
-        this.read("{");
-        var list = this.StatementList(true, true);
-        this.read("}");
-        
-        this.popContext();
-        
-        return {
-            type: "ModuleBody", 
-            statements: list,
-            start: start,
-            end: this.endOffset
-        };
-    },
     
     ModuleDeclaration: function() {
         
@@ -2120,12 +2104,32 @@ Parser.prototype = {
         };
     },
     
+    ModuleBody: function() {
+    
+        this.pushContext(false, true);
+        
+        var start = this.startOffset;
+        
+        this.read("{");
+        var list = this.StatementList(true, true);
+        this.read("}");
+        
+        this.popContext();
+        
+        return {
+            type: "ModuleBody", 
+            statements: list,
+            start: start,
+            end: this.endOffset
+        };
+    },
+    
     ImportDeclaration: function() {
     
         var start = this.startOffset,
             binding,
             from;
-            
+        
         this.read("import");
         
         binding = this.peek() === "{" ?
@@ -2195,7 +2199,8 @@ Parser.prototype = {
     
         var start = this.startOffset,
             binding = null,
-            from = null;
+            from = null,
+            maybeFrom = false;
         
         this.read("export");
         
@@ -2207,7 +2212,6 @@ Parser.prototype = {
             
                 binding = this.VariableDeclaration(false);
                 this.Semicolon();
-                
                 break;
             
             case "function":
@@ -2220,39 +2224,42 @@ Parser.prototype = {
                 binding = this.ClassDeclaration();
                 break;
             
-            case "=":
-            
-                this.read();
-                binding = this.Expression();
-                this.Semicolon();
-                
-                break;
-            
             case "IDENTIFIER":
             
                 if (this.peekModule(false)) {
                 
                     binding = this.ModuleDeclaration();
-                    break;
+                
+                } else {
+                
+                    binding = this.Identifier();
+                    maybeFrom = true;
                 }
+                
+                break;
+            
+            case "*":
+            
+                this.read();
+                maybeFrom = true;
+                break;
             
             default:
             
-                switch (this.peek()) {
-                
-                    case "*": binding = null; break;
-                    case "IDENTIFIER": binding = this.Identifier(); break;
-                    default: binding = this.ExportSpecifierSet(); break;
-                }
-                
-                if (this.peekKeyword("from")) {
-                
-                    this.read();
-                    from = this.peek() === "STRING" ? this.String() : this.BindingPath();
-                }
-            
-                this.Semicolon();
+                binding = this.ExportSpecifierSet();
+                maybeFrom = true;
                 break;
+        }
+        
+        if (maybeFrom) {
+        
+            if (this.peekKeyword("from")) {
+            
+                this.read();
+                from = this.peek() === "STRING" ? this.String() : this.BindingPath();
+            }
+            
+            this.Semicolon();
         }
         
         return { 
@@ -2377,6 +2384,8 @@ Parser.prototype = {
     
     ClassBody: function() {
     
+        this.pushContext(false, true);
+        
         var start = this.startOffset,
             nameSet = {}, 
             list = [];
@@ -2388,7 +2397,7 @@ Parser.prototype = {
         
         this.read("}");
         
-        this.checkInvalidNodes();
+        this.popContext();
         
         return {
             type: "ClassBody",
@@ -2412,7 +2421,7 @@ Parser.prototype = {
         
         // Check for duplicate names
         if (this.isDuplicateName(flag, nameSet[name = "." + node.name.value]))
-            this.addInvalidNode(node, "Duplicate element name in class definition.");
+            this.fail("Duplicate element name in class definition.", node);
         
         // Set name flag
         nameSet[name] |= flag;

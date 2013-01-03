@@ -14,14 +14,14 @@ function forEachChild(node, fn) {
     
     for (i = 0; i < keys.length; ++i) {
     
-        // Skip parent links
         if (keys[i] === "parentNode")
             continue;
-        
+            
         val = node[keys[i]];
         
-        // Skip properties whose values are not objects
-        if (!val || typeof val !== "object") continue;
+        // Skip non-objects
+        if (!val || typeof val !== "object") 
+            continue;
         
         if (typeof val.type === "string") {
         

@@ -112,6 +112,7 @@ Transform.prototype = {
                     this.fail("Invalid pattern", prop);
             }
             
+            // Clear error flags
             if (prop.error)
                 delete prop.error;
             
