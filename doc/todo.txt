@@ -1,8 +1,6 @@
 == TODO ==
 
 - Extended string unicode escapes u{ HexDigits }
-- Binding identifier check on function expression identifiers should
-  be made after strict-ness is known.
 - In binding forms like { x }, we need to run the binding check against
   "x".
 - Implicit Strict Mode:

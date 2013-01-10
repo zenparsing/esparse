@@ -1095,7 +1095,6 @@ Parser.prototype = {
     
         var start = this.startOffset,
             modifier = "",
-            isStrict = true,
             gen = false,
             params,
             name;
@@ -1118,7 +1117,6 @@ Parser.prototype = {
             
                 modifier = name.value;
                 name = this.PropertyName();
-                isStrict = false;
             }
         }
         
@@ -1128,7 +1126,7 @@ Parser.prototype = {
             name: name,
             generator: gen,
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params, isStrict),
+            body: this.FunctionBody(null, params, false),
             start: start,
             end: this.endOffset
         };
@@ -1943,6 +1941,7 @@ Parser.prototype = {
     
         var start = this.startOffset,
             gen = false,
+            ident,
             params;
         
         this.read("function");
@@ -1956,9 +1955,9 @@ Parser.prototype = {
         return { 
             type: "FunctionDeclaration", 
             generator: gen,
-            ident: this.BindingIdentifier(),
+            ident: (ident = this.Identifier()),
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params, gen),
+            body: this.FunctionBody(ident, params, false),
             start: start,
             end: this.endOffset
         };
@@ -1968,6 +1967,7 @@ Parser.prototype = {
     
         var start = this.startOffset,
             gen = false,
+            ident = null,
             params;
         
         this.read("function");
@@ -1978,12 +1978,15 @@ Parser.prototype = {
             gen = true;
         }
         
+        if (this.peek() !== "(")
+            ident = this.Identifier();
+        
         return { 
             type: "FunctionExpression", 
             generator: gen,
-            ident: this.peek() !== "(" ? this.BindingIdentifier() : null,
+            ident: ident,
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params, gen),
+            body: this.FunctionBody(ident, params, false),
             start: start,
             end: this.endOffset
         };
@@ -2050,7 +2053,7 @@ Parser.prototype = {
         };
     },
     
-    FunctionBody: function(params, isStrict) {
+    FunctionBody: function(ident, params, isStrict) {
     
         this.pushContext(true, isStrict);
         
@@ -2060,6 +2063,7 @@ Parser.prototype = {
         var statements = this.StatementList(true);
         this.read("}");
         
+        if (ident) this.checkBindingIdent(ident);
         this.checkParameters(params);
         
         this.popContext();
@@ -2084,7 +2088,7 @@ Parser.prototype = {
         
         if (this.peek() === "{") {
         
-            body = this.FunctionBody(params, true);
+            body = this.FunctionBody(null, params, true);
             
         } else {
         
@@ -2178,7 +2182,7 @@ Parser.prototype = {
         
         binding = this.peek() === "{" ?
             this.ImportSpecifierSet() :
-            this.Identifier();
+            this.BindingIdentifier();
         
         this.readKeyword("from");
         from = this.peek() === "STRING" ? this.String() : this.BindingPath();
@@ -2228,6 +2232,10 @@ Parser.prototype = {
         
             this.read();
             ident = this.BindingIdentifier();
+            
+        } else {
+        
+            this.checkBindingIdent(name);
         }
         
         return { 
@@ -2348,6 +2356,8 @@ Parser.prototype = {
             
         if (this.peek() === ":") {
         
+            this.checkBindingIdent(ident);
+            
             this.read();
             path = this.BindingPath();
         }
