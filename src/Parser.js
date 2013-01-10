@@ -763,7 +763,8 @@ Parser.prototype = {
     PrimaryExpression: function() {
     
         var tok = this.peekToken(),
-            type = tok.type;
+            type = tok.type,
+            start = tok.start;
         
         switch (type) {
             
@@ -779,7 +780,7 @@ Parser.prototype = {
             case "IDENTIFIER":
             
                 return this.peek("div", 1) === "=>" ?
-                    this.ArrowFunction(this.BindingIdentifier(), null, tok.start) :
+                    this.ArrowFunction(this.BindingIdentifier(), null, start) :
                     this.Identifier();
             
             case "REGEX":
@@ -1000,7 +1001,6 @@ Parser.prototype = {
         
         switch (this.peek("name", 1)) {
         
-            case "(":
             case "IDENTIFIER":
             case "STRING":
             case "NUMBER":
@@ -1013,6 +1013,11 @@ Parser.prototype = {
                     case "set": flag = PROP_SET; break;
                 }
                 
+                break;
+            
+            case "(":
+            
+                node = this.MethodDefinition();
                 break;
             
             case ":":
@@ -1362,6 +1367,7 @@ Parser.prototype = {
         return { 
             type: "ExpressionStatement", 
             expression: expr,
+            directive: null,
             start: start,
             end: this.endOffset
         };
@@ -1495,6 +1501,7 @@ Parser.prototype = {
         
         } else {
         
+            // TODO: token may be mutated!
             if (!labelSet[""] && !(keyword === "break" && this.context.switchDepth > 0))
                 this.fail("Invalid " + keyword + " statement", token);
         }
@@ -1547,10 +1554,14 @@ Parser.prototype = {
         var start = this.startOffset;
         
         this.read("if");
+        this.read("(");
         
-        var test = this.ParenExpression(),
-            body = this.Statement(),
+        var test = this.Expression(),
+            body = null,
             elseBody = null;
+        
+        this.read(")");
+        body = this.Statement();
         
         if (this.peek() === "else") {
         
@@ -1578,7 +1589,11 @@ Parser.prototype = {
         body = this.StatementWithLabel();
         
         this.read("while");
-        test = this.ParenExpression();
+        this.read("(");
+        
+        test = this.Expression();
+        
+        this.read(")");
         
         return { 
             type: "DoWhileStatement", 
@@ -1594,11 +1609,12 @@ Parser.prototype = {
         var start = this.startOffset;
         
         this.read("while");
+        this.read("(");
         
         return {
             type: "WhileStatement",
-            test: this.ParenExpression(),
-            body: this.StatementWithLabel(),
+            test: this.Expression(),
+            body: (this.read(")"), this.StatementWithLabel()),
             start: start,
             end: this.endOffset
         };
@@ -1703,11 +1719,12 @@ Parser.prototype = {
         var start = this.startOffset;
         
         this.read("with");
+        this.read("(");
         
         return {
             type: "WithStatement",
-            object: this.ParenExpression(),
-            body: this.Statement(),
+            object: this.Expression(),
+            body: (this.read(")"), this.Statement()),
             start: start,
             end: this.endOffset
         };
@@ -1718,12 +1735,14 @@ Parser.prototype = {
         var start = this.startOffset;
         
         this.read("switch");
+        this.read("(");
         
-        var head = this.ParenExpression(),
+        var head = this.Expression(),
             hasDefault = false,
             cases = [],
             node;
         
+        this.read(")");
         this.read("{");
         this.context.switchDepth += 1;
         
@@ -1861,12 +1880,16 @@ Parser.prototype = {
                 node = element.expression;
                 dir = this.input.slice(node.start + 1, node.end - 1);
                 
+                element.directive = dir;
+                
                 // Check for strict mode
                 if (dir === "use strict")
                     this.setStrict();
-            }
+                    
+            } else {
             
-            prologue = false;
+                prologue = false;
+            }
         }
         
         // Check for invalid nodes

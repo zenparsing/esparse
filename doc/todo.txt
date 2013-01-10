@@ -1,8 +1,10 @@
 == TODO ==
 
 - Extended string unicode escapes u{ HexDigits }
-- Error messages should probably be constants.
-- Should directives be a list, instead of just the one?
+- Binding identifier check on function expression identifiers should
+  be made after strict-ness is known.
+- In binding forms like { x }, we need to run the binding check against
+  "x".
 - Implicit Strict Mode:
   - ModuleBody
   - ClassBody
