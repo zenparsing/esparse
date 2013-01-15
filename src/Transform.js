@@ -1,11 +1,7 @@
-"use strict";
-
-function Transform() {}
-
-Transform.prototype = {
+export class Transform {
 
     // Transform an expression into a formal parameter list
-    transformFormals: function(expr) {
+    transformFormals(expr) {
     
         if (expr === null)
             return [];
@@ -33,9 +29,9 @@ Transform.prototype = {
         }
         
         return params;
-    },
+    }
     
-    transformArrayPattern: function(node, binding) {
+    transformArrayPattern(node, binding) {
     
         node.type = "ArrayPattern";
         
@@ -73,9 +69,9 @@ Transform.prototype = {
             if (elem.rest) this.transformPattern(elem.pattern, binding);
             else this.transformPatternElement(elem, binding);
         }
-    },
+    }
     
-    transformObjectPattern: function(node, binding) {
+    transformObjectPattern(node, binding) {
 
         node.type = "ObjectPattern";
         
@@ -119,9 +115,9 @@ Transform.prototype = {
             if (prop.pattern) this.transformPatternElement(prop, binding);
             else this.transformPattern(prop.name, binding);
         }
-    },
+    }
     
-    transformPatternElement: function(elem, binding) {
+    transformPatternElement(elem, binding) {
     
         var node = elem.pattern;
         
@@ -133,10 +129,10 @@ Transform.prototype = {
         }
         
         this.transformPattern(elem.pattern, binding);
-    },
+    }
     
     // Transforms an expression into a pattern
-    transformPattern: function(node, binding) {
+    transformPattern(node, binding) {
 
         switch (node.type) {
         
@@ -170,6 +166,5 @@ Transform.prototype = {
         return node;
     }
     
-};
+}
 
-exports.Transform = Transform;

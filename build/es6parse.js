@@ -10,10 +10,10 @@ function __require(i, obj) {
 } 
 
 __modules[0] = function(exports) {
-"use strict";
+var Parser = __require(1).Parser;
+var Scanner = __require(2).Scanner;
 
-var Parser = __require(1).Parser,
-    Scanner = __require(2).Scanner;
+
 
 function parseModule(input, options) {
 
@@ -55,21 +55,18 @@ function forEachChild(node, fn) {
     }
 }
 
+
 exports.Parser = Parser;
 exports.Scanner = Scanner;
-
-exports.parseScript = parseScript;
 exports.parseModule = parseModule;
+exports.parseScript = parseScript;
 exports.forEachChild = forEachChild;
-
 };
 
 __modules[1] = function(exports) {
-"use strict";
-
-var Scanner = __require(2).Scanner,
-    Transform = __require(3).Transform,
-    Validate = __require(4).Validate;
+var Scanner = __require(2).Scanner;
+var Transform = __require(3).Transform;
+var Validate = __require(4).Validate;
 
 // Binary operator precedence levels
 var operatorPrecedence = {
@@ -88,9 +85,9 @@ var operatorPrecedence = {
 
 // Object literal property name flags
 var PROP_NORMAL = 1,
-    PROP_ASSIGN = 2,
-    PROP_GET = 4,
-    PROP_SET = 8;
+      PROP_ASSIGN = 2,
+      PROP_GET = 4,
+      PROP_SET = 8;
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -158,28 +155,28 @@ function copyToken(token) {
 // Adds methods to the Parser prototype
 function mixin(source) {
 
-    Object.keys(source.prototype).forEach(function(k) { 
+    Object.keys(source.prototype).forEach((function(k) { 
     
         Parser.prototype[k] = source.prototype[k];
-    });
+    }));
 }
 
-function Parser(input, offset) {
+var Parser = es6now.Class(null, function(__super) { return {
 
-    var scanner = new Scanner(input, offset);
+    constructor: function(input, offset) {
+
+        var scanner = new Scanner(input, offset);
+            
+        this.scanner = scanner;
+        this.input = input;
         
-    this.scanner = scanner;
-    this.input = input;
-    
-    this.peek0 = null;
-    this.peek1 = null;
-    this.endOffset = scanner.offset;
-    
-    this.contextStack = [];
-    this.pushContext(false);
-}
-
-Parser.prototype = {
+        this.peek0 = null;
+        this.peek1 = null;
+        this.endOffset = scanner.offset;
+        
+        this.contextStack = [];
+        this.pushContext(false);
+    },
 
     get startOffset() {
     
@@ -706,7 +703,7 @@ Parser.prototype = {
                     
                         type: "MemberExpression", 
                         object: expr, 
-                        property: this.Identifier(true),
+                        property: this.IdentifierName(),
                         computed: false,
                         start: start,
                         end: this.endOffset
@@ -830,7 +827,8 @@ Parser.prototype = {
     PrimaryExpression: function() {
     
         var tok = this.peekToken(),
-            type = tok.type;
+            type = tok.type,
+            start = tok.start;
         
         switch (type) {
             
@@ -846,8 +844,8 @@ Parser.prototype = {
             case "IDENTIFIER":
             
                 return this.peek("div", 1) === "=>" ?
-                    this.ArrowFunction(this.BindingIdentifier(), null, tok.start) :
-                    this.Identifier();
+                    this.ArrowFunction(this.BindingIdentifier(), null, start) :
+                    this.Identifier(true);
             
             case "REGEX":
             
@@ -898,13 +896,29 @@ Parser.prototype = {
         this.fail("Unexpected token " + type);
     },
     
-    Identifier: function(name) {
+    Identifier: function(isVar) {
     
-        var token = this.readToken("IDENTIFIER", name ? "name" : null);
+        var token = this.readToken("IDENTIFIER");
         
         return {
             type: "Identifier",
             value: token.value,
+            variable: isVar || false,
+            declaration: false,
+            start: token.start,
+            end: token.end
+        };
+    },
+    
+    IdentifierName: function() {
+    
+        var token = this.readToken("IDENTIFIER", "name");
+        
+        return {
+            type: "Identifier",
+            value: token.value,
+            variable: false,
+            declaration: false,
             start: token.start,
             end: token.end
         };
@@ -1067,7 +1081,6 @@ Parser.prototype = {
         
         switch (this.peek("name", 1)) {
         
-            case "(":
             case "IDENTIFIER":
             case "STRING":
             case "NUMBER":
@@ -1080,6 +1093,11 @@ Parser.prototype = {
                     case "set": flag = PROP_SET; break;
                 }
                 
+                break;
+            
+            case "(":
+            
+                node = this.MethodDefinition();
                 break;
             
             case ":":
@@ -1157,7 +1175,6 @@ Parser.prototype = {
     
         var start = this.startOffset,
             modifier = "",
-            isStrict = true,
             gen = false,
             params,
             name;
@@ -1180,7 +1197,6 @@ Parser.prototype = {
             
                 modifier = name.value;
                 name = this.PropertyName();
-                isStrict = false;
             }
         }
         
@@ -1190,7 +1206,7 @@ Parser.prototype = {
             name: name,
             generator: gen,
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params, isStrict),
+            body: this.FunctionBody(null, params, false),
             start: start,
             end: this.endOffset
         };
@@ -1429,6 +1445,7 @@ Parser.prototype = {
         return { 
             type: "ExpressionStatement", 
             expression: expr,
+            directive: null,
             start: start,
             end: this.endOffset
         };
@@ -1562,6 +1579,7 @@ Parser.prototype = {
         
         } else {
         
+            // TODO: token may be mutated!
             if (!labelSet[""] && !(keyword === "break" && this.context.switchDepth > 0))
                 this.fail("Invalid " + keyword + " statement", token);
         }
@@ -1614,10 +1632,14 @@ Parser.prototype = {
         var start = this.startOffset;
         
         this.read("if");
+        this.read("(");
         
-        var test = this.ParenExpression(),
-            body = this.Statement(),
+        var test = this.Expression(),
+            body = null,
             elseBody = null;
+        
+        this.read(")");
+        body = this.Statement();
         
         if (this.peek() === "else") {
         
@@ -1645,7 +1667,11 @@ Parser.prototype = {
         body = this.StatementWithLabel();
         
         this.read("while");
-        test = this.ParenExpression();
+        this.read("(");
+        
+        test = this.Expression();
+        
+        this.read(")");
         
         return { 
             type: "DoWhileStatement", 
@@ -1661,11 +1687,12 @@ Parser.prototype = {
         var start = this.startOffset;
         
         this.read("while");
+        this.read("(");
         
         return {
             type: "WhileStatement",
-            test: this.ParenExpression(),
-            body: this.StatementWithLabel(),
+            test: this.Expression(),
+            body: (this.read(")"), this.StatementWithLabel()),
             start: start,
             end: this.endOffset
         };
@@ -1770,11 +1797,12 @@ Parser.prototype = {
         var start = this.startOffset;
         
         this.read("with");
+        this.read("(");
         
         return {
             type: "WithStatement",
-            object: this.ParenExpression(),
-            body: this.Statement(),
+            object: this.Expression(),
+            body: (this.read(")"), this.Statement()),
             start: start,
             end: this.endOffset
         };
@@ -1785,12 +1813,14 @@ Parser.prototype = {
         var start = this.startOffset;
         
         this.read("switch");
+        this.read("(");
         
-        var head = this.ParenExpression(),
+        var head = this.Expression(),
             hasDefault = false,
             cases = [],
             node;
         
+        this.read(")");
         this.read("{");
         this.context.switchDepth += 1;
         
@@ -1928,12 +1958,16 @@ Parser.prototype = {
                 node = element.expression;
                 dir = this.input.slice(node.start + 1, node.end - 1);
                 
+                element.directive = dir;
+                
                 // Check for strict mode
                 if (dir === "use strict")
                     this.setStrict();
-            }
+                    
+            } else {
             
-            prologue = false;
+                prologue = false;
+            }
         }
         
         // Check for invalid nodes
@@ -1987,6 +2021,7 @@ Parser.prototype = {
     
         var start = this.startOffset,
             gen = false,
+            ident,
             params;
         
         this.read("function");
@@ -2000,9 +2035,9 @@ Parser.prototype = {
         return { 
             type: "FunctionDeclaration", 
             generator: gen,
-            ident: this.BindingIdentifier(),
+            ident: (ident = this.Identifier()),
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params, gen),
+            body: this.FunctionBody(ident, params, false),
             start: start,
             end: this.endOffset
         };
@@ -2012,6 +2047,7 @@ Parser.prototype = {
     
         var start = this.startOffset,
             gen = false,
+            ident = null,
             params;
         
         this.read("function");
@@ -2022,12 +2058,15 @@ Parser.prototype = {
             gen = true;
         }
         
+        if (this.peek() !== "(")
+            ident = this.Identifier();
+        
         return { 
             type: "FunctionExpression", 
             generator: gen,
-            ident: this.peek() !== "(" ? this.BindingIdentifier() : null,
+            ident: ident,
             params: (params = this.FormalParameters()),
-            body: this.FunctionBody(params, gen),
+            body: this.FunctionBody(ident, params, false),
             start: start,
             end: this.endOffset
         };
@@ -2094,7 +2133,7 @@ Parser.prototype = {
         };
     },
     
-    FunctionBody: function(params, isStrict) {
+    FunctionBody: function(ident, params, isStrict) {
     
         this.pushContext(true, isStrict);
         
@@ -2104,6 +2143,7 @@ Parser.prototype = {
         var statements = this.StatementList(true);
         this.read("}");
         
+        if (ident) this.checkBindingIdent(ident);
         this.checkParameters(params);
         
         this.popContext();
@@ -2128,7 +2168,7 @@ Parser.prototype = {
         
         if (this.peek() === "{") {
         
-            body = this.FunctionBody(params, true);
+            body = this.FunctionBody(null, params, true);
             
         } else {
         
@@ -2222,7 +2262,7 @@ Parser.prototype = {
         
         binding = this.peek() === "{" ?
             this.ImportSpecifierSet() :
-            this.Identifier();
+            this.BindingIdentifier();
         
         this.readKeyword("from");
         from = this.peek() === "STRING" ? this.String() : this.BindingPath();
@@ -2272,6 +2312,10 @@ Parser.prototype = {
         
             this.read();
             ident = this.BindingIdentifier();
+            
+        } else {
+        
+            this.checkBindingIdent(name);
         }
         
         return { 
@@ -2392,6 +2436,8 @@ Parser.prototype = {
             
         if (this.peek() === ":") {
         
+            this.checkBindingIdent(ident);
+            
             this.read();
             path = this.BindingPath();
         }
@@ -2518,7 +2564,7 @@ Parser.prototype = {
     }
     
     
-};
+}});
 
 // Add externally defined methods
 mixin(Transform);
@@ -2528,8 +2574,6 @@ exports.Parser = Parser;
 };
 
 __modules[2] = function(exports) {
-"use strict";
-
 // === Unicode Categories for Javascript ===
 var Unicode = (function() {
 
@@ -2550,13 +2594,11 @@ var Unicode = (function() {
     
     var pattern = /([0-9a-f]{4})(-[0-9a-f]{4})?/ig;
     
-    Object.keys(cat).forEach(function(k) {
+    Object.keys(cat).forEach((function(k) {
     
-        cat[k] = cat[k].replace(pattern, function(m, m1, m2) {
-            
-            return "\\u" + m1 + (m2 ? "-\\u" + m2.slice(1) : "");
-        });
-    });
+        cat[k] = cat[k].replace(pattern, (function(m, m1, m2) { return "\\u" + m1 + (m2 ? "-\\u" + m2.slice(1) : ""); })
+        );
+    }));
     
     return cat;
 
@@ -2564,11 +2606,11 @@ var Unicode = (function() {
 
 // === Unicode Matching Patterns ===
 var unicodeLetter = Unicode.Lu + Unicode.Ll + Unicode.Lt + Unicode.Lm + Unicode.Lo + Unicode.Nl,
-    identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
-    identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
-    identifierEscape = /\\u([0-9a-fA-F]{4})/g,
-    whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
-    newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
+      identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
+      identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
+      identifierEscape = /\\u([0-9a-fA-F]{4})/g,
+      whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
+      newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
 
 
 // === Reserved Words ===
@@ -2597,21 +2639,21 @@ var multiCharPunctuator = new RegExp("^(?:" +
 
 // === Miscellaneous Patterns ===
 var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
-    blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
-    hexChar = /[0-9a-f]/i;
+      blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
+      hexChar = /[0-9a-f]/i;
 
 // === Character Types ===
 var WHITESPACE = 1,
-    NEWLINE = 2,
-    DECIMAL_DIGIT = 3,
-    PUNCTUATOR = 4,
-    STRING = 5,
-    TEMPLATE = 6,
-    IDENTIFIER = 7,
-    ZERO = 8,
-    DOT = 9,
-    SLASH = 10,
-    LBRACE = 11;
+      NEWLINE = 2,
+      DECIMAL_DIGIT = 3,
+      PUNCTUATOR = 4,
+      STRING = 5,
+      TEMPLATE = 6,
+      IDENTIFIER = 7,
+      ZERO = 8,
+      DOT = 9,
+      SLASH = 10,
+      LBRACE = 11;
 
 // === Character Type Lookup Table ===
 var charTable = (function() {
@@ -2637,7 +2679,7 @@ var charTable = (function() {
     
     function add(type, string) {
     
-        string.split("").forEach(function(c) { table[c.charCodeAt(0)] = type });
+        string.split("").forEach((function(c) { table[c.charCodeAt(0)] = type }));
     }
 
 })();
@@ -2733,26 +2775,26 @@ function isNumberFollow(c) {
     );
 }
 
-function Scanner(input, offset) {
+var Scanner = es6now.Class(null, function(__super) { return {
 
-    this.input = input;
-    this.offset = offset || 0;
-    this.length = input.length;
-    this.lines = [-1];
-    
-    this.strict = false;
-    
-    this.type = "";
-    this.start = 0;
-    this.end = 0;
-    this.value = null;
-    this.templateEnd = false;
-    this.regexFlags = null;
-    this.newlineBefore = false;
-    this.error = "";
-}
+    constructor: function(input, offset) {
 
-Scanner.prototype = {
+        this.input = input;
+        this.offset = offset || 0;
+        this.length = input.length;
+        this.lines = [-1];
+        
+        this.strict = false;
+        
+        this.type = "";
+        this.start = 0;
+        this.end = 0;
+        this.value = null;
+        this.templateEnd = false;
+        this.regexFlags = null;
+        this.newlineBefore = false;
+        this.error = "";
+    },
 
     next: function(context) {
 
@@ -3381,18 +3423,13 @@ Scanner.prototype = {
         return "ILLEGAL";
     }
     
-};
+}});
 
 exports.Scanner = Scanner;
-
 };
 
 __modules[3] = function(exports) {
-"use strict";
-
-function Transform() {}
-
-Transform.prototype = {
+var Transform = es6now.Class(null, function(__super) { return {
 
     // Transform an expression into a formal parameter list
     transformFormals: function(expr) {
@@ -3560,20 +3597,18 @@ Transform.prototype = {
         return node;
     }
     
-};
+}});
+
 
 exports.Transform = Transform;
-
 };
 
 __modules[4] = function(exports) {
-"use strict";
-
 // Object literal property name flags
 var PROP_NORMAL = 1,
-    PROP_ASSIGN = 2,
-    PROP_GET = 4,
-    PROP_SET = 8;
+      PROP_ASSIGN = 2,
+      PROP_GET = 4,
+      PROP_SET = 8;
 
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
@@ -3581,23 +3616,30 @@ function isPoisonIdent(name) {
     return name === "eval" || name === "arguments";
 }
 
-function Validate() {}
-
-Validate.prototype = {
+var Validate = es6now.Class(null, function(__super) { return {
 
     // Checks an assignment target for strict mode restrictions
     checkAssignTarget: function(node, strict) {
     
+        if (node.type !== "Identifier")
+            return;
+        
+        // Mark identifier node as a variable
+        node.variable = true;
+        
         if (!strict && !this.context.strict)
             return;
         
-        if (node.type === "Identifier" && isPoisonIdent(node.value))
+        if (isPoisonIdent(node.value))
             this.fail("Cannot modify " + node.value + " in strict mode", node);
     },
     
     // Checks a binding identifier for strict mode restrictions
     checkBindingIdent: function(node, strict) {
     
+        // Mark identifier node as a declaration
+        node.declaration = true;
+        
         if (!strict && !this.context.strict)
             return;
             
@@ -3704,8 +3746,7 @@ Validate.prototype = {
         context.invalidNodes = null;
     }
     
-};
-
+}});
 exports.Validate = Validate;
 };
 

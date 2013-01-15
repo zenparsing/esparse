@@ -1,16 +1,14 @@
-"use strict";
+module Path = "path";
+module FS = "fs";
 
-var FS = require("fs"),
-    Path = require("path"),
-    Util = require("util");
+import inspect from "util";
+import parseScript from "../src/main.js";
 
-var Parser = require("../src/main.js");
+const HOP = Object.prototype.hasOwnProperty,
+      TEST_COMMENT = /\/\*\*!?[\s\S]+?\*\*\//g,
+      COMMENT_TRIM = /^\/\*\*!?|\*\*\/$/g;
 
-var HOP = Object.prototype.hasOwnProperty,
-    TEST_COMMENT = /\/\*\*!?[\s\S]+?\*\*\//g,
-    COMMENT_TRIM = /^\/\*\*!?|\*\*\/$/g;
-
-var SKIP_KEYS = {
+const SKIP_KEYS = {
 
     "start": 1,
     "end": 1,
@@ -87,10 +85,10 @@ function walkDirectory(dir, fn) {
 
     FS
     .readdirSync(dir)
-    .filter(function(name) { return name.charAt(0) !== "."; })
-    .map(function(name) { return Path.resolve(dir, name); })
-    .map(function(path) { return { path: path, stat: statPath(path) }; })
-    .forEach(function(entry) {
+    .filter(name => name.charAt(0) !== ".")
+    .map(name => Path.resolve(dir, name))
+    .map(path => ({ path: path, stat: statPath(path) }))
+    .forEach(entry => {
     
         if (!entry.stat)
             return;
@@ -135,16 +133,13 @@ function parseTestComments(text) {
 
     var list = text.match(TEST_COMMENT) || [];
     
-    return list.map(function(source) {
-    
-        return source.replace(COMMENT_TRIM, "").trim();
-    });
+    return list.map(source => source.replace(COMMENT_TRIM, "").trim());
 }
 
 // Displays an object tree
 function displayTree(tree) {
 
-    console.log(Util.inspect(tree, false, 10, true));
+    console.log(inspect(tree, false, 10, true));
 }
 
 function run() {
@@ -175,7 +170,7 @@ function run() {
         
             try { 
             
-                tree = Parser.parseScript(programs[i]);
+                tree = parseScript(programs[i]);
             
             } catch (err) {
             

@@ -1,7 +1,5 @@
-"use strict";
-
 // === Unicode Categories for Javascript ===
-var Unicode = (function() {
+const Unicode = () => {
 
     var cat = {
     
@@ -20,41 +18,41 @@ var Unicode = (function() {
     
     var pattern = /([0-9a-f]{4})(-[0-9a-f]{4})?/ig;
     
-    Object.keys(cat).forEach(function(k) {
+    Object.keys(cat).forEach(k => {
     
-        cat[k] = cat[k].replace(pattern, function(m, m1, m2) {
+        cat[k] = cat[k].replace(pattern, (m, m1, m2) => 
             
-            return "\\u" + m1 + (m2 ? "-\\u" + m2.slice(1) : "");
-        });
+            "\\u" + m1 + (m2 ? "-\\u" + m2.slice(1) : "")
+        );
     });
     
     return cat;
 
-})();
+}();
 
 // === Unicode Matching Patterns ===
-var unicodeLetter = Unicode.Lu + Unicode.Ll + Unicode.Lt + Unicode.Lm + Unicode.Lo + Unicode.Nl,
-    identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
-    identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
-    identifierEscape = /\\u([0-9a-fA-F]{4})/g,
-    whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
-    newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
+const unicodeLetter = Unicode.Lu + Unicode.Ll + Unicode.Lt + Unicode.Lm + Unicode.Lo + Unicode.Nl,
+      identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
+      identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
+      identifierEscape = /\\u([0-9a-fA-F]{4})/g,
+      whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
+      newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
 
 
 // === Reserved Words ===
-var reservedWord = new RegExp("^(?:" +
+const reservedWord = new RegExp("^(?:" +
     "break|case|catch|class|const|continue|debugger|default|delete|do|" +
     "else|enum|export|extends|false|finally|for|function|if|import|in|" +
     "instanceof|new|null|return|super|switch|this|throw|true|try|typeof|" +
     "var|void|while|with" +
 ")$");
 
-var strictReservedWord = new RegExp("^(?:" +
+const strictReservedWord = new RegExp("^(?:" +
     "implements|private|public|interface|package|let|protected|static|yield" +
 ")$");
 
 // === Punctuators ===
-var multiCharPunctuator = new RegExp("^(?:" +
+const multiCharPunctuator = new RegExp("^(?:" +
     "[-+]{2}|" +
     "[&|]{2}|" +
     "<<=?|" +
@@ -66,25 +64,25 @@ var multiCharPunctuator = new RegExp("^(?:" +
 ")$");
 
 // === Miscellaneous Patterns ===
-var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
-    blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
-    hexChar = /[0-9a-f]/i;
+const octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
+      blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
+      hexChar = /[0-9a-f]/i;
 
 // === Character Types ===
-var WHITESPACE = 1,
-    NEWLINE = 2,
-    DECIMAL_DIGIT = 3,
-    PUNCTUATOR = 4,
-    STRING = 5,
-    TEMPLATE = 6,
-    IDENTIFIER = 7,
-    ZERO = 8,
-    DOT = 9,
-    SLASH = 10,
-    LBRACE = 11;
+const WHITESPACE = 1,
+      NEWLINE = 2,
+      DECIMAL_DIGIT = 3,
+      PUNCTUATOR = 4,
+      STRING = 5,
+      TEMPLATE = 6,
+      IDENTIFIER = 7,
+      ZERO = 8,
+      DOT = 9,
+      SLASH = 10,
+      LBRACE = 11;
 
 // === Character Type Lookup Table ===
-var charTable = (function() {
+const charTable = () => {
 
     var table = new Array(128), i;
     
@@ -107,10 +105,10 @@ var charTable = (function() {
     
     function add(type, string) {
     
-        string.split("").forEach(function(c) { table[c.charCodeAt(0)] = type });
+        string.split("").forEach(c => { table[c.charCodeAt(0)] = type });
     }
 
-})();
+}();
 
 // Performs a binary search on an array
 function binarySearch(array, val) {
@@ -203,28 +201,28 @@ function isNumberFollow(c) {
     );
 }
 
-function Scanner(input, offset) {
+export class Scanner {
 
-    this.input = input;
-    this.offset = offset || 0;
-    this.length = input.length;
-    this.lines = [-1];
-    
-    this.strict = false;
-    
-    this.type = "";
-    this.start = 0;
-    this.end = 0;
-    this.value = null;
-    this.templateEnd = false;
-    this.regexFlags = null;
-    this.newlineBefore = false;
-    this.error = "";
-}
+    constructor(input, offset) {
 
-Scanner.prototype = {
+        this.input = input;
+        this.offset = offset || 0;
+        this.length = input.length;
+        this.lines = [-1];
+        
+        this.strict = false;
+        
+        this.type = "";
+        this.start = 0;
+        this.end = 0;
+        this.value = null;
+        this.templateEnd = false;
+        this.regexFlags = null;
+        this.newlineBefore = false;
+        this.error = "";
+    }
 
-    next: function(context) {
+    next(context) {
 
         if (this.type !== "COMMENT")
             this.newlineBefore = false;
@@ -245,15 +243,15 @@ Scanner.prototype = {
         this.end = this.offset;
         
         return type;
-    },
+    }
     
-    raw: function(token) {
+    raw(token) {
     
         token || (token = this);
         return this.input.slice(this.start, this.end);
-    },
+    }
     
-    position: function(token) {
+    position(token) {
     
         token || (token = this);
         
@@ -266,14 +264,14 @@ Scanner.prototype = {
             line: i, 
             col: offset - this.lines[i - 1]
         };
-    },
+    }
     
-    addLineBreak: function(offset) {
+    addLineBreak(offset) {
     
         this.lines.push(offset);
-    },
+    }
     
-    readOctalEscape: function() {
+    readOctalEscape() {
     
         var m = octalEscape.exec(this.input.slice(this.offset, this.offset + 3)),
             val = m ? m[0] : "";
@@ -281,9 +279,9 @@ Scanner.prototype = {
         this.offset += val.length;
         
         return val;
-    },
+    }
     
-    readStringEscape: function() {
+    readStringEscape() {
     
         this.offset++;
         
@@ -354,9 +352,9 @@ Scanner.prototype = {
             
                 return chr;
         }
-    },
+    }
     
-    readRange: function(low, high) {
+    readRange(low, high) {
     
         var start = this.offset,
             code;
@@ -368,9 +366,9 @@ Scanner.prototype = {
         }
         
         return this.input.slice(start, this.offset);
-    },
+    }
     
-    readInteger: function() {
+    readInteger() {
     
         var start = this.offset,
             code;
@@ -382,9 +380,9 @@ Scanner.prototype = {
         }
         
         return this.input.slice(start, this.offset);
-    },
+    }
     
-    readHex: function(maxLen) {
+    readHex(maxLen) {
         
         var str = "", 
             chr;
@@ -402,9 +400,9 @@ Scanner.prototype = {
         }
         
         return str;
-    },
+    }
     
-    Start: function(context) {
+    Start(context) {
     
         var code = this.input.charCodeAt(this.offset),
             next;
@@ -475,9 +473,9 @@ Scanner.prototype = {
             return this.Identifier(context);
         
         return this.Error();
-    },
+    }
     
-    Whitespace: function() {
+    Whitespace() {
     
         this.offset++;
         
@@ -485,9 +483,9 @@ Scanner.prototype = {
             this.offset++;
         
         return null;
-    },
+    }
     
-    UnicodeWhitespace: function() {
+    UnicodeWhitespace() {
     
         this.offset++;
         
@@ -495,9 +493,9 @@ Scanner.prototype = {
             this.offset++;
         
         return null;
-    },
+    }
     
-    Newline: function() {
+    Newline() {
         
         this.addLineBreak(this.offset);
         
@@ -507,9 +505,9 @@ Scanner.prototype = {
         this.newlineBefore = true;
         
         return null;
-    },
+    }
     
-    Punctuator: function(code) {
+    Punctuator(code) {
         
         var op = this.input[this.offset++], 
             chr,
@@ -524,9 +522,9 @@ Scanner.prototype = {
         }
         
         return op;
-    },
+    }
     
-    Template: function() {
+    Template() {
     
         var first = this.input[this.offset++],
             end = false, 
@@ -573,9 +571,9 @@ Scanner.prototype = {
         this.templateEnd = end;
         
         return "TEMPLATE";
-    },
+    }
     
-    String: function() {
+    String() {
     
         var delim = this.input[this.offset++],
             val = "",
@@ -613,9 +611,9 @@ Scanner.prototype = {
         this.value = val;
         
         return "STRING";
-    },
+    }
     
-    RegularExpression: function() {
+    RegularExpression() {
     
         this.offset++;
         
@@ -669,9 +667,9 @@ Scanner.prototype = {
         this.regexFlags = flags;
         
         return "REGEX";
-    },
+    }
     
-    LegacyOctalNumber: function() {
+    LegacyOctalNumber() {
     
         this.offset++;
         
@@ -692,9 +690,9 @@ Scanner.prototype = {
         this.value = parseInt(this.input.slice(start, this.offset), 8);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-    },
+    }
     
-    Number: function() {
+    Number() {
     
         var start = this.offset,
             next;
@@ -725,33 +723,33 @@ Scanner.prototype = {
         this.value = parseFloat(this.input.slice(start, this.offset));
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-    },
+    }
     
-    BinaryNumber: function() {
+    BinaryNumber() {
     
         this.offset += 2;
         this.value = parseInt(this.readRange(48, 49), 2);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-    },
+    }
     
-    OctalNumber: function() {
+    OctalNumber() {
     
         this.offset += 2;
         this.value = parseInt(this.readRange(48, 55), 8);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-    },
+    }
     
-    HexNumber: function() {
+    HexNumber() {
     
         this.offset += 2;
         this.value = parseInt(this.readHex(0), 16);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
-    },
+    }
     
-    Identifier: function(context) {
+    Identifier(context) {
     
         var start = this.offset,
             id = "",
@@ -790,9 +788,9 @@ Scanner.prototype = {
         this.value = id;
         
         return "IDENTIFIER";
-    },
+    }
     
-    LineComment: function() {
+    LineComment() {
     
         this.offset += 2;
         
@@ -810,9 +808,9 @@ Scanner.prototype = {
         this.value = this.input.slice(start, this.offset);
         
         return "COMMENT";
-    },
+    }
     
-    BlockComment: function() {
+    BlockComment() {
     
         this.offset += 2;
         
@@ -839,9 +837,9 @@ Scanner.prototype = {
         this.value = this.input.slice(start, this.offset - 2);
         
         return "COMMENT";
-    },
+    }
     
-    Error: function(msg) {
+    Error(msg) {
     
         this.offset++;
         
@@ -851,6 +849,4 @@ Scanner.prototype = {
         return "ILLEGAL";
     }
     
-};
-
-exports.Scanner = Scanner;
+}

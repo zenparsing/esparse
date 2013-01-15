@@ -1,19 +1,19 @@
-"use strict";
+import Parser from "Parser.js";
+import Scanner from "Scanner.js";
 
-var Parser = require("./Parser.js").Parser,
-    Scanner = require("./Scanner.js").Scanner;
+export { Parser, Scanner };
 
-function parseModule(input, options) {
+export function parseModule(input, options) {
 
     return new Parser(input, options).parseModule();
 }
 
-function parseScript(input, options) {
+export function parseScript(input, options) {
 
     return new Parser(input, options).parseScript();
 }
 
-function forEachChild(node, fn) {
+export function forEachChild(node, fn) {
 
     var keys = Object.keys(node), val, i, j;
     
@@ -43,9 +43,3 @@ function forEachChild(node, fn) {
     }
 }
 
-exports.Parser = Parser;
-exports.Scanner = Scanner;
-
-exports.parseScript = parseScript;
-exports.parseModule = parseModule;
-exports.forEachChild = forEachChild;

@@ -1,11 +1,9 @@
-"use strict";
-
-var Scanner = require("./Scanner.js").Scanner,
-    Transform = require("./Transform.js").Transform,
-    Validate = require("./Validate.js").Validate;
+import Scanner from "Scanner.js";
+import Transform from "Transform.js";
+import Validate from "Validate.js";
 
 // Binary operator precedence levels
-var operatorPrecedence = {
+const operatorPrecedence = {
 
     "||": 1,
     "&&": 2,
@@ -20,10 +18,10 @@ var operatorPrecedence = {
 };
 
 // Object literal property name flags
-var PROP_NORMAL = 1,
-    PROP_ASSIGN = 2,
-    PROP_GET = 4,
-    PROP_SET = 8;
+const PROP_NORMAL = 1,
+      PROP_ASSIGN = 2,
+      PROP_GET = 4,
+      PROP_SET = 8;
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -91,45 +89,45 @@ function copyToken(token) {
 // Adds methods to the Parser prototype
 function mixin(source) {
 
-    Object.keys(source.prototype).forEach(function(k) { 
+    Object.keys(source.prototype).forEach(k => { 
     
         Parser.prototype[k] = source.prototype[k];
     });
 }
 
-function Parser(input, offset) {
+export class Parser {
 
-    var scanner = new Scanner(input, offset);
+    constructor(input, offset) {
+
+        var scanner = new Scanner(input, offset);
+            
+        this.scanner = scanner;
+        this.input = input;
         
-    this.scanner = scanner;
-    this.input = input;
-    
-    this.peek0 = null;
-    this.peek1 = null;
-    this.endOffset = scanner.offset;
-    
-    this.contextStack = [];
-    this.pushContext(false);
-}
-
-Parser.prototype = {
+        this.peek0 = null;
+        this.peek1 = null;
+        this.endOffset = scanner.offset;
+        
+        this.contextStack = [];
+        this.pushContext(false);
+    }
 
     get startOffset() {
     
         return this.peekToken().start;
-    },
+    }
     
-    parseScript: function() { 
+    parseScript() { 
     
         return this.Script();
-    },
+    }
     
-    parseModule: function() {
+    parseModule() {
     
         return this.Module();
-    },
+    }
     
-    nextToken: function(context) {
+    nextToken(context) {
     
         var scanner = this.scanner,
             type = null;
@@ -138,9 +136,9 @@ Parser.prototype = {
             type = scanner.next(context);
         
         return scanner;
-    },
+    }
     
-    readToken: function(type, context) {
+    readToken(type, context) {
     
         var token = this.peek0 || this.nextToken(context);
         
@@ -152,14 +150,14 @@ Parser.prototype = {
             this.fail("Unexpected token " + token.type, token);
         
         return token;
-    },
+    }
     
-    read: function(type, context) {
+    read(type, context) {
     
         return this.readToken(type, context).type;
-    },
+    }
     
-    peekToken: function(context, index) {
+    peekToken(context, index) {
     
         if (index === 0 || index === void 0) {
         
@@ -179,14 +177,14 @@ Parser.prototype = {
         }
         
         throw new Error("Invalid lookahead");
-    },
+    }
     
-    peek: function(context, index) {
+    peek(context, index) {
     
         return this.peekToken(context, index).type;
-    },
+    }
     
-    unpeek: function() {
+    unpeek() {
     
         if (this.peek0) {
         
@@ -194,21 +192,21 @@ Parser.prototype = {
             this.peek0 = null;
             this.peek1 = null;
         }
-    },
+    }
     
-    peekUntil: function(type, context) {
+    peekUntil(type, context) {
     
         var tok = this.peek(context);
         return tok !== "EOF" && tok !== type ? tok : null;
-    },
+    }
     
-    fail: function(msg, loc) {
+    fail(msg, loc) {
     
         var pos = this.scanner.position(loc || this.peek0);
         throw new SyntaxError(msg + " (line " + pos.line + ", col " + pos.col + ")");
-    },
+    }
     
-    readKeyword: function(word) {
+    readKeyword(word) {
     
         var token = this.readToken();
         
@@ -216,9 +214,9 @@ Parser.prototype = {
             return token;
         
         this.fail("Unexpected token " + token.type, token);
-    },
+    }
     
-    peekKeyword: function(word, noNewlineBefore) {
+    peekKeyword(word, noNewlineBefore) {
     
         var token = this.peekToken();
         
@@ -229,10 +227,10 @@ Parser.prototype = {
                 token.type === "IDENTIFIER" && 
                 token.value === word && 
                 !(noNewlineBefore && token.newlineBefore);
-    },
+    }
     
     // Context management
-    pushContext: function(isFunction, isStrict) {
+    pushContext(isFunction, isStrict) {
     
         this.context = { 
             
@@ -245,22 +243,22 @@ Parser.prototype = {
         
         this.contextStack.push(this.context);
         this.scanner.strict = this.context.strict;
-    },
+    }
     
-    popContext: function() {
+    popContext() {
     
         this.contextStack.pop();
         this.context = this.contextStack[this.contextStack.length - 1];
         this.scanner.strict = this.context ? this.context.strict : false;
-    },
+    }
     
-    setStrict: function() {
+    setStrict() {
     
         this.context.strict = true;
         this.scanner.strict = true;
-    },
+    }
     
-    maybeEnd: function() {
+    maybeEnd() {
     
         var token = this.peekToken();
         
@@ -279,9 +277,9 @@ Parser.prototype = {
         }
         
         return false;
-    },
+    }
     
-    peekModule: function(allowURL) {
+    peekModule(allowURL) {
     
         if (this.peekToken().value === "module") {
         
@@ -298,9 +296,9 @@ Parser.prototype = {
         }
         
         return false;
-    },
+    }
     
-    addInvalidNode: function(node, error) {
+    addInvalidNode(node, error) {
     
         var context = this.context,
             list = context.invalidNodes;
@@ -309,11 +307,11 @@ Parser.prototype = {
         
         if (!list) context.invalidNodes = [node];
         else list.push(node);
-    },
+    }
     
     // === Top Level ===
     
-    Script: function() {
+    Script() {
     
         var start = this.startOffset,
             statements = this.StatementList(true, false);
@@ -324,9 +322,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    Module: function() {
+    Module() {
     
         // Modules are always strict
         this.setStrict();
@@ -340,11 +338,11 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
     // === Expressions ===
     
-    Expression: function(noIn) {
+    Expression(noIn) {
     
         var start = this.startOffset,
             expr = this.AssignmentExpression(noIn),
@@ -381,9 +379,9 @@ Parser.prototype = {
             expr.end = this.endOffset;
         
         return expr;
-    },
+    }
     
-    AssignmentExpression: function(noIn) {
+    AssignmentExpression(noIn) {
     
         var start = this.startOffset,
             left,
@@ -426,9 +424,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    SpreadAssignment: function(noIn) {
+    SpreadAssignment(noIn) {
     
         if (this.peek() === "...") {
         
@@ -445,9 +443,9 @@ Parser.prototype = {
         }
         
         return this.AssignmentExpression(noIn);
-    },
+    }
     
-    YieldExpression: function() {
+    YieldExpression() {
     
         this.read("yield");
         
@@ -464,9 +462,9 @@ Parser.prototype = {
             delegate: delegate,
             expression: this.AssignmentExpression()
         };  
-    },
+    }
     
-    ConditionalExpression: function(noIn) {
+    ConditionalExpression(noIn) {
     
         var start = this.startOffset,
             left = this.BinaryExpression(noIn),
@@ -490,14 +488,14 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    BinaryExpression: function(noIn) {
+    BinaryExpression(noIn) {
     
         return this.PartialBinaryExpression(this.UnaryExpression(), 0, noIn);
-    },
+    }
     
-    PartialBinaryExpression: function(lhs, minPrec, noIn) {
+    PartialBinaryExpression(lhs, minPrec, noIn) {
     
         var prec,
             next, 
@@ -546,9 +544,9 @@ Parser.prototype = {
         }
         
         return lhs;
-    },
+    }
     
-    UnaryExpression: function() {
+    UnaryExpression() {
     
         var start = this.startOffset,
             type = this.peek(),
@@ -612,9 +610,9 @@ Parser.prototype = {
         }
         
         return expr;
-    },
+    }
     
-    MemberExpression: function(allowCall) {
+    MemberExpression(allowCall) {
     
         var start = this.startOffset,
             type = this.peek(),
@@ -639,7 +637,7 @@ Parser.prototype = {
                     
                         type: "MemberExpression", 
                         object: expr, 
-                        property: this.Identifier(true),
+                        property: this.IdentifierName(),
                         computed: false,
                         start: start,
                         end: this.endOffset
@@ -708,9 +706,9 @@ Parser.prototype = {
         }
         
         return expr;
-    },
+    }
     
-    NewExpression: function() {
+    NewExpression() {
     
         var start = this.startOffset;
         
@@ -726,9 +724,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    SuperExpression: function() {
+    SuperExpression() {
     
         var start = this.startOffset;
         
@@ -739,9 +737,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ArgumentList: function() {
+    ArgumentList() {
     
         var list = [];
         
@@ -758,9 +756,9 @@ Parser.prototype = {
         this.read(")");
         
         return list;
-    },
+    }
     
-    PrimaryExpression: function() {
+    PrimaryExpression() {
     
         var tok = this.peekToken(),
             type = tok.type,
@@ -781,7 +779,7 @@ Parser.prototype = {
             
                 return this.peek("div", 1) === "=>" ?
                     this.ArrowFunction(this.BindingIdentifier(), null, start) :
-                    this.Identifier();
+                    this.Identifier(true);
             
             case "REGEX":
             
@@ -830,21 +828,37 @@ Parser.prototype = {
         }
         
         this.fail("Unexpected token " + type);
-    },
+    }
     
-    Identifier: function(name) {
+    Identifier(isVar) {
     
-        var token = this.readToken("IDENTIFIER", name ? "name" : null);
+        var token = this.readToken("IDENTIFIER");
         
         return {
             type: "Identifier",
             value: token.value,
+            variable: isVar || false,
+            declaration: false,
             start: token.start,
             end: token.end
         };
-    },
+    }
     
-    String: function() {
+    IdentifierName() {
+    
+        var token = this.readToken("IDENTIFIER", "name");
+        
+        return {
+            type: "Identifier",
+            value: token.value,
+            variable: false,
+            declaration: false,
+            start: token.start,
+            end: token.end
+        };
+    }
+    
+    String() {
     
         var token = this.readToken("STRING");
         
@@ -854,9 +868,9 @@ Parser.prototype = {
             start: token.start,
             end: token.end
         };
-    },
+    }
     
-    Number: function() {
+    Number() {
     
         var token = this.readToken("NUMBER");
         
@@ -866,9 +880,9 @@ Parser.prototype = {
             start: token.start,
             end: token.end
         };
-    },
+    }
     
-    Template: function() {
+    Template() {
     
         var token = this.readToken("TEMPLATE", "template");
         
@@ -879,17 +893,17 @@ Parser.prototype = {
             start: token.start,
             end: token.end
         };
-    },
+    }
     
-    BindingIdentifier: function() {
+    BindingIdentifier() {
     
         var node = this.Identifier();
         
         this.checkBindingIdent(node);
         return node;
-    },
+    }
     
-    BindingPattern: function() {
+    BindingPattern() {
     
         var node;
         
@@ -913,9 +927,9 @@ Parser.prototype = {
             this.transformPattern(node, true);
         
         return node;
-    },
+    }
     
-    ParenExpression: function() {
+    ParenExpression() {
 
         var start = this.startOffset,
             expr = null,
@@ -963,9 +977,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ObjectExpression: function() {
+    ObjectExpression() {
     
         var start = this.startOffset,
             list = [],
@@ -990,9 +1004,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    PropertyDefinition: function(nameSet) {
+    PropertyDefinition(nameSet) {
         
         var start = this.startOffset,
             flag = PROP_NORMAL, 
@@ -1075,9 +1089,9 @@ Parser.prototype = {
         nameSet[name] |= flag;
         
         return node;
-    },
+    }
     
-    PropertyName: function() {
+    PropertyName() {
     
         var type = this.peek("name");
         
@@ -1089,9 +1103,9 @@ Parser.prototype = {
         }
         
         this.fail("Unexpected token " + type);
-    },
+    }
     
-    MethodDefinition: function() {
+    MethodDefinition() {
     
         var start = this.startOffset,
             modifier = "",
@@ -1130,9 +1144,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ArrayExpression: function() {
+    ArrayExpression() {
     
         var start = this.startOffset,
             list = [],
@@ -1175,9 +1189,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ArrayComprehension: function(expr, start) {
+    ArrayComprehension(expr, start) {
     
         var list = [], 
             test = null;
@@ -1201,9 +1215,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    GeneratorComprehension: function(expr, start) {
+    GeneratorComprehension(expr, start) {
     
         var list = [], 
             test = null;
@@ -1227,9 +1241,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ComprehensionFor: function() {
+    ComprehensionFor() {
     
         this.read("for");
         
@@ -1238,9 +1252,9 @@ Parser.prototype = {
             binding: this.BindingPattern(),
             of: (this.readKeyword("of"), this.Expression())
         };
-    },
+    }
     
-    TemplateExpression: function() {
+    TemplateExpression() {
         
         var atom = this.Template(),
             start = atom.start,
@@ -1264,11 +1278,11 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
     // === Statements ===
     
-    Statement: function() {
+    Statement() {
     
         switch (this.peek()) {
             
@@ -1296,9 +1310,9 @@ Parser.prototype = {
             
             default: return this.ExpressionStatement();
         }
-    },
+    }
     
-    StatementWithLabel: function(label) {
+    StatementWithLabel(label) {
     
         var name = label && label.value || "",
             labelSet = this.context.labelSet,
@@ -1312,9 +1326,9 @@ Parser.prototype = {
         labelSet[name] -= 1;
         
         return stmt;
-    },
+    }
     
-    Block: function() {
+    Block() {
         
         var start = this.startOffset;
         
@@ -1328,18 +1342,18 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    Semicolon: function() {
+    Semicolon() {
     
         var token = this.peekToken(),
             type = token.type;
         
         if (type === ";" || !(type === "}" || type === "EOF" || token.newlineBefore))
             this.read(";");
-    },
+    }
     
-    LabelledStatement: function() {
+    LabelledStatement() {
     
         var start = this.startOffset,
             label = this.Identifier();
@@ -1353,9 +1367,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ExpressionStatement: function() {
+    ExpressionStatement() {
     
         var start = this.startOffset,
             expr = this.Expression();
@@ -1369,9 +1383,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    EmptyStatement: function() {
+    EmptyStatement() {
     
         var start = this.startOffset;
         
@@ -1382,9 +1396,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    VariableStatement: function() {
+    VariableStatement() {
     
         var node = this.VariableDeclaration(false);
         
@@ -1392,9 +1406,9 @@ Parser.prototype = {
         node.end = this.endOffset;
         
         return node;
-    },
+    }
     
-    VariableDeclaration: function(noIn) {
+    VariableDeclaration(noIn) {
     
         var start = this.startOffset,
             keyword = this.peek(),
@@ -1433,9 +1447,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    VariableDeclarator: function(noIn, isConst) {
+    VariableDeclarator(noIn, isConst) {
     
         var start = this.startOffset,
             pattern = this.BindingPattern(),
@@ -1458,9 +1472,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ReturnStatement: function() {
+    ReturnStatement() {
     
         if (!this.context.isFunction)
             this.fail("Return statement outside of function");
@@ -1478,9 +1492,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    BreakOrContinueStatement: function() {
+    BreakOrContinueStatement() {
     
         var start = this.startOffset,
             token = this.readToken(),
@@ -1510,9 +1524,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ThrowStatement: function() {
+    ThrowStatement() {
     
         var start = this.startOffset;
         
@@ -1531,9 +1545,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    DebuggerStatement: function() {
+    DebuggerStatement() {
     
         var start = this.startOffset;
         
@@ -1545,9 +1559,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    IfStatement: function() {
+    IfStatement() {
     
         var start = this.startOffset;
         
@@ -1575,9 +1589,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    DoWhileStatement: function() {
+    DoWhileStatement() {
     
         var start = this.startOffset,
             body, 
@@ -1600,9 +1614,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    WhileStatement: function() {
+    WhileStatement() {
     
         var start = this.startOffset;
         
@@ -1616,9 +1630,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ForStatement: function() {
+    ForStatement() {
     
         var start = this.startOffset,
             init = null,
@@ -1671,9 +1685,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ForInStatement: function(init, start) {
+    ForInStatement(init, start) {
     
         this.checkForInit(init, "in");
         
@@ -1689,9 +1703,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ForOfStatement: function(init, start) {
+    ForOfStatement(init, start) {
     
         this.checkForInit(init, "of");
         
@@ -1707,9 +1721,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    WithStatement: function() {
+    WithStatement() {
     
         if (this.context.strict)
             this.fail("With statement is not allowed in strict mode");
@@ -1726,9 +1740,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    SwitchStatement: function() {
+    SwitchStatement() {
     
         var start = this.startOffset;
         
@@ -1769,9 +1783,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    Case: function() {
+    Case() {
     
         var start = this.startOffset,
             expr = null, 
@@ -1805,9 +1819,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    TryStatement: function() {
+    TryStatement() {
     
         var start = this.startOffset;
         
@@ -1834,9 +1848,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    Catch: function() {
+    Catch() {
     
         var start = this.startOffset;
         
@@ -1854,11 +1868,11 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
     // === Declarations ===
     
-    StatementList: function(prologue, isModule) {
+    StatementList(prologue, isModule) {
     
         var list = [],
             element,
@@ -1894,9 +1908,9 @@ Parser.prototype = {
         this.checkInvalidNodes();
         
         return list;
-    },
+    }
     
-    Declaration: function(isModule) {
+    Declaration(isModule) {
     
         switch (this.peek()) {
             
@@ -1923,9 +1937,9 @@ Parser.prototype = {
         }
         
         return this.Statement();
-    },
+    }
     
-    LexicalDeclaration: function() {
+    LexicalDeclaration() {
     
         var node = this.VariableDeclaration(false);
         
@@ -1933,11 +1947,11 @@ Parser.prototype = {
         node.end = this.endOffset;
         
         return node;
-    },
+    }
     
     // === Functions ===
     
-    FunctionDeclaration: function() {
+    FunctionDeclaration() {
     
         var start = this.startOffset,
             gen = false,
@@ -1961,9 +1975,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    FunctionExpression: function() {
+    FunctionExpression() {
     
         var start = this.startOffset,
             gen = false,
@@ -1990,9 +2004,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    FormalParameters: function() {
+    FormalParameters() {
     
         var list = [];
         
@@ -2016,9 +2030,9 @@ Parser.prototype = {
         this.read(")");
         
         return list;
-    },
+    }
     
-    FormalParameter: function() {
+    FormalParameter() {
     
         var start = this.startOffset,
             pattern = this.BindingPattern(),
@@ -2037,9 +2051,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    RestParameter: function() {
+    RestParameter() {
     
         var start = this.startOffset;
         
@@ -2051,9 +2065,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    FunctionBody: function(ident, params, isStrict) {
+    FunctionBody(ident, params, isStrict) {
     
         this.pushContext(true, isStrict);
         
@@ -2074,9 +2088,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ArrowFunction: function(formals, rest, start) {
+    ArrowFunction(formals, rest, start) {
     
         this.read("=>");
         
@@ -2104,11 +2118,11 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
     // === Modules ===
     
-    ModuleDeclaration: function() {
+    ModuleDeclaration() {
         
         var start = this.startOffset;
         
@@ -2150,9 +2164,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ModuleBody: function() {
+    ModuleBody() {
     
         this.pushContext(false, true);
         
@@ -2170,9 +2184,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ImportDeclaration: function() {
+    ImportDeclaration() {
     
         var start = this.startOffset,
             binding,
@@ -2195,9 +2209,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ImportSpecifierSet: function() {
+    ImportSpecifierSet() {
         
         var start = this.startOffset,
             list = [];
@@ -2220,9 +2234,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ImportSpecifier: function() {
+    ImportSpecifier() {
     
         var start = this.startOffset,
             name = this.Identifier(),
@@ -2245,9 +2259,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ExportDeclaration: function() {
+    ExportDeclaration() {
     
         var start = this.startOffset,
             binding = null,
@@ -2321,9 +2335,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ExportSpecifierSet: function() {
+    ExportSpecifierSet() {
     
         var start = this.startOffset,
             list = [];
@@ -2346,9 +2360,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ExportSpecifier: function() {
+    ExportSpecifier() {
     
         var start = this.startOffset,
             ident = this.Identifier(),
@@ -2369,9 +2383,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    BindingPath: function() {
+    BindingPath() {
     
         var start = this.startOffset,
             path = [];
@@ -2390,20 +2404,20 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
     // === Classes ===
     
-    ClassDeclaration: function() {
+    ClassDeclaration() {
     
         var start = this.startOffset;
         
         this.read("class");
         
         return this.ClassLiteral("ClassDeclaration", this.BindingIdentifier(), start);
-    },
+    }
     
-    ClassExpression: function() {
+    ClassExpression() {
     
         var start = this.startOffset, 
             ident = null;
@@ -2414,9 +2428,9 @@ Parser.prototype = {
             ident = this.BindingIdentifier();
         
         return this.ClassLiteral("ClassExpression", ident, start);
-    },
+    }
     
-    ClassLiteral: function(type, ident, start) {
+    ClassLiteral(type, ident, start) {
     
         var base = null;
         
@@ -2434,9 +2448,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ClassBody: function() {
+    ClassBody() {
     
         this.pushContext(false, true);
         
@@ -2459,9 +2473,9 @@ Parser.prototype = {
             start: start,
             end: this.endOffset
         };
-    },
+    }
     
-    ClassElement: function(nameSet) {
+    ClassElement(nameSet) {
     
         var node = this.MethodDefinition(),
             flag = PROP_NORMAL,
@@ -2484,10 +2498,8 @@ Parser.prototype = {
     }
     
     
-};
+}
 
 // Add externally defined methods
 mixin(Transform);
 mixin(Validate);
-
-exports.Parser = Parser;

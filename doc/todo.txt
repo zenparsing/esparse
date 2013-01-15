@@ -1,17 +1,5 @@
 == TODO ==
 
 - Extended string unicode escapes u{ HexDigits }
-- In binding forms like { x }, we need to run the binding check against
-  "x".
-- Implicit Strict Mode:
-  - ModuleBody
-  - ClassBody
-  - FunctionBody for generators, arrows
-  ? FunctionBody for object methods
-  
-
-== Future ==
-
-- Eventually we'd like to rewrite this using ES6 modules instead of
-  Node modules.  It's not worth it for now (and for some time) because
-  of the bootstrap issues.
+- Currently, destructured bindings always apply binding identifier checks?
+- Record whether an identifier node is a declaration or variable name?

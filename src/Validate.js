@@ -1,10 +1,8 @@
-"use strict";
-
 // Object literal property name flags
-var PROP_NORMAL = 1,
-    PROP_ASSIGN = 2,
-    PROP_GET = 4,
-    PROP_SET = 8;
+const PROP_NORMAL = 1,
+      PROP_ASSIGN = 2,
+      PROP_GET = 4,
+      PROP_SET = 8;
 
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
@@ -12,23 +10,30 @@ function isPoisonIdent(name) {
     return name === "eval" || name === "arguments";
 }
 
-function Validate() {}
-
-Validate.prototype = {
+export class Validate {
 
     // Checks an assignment target for strict mode restrictions
-    checkAssignTarget: function(node, strict) {
+    checkAssignTarget(node, strict) {
     
+        if (node.type !== "Identifier")
+            return;
+        
+        // Mark identifier node as a variable
+        node.variable = true;
+        
         if (!strict && !this.context.strict)
             return;
         
-        if (node.type === "Identifier" && isPoisonIdent(node.value))
+        if (isPoisonIdent(node.value))
             this.fail("Cannot modify " + node.value + " in strict mode", node);
-    },
+    }
     
     // Checks a binding identifier for strict mode restrictions
-    checkBindingIdent: function(node, strict) {
+    checkBindingIdent(node, strict) {
     
+        // Mark identifier node as a declaration
+        node.declaration = true;
+        
         if (!strict && !this.context.strict)
             return;
             
@@ -36,10 +41,10 @@ Validate.prototype = {
         
         if (isPoisonIdent(name))
             this.fail("Binding cannot be created for '" + name + "' in strict mode", node);
-    },
+    }
     
     // Checks function formal parameters for strict mode restrictions
-    checkParameters: function(params) {
+    checkParameters(params) {
     
         if (!this.context.strict)
             return;
@@ -66,10 +71,10 @@ Validate.prototype = {
             
             names[name] = 1;
         }
-    },
+    }
     
     // Performs validation on the init portion of a for-in or for-of statement
-    checkForInit: function(init, type) {
+    checkForInit(init, type) {
     
         if (init.type === "VariableDeclaration") {
         
@@ -96,10 +101,10 @@ Validate.prototype = {
             // Transform object and array patterns
             this.transformPattern(init, false);
         }
-    },
+    }
     
     // Returns true if the specified name type is a duplicate for a given set of flags
-    isDuplicateName: function(type, flags) {
+    isDuplicateName(type, flags) {
     
         if (!flags)
             return false;
@@ -111,10 +116,10 @@ Validate.prototype = {
             case PROP_SET: return (flags !== PROP_GET);
             default: return !!flags;
         }
-    },
+    }
     
     // Checks for duplicate property names in object literals or classes
-    checkInvalidNodes: function() {
+    checkInvalidNodes() {
     
         var context = this.context,
             list = context.invalidNodes,
@@ -135,6 +140,4 @@ Validate.prototype = {
         context.invalidNodes = null;
     }
     
-};
-
-exports.Validate = Validate;
+}
