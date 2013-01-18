@@ -1,5 +1,5 @@
 // === Unicode Categories for Javascript ===
-const Unicode = () => {
+var Unicode = () => {
 
     var cat = {
     
@@ -31,28 +31,28 @@ const Unicode = () => {
 }();
 
 // === Unicode Matching Patterns ===
-const unicodeLetter = Unicode.Lu + Unicode.Ll + Unicode.Lt + Unicode.Lm + Unicode.Lo + Unicode.Nl,
-      identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
-      identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
-      identifierEscape = /\\u([0-9a-fA-F]{4})/g,
-      whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
-      newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
+var unicodeLetter = Unicode.Lu + Unicode.Ll + Unicode.Lt + Unicode.Lm + Unicode.Lo + Unicode.Nl,
+    identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
+    identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
+    identifierEscape = /\\u([0-9a-fA-F]{4})/g,
+    whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
+    newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
 
 
 // === Reserved Words ===
-const reservedWord = new RegExp("^(?:" +
+var reservedWord = new RegExp("^(?:" +
     "break|case|catch|class|const|continue|debugger|default|delete|do|" +
     "else|enum|export|extends|false|finally|for|function|if|import|in|" +
     "instanceof|new|null|return|super|switch|this|throw|true|try|typeof|" +
     "var|void|while|with" +
 ")$");
 
-const strictReservedWord = new RegExp("^(?:" +
+var strictReservedWord = new RegExp("^(?:" +
     "implements|private|public|interface|package|let|protected|static|yield" +
 ")$");
 
 // === Punctuators ===
-const multiCharPunctuator = new RegExp("^(?:" +
+var multiCharPunctuator = new RegExp("^(?:" +
     "[-+]{2}|" +
     "[&|]{2}|" +
     "<<=?|" +
@@ -64,25 +64,25 @@ const multiCharPunctuator = new RegExp("^(?:" +
 ")$");
 
 // === Miscellaneous Patterns ===
-const octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
+var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
       blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
       hexChar = /[0-9a-f]/i;
 
 // === Character Types ===
-const WHITESPACE = 1,
-      NEWLINE = 2,
-      DECIMAL_DIGIT = 3,
-      PUNCTUATOR = 4,
-      STRING = 5,
-      TEMPLATE = 6,
-      IDENTIFIER = 7,
-      ZERO = 8,
-      DOT = 9,
-      SLASH = 10,
-      LBRACE = 11;
+var WHITESPACE = 1,
+    NEWLINE = 2,
+    DECIMAL_DIGIT = 3,
+    PUNCTUATOR = 4,
+    STRING = 5,
+    TEMPLATE = 6,
+    IDENTIFIER = 7,
+    ZERO = 8,
+    DOT = 9,
+    SLASH = 10,
+    LBRACE = 11;
 
 // === Character Type Lookup Table ===
-const charTable = () => {
+var charTable = () => {
 
     var table = new Array(128), i;
     

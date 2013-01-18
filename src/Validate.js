@@ -1,8 +1,8 @@
 // Object literal property name flags
-const PROP_NORMAL = 1,
-      PROP_ASSIGN = 2,
-      PROP_GET = 4,
-      PROP_SET = 8;
+var PROP_NORMAL = 1,
+    PROP_ASSIGN = 2,
+    PROP_GET = 4,
+    PROP_SET = 8;
 
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
@@ -19,7 +19,7 @@ export class Validate {
             return;
         
         // Mark identifier node as a variable
-        node.variable = true;
+        node.context = "variable";
         
         if (!strict && !this.context.strict)
             return;
@@ -32,7 +32,7 @@ export class Validate {
     checkBindingIdent(node, strict) {
     
         // Mark identifier node as a declaration
-        node.declaration = true;
+        node.context = "declaration";
         
         if (!strict && !this.context.strict)
             return;

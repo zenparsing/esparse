@@ -1,9 +1,11 @@
+module Node = "TreeNode.js";
+
 import Scanner from "Scanner.js";
 import Transform from "Transform.js";
 import Validate from "Validate.js";
 
 // Binary operator precedence levels
-const operatorPrecedence = {
+var operatorPrecedence = {
 
     "||": 1,
     "&&": 2,
@@ -18,10 +20,10 @@ const operatorPrecedence = {
 };
 
 // Object literal property name flags
-const PROP_NORMAL = 1,
-      PROP_ASSIGN = 2,
-      PROP_GET = 4,
-      PROP_SET = 8;
+var PROP_NORMAL = 1,
+    PROP_ASSIGN = 2,
+    PROP_GET = 4,
+    PROP_SET = 8;
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -729,14 +731,9 @@ export class Parser {
     SuperExpression() {
     
         var start = this.startOffset;
-        
         this.read("super");
         
-        return { 
-            type: "SuperExpression", 
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.SuperExpression(start, this.endOffset);
     }
     
     ArgumentList() {
@@ -782,49 +779,21 @@ export class Parser {
                     this.Identifier(true);
             
             case "REGEX":
-            
                 this.read();
-                
-                return {
-                    type: "RegularExpression",
-                    value: tok.value,
-                    start: tok.start,
-                    end: tok.end,
-                    flags: tok.regexFlags
-                };
+                return new Node.RegularExpression(tok.value, tok.regexFlags, tok.start, tok.end);
             
             case "null":
-            
                 this.read();
-                
-                return { 
-                    type: "Null", 
-                    value: null, 
-                    start: tok.start, 
-                    end: tok.end 
-                };
+                return new Node.Null(tok.start, tok.end);
             
             case "true":
             case "false":
-            
                 this.read();
-                
-                return { 
-                    type: "Boolean", 
-                    value: (type === "true"), 
-                    start: tok.start, 
-                    end: tok.end
-                };
+                return new Node.Boolean(type === "true", tok.start, tok.end);
             
             case "this":
-            
                 this.read();
-                
-                return {
-                    type: "ThisExpression",
-                    start: tok.start,
-                    end: tok.end
-                };
+                return new Node.ThisExpression(tok.start, tok.end);
         }
         
         this.fail("Unexpected token " + type);
@@ -832,67 +801,34 @@ export class Parser {
     
     Identifier(isVar) {
     
-        var token = this.readToken("IDENTIFIER");
+        var token = this.readToken("IDENTIFIER"),
+            context = isVar ? "variable" : "";
         
-        return {
-            type: "Identifier",
-            value: token.value,
-            variable: isVar || false,
-            declaration: false,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.Identifier(token.value, context, token.start, token.end);
     }
     
     IdentifierName() {
     
         var token = this.readToken("IDENTIFIER", "name");
-        
-        return {
-            type: "Identifier",
-            value: token.value,
-            variable: false,
-            declaration: false,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.Identifier(token.value, "", token.start, token.end);
     }
     
     String() {
     
         var token = this.readToken("STRING");
-        
-        return {
-            type: "String",
-            value: token.value,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.String(token.value, token.start, token.end);
     }
     
     Number() {
     
         var token = this.readToken("NUMBER");
-        
-        return {
-            type: "Number",
-            value: token.value,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.Number(token.value, token.start, token.end);
     }
     
     Template() {
     
         var token = this.readToken("TEMPLATE", "template");
-        
-        return {
-            type: "Template",
-            value: token.value,
-            templateEnd: token.templateEnd,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.Template(token.value, token.templateEnd, token.start, token.end);
     }
     
     BindingIdentifier() {

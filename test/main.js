@@ -4,17 +4,18 @@ module FS = "fs";
 import inspect from "util";
 import parseScript from "../src/main.js";
 
-const HOP = Object.prototype.hasOwnProperty,
-      TEST_COMMENT = /\/\*\*!?[\s\S]+?\*\*\//g,
-      COMMENT_TRIM = /^\/\*\*!?|\*\*\/$/g;
+var HOP = {}.hasOwnProperty,
+    TEST_COMMENT = /\/\*\*!?[\s\S]+?\*\*\//g,
+    COMMENT_TRIM = /^\/\*\*!?|\*\*\/$/g;
 
-const SKIP_KEYS = {
+var SKIP_KEYS = {
 
     "start": 1,
     "end": 1,
     "newlineBefore": 1,
     "message": 1,
-    "directive": 1
+    "directive": 1,
+    "context": 1
 }
 
 // Returns true if the argument is an object

@@ -10,8 +10,9 @@ function __require(i, obj) {
 } 
 
 __modules[0] = function(exports) {
-var Parser = __require(1).Parser;
-var Scanner = __require(2).Scanner;
+var Node = __require(1);
+var Parser = __require(2).Parser;
+var Scanner = __require(3).Scanner;
 
 
 
@@ -58,15 +59,129 @@ function forEachChild(node, fn) {
 
 exports.Parser = Parser;
 exports.Scanner = Scanner;
+exports.Node = Node;
 exports.parseModule = parseModule;
 exports.parseScript = parseScript;
 exports.forEachChild = forEachChild;
 };
 
 __modules[1] = function(exports) {
-var Scanner = __require(2).Scanner;
-var Transform = __require(3).Transform;
-var Validate = __require(4).Validate;
+
+var Identifier = es6now.Class(null, function(__super) { return {
+
+    constructor: function(value, context, start, end) {
+    
+        this.type = "Identifier";
+        this.value = value;
+        this.context = context;
+        this.start = start;
+        this.end = end;
+    }
+}});
+
+var Number = es6now.Class(null, function(__super) { return {
+
+    constructor: function(value, start, end) {
+    
+        this.type = "Number";
+        this.value = value;
+        this.start = start;
+        this.end = end;
+    }
+}});
+
+var String = es6now.Class(null, function(__super) { return {
+
+    constructor: function(value, start, end) {
+    
+        this.type = "String";
+        this.value = value;
+        this.start = start;
+        this.end = end;
+    }
+}});
+
+var Template = es6now.Class(null, function(__super) { return {
+
+    constructor: function(value, isEnd, start, end) {
+    
+        this.type = "Template";
+        this.value = value;
+        this.templateEnd = isEnd;
+        this.start = start;
+        this.end = end;
+    }
+}});
+
+var RegularExpression = es6now.Class(null, function(__super) { return {
+
+    constructor: function(value, flags, start, end) {
+    
+        this.type = "RegularExpression";
+        this.value = value;
+        this.flags = flags;
+        this.start = start;
+        this.end = end;
+    }
+}});
+
+var Null = es6now.Class(null, function(__super) { return {
+
+    constructor: function(start, end) {
+    
+        this.type = "Null";
+        this.start = start;
+        this.end = end;
+    }
+}});
+
+var Boolean = es6now.Class(null, function(__super) { return {
+
+    constructor: function(value, start, end) {
+    
+        this.type = "Boolean";
+        this.value = value;
+        this.start = start;
+        this.end = end;
+    }
+}});
+
+var ThisExpression = es6now.Class(null, function(__super) { return {
+
+    constructor: function(start, end) {
+    
+        this.type = "ThisExpression";
+        this.start = start;
+        this.end = end;
+    }
+}});
+
+var SuperExpression = es6now.Class(null, function(__super) { return {
+
+    constructor: function(start, end) {
+    
+        this.type = "SuperExpression";
+        this.start = start;
+        this.end = end;
+    }
+}});
+exports.Identifier = Identifier;
+exports.Number = Number;
+exports.String = String;
+exports.Template = Template;
+exports.RegularExpression = RegularExpression;
+exports.Null = Null;
+exports.Boolean = Boolean;
+exports.ThisExpression = ThisExpression;
+exports.SuperExpression = SuperExpression;
+};
+
+__modules[2] = function(exports) {
+var Node = __require(1);
+
+var Scanner = __require(3).Scanner;
+var Transform = __require(4).Transform;
+var Validate = __require(5).Validate;
 
 // Binary operator precedence levels
 var operatorPrecedence = {
@@ -85,9 +200,9 @@ var operatorPrecedence = {
 
 // Object literal property name flags
 var PROP_NORMAL = 1,
-      PROP_ASSIGN = 2,
-      PROP_GET = 4,
-      PROP_SET = 8;
+    PROP_ASSIGN = 2,
+    PROP_GET = 4,
+    PROP_SET = 8;
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -795,14 +910,9 @@ var Parser = es6now.Class(null, function(__super) { return {
     SuperExpression: function() {
     
         var start = this.startOffset;
-        
         this.read("super");
         
-        return { 
-            type: "SuperExpression", 
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.SuperExpression(start, this.endOffset);
     },
     
     ArgumentList: function() {
@@ -848,49 +958,21 @@ var Parser = es6now.Class(null, function(__super) { return {
                     this.Identifier(true);
             
             case "REGEX":
-            
                 this.read();
-                
-                return {
-                    type: "RegularExpression",
-                    value: tok.value,
-                    start: tok.start,
-                    end: tok.end,
-                    flags: tok.regexFlags
-                };
+                return new Node.RegularExpression(tok.value, tok.regexFlags, tok.start, tok.end);
             
             case "null":
-            
                 this.read();
-                
-                return { 
-                    type: "Null", 
-                    value: null, 
-                    start: tok.start, 
-                    end: tok.end 
-                };
+                return new Node.Null(tok.start, tok.end);
             
             case "true":
             case "false":
-            
                 this.read();
-                
-                return { 
-                    type: "Boolean", 
-                    value: (type === "true"), 
-                    start: tok.start, 
-                    end: tok.end
-                };
+                return new Node.Boolean(type === "true", tok.start, tok.end);
             
             case "this":
-            
                 this.read();
-                
-                return {
-                    type: "ThisExpression",
-                    start: tok.start,
-                    end: tok.end
-                };
+                return new Node.ThisExpression(tok.start, tok.end);
         }
         
         this.fail("Unexpected token " + type);
@@ -898,67 +980,34 @@ var Parser = es6now.Class(null, function(__super) { return {
     
     Identifier: function(isVar) {
     
-        var token = this.readToken("IDENTIFIER");
+        var token = this.readToken("IDENTIFIER"),
+            context = isVar ? "variable" : "";
         
-        return {
-            type: "Identifier",
-            value: token.value,
-            variable: isVar || false,
-            declaration: false,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.Identifier(token.value, context, token.start, token.end);
     },
     
     IdentifierName: function() {
     
         var token = this.readToken("IDENTIFIER", "name");
-        
-        return {
-            type: "Identifier",
-            value: token.value,
-            variable: false,
-            declaration: false,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.Identifier(token.value, "", token.start, token.end);
     },
     
     String: function() {
     
         var token = this.readToken("STRING");
-        
-        return {
-            type: "String",
-            value: token.value,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.String(token.value, token.start, token.end);
     },
     
     Number: function() {
     
         var token = this.readToken("NUMBER");
-        
-        return {
-            type: "Number",
-            value: token.value,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.Number(token.value, token.start, token.end);
     },
     
     Template: function() {
     
         var token = this.readToken("TEMPLATE", "template");
-        
-        return {
-            type: "Template",
-            value: token.value,
-            templateEnd: token.templateEnd,
-            start: token.start,
-            end: token.end
-        };
+        return new Node.Template(token.value, token.templateEnd, token.start, token.end);
     },
     
     BindingIdentifier: function() {
@@ -2573,7 +2622,7 @@ mixin(Validate);
 exports.Parser = Parser;
 };
 
-__modules[2] = function(exports) {
+__modules[3] = function(exports) {
 // === Unicode Categories for Javascript ===
 var Unicode = (function() {
 
@@ -2606,11 +2655,11 @@ var Unicode = (function() {
 
 // === Unicode Matching Patterns ===
 var unicodeLetter = Unicode.Lu + Unicode.Ll + Unicode.Lt + Unicode.Lm + Unicode.Lo + Unicode.Nl,
-      identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
-      identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
-      identifierEscape = /\\u([0-9a-fA-F]{4})/g,
-      whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
-      newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
+    identifierStart = new RegExp("^[\\\\_$" + unicodeLetter + "]"),
+    identifierPart = new RegExp("^[_$\u200c\u200d" + unicodeLetter + Unicode.Mn + Unicode.Mc + Unicode.Nd + Unicode.Pc + "]+"),
+    identifierEscape = /\\u([0-9a-fA-F]{4})/g,
+    whitespaceChars = /\t\v\f\uFEFF \u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A/,
+    newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
 
 
 // === Reserved Words ===
@@ -2644,16 +2693,16 @@ var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
 
 // === Character Types ===
 var WHITESPACE = 1,
-      NEWLINE = 2,
-      DECIMAL_DIGIT = 3,
-      PUNCTUATOR = 4,
-      STRING = 5,
-      TEMPLATE = 6,
-      IDENTIFIER = 7,
-      ZERO = 8,
-      DOT = 9,
-      SLASH = 10,
-      LBRACE = 11;
+    NEWLINE = 2,
+    DECIMAL_DIGIT = 3,
+    PUNCTUATOR = 4,
+    STRING = 5,
+    TEMPLATE = 6,
+    IDENTIFIER = 7,
+    ZERO = 8,
+    DOT = 9,
+    SLASH = 10,
+    LBRACE = 11;
 
 // === Character Type Lookup Table ===
 var charTable = (function() {
@@ -3428,7 +3477,7 @@ var Scanner = es6now.Class(null, function(__super) { return {
 exports.Scanner = Scanner;
 };
 
-__modules[3] = function(exports) {
+__modules[4] = function(exports) {
 var Transform = es6now.Class(null, function(__super) { return {
 
     // Transform an expression into a formal parameter list
@@ -3603,12 +3652,12 @@ var Transform = es6now.Class(null, function(__super) { return {
 exports.Transform = Transform;
 };
 
-__modules[4] = function(exports) {
+__modules[5] = function(exports) {
 // Object literal property name flags
 var PROP_NORMAL = 1,
-      PROP_ASSIGN = 2,
-      PROP_GET = 4,
-      PROP_SET = 8;
+    PROP_ASSIGN = 2,
+    PROP_GET = 4,
+    PROP_SET = 8;
 
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
@@ -3625,7 +3674,7 @@ var Validate = es6now.Class(null, function(__super) { return {
             return;
         
         // Mark identifier node as a variable
-        node.variable = true;
+        node.context = "variable";
         
         if (!strict && !this.context.strict)
             return;
@@ -3638,7 +3687,7 @@ var Validate = es6now.Class(null, function(__super) { return {
     checkBindingIdent: function(node, strict) {
     
         // Mark identifier node as a declaration
-        node.declaration = true;
+        node.context = "declaration";
         
         if (!strict && !this.context.strict)
             return;
