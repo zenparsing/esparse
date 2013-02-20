@@ -15,13 +15,15 @@
                 
                 {   type: "MethodDefinition",
                     
+                    static: false,
+                    generator: true,
+                    accessor: null,
+                    
                     name: 
                     {   type: "Identifier",
                         value: "x"
                     },
                     
-                    modifier: "*",
-                    generator: true,
                     params: [],
                         
                     body: 

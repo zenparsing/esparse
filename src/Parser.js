@@ -957,7 +957,7 @@ export class Parser {
                 
                 node = this.MethodDefinition();
                 
-                switch (node.modifier) {
+                switch (node.accessor) {
                 
                     case "get": flag = PROP_GET; break;
                     case "set": flag = PROP_SET; break;
@@ -1044,16 +1044,23 @@ export class Parser {
     MethodDefinition() {
     
         var start = this.startOffset,
-            modifier = "",
+            accessor = null,
+            isStatic = false,
             gen = false,
             params,
             name;
+        
+        if (this.peekToken("name").value === "static" &&
+            this.peek("name", 1) !== "(") {
+        
+            isStatic = true;
+            this.read();
+        }
         
         if (this.peek("name") === "*") {
         
             this.read();
             
-            modifier = "*";
             gen = true;
             name = this.PropertyName();
         
@@ -1065,16 +1072,17 @@ export class Parser {
                 this.peek("name") !== "(" &&
                 (name.value === "get" || name.value === "set")) {
             
-                modifier = name.value;
+                accessor = name.value;
                 name = this.PropertyName();
             }
         }
         
         return {
             type: "MethodDefinition",
-            modifier: modifier,
-            name: name,
+            static: isStatic,
             generator: gen,
+            accessor: accessor,
+            name: name,
             params: (params = this.FormalParameters()),
             body: this.FunctionBody(null, params, false),
             start: start,
@@ -2417,7 +2425,7 @@ export class Parser {
             flag = PROP_NORMAL,
             name;
         
-        switch (node.modifier) {
+        switch (node.accessor) {
         
             case "get": flag = PROP_GET; break;
             case "set": flag = PROP_SET; break;
