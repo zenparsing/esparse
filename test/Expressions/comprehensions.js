@@ -1,6 +1,6 @@
 [
 
-/** [x for x of y]; **/
+/** [for x of y x]; **/
 {   type: "Script",
     statements: [
     
@@ -9,12 +9,7 @@
         
         {   type: "ArrayComprehension",
         
-            expression:
-            {   type: "Identifier",
-                value: "x"
-            },
-            
-            list: [
+            qualifiers: [
             
             {   type: "ComprehensionFor",
                 
@@ -28,8 +23,11 @@
                     value: "y"
                 }
             }],
-            
-            test: null
+        
+            expression:
+            {   type: "Identifier",
+                value: "x"
+            }
         }
     }]
 }

@@ -204,8 +204,11 @@ export class Parser {
     
     fail(msg, loc) {
     
-        var pos = this.scanner.position(loc || this.peek0);
-        throw new SyntaxError(msg + " (line " + pos.line + ", col " + pos.col + ")");
+        var pos = this.scanner.position(loc || this.peek0),
+            err = new SyntaxError(msg);
+        
+        err.position = pos;
+        throw err;
     }
     
     readKeyword(word) {
@@ -765,12 +768,18 @@ export class Parser {
             
             case "function": return this.FunctionExpression();
             case "class": return this.ClassExpression();
-            case "[": return this.ArrayExpression();
-            case "{": return this.ObjectExpression();
-            case "(": return this.ParenExpression();
             case "TEMPLATE": return this.TemplateExpression();
             case "NUMBER": return this.Number();
             case "STRING": return this.String();
+            case "{": return this.ObjectExpression();
+            
+            case "(": return this.peek(null, 1) === "for" ? 
+                this.GeneratorComprehension() :
+                this.ParenExpression();
+            
+            case "[": return this.peek(null, 1) === "for" ?
+                this.ArrayComprehension() :
+                this.ArrayExpression();
             
             case "IDENTIFIER":
             
@@ -889,10 +898,6 @@ export class Parser {
                 expr = this.Expression();
                 break;
         }
-        
-        // Look for generator comprehensions
-        if (expr && this.peek() === "for")
-            return this.GeneratorComprehension(expr, start);
         
         // Look for a trailing rest formal parameter within an arrow formal list
         if (!rest && this.peek() === "," && this.peek(null, 1) === "...") {
@@ -1102,13 +1107,7 @@ export class Parser {
         
         while (type = this.peekUntil("]")) {
             
-            if (type === "for" && 
-                list.length === 1 && 
-                next.type !== "SpreadExpression") {
-            
-                return this.ArrayComprehension(list[0], start);
-                
-            } else if (type === ",") {
+            if (type === ",") {
             
                 this.read();
                 
@@ -1135,66 +1134,97 @@ export class Parser {
         };
     }
     
-    ArrayComprehension(expr, start) {
+    ArrayComprehension() {
     
-        var list = [], 
-            test = null;
+        var start = this.startOffset;
         
-        while (this.peek() === "for")
-            list.push(this.ComprehensionFor());
+        this.read("[");
         
-        if (this.peek() === "if") {
-        
-            this.read();
-            test = this.Expression();
-        }
+        var list = this.ComprehensionQualifierList(),
+            expr = this.AssignmentExpression();
         
         this.read("]");
         
         return {
             type: "ArrayComprehension",
+            qualifiers: list,
             expression: expr,
-            list: list,
-            test: test,
             start: start,
             end: this.endOffset
         };
     }
     
-    GeneratorComprehension(expr, start) {
+    GeneratorComprehension() {
     
-        var list = [], 
-            test = null;
+        var start = this.startOffset;
         
-        while (this.peek() === "for")
-            list.push(this.ComprehensionFor());
+        this.read("(");
         
-        if (this.peek() === "if") {
-        
-            this.read();
-            test = this.Expression();
-        }
+        var list = this.ComprehensionQualifierList(),
+            expr = this.AssignmentExpression();
         
         this.read(")");
         
         return {
             type: "GeneratorComprehension",
+            qualifiers: list,
             expression: expr,
-            list: list,
-            test: test,
             start: start,
             end: this.endOffset
         };
     }
     
+    ComprehensionQualifierList() {
+    
+        var list = [],
+            done = false;
+        
+        list.push(this.ComprehensionFor());
+        
+        while (!done) {
+        
+            switch (this.peek()) {
+            
+                case "for": list.push(this.ComprehensionFor()); break;
+                case "if": list.push(this.ComprehensionIf()); break;
+                default: done = true; break;
+            }
+        }
+        
+        return list;
+    }
+    
     ComprehensionFor() {
     
+        var start = this.startOffset;
+        
         this.read("for");
         
         return {
             type: "ComprehensionFor",
             binding: this.BindingPattern(),
-            of: (this.readKeyword("of"), this.Expression())
+            of: (this.readKeyword("of"), this.AssignmentExpression()),
+            start: start,
+            end: this.endOffset
+        };
+    }
+    
+    ComprehensionIf() {
+    
+        var start = this.startOffset,
+            test;
+            
+        this.read("if");
+        
+        this.read("(");
+        test = this.AssignmentExpression();
+        this.read(")");
+        
+        return {
+            type: "ComprehensionIf",
+            test: test,
+            start: start,
+            end: this.endOffset
         };
     }
     
@@ -1654,7 +1684,7 @@ export class Parser {
         this.checkForInit(init, "of");
         
         this.readKeyword("of");
-        var expr = this.Expression();
+        var expr = this.AssignmentExpression();
         this.read(")");
         
         return {

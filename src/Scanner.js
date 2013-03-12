@@ -262,7 +262,7 @@ export class Scanner {
         
             offset: offset, 
             line: i, 
-            col: offset - this.lines[i - 1]
+            column: offset - this.lines[i - 1]
         };
     }
     
