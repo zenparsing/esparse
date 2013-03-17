@@ -1,4 +1,4 @@
-module Node = "TreeNode.js";
+import "TreeNode.js" as Node;
 import Parser from "Parser.js";
 import Scanner from "Scanner.js";
 

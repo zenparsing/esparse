@@ -1,5 +1,6 @@
 == TODO ==
 
+- Module declarations cannot nest
 - Extended string unicode escapes u{ HexDigits }
 - Currently, destructured bindings always apply binding identifier checks?
 - Record whether an identifier node is a declaration or variable name?

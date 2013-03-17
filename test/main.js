@@ -1,5 +1,5 @@
-module Path = "path";
-module FS = "fs";
+import "path" as Path;
+import "fs" as FS;
 
 import inspect from "util";
 import parseScript from "../src/main.js";
@@ -174,7 +174,7 @@ function run() {
                 tree = parseScript(programs[i]);
             
             } catch (err) {
-            
+                
                 if (err instanceof SyntaxError)
                     tree = { message: err.message };
                 else

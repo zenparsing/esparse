@@ -1,4 +1,4 @@
-module Node = "TreeNode.js";
+import "TreeNode.js" as Node;
 
 import Scanner from "Scanner.js";
 import Transform from "Transform.js";
@@ -74,20 +74,6 @@ function isUnary(op) {
     return false;
 }
 
-// Returns a copy of the specified token
-function copyToken(token) {
-
-    return {
-        type: token.type,
-        value: token.value,
-        newlineBefore: token.newlineBefore,
-        start: token.start,
-        end: token.end,
-        regexFlags: token.regexFlags,
-        templateEnd: token.templateEnd
-    };
-}
-
 // Adds methods to the Parser prototype
 function mixin(source) {
 
@@ -95,6 +81,20 @@ function mixin(source) {
     
         Parser.prototype[k] = source.prototype[k];
     });
+}
+
+class TokenData {
+
+    constructor(token) {
+    
+        this.type = token.type;
+        this.value = token.value;
+        this.newlineBefore = token.newlineBefore;
+        this.start = token.start;
+        this.end = token.end;
+        this.regexFlags = token.regexFlags;
+        this.templateEnd = token.templateEnd;
+    }
 }
 
 export class Parser {
@@ -173,7 +173,7 @@ export class Parser {
             
             } else if (this.peek0) {
             
-                this.peek0 = copyToken(this.peek0);
+                this.peek0 = new TokenData(this.peek0);
                 return this.peek1 = this.nextToken(context);
             }
         }
@@ -202,12 +202,16 @@ export class Parser {
         return tok !== "EOF" && tok !== type ? tok : null;
     }
     
+    formatErrorMessage(msg, pos) {
+    
+        return `${ msg } (line ${ pos.line }:${ pos.column })`;
+    }
+    
     fail(msg, loc) {
     
         var pos = this.scanner.position(loc || this.peek0),
-            err = new SyntaxError(msg);
+            err = new SyntaxError(this.formatErrorMessage(msg, pos));
         
-        err.position = pos;
         throw err;
     }
     
@@ -318,31 +322,19 @@ export class Parser {
     
     Script() {
     
-        var start = this.startOffset,
-            statements = this.StatementList(true, false);
+        var start = this.startOffset;
         
-        return { 
-            type: "Script", 
-            statements: statements,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.Script(this.StatementList(true, false), start, this.endOffset);
     }
     
     Module() {
     
+        var start = this.startOffset;
+        
         // Modules are always strict
         this.setStrict();
         
-        var start = this.startOffset,
-            statements = this.StatementList(true, true);
-        
-        return { 
-            type: "Module", 
-            statements: statements,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.Module(this.StatementList(true, true), start, this.endOffset);
     }
     
     // === Expressions ===
@@ -365,17 +357,8 @@ export class Parser {
             
             this.read();
             
-            if (list === null) {
-            
-                list = [expr];
-                
-                expr = { 
-                    type: "SequenceExpression", 
-                    expressions: list, 
-                    start: start,
-                    end: -1
-                };
-            }
+            if (list === null)
+                expr = new Node.SequenceExpression(list = [expr], start, -1);
             
             list.push(this.AssignmentExpression(noIn));
         }
@@ -420,15 +403,12 @@ export class Parser {
                 break;
         }
         
-        return {
-        
-            type: "AssignmentExpression",
-            operator: this.read(),
-            left: left,
-            right: this.AssignmentExpression(noIn),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.AssignmentExpression(
+            this.read(),
+            left,
+            this.AssignmentExpression(noIn),
+            start,
+            this.endOffset);
     }
     
     SpreadAssignment(noIn) {
@@ -439,12 +419,10 @@ export class Parser {
             
             this.read();
             
-            return {
-                type: "SpreadExpression",
-                expression: this.AssignmentExpression(noIn),
-                start: start,
-                end: this.endOffset
-            };
+            return new Node.SpreadExpression(
+                this.AssignmentExpression(noIn), 
+                start, 
+                this.endOffset);
         }
         
         return this.AssignmentExpression(noIn);
@@ -452,9 +430,10 @@ export class Parser {
     
     YieldExpression() {
     
+        var start = this.startOffset,
+            delegate = false;
+            
         this.read("yield");
-        
-        var delegate = false;
         
         if (this.peek() === "*") {
         
@@ -462,11 +441,11 @@ export class Parser {
             delegate = true;
         }
         
-        return {
-            type: "YieldExpression",
-            delegate: delegate,
-            expression: this.AssignmentExpression()
-        };  
+        return new Node.YieldExpression(
+            this.AssignmentExpression(), 
+            delegate, 
+            start, 
+            this.endOffset);
     }
     
     ConditionalExpression(noIn) {
@@ -484,15 +463,7 @@ export class Parser {
         this.read(":");
         right = this.AssignmentExpression(noIn);
         
-        return {
-        
-            type: "ConditionalExpression",
-            test: left,
-            consequent: middle,
-            alternate: right,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ConditionalExpression(left, middle, right, start, this.endOffset);
     }
     
     BinaryExpression(noIn) {
@@ -537,15 +508,7 @@ export class Parser {
                 rhs = this.PartialBinaryExpression(rhs, prec, noIn);
             }
             
-            lhs = {
-            
-                type: "BinaryExpression",
-                operator: op,
-                left: lhs,
-                right: rhs,
-                start: lhs.start,
-                end: rhs.end
-            };
+            lhs = new Node.BinaryExpression(op, lhs, rhs, lhs.start, rhs.end);
         }
         
         return lhs;
@@ -564,15 +527,7 @@ export class Parser {
             expr = this.MemberExpression(true);
             this.checkAssignTarget(expr);
             
-            return {
-            
-                type: "UpdateExpression", 
-                operator: type, 
-                expression: expr,
-                prefix: true,
-                start: start,
-                end: this.endOffset
-            };
+            return new Node.UpdateExpression(type, expr, true, start, this.endOffset);
         }
         
         if (isUnary(type)) {
@@ -583,14 +538,7 @@ export class Parser {
             if (type === "delete" && this.context.strict && expr.type === "Identifier")
                 this.fail("Cannot delete unqualified property in strict mode", expr);
             
-            return {
-            
-                type: "UnaryExpression",
-                operator: type,
-                expression: expr,
-                start: start,
-                end: this.endOffset
-            };
+            return new Node.UnaryExpression(type, expr, start, this.endOffset);
         }
         
         expr = this.MemberExpression(true);
@@ -603,15 +551,7 @@ export class Parser {
             this.read();
             this.checkAssignTarget(expr);
             
-            return {
-            
-                type: "UpdateExpression",
-                operator: type,
-                expression: expr,
-                prefix: false,
-                start: start,
-                end: this.endOffset
-            };
+            return new Node.UpdateExpression(type, expr, false, start, this.endOffset);
         }
         
         return expr;
@@ -638,15 +578,12 @@ export class Parser {
                 
                     this.read();
                     
-                    expr = { 
-                    
-                        type: "MemberExpression", 
-                        object: expr, 
-                        property: this.IdentifierName(),
-                        computed: false,
-                        start: start,
-                        end: this.endOffset
-                    };
+                    expr = new Node.MemberExpression(
+                        expr, 
+                        this.IdentifierName(), 
+                        false, 
+                        start, 
+                        this.endOffset);
                     
                     break;
                 
@@ -656,15 +593,12 @@ export class Parser {
                     prop = this.Expression();
                     this.read("]");
                     
-                    expr = { 
-                    
-                        type: "MemberExpression", 
-                        object: expr, 
-                        property: prop,
-                        computed: true,
-                        start: start,
-                        end: this.endOffset
-                    };
+                    expr = new Node.MemberExpression(
+                        expr, 
+                        prop, 
+                        true, 
+                        start, 
+                        this.endOffset);
         
                     break;
                 
@@ -676,27 +610,21 @@ export class Parser {
                         break;
                     }
                     
-                    expr = {
-                    
-                        type: "CallExpression",
-                        callee: expr,
-                        arguments: this.ArgumentList(),
-                        start: start,
-                        end: this.endOffset
-                    };
+                    expr = new Node.CallExpression(
+                        expr, 
+                        this.ArgumentList(), 
+                        start, 
+                        this.endOffset);
                     
                     break;
                 
                 case "TEMPLATE":
                 
-                    expr = {
-                    
-                        type: "TaggedTemplateExpression",
-                        tag: expr,
-                        template: this.TemplateExpression(),
-                        start: start,
-                        end: this.endOffset
-                    };
+                    expr = new Node.TaggedTemplateExpression(
+                        expr,
+                        this.TemplateExpression(),
+                        start,
+                        this.endOffset);
                     
                     break;
                 
@@ -722,13 +650,7 @@ export class Parser {
         var expr = this.MemberExpression(false),
             args = this.peek("div") === "(" ? this.ArgumentList() : null;
         
-        return {
-            type: "NewExpression",
-            callee: expr,
-            arguments: args,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.NewExpression(expr, args, start, this.endOffset);
     }
     
     SuperExpression() {
@@ -912,12 +834,7 @@ export class Parser {
         if (expr === null || rest !== null || this.peek("div") === "=>")
             return this.ArrowFunction(expr, rest, start);
         
-        return {
-            type: "ParenExpression",
-            expression: expr,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ParenExpression(expr, start, this.endOffset);
     }
     
     ObjectExpression() {
@@ -939,12 +856,7 @@ export class Parser {
         
         this.read("}");
         
-        return { 
-            type: "ObjectExpression", 
-            properties: list,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ObjectExpression(list, start, this.endOffset);
     }
     
     PropertyDefinition(nameSet) {
@@ -979,13 +891,11 @@ export class Parser {
                 
                 flag = PROP_ASSIGN;
                 
-                node = {
-                    type: "PropertyDefinition",
-                    name: this.PropertyName(),
-                    expression: (this.read(), this.AssignmentExpression()),
-                    start: start,
-                    end: this.endOffset
-                };
+                node = new Node.PropertyDefinition(
+                    this.PropertyName(),
+                    (this.read(), this.AssignmentExpression()),
+                    start,
+                    this.endOffset);
                 
                 break;
             
@@ -993,14 +903,12 @@ export class Parser {
             
                 this.unpeek();
                 
-                node = {
-                    type: "CoveredPatternProperty",
-                    name: this.Identifier(),
-                    pattern: null,
-                    init: (this.read(), this.AssignmentExpression()),
-                    start: start,
-                    end: this.endOffset
-                };
+                node = new Node.CoveredPatternProperty(
+                    this.Identifier(),
+                    null,
+                    (this.read(), this.AssignmentExpression()),
+                    start,
+                    this.endOffset);
                 
                 this.addInvalidNode(node, "Invalid property definition in object literal");
                 
@@ -1011,13 +919,11 @@ export class Parser {
                 // Re-read token as an identifier
                 this.unpeek();
             
-                node = {
-                    type: "PropertyDefinition",
-                    name: this.Identifier(),
-                    expression: null,
-                    start: start,
-                    end: this.endOffset
-                };
+                node = new Node.PropertyDefinition(
+                    this.Identifier(),
+                    null,
+                    start,
+                    this.endOffset);
                 
                 break;
         }
@@ -2102,38 +2008,9 @@ export class Parser {
         
         this.readKeyword("module");
         
-        if (this.peek() === "STRING") {
-        
-            return {
-                type: "ModuleRegistration",
-                url: this.String(),
-                body: this.ModuleBody(),
-                start: start,
-                end: this.endOffset
-            };
-        }
-        
-        var ident = this.BindingIdentifier(),
-            spec;
-        
-        if (this.peek() === "=") {
-        
-            this.read();
-            spec = this.peek() === "STRING" ? this.String() : this.BindingPath();
-            this.Semicolon();
-            
-            return {
-                type: "ModuleAlias",
-                ident: ident,
-                specifier: spec,
-                start: start,
-                end: this.endOffset
-            };
-        }
-        
-        return { 
-            type: "ModuleDeclaration", 
-            ident: ident, 
+        return {
+            type: "ModuleDeclaration",
+            url: this.String(),
             body: this.ModuleBody(),
             start: start,
             end: this.endOffset
@@ -2168,12 +2045,29 @@ export class Parser {
         
         this.read("import");
         
+        if (this.peek() === "STRING") {
+        
+            from = this.String();
+            this.readKeyword("as");
+            binding = this.BindingIdentifier();
+            this.Semicolon();
+            
+            return {
+            
+                type: "ImportAsDeclaration",
+                url: from,
+                ident: binding,
+                start: start,
+                end: this.endOffset
+            };
+        }
+        
         binding = this.peek() === "{" ?
             this.ImportSpecifierSet() :
             this.BindingIdentifier();
         
         this.readKeyword("from");
-        from = this.peek() === "STRING" ? this.String() : this.BindingPath();
+        from = this.peek() === "STRING" ? this.String() : this.Identifier();
         this.Semicolon();
         
         return { 
@@ -2296,7 +2190,7 @@ export class Parser {
             if (this.peekKeyword("from")) {
             
                 this.read();
-                from = this.peek() === "STRING" ? this.String() : this.BindingPath();
+                from = this.peek() === "STRING" ? this.String() : this.Identifier();
             }
             
             this.Semicolon();
@@ -2473,6 +2367,7 @@ export class Parser {
     
     
 }
+
 
 // Add externally defined methods
 mixin(Transform);
