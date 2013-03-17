@@ -487,15 +487,6 @@ function isUnary(op) {
     return false;
 }
 
-// Adds methods to the Parser prototype
-function mixin(source) {
-
-    Object.keys(source.prototype).forEach((function(k) { 
-    
-        Parser.prototype[k] = source.prototype[k];
-    }));
-}
-
 var TokenData = es6now.Class(function(__super) { return {
 
     constructor: function(token) {
@@ -615,12 +606,16 @@ var Parser = es6now.Class(function(__super) { return {
         return tok !== "EOF" && tok !== type ? tok : null;
     },
     
+    formatErrorMessage: function(msg, pos) {
+    
+        return "" + (msg) + " (line " + (pos.line) + ":" + (pos.column) + ")";
+    },
+    
     fail: function(msg, loc) {
     
         var pos = this.scanner.position(loc || this.peek0),
-            err = new SyntaxError(msg);
+            err = new SyntaxError(this.formatErrorMessage(msg, pos));
         
-        err.position = pos;
         throw err;
     },
     
@@ -2777,9 +2772,10 @@ var Parser = es6now.Class(function(__super) { return {
     
 }});
 
+
 // Add externally defined methods
-mixin(Transform);
-mixin(Validate);
+Object.mixin(Parser.prototype, Transform.prototype);
+Object.mixin(Parser.prototype, Validate.prototype);
 
 exports.Parser = Parser;
 };

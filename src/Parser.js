@@ -74,15 +74,6 @@ function isUnary(op) {
     return false;
 }
 
-// Adds methods to the Parser prototype
-function mixin(source) {
-
-    Object.keys(source.prototype).forEach(k => { 
-    
-        Parser.prototype[k] = source.prototype[k];
-    });
-}
-
 class TokenData {
 
     constructor(token) {
@@ -2370,5 +2361,5 @@ export class Parser {
 
 
 // Add externally defined methods
-mixin(Transform);
-mixin(Validate);
+Object.mixin(Parser.prototype, Transform.prototype);
+Object.mixin(Parser.prototype, Validate.prototype);
