@@ -1009,13 +1009,7 @@ export class Parser {
         
         this.read("]");
         
-        return { 
-            type: "ArrayExpression", 
-            elements: list,
-            trailingComma: comma,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ArrayExpression(list, start, this.endOffset);
     }
     
     ArrayComprehension() {
@@ -1029,13 +1023,7 @@ export class Parser {
         
         this.read("]");
         
-        return {
-            type: "ArrayComprehension",
-            qualifiers: list,
-            expression: expr,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ArrayComprehension(list, expr, start, this.endOffset);
     }
     
     GeneratorComprehension() {
@@ -1049,13 +1037,7 @@ export class Parser {
         
         this.read(")");
         
-        return {
-            type: "GeneratorComprehension",
-            qualifiers: list,
-            expression: expr,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.GeneratorComprehension(list, expr, start, this.endOffset);
     }
     
     ComprehensionQualifierList() {
@@ -1084,13 +1066,11 @@ export class Parser {
         
         this.read("for");
         
-        return {
-            type: "ComprehensionFor",
-            binding: this.BindingPattern(),
-            of: (this.readKeyword("of"), this.AssignmentExpression()),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ComprehensionFor(
+            this.BindingPattern(),
+            (this.readKeyword("of"), this.AssignmentExpression()),
+            start,
+            this.endOffset);
     }
     
     ComprehensionIf() {
@@ -1104,12 +1084,7 @@ export class Parser {
         test = this.AssignmentExpression();
         this.read(")");
         
-        return {
-            type: "ComprehensionIf",
-            test: test,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ComprehensionIf(test, start, this.endOffset);
     }
     
     TemplateExpression() {
@@ -1129,13 +1104,7 @@ export class Parser {
             lit.push(atom = this.Template());
         }
         
-        return { 
-            type: "TemplateExpression", 
-            literals: lit, 
-            substitutions: sub,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.TemplateExpression(lit, sub, start, this.endOffset);
     }
     
     // === Statements ===

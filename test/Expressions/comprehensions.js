@@ -13,12 +13,12 @@
             
             {   type: "ComprehensionFor",
                 
-                binding: 
+                left: 
                 {   type: "Identifier",
                     value: "x"
                 },
                 
-                of:
+                right:
                 {   type: "Identifier",
                     value: "y"
                 }

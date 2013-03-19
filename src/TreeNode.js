@@ -339,3 +339,73 @@ export class ClassElement {
         this.end = end;
     }
 }
+
+export class ArrayExpression {
+
+    constructor(elements, start, end) {
+    
+        this.type = "ArrayExpression";
+        this.elements = elements;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ArrayComprehension {
+
+    constructor(qualifiers, expr, start, end) {
+    
+        this.type = "ArrayComprehension";
+        this.qualifiers = qualifiers;
+        this.expression = expr;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class GeneratorComprehension {
+
+    constructor(qualifiers, expr, start, end) {
+    
+        this.type = "GeneratorComprehension";
+        this.qualifiers = qualifiers;
+        this.expression = expr;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ComprehensionFor {
+
+    constructor(left, right, start, end) {
+    
+        this.type = "ComprehensionFor";
+        this.left = left;
+        this.right = right;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ComprehensionIf {
+
+    constructor(test, start, end) {
+    
+        this.type = "ComprehensionIf";
+        this.test = test;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class TemplateExpression {
+
+    constructor(lits, subs, start, end) {
+    
+        this.type = "TemplateExpression";
+        this.literals = lits;
+        this.substitutions = subs;
+        this.start = start;
+        this.end = end;
+    }
+}
