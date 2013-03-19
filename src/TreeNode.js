@@ -409,3 +409,101 @@ export class TemplateExpression {
         this.end = end;
     }
 }
+
+export class Block {
+
+    constructor(statements, start, end) {
+    
+        this.type = "Block";
+        this.statements = statements;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class LabelledStatement {
+
+    constructor(label, statement) {
+    
+        this.type = "LabelledStatement";
+        this.label = label;
+        this.statement = statement;
+    }
+}
+
+export class ExpressionStatement {
+
+    constructor(expr, start, end) {
+    
+        this.type = "ExpressionStatement";
+        this.expression = expr;
+        this.directive = null;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class EmptyStatement {
+
+    constructor(start, end) {
+    
+        this.type = "EmptyStatement";
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class VariableDeclaration {
+
+    constructor(keyword, list, start, end) {
+    
+        this.type = "VariableDeclaration";
+        this.keyword = keyword;
+        this.declarations = list;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class VariableDeclarator {
+
+    constructor(pattern, init, start, end) {
+    
+        this.type = "VariableDeclarator";
+        this.pattern = pattern;
+        this.init = init;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ReturnStatement {
+
+    constructor(arg, start, end) {
+    
+        this.type = "ReturnStatement";
+        this.argument = arg;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class BreakStatement {
+
+    constructor(label, start, end) {
+    
+        this.type = "BreakStatement";
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ContinueStatement {
+
+    constructor(label, start, end) {
+    
+        this.type = "ContinueStatement";
+        this.start = start;
+        this.end = end;
+    }
+}

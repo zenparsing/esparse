@@ -279,20 +279,14 @@ export class Parser {
         return false;
     }
     
-    peekModule(allowURL) {
+    peekModule() {
     
         if (this.peekToken().value === "module") {
         
             var p = this.peekToken("div", 1);
             
-            if (!p.newlineBefore) {
-            
-                switch (p.type) {
-                
-                    case "IDENTIFIER": return true;
-                    case "STRING": return allowURL;
-                }
-            }
+            if (!p.newlineBefore && p.type === "STRING")
+                return true;
         }
         
         return false;
@@ -1163,12 +1157,7 @@ export class Parser {
         var list = this.StatementList(false);
         this.read("}");
         
-        return { 
-            type: "Block", 
-            statements: list,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.Block(list, start, this.endOffset);
     }
     
     Semicolon() {
@@ -1187,13 +1176,11 @@ export class Parser {
         
         this.read(":");
         
-        return { 
-            type: "LabelledStatement", 
-            label: label, 
-            statement: this.StatementWithLabel(label),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.LabelledStatement(
+            label, 
+            this.StatementWithLabel(label),
+            start,
+            this.endOffset);
     }
     
     ExpressionStatement() {
@@ -1203,13 +1190,7 @@ export class Parser {
         
         this.Semicolon();
         
-        return { 
-            type: "ExpressionStatement", 
-            expression: expr,
-            directive: null,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ExpressionStatement(expr, start, this.endOffset);
     }
     
     EmptyStatement() {
@@ -1218,11 +1199,7 @@ export class Parser {
         
         this.Semicolon();
         
-        return { 
-            type: "EmptyStatement", 
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.EmptyStatement(start, this.endOffset);
     }
     
     VariableStatement() {
@@ -1267,13 +1244,7 @@ export class Parser {
             else break;
         }
         
-        return { 
-            type: "VariableDeclaration", 
-            keyword: keyword,
-            declarations: list, 
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.VariableDeclaration(keyword, list, start, this.endOffset);
     }
     
     VariableDeclarator(noIn, isConst) {
@@ -1292,13 +1263,7 @@ export class Parser {
             this.fail("Missing const initializer", pattern);
         }
         
-        return { 
-            type: "VariableDeclarator", 
-            pattern: pattern, 
-            init: init,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.VariableDeclarator(pattern, init, start, this.endOffset);
     }
     
     ReturnStatement() {
@@ -1309,16 +1274,11 @@ export class Parser {
         var start = this.startOffset;
         
         this.read("return");
-        var init = this.maybeEnd() ? this.Expression() : null;
+        var value = this.maybeEnd() ? this.Expression() : null;
         
         this.Semicolon();
         
-        return { 
-            type: "ReturnStatement", 
-            argument: init,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ReturnStatement(value, start, this.endOffset);
     }
     
     BreakOrContinueStatement() {
@@ -1345,12 +1305,9 @@ export class Parser {
                 this.fail("Invalid " + keyword + " statement", token);
         }
         
-        return { 
-            type: keyword === "break" ? "Break" : "Continue", 
-            label: label,
-            start: start,
-            end: this.endOffset
-        };
+        return keyword === "break" ?
+            new Node.BreakStatement(label, start, this.endOffset) :
+            new Node.ContinueStatement(label, start, this.endOffset);
     }
     
     ThrowStatement() {
@@ -1757,7 +1714,7 @@ export class Parser {
             
             case "IDENTIFIER":
                 
-                if (this.peekModule(true))
+                if (this.peekModule())
                     return this.ModuleDeclaration();
                 
                 break;
