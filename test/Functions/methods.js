@@ -15,9 +15,7 @@
                 
                 {   type: "MethodDefinition",
                     
-                    static: false,
-                    generator: true,
-                    accessor: null,
+                    modifier: "*",
                     
                     name: 
                     {   type: "Identifier",

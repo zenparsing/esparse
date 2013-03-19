@@ -865,7 +865,7 @@ export class Parser {
                 
                 node = this.MethodDefinition();
                 
-                switch (node.accessor) {
+                switch (node.modifier) {
                 
                     case "get": flag = PROP_GET; break;
                     case "set": flag = PROP_SET; break;
@@ -946,24 +946,15 @@ export class Parser {
     MethodDefinition() {
     
         var start = this.startOffset,
-            accessor = null,
-            isStatic = false,
-            gen = false,
+            modifier = null,
             params,
             name;
-        
-        if (this.peekToken("name").value === "static" &&
-            this.peek("name", 1) !== "(") {
-        
-            isStatic = true;
-            this.read();
-        }
         
         if (this.peek("name") === "*") {
         
             this.read();
             
-            gen = true;
+            modifier = "*";
             name = this.PropertyName();
         
         } else {
@@ -974,22 +965,18 @@ export class Parser {
                 this.peek("name") !== "(" &&
                 (name.value === "get" || name.value === "set")) {
             
-                accessor = name.value;
+                modifier = name.value;
                 name = this.PropertyName();
             }
         }
         
-        return {
-            type: "MethodDefinition",
-            static: isStatic,
-            generator: gen,
-            accessor: accessor,
-            name: name,
-            params: (params = this.FormalParameters()),
-            body: this.FunctionBody(null, params, false),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.MethodDefinition(
+            modifier,
+            name,
+            params = this.FormalParameters(),
+            this.FunctionBody(null, params, false),
+            start,
+            this.endOffset);
     }
     
     ArrayExpression() {
@@ -2151,16 +2138,8 @@ export class Parser {
             
             case "IDENTIFIER":
             
-                if (this.peekModule(false)) {
-                
-                    binding = this.ModuleDeclaration();
-                
-                } else {
-                
-                    binding = this.Identifier();
-                    maybeFrom = true;
-                }
-                
+                binding = this.Identifier();
+                maybeFrom = true;
                 break;
             
             case "*":
@@ -2315,12 +2294,13 @@ export class Parser {
         
         var start = this.startOffset,
             nameSet = {}, 
+            staticSet = {},
             list = [];
         
         this.read("{");
         
         while (this.peekUntil("}", "name"))
-            list.push(this.ClassElement(nameSet));
+            list.push(this.ClassElement(nameSet, staticSet));
         
         this.read("}");
         
@@ -2334,26 +2314,39 @@ export class Parser {
         };
     }
     
-    ClassElement(nameSet) {
+    ClassElement(nameSet, staticSet) {
     
-        var node = this.MethodDefinition(),
+        var start = this.startOffset,
+            isStatic = false,
             flag = PROP_NORMAL,
+            method,
             name;
         
-        switch (node.accessor) {
+        // Check for static modifier
+        if (this.peekToken("name").value === "static" &&
+            this.peek("name", 1) !== "(") {
+        
+            isStatic = true;
+            nameSet = staticSet;
+            this.read();
+        }
+        
+        method = this.MethodDefinition();
+        
+        switch (method.modifier) {
         
             case "get": flag = PROP_GET; break;
             case "set": flag = PROP_SET; break;
         }
         
         // Check for duplicate names
-        if (this.isDuplicateName(flag, nameSet[name = "." + node.name.value]))
-            this.fail("Duplicate element name in class definition.", node);
+        if (this.isDuplicateName(flag, nameSet[name = "." + method.name.value]))
+            this.fail("Duplicate element name in class definition.", method);
         
         // Set name flag
         nameSet[name] |= flag;
         
-        return node;
+        return new Node.ClassElement(isStatic, method, start, this.endOffset);
     }
     
     

@@ -313,3 +313,29 @@ export class CoveredPatternProperty {
         this.end = end;
     }
 }
+
+export class MethodDefinition {
+
+    constructor(modifier, name, params, body, start, end) {
+    
+        this.type = "MethodDefinition";
+        this.modifier = modifier;
+        this.name = name;
+        this.params = params;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ClassElement {
+
+    constructor(isStatic, method, start, end) {
+    
+        this.type = "ClassElement";
+        this.static = isStatic;
+        this.method = method;
+        this.start = start;
+        this.end = end;
+    }
+}

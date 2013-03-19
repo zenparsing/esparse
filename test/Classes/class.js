@@ -65,18 +65,20 @@
         {   type: "ClassBody",
             elements: [
             
-            {   type: "MethodDefinition",
+            {   type: "ClassElement",
                 static: true,
-                generator: false,
-                accessor: null,
-                name:
-                {   type: "Identifier",
-                    value: "S"
-                },
-                params: [],
-                body:
-                {   type: "FunctionBody",
-                    statements: []
+                method:
+                {   type: "MethodDefinition",
+                    modifier: null,
+                    name:
+                    {   type: "Identifier",
+                        value: "S"
+                    },
+                    params: [],
+                    body:
+                    {   type: "FunctionBody",
+                        statements: []
+                    }
                 }
             }]
         }
