@@ -507,3 +507,306 @@ export class ContinueStatement {
         this.end = end;
     }
 }
+
+export class ThrowStatement {
+
+    constructor(expr, start, end) {
+    
+        this.type = "ThrowStatement";
+        this.expression = expr;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class DebuggerStatement {
+
+    constructor(start, end) {
+    
+        this.type = "DebuggerStatement";
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class IfStatement {
+
+    constructor(test, cons, alt, start, end) {
+    
+        this.type = "IfStatement";
+        this.test = test;
+        this.consequent = cons;
+        this.alternate = alt;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class DoWhileStatement {
+
+    constructor(body, test, start, end) {
+    
+        this.type = "DoWhileStatement";
+        this.body = body;
+        this.test = test;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class WhileStatement {
+
+    constructor(test, body, start, end) {
+    
+        this.type = "WhileStatement";
+        this.test = test;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ForStatement {
+
+    constructor(init, test, update, body, start, end) {
+    
+        this.type = "ForStatement";
+        this.init = init;
+        this.test = test;
+        this.update = update;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ForInStatement {
+
+    constructor(left, right, body, start, end) {
+    
+        this.type = "ForInStatement";
+        this.left = left;
+        this.right = right;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ForOfStatement {
+
+    constructor(left, right, body, start, end) {
+    
+        this.type = "ForOfStatement";
+        this.left = left;
+        this.right = right;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class WithStatement {
+
+    constructor(object, body, start, end) {
+    
+        this.type = "WithStatement";
+        this.object = object;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class SwitchStatement {
+
+    constructor(desc, cases, start, end) {
+    
+        this.type = "SwitchStatement";
+        this.descriminant = desc;
+        this.cases = cases;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class SwitchCase {
+
+    constructor(test, cons, start, end) {
+    
+        this.type = "SwitchCase";
+        this.test = test;
+        this.consequent = cons;
+        this.start = start;
+        this.end = this.endOffset;
+    }
+}
+
+export class TryStatement {
+
+    constructor(block, handler, fin, start, end) {
+    
+        this.type = "TryStatement";
+        this.block = block;
+        this.handler = handler;
+        this.finalizer = fin;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class CatchClause {
+
+    constructor(param, body) {
+    
+        this.type = "CatchClause";
+        this.param = param;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class FunctionDeclaration {
+
+    constructor(gen, ident, params, body, start, end) {
+    
+        this.type = "FunctionDeclaration";
+        this.generator = gen;
+        this.ident = ident;
+        this.params = params;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class FunctionExpression {
+
+    constructor(gen, ident, params, body, start, end) {
+    
+        this.type = "FunctionExpression";
+        this.generator = gen;
+        this.ident = ident;
+        this.params = params;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class FormalParameter {
+
+    constructor(pattern, init, start, end) {
+    
+        this.type = "FormalParameter";
+        this.pattern = pattern;
+        this.init = init;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class RestParameter {
+
+    constructor(ident, start, end) {
+    
+        this.type = "RestParameter";
+        this.ident = ident;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class FunctionBody {
+
+    constructor(statements, start, end) {
+    
+        this.type = "FunctionBody";
+        this.statements = statements;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ArrowFunction {
+
+    constructor(params, body, start, end) {
+    
+        this.type = "ArrowFunction";
+        this.params = params;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ModuleDeclaration {
+
+    constructor(url, body, start, end) {
+    
+        this.type = "ModuleDeclaration";
+        this.url = url;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ModuleBody {
+
+    constructor(statements, start, end) {
+    
+        this.type = "ModuleBody";
+        this.statements = statements;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ImportAsDeclaration {
+
+    constructor(url, ident, start, end) {
+    
+        this.type = "ImportAsDeclaration";
+        this.url = url;
+        this.ident = ident;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ImportDeclaration {
+
+    constructor(binding, from, start, end) {
+    
+        this.type = "ImportDeclaration";
+        this.binding = binding;
+        this.from = from;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ImportSpecifierSet {
+
+    constructor(list, start, end) {
+    
+        this.type = "ImportSpecifierSet";
+        this.specifiers = list;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ImportSpecifier {
+
+    constructor(name, ident, start, end) {
+    
+        this.type = "ImportSpecifier";
+        this.name = name;
+        this.ident = ident;
+        this.start = start;
+        this.end = end;
+    }
+}

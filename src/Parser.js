@@ -1323,12 +1323,7 @@ export class Parser {
         
         this.Semicolon();
         
-        return { 
-            type: "ThrowStatement", 
-            expression: expr,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ThrowStatement(expr, start, this.endOffset);
     }
     
     DebuggerStatement() {
@@ -1338,11 +1333,7 @@ export class Parser {
         this.read("debugger");
         this.Semicolon();
         
-        return { 
-            type: "DebuggerStatement",
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.DebuggerStatement(start, this.endOffset);
     }
     
     IfStatement() {
@@ -1365,14 +1356,7 @@ export class Parser {
             elseBody = this.Statement();
         }
         
-        return { 
-            type: "IfStatement", 
-            test: test, 
-            consequent: body, 
-            alternate: elseBody,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.IfStatement(test, body, elseBody, start, this.endOffset);
     }
     
     DoWhileStatement() {
@@ -1391,13 +1375,7 @@ export class Parser {
         
         this.read(")");
         
-        return { 
-            type: "DoWhileStatement", 
-            body: body, 
-            test: test,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.DoWhileStatement(body, test, start, this.endOffset);
     }
     
     WhileStatement() {
@@ -1407,13 +1385,11 @@ export class Parser {
         this.read("while");
         this.read("(");
         
-        return {
-            type: "WhileStatement",
-            test: this.Expression(),
-            body: (this.read(")"), this.StatementWithLabel()),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.WhileStatement(
+            this.Expression(), 
+            (this.read(")"), this.StatementWithLabel()), 
+            start, 
+            this.endOffset);
     }
     
     ForStatement() {
@@ -1460,15 +1436,13 @@ export class Parser {
         
         this.read(")");
         
-        return {
-            type: "ForStatement",
-            init: init,
-            test: test,
-            update: step,
-            body: this.StatementWithLabel(),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ForStatement(
+            init, 
+            test, 
+            step, 
+            this.StatementWithLabel(), 
+            start, 
+            this.endOffset);
     }
     
     ForInStatement(init, start) {
@@ -1479,14 +1453,12 @@ export class Parser {
         var expr = this.Expression();
         this.read(")");
         
-        return {
-            type: "ForInStatement",
-            left: init,
-            right: expr,
-            body: this.StatementWithLabel(),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ForInStatement(
+            init, 
+            expr, 
+            this.StatementWithLabel(), 
+            start, 
+            this.endOffset);
     }
     
     ForOfStatement(init, start) {
@@ -1497,14 +1469,12 @@ export class Parser {
         var expr = this.AssignmentExpression();
         this.read(")");
         
-        return {
-            type: "ForOfStatement",
-            left: init,
-            right: expr,
-            body: this.StatementWithLabel(),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ForOfStatement(
+            init, 
+            expr, 
+            this.StatementWithLabel(), 
+            start, 
+            this.endOffset);
     }
     
     WithStatement() {
@@ -1517,13 +1487,11 @@ export class Parser {
         this.read("with");
         this.read("(");
         
-        return {
-            type: "WithStatement",
-            object: this.Expression(),
-            body: (this.read(")"), this.Statement()),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.WithStatement(
+            this.Expression(), 
+            (this.read(")"), this.Statement()),
+            start,
+            this.endOffset);
     }
     
     SwitchStatement() {
@@ -1544,7 +1512,7 @@ export class Parser {
         
         while (this.peekUntil("}")) {
         
-            node = this.Case();
+            node = this.SwitchCase();
             
             if (node.test === null) {
             
@@ -1560,16 +1528,10 @@ export class Parser {
         this.context.switchDepth -= 1;
         this.read("}");
         
-        return {
-            type: "SwitchStatement",
-            descriminant: head,
-            cases: cases,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.SwitchStatement(head, cases, start, this.endOffset);
     }
     
-    Case() {
+    SwitchCase() {
     
         var start = this.startOffset,
             expr = null, 
@@ -1596,13 +1558,7 @@ export class Parser {
             list.push(this.Statement());
         }
         
-        return {
-            type: "SwitchCase",
-            test: expr,
-            consequent: list,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.SwitchCase(expr, list, start, this.endOffset);
     }
     
     TryStatement() {
@@ -1616,7 +1572,7 @@ export class Parser {
             fin = null;
         
         if (this.peek() === "catch")
-            handler = this.Catch();
+            handler = this.CatchClause();
         
         if (this.peek() === "finally") {
         
@@ -1634,24 +1590,16 @@ export class Parser {
         };
     }
     
-    Catch() {
+    CatchClause() {
     
         var start = this.startOffset;
         
         this.read("catch");
         this.read("(");
-    
         var param = this.BindingPattern();
-        
         this.read(")");
         
-        return {
-            type: "CatchClause",
-            param: param,
-            body: this.Block(),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.CatchClause(param, this.Block(), start, this.endOffset);
     }
     
     // === Declarations ===
@@ -1750,15 +1698,13 @@ export class Parser {
             gen = true;
         }
         
-        return { 
-            type: "FunctionDeclaration", 
-            generator: gen,
-            ident: (ident = this.Identifier()),
-            params: (params = this.FormalParameters()),
-            body: this.FunctionBody(ident, params, false),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.FunctionDeclaration(
+            gen,
+            ident = this.Identifier(),
+            params = this.FormalParameters(),
+            this.FunctionBody(ident, params, false),
+            start,
+            this.endOffset);
     }
     
     FunctionExpression() {
@@ -1779,15 +1725,13 @@ export class Parser {
         if (this.peek() !== "(")
             ident = this.Identifier();
         
-        return { 
-            type: "FunctionExpression", 
-            generator: gen,
-            ident: ident,
-            params: (params = this.FormalParameters()),
-            body: this.FunctionBody(ident, params, false),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.FunctionExpression(
+            gen,
+            ident,
+            params = this.FormalParameters(),
+            this.FunctionBody(ident, params, false),
+            start,
+            this.endOffset);
     }
     
     FormalParameters() {
@@ -1828,13 +1772,7 @@ export class Parser {
             init = this.AssignmentExpression();
         }
         
-        return { 
-            type: "FormalParameter", 
-            pattern: pattern, 
-            init: init,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.FormalParameter(pattern, init, start, this.endOffset);
     }
     
     RestParameter() {
@@ -1843,12 +1781,7 @@ export class Parser {
         
         this.read("...");
         
-        return { 
-            type: "RestParameter", 
-            ident: this.BindingIdentifier(),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.RestParameter(this.BindingIdentifier(), start, this.endOffset);
     }
     
     FunctionBody(ident, params, isStrict) {
@@ -1866,12 +1799,7 @@ export class Parser {
         
         this.popContext();
         
-        return {
-            type: "FunctionBody",
-            statements: statements,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.FunctionBody(statements, start, this.endOffset);
     }
     
     ArrowFunction(formals, rest, start) {
@@ -1895,13 +1823,7 @@ export class Parser {
             body = this.AssignmentExpression();
         }
         
-        return {
-            type: "ArrowFunction",
-            params: params,
-            body: body,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ArrowFunction(params, body, start, this.endOffset);
     }
     
     // === Modules ===
@@ -1912,13 +1834,11 @@ export class Parser {
         
         this.readKeyword("module");
         
-        return {
-            type: "ModuleDeclaration",
-            url: this.String(),
-            body: this.ModuleBody(),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ModuleDeclaration(
+            this.String(),
+            this.ModuleBody(),
+            start,
+            this.endOffset);
     }
     
     ModuleBody() {
@@ -1933,12 +1853,7 @@ export class Parser {
         
         this.popContext();
         
-        return {
-            type: "ModuleBody", 
-            statements: list,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ModuleBody(list, start, this.endOffset);
     }
     
     ImportDeclaration() {
@@ -1956,14 +1871,7 @@ export class Parser {
             binding = this.BindingIdentifier();
             this.Semicolon();
             
-            return {
-            
-                type: "ImportAsDeclaration",
-                url: from,
-                ident: binding,
-                start: start,
-                end: this.endOffset
-            };
+            return new Node.ImportAsDeclaration(from, binding, start, this.endOffset);
         }
         
         binding = this.peek() === "{" ?
@@ -1974,13 +1882,7 @@ export class Parser {
         from = this.peek() === "STRING" ? this.String() : this.Identifier();
         this.Semicolon();
         
-        return { 
-            type: "ImportDeclaration",
-            binding: binding,
-            from: from,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ImportDeclaration(binding, from, start, this.endOffset);
     }
     
     ImportSpecifierSet() {
@@ -2000,12 +1902,7 @@ export class Parser {
         
         this.read("}");
         
-        return { 
-            type: "ImportSpecifierSet", 
-            specifiers: list,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ImportSpecifierSet(list, start, this.endOffset);
     }
     
     ImportSpecifier() {
@@ -2024,13 +1921,7 @@ export class Parser {
             this.checkBindingIdent(name);
         }
         
-        return { 
-            type: "ImportSpecifier", 
-            name: name, 
-            ident: ident,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ImportSpecifier(name, ident, start, this.endOffset);
     }
     
     ExportDeclaration() {
