@@ -1580,14 +1580,7 @@ export class Parser {
             fin = this.Block();
         }
         
-        return {
-            type: "TryStatement",
-            block: tryBlock,
-            handler: handler,
-            finalizer: fin,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.TryStatement(tryBlock, handler, fin, start, this.endOffset);
     }
     
     CatchClause() {
@@ -1983,13 +1976,7 @@ export class Parser {
             this.Semicolon();
         }
         
-        return { 
-            type: "ExportDeclaration", 
-            binding: binding,
-            from: from,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ExportDeclaration(binding, from, start, this.endOffset);
     }
     
     ExportSpecifierSet() {
@@ -2009,12 +1996,7 @@ export class Parser {
         
         this.read("}");
         
-        return { 
-            type: "ExportSpecifierSet", 
-            specifiers: list,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ExportSpecifierSet(list, start, this.endOffset);
     }
     
     ExportSpecifier() {
@@ -2031,13 +2013,7 @@ export class Parser {
             path = this.BindingPath();
         }
         
-        return { 
-            type: "ExportSpecifier", 
-            ident: ident, 
-            path: path,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ExportSpecifier(ident, path, start, this.endOffset);
     }
     
     BindingPath() {
@@ -2053,41 +2029,20 @@ export class Parser {
             else break;
         }
         
-        return { 
-            type: "BindingPath", 
-            elements: path,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.BindingPath(path, start, this.endOffset);
     }
     
     // === Classes ===
     
     ClassDeclaration() {
     
-        var start = this.startOffset;
+        var start = this.startOffset,
+            ident = null,
+            base = null;
         
         this.read("class");
         
-        return this.ClassLiteral("ClassDeclaration", this.BindingIdentifier(), start);
-    }
-    
-    ClassExpression() {
-    
-        var start = this.startOffset, 
-            ident = null;
-        
-        this.read("class");
-        
-        if (this.peek() === "IDENTIFIER")
-            ident = this.BindingIdentifier();
-        
-        return this.ClassLiteral("ClassExpression", ident, start);
-    }
-    
-    ClassLiteral(type, ident, start) {
-    
-        var base = null;
+        ident = this.BindingIdentifier();
         
         if (this.peek() === "extends") {
         
@@ -2095,14 +2050,37 @@ export class Parser {
             base = this.AssignmentExpression();
         }
         
-        return {
-            type: type,
-            ident: ident,
-            base: base,
-            body: this.ClassBody(),
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ClassDeclaration(
+            ident,
+            base,
+            this.ClassBody(),
+            start,
+            this.endOffset);
+    }
+    
+    ClassExpression() {
+    
+        var start = this.startOffset, 
+            ident = null,
+            base = null;
+        
+        this.read("class");
+        
+        if (this.peek() === "IDENTIFIER")
+            ident = this.BindingIdentifier();
+        
+        if (this.peek() === "extends") {
+        
+            this.read();
+            base = this.AssignmentExpression();
+        }
+        
+        return new Node.ClassExpression(
+            ident, 
+            base, 
+            this.ClassBody(), 
+            start, 
+            this.endOffset);
     }
     
     ClassBody() {
@@ -2123,12 +2101,7 @@ export class Parser {
         
         this.popContext();
         
-        return {
-            type: "ClassBody",
-            elements: list,
-            start: start,
-            end: this.endOffset
-        };
+        return new Node.ClassBody(list, start, this.endOffset);
     }
     
     ClassElement(nameSet, staticSet) {

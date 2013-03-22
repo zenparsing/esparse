@@ -101,7 +101,7 @@
     
     {   type: "ImportAsDeclaration",
         
-        url:
+        from:
         {   type: "String",
             value: "x.js"
         },

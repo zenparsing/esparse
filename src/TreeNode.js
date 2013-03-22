@@ -328,18 +328,6 @@ export class MethodDefinition {
     }
 }
 
-export class ClassElement {
-
-    constructor(isStatic, method, start, end) {
-    
-        this.type = "ClassElement";
-        this.static = isStatic;
-        this.method = method;
-        this.start = start;
-        this.end = end;
-    }
-}
-
 export class ArrayExpression {
 
     constructor(elements, start, end) {
@@ -638,7 +626,7 @@ export class SwitchCase {
         this.test = test;
         this.consequent = cons;
         this.start = start;
-        this.end = this.endOffset;
+        this.end = end;
     }
 }
 
@@ -657,7 +645,7 @@ export class TryStatement {
 
 export class CatchClause {
 
-    constructor(param, body) {
+    constructor(param, body, start, end) {
     
         this.type = "CatchClause";
         this.param = param;
@@ -766,10 +754,10 @@ export class ModuleBody {
 
 export class ImportAsDeclaration {
 
-    constructor(url, ident, start, end) {
+    constructor(from, ident, start, end) {
     
         this.type = "ImportAsDeclaration";
-        this.url = url;
+        this.from = from;
         this.ident = ident;
         this.start = start;
         this.end = end;
@@ -806,6 +794,101 @@ export class ImportSpecifier {
         this.type = "ImportSpecifier";
         this.name = name;
         this.ident = ident;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ExportDeclaration {
+
+    constructor(binding, from, start, end) {
+    
+        this.type = "ExportDeclaration";
+        this.binding = binding;
+        this.from = from;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ExportSpecifierSet {
+
+    constructor(list, start, end) {
+    
+        this.type = "ExportSpecifierSet";
+        this.specifiers = list;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ExportSpecifier {
+
+    constructor(ident, path, start, end) {
+    
+        this.type = "ExportSpecifier";
+        this.ident = ident;
+        this.path = path;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class BindingPath {
+    
+    constructor(list, start, end) {
+    
+        this.type = "BindingPath";
+        this.elements = list;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ClassDeclaration {
+
+    constructor(ident, base, body, start, end) {
+    
+        this.type = "ClassDeclaration";
+        this.ident = ident;
+        this.base = base;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ClassExpression {
+
+    constructor(ident, base, body, start, end) {
+    
+        this.type = "ClassExpression";
+        this.ident = ident;
+        this.base = base;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ClassBody {
+
+    constructor(elems, start, end) {
+    
+        this.type = "ClassBody";
+        this.elements = elems;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ClassElement {
+
+    constructor(isStatic, method, start, end) {
+    
+        this.type = "ClassElement";
+        this.static = isStatic;
+        this.method = method;
         this.start = start;
         this.end = end;
     }
