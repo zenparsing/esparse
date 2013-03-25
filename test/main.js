@@ -2,7 +2,7 @@ import "path" as Path;
 import "fs" as FS;
 
 import inspect from "util";
-import parseScript from "../src/main.js";
+import parseScript from "../src/es6parse.js";
 
 var HOP = {}.hasOwnProperty,
     TEST_COMMENT = /\/\*\*!?[\s\S]+?\*\*\//g,
@@ -147,7 +147,7 @@ function run() {
 
     var currentGroup = null;
     
-    walkDirectory(__dirname, function(path) {
+    walkDirectory(__dirname, path => {
     
         var group = groupName(path),
             name = Path.basename(path, ".js"),
@@ -164,6 +164,7 @@ function run() {
         var text = readFile(path),
             programs = parseTestComments(text),
             outputs = (new Function("return " + text))(),
+            keys = Object.keys(outputs),
             pass,
             i;
         
@@ -181,9 +182,9 @@ function run() {
                     throw err;
             }
             
-            pass = astLike(tree, outputs[i]);
+            pass = astLike(tree, outputs[keys[i]]);
             
-            printResult(name + "[" + i + "]", pass);
+            printResult(name + " - " + keys[i], pass);
             
             if (!pass) {
         

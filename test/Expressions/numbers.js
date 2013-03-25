@@ -1,6 +1,6 @@
 [
 
-/** 42; **/
+/** 42 **/
 {   type: "Script",
     statements: [
     
