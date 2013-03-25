@@ -1,46 +1,38 @@
-[
+({
 
 /** class C {} **/
-{   type: "Script",
+"class declaration": {   
+    type: "Script",
     statements: [
-    
     {   type: "ClassDeclaration",
-        
-        ident:
-        {   type: "Identifier",
+        ident: {
+            type: "Identifier",
             value: "C"
         },
-        
         base: null,
-        
-        body: 
-        {   type: "ClassBody",
+        body: {
+            type: "ClassBody",
             elements: []
         }
     }]
 },
 
 /** (class C {}); **/
-{   type: "Script",
+"class expression": {
+    type: "Script",
     statements: [
-    
     {   type: "ExpressionStatement",
-        expression:
-        
-        {   type: "ParenExpression",
-            expression:
-            
-            {   type: "ClassExpression",
-                
-                ident:
-                {   type: "Identifier",
+        expression: {
+            type: "ParenExpression",
+            expression: {
+                type: "ClassExpression",
+                ident: {
+                    type: "Identifier",
                     value: "C"
                 },
-                
                 base: null,
-                
-                body: 
-                {   type: "ClassBody",
+                body: {  
+                    type: "ClassBody",
                     elements: []
                 }
             }
@@ -49,34 +41,31 @@
 },
 
 /** class C { static S() {} } **/
-{   type: "Script",
+"static method": {
+    type: "Script",
     statements: [
-    
     {   type: "ClassDeclaration",
-        
-        ident:
-        {   type: "Identifier",
+        ident: {
+            type: "Identifier",
             value: "C"
         },
-        
         base: null,
-        
-        body: 
-        {   type: "ClassBody",
+        body: {
+            type: "ClassBody",
             elements: [
             
             {   type: "ClassElement",
                 static: true,
-                method:
-                {   type: "MethodDefinition",
+                method: {
+                    type: "MethodDefinition",
                     modifier: null,
-                    name:
-                    {   type: "Identifier",
+                    name: {
+                        type: "Identifier",
                         value: "S"
                     },
                     params: [],
-                    body:
-                    {   type: "FunctionBody",
+                    body: {
+                        type: "FunctionBody",
                         statements: []
                     }
                 }
@@ -85,4 +74,4 @@
     }]
 },
 
-]
+})
