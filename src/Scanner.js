@@ -65,8 +65,8 @@ var multiCharPunctuator = new RegExp("^(?:" +
 
 // === Miscellaneous Patterns ===
 var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
-      blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
-      hexChar = /[0-9a-f]/i;
+    blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
+    hexChar = /[0-9a-f]/i;
 
 // === Character Types ===
 var WHITESPACE = 1,

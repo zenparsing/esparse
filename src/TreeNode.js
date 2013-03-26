@@ -411,11 +411,13 @@ export class Block {
 
 export class LabelledStatement {
 
-    constructor(label, statement) {
+    constructor(label, statement, start, end) {
     
         this.type = "LabelledStatement";
         this.label = label;
         this.statement = statement;
+        this.start = start;
+        this.end = end;
     }
 }
 
