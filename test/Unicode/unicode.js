@@ -32,6 +32,18 @@
     }]
 },
 
+/** \u{64}efg; **/
+"extended unicode escapes": {
+    type: "Script",
+    statements: [
+    {   type: "ExpressionStatement",
+        expression: {
+            type: "Identifier",
+            value: "defg"
+        }
+    }]
+},
+
 /** ƒ; **/
 "unicode identifiers": {
     type: "Script",
@@ -43,5 +55,10 @@
         }
     }]
 },
+
+// FIX
+/* \u0030abc; 
+"cannot use espace sequence to create invalid identifiers": {}
+*/
 
 });

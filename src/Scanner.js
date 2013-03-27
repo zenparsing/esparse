@@ -312,8 +312,21 @@ export class Scanner {
             
             case "u":
             
-                esc = this.readHex(4);
-                return (esc.length < 4) ? null : String.fromCharCode(parseInt(esc, 16));
+                if (this.input[this.offset] === "{") {
+                
+                    this.offset++;
+                    esc = this.readHex(0);
+                    
+                    if (this.input[this.offset++] !== "}")
+                        return null;
+                    
+                } else {
+                
+                    esc = this.readHex(4);
+                    if (esc.length < 4) return null;
+                }
+                
+                return String.fromCharCode(parseInt(esc, 16));
             
             default: 
             
@@ -732,10 +745,21 @@ export class Scanner {
                 if (this.input[this.offset++] !== "u")
                     return this.Error();
                 
-                hex = this.readHex(4);
+                if (this.input[this.offset] === "{") {
                 
-                if (hex.length < 4)
-                    return this.Error();
+                    this.offset++;
+                    hex = this.readHex(0);
+                    
+                    if (this.input[this.offset++] !== "}")
+                        return this.Error();
+                
+                } else {
+                
+                    hex = this.readHex(4);
+                
+                    if (hex.length < 4)
+                        return this.Error();
+                }
                 
                 id += String.fromCharCode(parseInt(hex, 16));
                 start = this.offset;

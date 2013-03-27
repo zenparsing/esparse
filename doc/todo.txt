@@ -1,6 +1,13 @@
 == TODO ==
 
 - Module declarations cannot nest
-- Extended string unicode escapes u{ HexDigits }
-- Currently, destructured bindings always apply binding identifier checks?
-- Record whether an identifier node is a declaration or variable name?
+- Create a list of early errors that we need to detect.
+  - yield outside of generator
+  - super outside of class
+  - ?
+
+== Known Issues ==
+
+- u{ HexDigits } escapes where HexDigits evaluates to a
+  code point requiring a surrogate pair in UTF-16 are not 
+  supported.
