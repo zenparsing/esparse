@@ -498,7 +498,7 @@ export class Scanner {
         return this.input[this.offset++];
     }
     
-    Punctuator(oneChar) {
+    Punctuator() {
         
         var op = this.input[this.offset++], 
             chr,
