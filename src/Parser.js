@@ -80,10 +80,11 @@ class TokenData {
     
         this.type = token.type;
         this.value = token.value;
+        this.number = token.number;
         this.newlineBefore = token.newlineBefore;
         this.start = token.start;
         this.end = token.end;
-        this.regexFlags = token.regexFlags;
+        this.regExpFlags = token.regExpFlags;
         this.templateEnd = token.templateEnd;
     }
 }
@@ -696,7 +697,7 @@ export class Parser {
             
             case "REGEX":
                 this.read();
-                return new Node.RegularExpression(tok.value, tok.regexFlags, tok.start, tok.end);
+                return new Node.RegularExpression(tok.value, tok.regExpFlags, tok.start, tok.end);
             
             case "null":
                 this.read();
@@ -738,7 +739,7 @@ export class Parser {
     Number() {
     
         var token = this.readToken("NUMBER");
-        return new Node.Number(token.value, token.start, token.end);
+        return new Node.Number(token.number, token.start, token.end);
     }
     
     Template() {

@@ -40,13 +40,14 @@ var WHITESPACE = 1,
     NEWLINE = 2,
     DECIMAL_DIGIT = 3,
     PUNCTUATOR = 4,
-    STRING = 5,
-    TEMPLATE = 6,
-    IDENTIFIER = 7,
-    ZERO = 8,
-    DOT = 9,
-    SLASH = 10,
-    LBRACE = 11;
+    PUNCTUATOR_CHAR = 5,
+    STRING = 6,
+    TEMPLATE = 7,
+    IDENTIFIER = 8,
+    ZERO = 9,
+    DOT = 10,
+    SLASH = 11,
+    LBRACE = 12;
 
 // === Character Type Lookup Table ===
 var charTable = () => {
@@ -56,7 +57,8 @@ var charTable = () => {
     add(WHITESPACE, "\t\v\f ");
     add(NEWLINE, "\r\n");
     add(DECIMAL_DIGIT, "123456789");
-    add(PUNCTUATOR, "{[]();,<>+-*%&|^!~?:=");
+    add(PUNCTUATOR_CHAR, "{[]();,?");
+    add(PUNCTUATOR, "<>+-*%&|^!~:=");
     add(DOT, ".");
     add(SLASH, "/");
     add(LBRACE, "}");
@@ -182,9 +184,10 @@ export class Scanner {
         this.type = "";
         this.start = 0;
         this.end = 0;
-        this.value = null;
+        this.value = "";
+        this.number = 0;
         this.templateEnd = false;
-        this.regexFlags = null;
+        this.regExpFlags = null;
         this.newlineBefore = false;
         this.error = "";
     }
@@ -195,6 +198,7 @@ export class Scanner {
             this.newlineBefore = false;
         
         this.error = "";
+        this.value = null;
         
         var type = null, 
             start;
@@ -395,6 +399,8 @@ export class Scanner {
             
             case IDENTIFIER: return this.Identifier(context);
             
+            case PUNCTUATOR_CHAR: return this.PunctuatorChar();
+            
             case PUNCTUATOR: return this.Punctuator();
             
             case DECIMAL_DIGIT: return this.Number();
@@ -435,7 +441,7 @@ export class Scanner {
             case LBRACE:
             
                 if (context === "template") return this.Template();
-                else return this.Punctuator();
+                else return this.PunctuatorChar();
         }
         
         var chr = this.input[this.offset];
@@ -487,7 +493,12 @@ export class Scanner {
         return null;
     }
     
-    Punctuator(code) {
+    PunctuatorChar() {
+    
+        return this.input[this.offset++];
+    }
+    
+    Punctuator(oneChar) {
         
         var op = this.input[this.offset++], 
             chr,
@@ -496,7 +507,7 @@ export class Scanner {
         while (
             isPunctuatorNext(chr = this.input[this.offset]) &&
             multiCharPunctuator.test(next = op + chr)) {
-        
+    
             this.offset++;
             op = next;
         }
@@ -644,7 +655,7 @@ export class Scanner {
             flags = this.Identifier("name").value;
         
         this.value = val;
-        this.regexFlags = flags;
+        this.regExpFlags = flags;
         
         return "REGEX";
     }
@@ -667,7 +678,7 @@ export class Scanner {
         if (this.strict)
             return this.Error("Octal literals are not allowed in strict mode");
         
-        this.value = parseInt(this.input.slice(start, this.offset), 8);
+        this.number = parseInt(this.input.slice(start, this.offset), 8);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
     }
@@ -700,7 +711,7 @@ export class Scanner {
                 return this.Error();
         }
         
-        this.value = parseFloat(this.input.slice(start, this.offset));
+        this.number = parseFloat(this.input.slice(start, this.offset));
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
     }
@@ -708,7 +719,7 @@ export class Scanner {
     BinaryNumber() {
     
         this.offset += 2;
-        this.value = parseInt(this.readRange(48, 49), 2);
+        this.number = parseInt(this.readRange(48, 49), 2);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
     }
@@ -716,7 +727,7 @@ export class Scanner {
     OctalNumber() {
     
         this.offset += 2;
-        this.value = parseInt(this.readRange(48, 55), 8);
+        this.number = parseInt(this.readRange(48, 55), 8);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
     }
@@ -724,7 +735,7 @@ export class Scanner {
     HexNumber() {
     
         this.offset += 2;
-        this.value = parseInt(this.readHex(0), 16);
+        this.number = parseInt(this.readHex(0), 16);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
     }
