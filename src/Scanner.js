@@ -191,7 +191,7 @@ export class Scanner {
         this.newlineBefore = false;
         this.error = "";
     }
-
+    
     next(context) {
 
         if (this.type !== "COMMENT")

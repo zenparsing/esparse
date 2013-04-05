@@ -74,28 +74,14 @@ function isUnary(op) {
     return false;
 }
 
-class TokenData {
-
-    constructor(token) {
-    
-        this.type = token.type;
-        this.value = token.value;
-        this.number = token.number;
-        this.newlineBefore = token.newlineBefore;
-        this.start = token.start;
-        this.end = token.end;
-        this.regExpFlags = token.regExpFlags;
-        this.templateEnd = token.templateEnd;
-    }
-}
-
 export class Parser {
 
     constructor(input, offset) {
 
         var scanner = new Scanner(input, offset);
-            
+        
         this.scanner = scanner;
+        this.token = new Scanner(input, offset);
         this.input = input;
         
         this.peek0 = null;
@@ -165,7 +151,20 @@ export class Parser {
             
             } else if (this.peek0) {
             
-                this.peek0 = new TokenData(this.peek0);
+                // Copy scanner state to token (inlined for performance)
+                var tok = this.token, 
+                    scanner = this.scanner;
+        
+                tok.type = scanner.type;
+                tok.value = scanner.value;
+                tok.number = scanner.number;
+                tok.newlineBefore = scanner.newlineBefore;
+                tok.start = scanner.start;
+                tok.end = scanner.end;
+                tok.regExpFlags = scanner.regExpFlags;
+                tok.templateEnd = scanner.templateEnd;
+                
+                this.peek0 = tok;
                 return this.peek1 = this.nextToken(context);
             }
         }

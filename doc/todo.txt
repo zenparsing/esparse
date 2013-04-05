@@ -1,5 +1,6 @@
 == TODO ==
 
+- JS lexers generally treat HTML-comment-begin as "//"
 - Module declarations cannot nest
 - Create a list of early errors that we need to detect.
   - yield outside of generator
