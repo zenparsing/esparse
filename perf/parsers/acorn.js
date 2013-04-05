@@ -12,11 +12,22 @@
 // Please use the [github bug tracker][ghbt] to report issues.
 //
 // [ghbt]: https://github.com/marijnh/acorn/issues
+//
+// This file defines the main parser interface. The library also comes
+// with a [error-tolerant parser][dammit] and an
+// [abstract syntax tree walker][walk], defined in other files.
+//
+// [dammit]: acorn_loose.js
+// [walk]: util/walk.js
 
-(function(exports) {
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") return mod(exports); // CommonJS
+  if (typeof define == "function" && define.amd) return define(["exports"], mod); // AMD
+  mod(self.acorn || (self.acorn = {})); // Plain browser env
+})(function(exports) {
   "use strict";
 
-  exports.version = "0.0.2";
+  exports.version = "0.1.01";
 
   // The main exported interface (under `self.acorn` when in the
   // browser) is a `parse` function that takes a code string and
@@ -136,8 +147,12 @@
     getToken.jumpTo = function(pos, reAllowed) {
       tokPos = pos;
       if (options.locations) {
-        tokCurLine = tokLineStart = 0;
-        tokLineStartNext = nextLineStart();
+        tokCurLine = tokLineStart = lineBreak.lastIndex = 0;
+        var match;
+        while ((match = lineBreak.exec(input)) && match.index < pos) {
+          ++tokCurLine;
+          tokLineStart = match.index + match[0].length;
+        }
       }
       var ch = input.charAt(pos - 1);
       tokRegexpAllowed = reAllowed;
@@ -183,9 +198,9 @@
 
   // When `options.locations` is true, these are used to keep
   // track of the current line, and know when a new line has been
-  // entered. See the `curLineLoc` function.
+  // entered.
 
-  var tokCurLine, tokLineStart, tokLineStartNext;
+  var tokCurLine, tokLineStart;
 
   // These store the position of the previous token, which is useful
   // when finishing a node and assigning its `end` position.
@@ -429,28 +444,12 @@
 
   // ## Tokenizer
 
-  // These are used when `options.locations` is on, in order to track
-  // the current line number and start of line offset, in order to set
-  // `tokStartLoc` and `tokEndLoc`.
-
-  function nextLineStart() {
-    lineBreak.lastIndex = tokLineStart;
-    var match = lineBreak.exec(input);
-    return match ? match.index + match[0].length : input.length + 1;
-  }
+  // These are used when `options.locations` is on, for the
+  // `tokStartLoc` and `tokEndLoc` properties.
 
   function line_loc_t() {
     this.line = tokCurLine;
     this.column = tokPos - tokLineStart;
-  }
-
-  function curLineLoc() {
-    while (tokLineStartNext <= tokPos) {
-      ++tokCurLine;
-      tokLineStart = tokLineStartNext;
-      tokLineStartNext = nextLineStart();
-    }
-    return new line_loc_t();
   }
 
   // Reset the token state. Used at the start of a parse.
@@ -458,7 +457,6 @@
   function initTokenState() {
     tokCurLine = 1;
     tokPos = tokLineStart = 0;
-    tokLineStartNext = nextLineStart();
     tokRegexpAllowed = true;
     skipSpace();
   }
@@ -469,7 +467,7 @@
 
   function finishToken(type, val) {
     tokEnd = tokPos;
-    if (options.locations) tokEndLoc = curLineLoc();
+    if (options.locations) tokEndLoc = new line_loc_t;
     tokType = type;
     skipSpace();
     tokVal = val;
@@ -477,28 +475,34 @@
   }
 
   function skipBlockComment() {
-    if (options.onComment && options.locations)
-      var startLoc = curLineLoc();
+    var startLoc = options.onComment && options.locations && new line_loc_t;
     var start = tokPos, end = input.indexOf("*/", tokPos += 2);
     if (end === -1) raise(tokPos - 2, "Unterminated comment");
     tokPos = end + 2;
+    if (options.locations) {
+      lineBreak.lastIndex = start;
+      var match;
+      while ((match = lineBreak.exec(input)) && match.index < tokPos) {
+        ++tokCurLine;
+        tokLineStart = match.index + match[0].length;
+      }
+    }
     if (options.onComment)
       options.onComment(true, input.slice(start + 2, end), start, tokPos,
-                        startLoc, options.locations && curLineLoc());
+                        startLoc, options.locations && new line_loc_t);
   }
 
   function skipLineComment() {
     var start = tokPos;
-    if (options.onComment && options.locations)
-      var startLoc = curLineLoc();
+    var startLoc = options.onComment && options.locations && new line_loc_t;
     var ch = input.charCodeAt(tokPos+=2);
     while (tokPos < inputLen && ch !== 10 && ch !== 13 && ch !== 8232 && ch !== 8329) {
       ++tokPos;
       ch = input.charCodeAt(tokPos);
     }
     if (options.onComment)
-      options.onComment(false, input.slice(start + 2, tokPos - 1), start, tokPos,
-                        startLoc, options.locations && curLineLoc());
+      options.onComment(false, input.slice(start + 2, tokPos), start, tokPos,
+                        startLoc, options.locations && new line_loc_t);
   }
 
   // Called at the start of the parse and after every token. Skips
@@ -507,7 +511,25 @@
   function skipSpace() {
     while (tokPos < inputLen) {
       var ch = input.charCodeAt(tokPos);
-      if (ch === 47) { // '/'
+      if (ch === 32) { // ' '
+        ++tokPos;
+      } else if(ch === 13) {
+        ++tokPos;
+        var next = input.charCodeAt(tokPos);
+        if(next === 10) {
+          ++tokPos;
+        }
+        if(options.locations) {
+          ++tokCurLine;
+          tokLineStart = tokPos;
+        }
+      } else if (ch === 10) {
+        ++tokPos;
+        ++tokCurLine;
+        tokLineStart = tokPos;
+      } else if(ch < 14 && ch > 8) {
+        ++tokPos;
+      } else if (ch === 47) { // '/'
         var next = input.charCodeAt(tokPos+1);
         if (next === 42) { // '*'
           skipBlockComment();
@@ -536,9 +558,9 @@
   // The `forceRegexp` parameter is used in the one case where the
   // `tokRegexpAllowed` trick does not work. See `parseStatement`.
 
-  function readToken_dot(code) {
+  function readToken_dot() {
     var next = input.charCodeAt(tokPos+1);
-    if (next >= 48 && next <= 57) return readNumber(String.fromCharCode(code));
+    if (next >= 48 && next <= 57) return readNumber(true);
     ++tokPos;
     return finishToken(_dot);
   }
@@ -600,7 +622,7 @@
       // The interpretation of a dot depends on whether it is followed
       // by a digit.
     case 46: // '.'
-      return readToken_dot(code);
+      return readToken_dot();
 
       // Punctuation tokens.
     case 40: ++tokPos; return finishToken(_parenL);
@@ -621,7 +643,7 @@
       // Anything else beginning with a digit is an integer, octal
       // number, or float.
     case 49: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: // 1-9
-      return readNumber(String.fromCharCode(code));
+      return readNumber(false);
 
       // Quotes produce strings.
     case 34: case 39: // '"', "'"
@@ -661,8 +683,9 @@
   }
 
   function readToken(forceRegexp) {
-    tokStart = tokPos;
-    if (options.locations) tokStartLoc = curLineLoc();
+    if (!forceRegexp) tokStart = tokPos;
+    else tokPos = tokStart + 1;
+    if (options.locations) tokStartLoc = new line_loc_t;
     if (forceRegexp) return readRegexp();
     if (tokPos >= inputLen) return finishToken(_eof);
 
@@ -746,18 +769,18 @@
 
   // Read an integer, octal integer, or floating-point number.
   
-  function readNumber(ch) {
-    var start = tokPos, isFloat = ch === ".";
-    if (!isFloat && readInt(10) == null) raise(start, "Invalid number");
-    if (isFloat || input.charAt(tokPos) === ".") {
-      var next = input.charAt(++tokPos);
-      if (next === "-" || next === "+") ++tokPos;
-      if (readInt(10) === null && ch === ".") raise(start, "Invalid number");
+  function readNumber(startsWithDot) {
+    var start = tokPos, isFloat = false, octal = input.charCodeAt(tokPos) === 48;
+    if (!startsWithDot && readInt(10) === null) raise(start, "Invalid number");
+    if (input.charCodeAt(tokPos) === 46) {
+      ++tokPos;
+      readInt(10);
       isFloat = true;
     }
-    if (/e/i.test(input.charAt(tokPos))) {
-      var next = input.charAt(++tokPos);
-      if (next === "-" || next === "+") ++tokPos;
+    var next = input.charCodeAt(tokPos);
+    if (next === 69 || next === 101) { // 'eE'
+      next = input.charCodeAt(++tokPos);
+      if (next === 43 || next === 45) ++tokPos; // '+-'
       if (readInt(10) === null) raise(start, "Invalid number")
       isFloat = true;
     }
@@ -765,7 +788,7 @@
 
     var str = input.slice(start, tokPos), val;
     if (isFloat) val = parseFloat(str);
-    else if (ch !== "0" || str.length === 1) val = parseInt(str, 10);
+    else if (!octal || str.length === 1) val = parseInt(str, 10);
     else if (/[89]/.test(str) || strict) raise(start, "Invalid number");
     else val = parseInt(str, 8);
     return finishToken(_num, val);
@@ -773,17 +796,15 @@
 
   // Read a string value, interpreting backslash-escapes.
 
-  var rs_str = [];
-
   function readString(quote) {
     tokPos++;
-    rs_str.length = 0;
+    var out = "";
     for (;;) {
       if (tokPos >= inputLen) raise(tokStart, "Unterminated string constant");
       var ch = input.charCodeAt(tokPos);
       if (ch === quote) {
         ++tokPos;
-        return finishToken(_string, String.fromCharCode.apply(null, rs_str));
+        return finishToken(_string, out);
       }
       if (ch === 92) { // '\'
         ch = input.charCodeAt(++tokPos);
@@ -794,28 +815,30 @@
         ++tokPos;
         if (octal) {
           if (strict) raise(tokPos - 2, "Octal literal in strict mode");
-          rs_str.push(parseInt(octal, 8));
+          out += String.fromCharCode(parseInt(octal, 8));
           tokPos += octal.length - 1;
         } else {
           switch (ch) {
-          case 110: rs_str.push(10); break; // 'n' -> '\n'
-          case 114: rs_str.push(13); break; // 'r' -> '\r'
-          case 120: rs_str.push(readHexChar(2)); break; // 'x'
-          case 117: rs_str.push(readHexChar(4)); break; // 'u'
-          case 85: rs_str.push(readHexChar(8)); break; // 'U'
-          case 116: rs_str.push(9); break; // 't' -> '\t'
-          case 98: rs_str.push(8); break; // 'b' -> '\b'
-          case 118: rs_str.push(11); break; // 'v' -> '\u000b'
-          case 102: rs_str.push(12); break; // 'f' -> '\f'
-          case 48: rs_str.push(0); break; // 0 -> '\0'
+          case 110: out += "\n"; break; // 'n' -> '\n'
+          case 114: out += "\r"; break; // 'r' -> '\r'
+          case 120: out += String.fromCharCode(readHexChar(2)); break; // 'x'
+          case 117: out += String.fromCharCode(readHexChar(4)); break; // 'u'
+          case 85: out += String.fromCharCode(readHexChar(8)); break; // 'U'
+          case 116: out += "\t"; break; // 't' -> '\t'
+          case 98: out += "\b"; break; // 'b' -> '\b'
+          case 118: out += "\u000b"; break; // 'v' -> '\u000b'
+          case 102: out += "\f"; break; // 'f' -> '\f'
+          case 48: out += "\0"; break; // 0 -> '\0'
           case 13: if (input.charCodeAt(tokPos) === 10) ++tokPos; // '\r\n'
-          case 10: break; // ' \n'
-          default: rs_str.push(ch); break;
+          case 10: // ' \n'
+            if (options.locations) { tokLineStart = tokPos; ++tokCurLine; }
+            break;
+          default: out += String.fromCharCode(ch); break;
           }
         }
       } else {
         if (ch === 13 || ch === 10 || ch === 8232 || ch === 8329) raise(tokStart, "Unterminated string constant");
-        rs_str.push(ch); // '\'
+        out += String.fromCharCode(ch); // '\'
         ++tokPos;
       }
     }
@@ -922,6 +945,10 @@
   function setStrict(strct) {
     strict = strct;
     tokPos = lastEnd;
+    while (tokPos < tokLineStart) {
+      tokLineStart = input.lastIndexOf("\n", tokLineStart - 2) + 1;
+      --tokCurLine;
+    }
     skipSpace();
     readToken();
   }
@@ -1042,7 +1069,7 @@
 
   function parseTopLevel(program) {
     lastStart = lastEnd = tokPos;
-    if (options.locations) lastEndLoc = curLineLoc();
+    if (options.locations) lastEndLoc = new line_loc_t;
     inFunction = strict = null;
     labels = [];
     readToken();
@@ -1208,8 +1235,8 @@
     case _try:
       next();
       node.block = parseBlock();
-      node.handlers = [];
-      while (tokType === _catch) {
+      node.handler = null;
+      if (tokType === _catch) {
         var clause = startNode();
         next();
         expect(_parenL);
@@ -1219,10 +1246,10 @@
         expect(_parenR);
         clause.guard = null;
         clause.body = parseBlock();
-        node.handlers.push(finishNode(clause, "CatchClause"));
+        node.handler = finishNode(clause, "CatchClause");
       }
       node.finalizer = eat(_finally) ? parseBlock() : null;
-      if (!node.handlers.length && !node.finalizer)
+      if (!node.handler && !node.finalizer)
         raise(node.start, "Missing catch or finally clause");
       return finishNode(node, "TryStatement");
 
@@ -1689,4 +1716,4 @@
     return finishNode(node, "Identifier");
   }
 
-})(typeof exports === "undefined" ? (self.acorn = {}) : exports);
+});
