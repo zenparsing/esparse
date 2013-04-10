@@ -57,41 +57,33 @@ function analyzeChars(string) {
         console.log(obj.chr + " > " + obj.num);
         return i < 100;
     });
-    
 }
 
-var nativeParser = {
+function nativeParse(src) {
 
-    parse(src) { new Function(src); }
-};
+    new Function(src);
+}
 
-var dryLoop = {
+function dryLoop(src) {
 
-    parse(src) {
+    for (var i = 0, c; i < src.length; ++i)
+        c = src.charAt(i);
+}
+
+function scanOnly(src) {
     
-        for (var i = 0, c; i < src.length; ++i)
-            c = src.charAt(i);
-    }
-};
-
-var scanOnly = {
-
-    parse(src) {
-    
-        var scanner = new Scanner(src);
-        
-        while (scanner.next("div") !== "EOF");
-    }
-};
+    var scanner = new Scanner(src);
+    while (scanner.next("div") !== "EOF");
+}
 
 var parsers = { 
 
     "dry-loop": dryLoop,
-    "native": nativeParser, 
+    "native": nativeParse, 
     "es6parse-scanner": scanOnly,
-    "acorn": Acorn,
-    "es6parse": { parse(input) { Parser.parseScript(input) } }, 
-    "esprima": Esprima
+    "acorn": Acorn.parse,
+    "es6parse": Parser.parseScript,
+    "esprima": Esprima.parse
 };
 
 walkDirectory(Path.join(__dirname, "input"), path => {
@@ -104,30 +96,17 @@ walkDirectory(Path.join(__dirname, "input"), path => {
     
     console.log("[" + name + "]");
     
-    next();
+    var ts = +new Date,
+        lib = process.argv[3] || "es6parse",
+        parser = parsers[lib],
+        count = 50;
     
-    function next() {
+    for (var i = count; i--;)
+        parser(input = input + " ");
     
-        var list = Object.keys(libs),
-            lib,
-            parser,
-            ts;
-        
-        if (list.length === 0)
-            return;
-        
-        lib = list.shift();
-        parser = libs[lib];
-        
-        delete libs[lib];
-        
-        ts = +new Date;
-        
-        for (var i = 8; i--;)
-            parser.parse(input);
-        
-        console.log("  " + lib + ": " + ((+new Date) - ts) + "ms");
-        
-        setTimeout(next, 500);
-    }
+    var ms = ((+new Date) - ts) / count;
+    
+    console.log("  " + lib + ": " + 
+        (ms / input.length * 1024 * 1024).toFixed(2) + " ms/MB, " +
+        (input.length * 1000 / ms / 1024 / 1024).toFixed(2) + " MB/sec");
 });

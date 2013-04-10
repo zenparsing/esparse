@@ -7,53 +7,26 @@ import Promise from DOM;
 
 var inputFiles = [
 
-    "codearea.js"
+    "jquery-1.9.1.js"
 ];
 
-var parsers = [
-
-    { name: "es6parse", parser: Parser },
-    { name: "acorn", parser: Acorn },
-    { name: "esprima", parser: Esprima }
-];
-
-exports.run = function(opt) {
-
-    opt || (opt = {});
-    
-    var repeat = opt.repeat || 1,
-        isolate = opt.isolate || false;
+exports.run = function() {
     
     DOM.loaded().then(ok => Promise.forEach(inputFiles, name => {
         
         return DOM.http("input/" + name).then(response => {
         
-            var input = response.responseText,
-                ms;
+            var input = response.responseText;
         
             console.log("[" + name + "]");
-            
-            ms = churn(val => Parser.parseScript(input));
-            console.log("  " + "es6parse" + ": " + ms + "ms");
-            
-            /*
-            if (!isolate) {
-                
-                ms = churn(function() { Esprima.parse(input) });
-                console.log("  esprima: " + ms + "ms");
-                
-                ms = churn(function() { Acorn.parse(input) });
-                console.log("  acorn: " + ms + "ms");
-            }
-            */
+            console.log("  es6parse: " + churn(val => Parser.parseScript(input)) + "ms");
         });
     }));
     
     function churn(fn) {
     
-        var ts = +new Date, i;
-        for (i = repeat; i--;) fn();
+        var ts = +new Date;
+        fn();
         return +new Date - ts;
-    }
-    
+    }  
 };

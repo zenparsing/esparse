@@ -4,21 +4,6 @@ import Scanner from "Scanner.js";
 import Transform from "Transform.js";
 import Validate from "Validate.js";
 
-// Binary operator precedence levels
-var operatorPrecedence = {
-
-    "||": 1,
-    "&&": 2,
-    "|": 3,
-    "^": 4,
-    "&": 5,
-    "==": 6, "!=": 6, "===": 6, "!==": 6,
-    "<=": 7, ">=": 7, ">": 7, "<": 7, "instanceof": 7, "in": 7,
-    ">>>": 8, ">>": 8, "<<": 8,
-    "+": 9, "-": 9,
-    "*": 10, "/": 10, "%": 10
-};
-
 // Object literal property name flags
 var PROP_NORMAL = 1,
     PROP_ASSIGN = 2,
@@ -29,6 +14,39 @@ var PROP_NORMAL = 1,
 function isIncrement(op) {
 
     return op === "++" || op === "--";
+}
+
+// Returns a binary operator precedence level
+function getPrecedence(op) {
+
+    switch (op) {
+    
+        case "||": return 1;
+        case "&&": return 2;
+        case "|": return 3;
+        case "^": return 4;
+        case "&": return 5;
+        case "==":
+        case "!=":
+        case "===":
+        case "!==": return 6;
+        case "<=":
+        case ">=":
+        case ">":
+        case "<":
+        case "instanceof":
+        case "in": return 7;
+        case ">>>":
+        case ">>":
+        case "<<": return 8;
+        case "+":
+        case "-": return 9;
+        case "*":
+        case "/":
+        case "%": return 10;
+    }
+    
+    return 0;
 }
 
 // Returns true if the specified operator is an assignment operator
@@ -81,7 +99,7 @@ export class Parser {
         var scanner = new Scanner(input, offset);
         
         this.scanner = scanner;
-        this.token = new Scanner(input, offset);
+        this.token = new Scanner;
         this.input = input;
         
         this.peek0 = null;
@@ -163,6 +181,8 @@ export class Parser {
                 tok.end = scanner.end;
                 tok.regExpFlags = scanner.regExpFlags;
                 tok.templateEnd = scanner.templateEnd;
+                tok.flags = scanner.flags;
+                tok.precedence = 0;
                 
                 this.peek0 = tok;
                 return this.peek1 = this.nextToken(context);
@@ -470,10 +490,10 @@ export class Parser {
             if (next === "in" && noIn)
                 break;
             
-            prec = operatorPrecedence[next];
+            prec = getPrecedence(next);
             
             // Exit if not a binary operator or lower precendence
-            if (prec === void 0 || prec < minPrec)
+            if (prec === 0 || prec < minPrec)
                 break;
             
             this.read();
@@ -484,10 +504,10 @@ export class Parser {
             
             while (next = this.peek("div")) {
             
-                prec = operatorPrecedence[next];
+                prec = getPrecedence(next);
                 
                 // Exit if not a binary operator or equal or higher precendence
-                if (prec === void 0 || prec <= max)
+                if (prec === 0 || prec <= max)
                     break;
                 
                 rhs = this.PartialBinaryExpression(rhs, prec, noIn);
