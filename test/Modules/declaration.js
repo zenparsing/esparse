@@ -1,18 +1,16 @@
 [
 
-/** module "x" {} **/
+/** module X {} **/
 {   type: "Script",
     statements: [
     
     {   type: "ModuleDeclaration",
-    
-        url: 
-        {   type: "String",
-            value: "x"
+        ident: {
+            type: "Identifier",
+            value: "X"
         },
-        
-        body:
-        {   type: "ModuleBody",
+        body: {
+            type: "ModuleBody",
             statements: []
         }
     }]

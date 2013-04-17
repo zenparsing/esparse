@@ -733,10 +733,10 @@ export class ArrowFunction {
 
 export class ModuleDeclaration {
 
-    constructor(url, body, start, end) {
+    constructor(ident, body, start, end) {
     
         this.type = "ModuleDeclaration";
-        this.url = url;
+        this.ident = ident;
         this.body = body;
         this.start = start;
         this.end = end;
@@ -768,22 +768,11 @@ export class ImportAsDeclaration {
 
 export class ImportDeclaration {
 
-    constructor(binding, from, start, end) {
+    constructor(specifiers, from, start, end) {
     
         this.type = "ImportDeclaration";
-        this.binding = binding;
+        this.specifiers = specifiers;
         this.from = from;
-        this.start = start;
-        this.end = end;
-    }
-}
-
-export class ImportSpecifierSet {
-
-    constructor(list, start, end) {
-    
-        this.type = "ImportSpecifierSet";
-        this.specifiers = list;
         this.start = start;
         this.end = end;
     }
@@ -791,11 +780,11 @@ export class ImportSpecifierSet {
 
 export class ImportSpecifier {
 
-    constructor(name, ident, start, end) {
+    constructor(remote, local, start, end) {
     
         this.type = "ImportSpecifier";
-        this.name = name;
-        this.ident = ident;
+        this.remote = remote;
+        this.local = local;
         this.start = start;
         this.end = end;
     }
@@ -803,11 +792,10 @@ export class ImportSpecifier {
 
 export class ExportDeclaration {
 
-    constructor(binding, from, start, end) {
+    constructor(binding, start, end) {
     
         this.type = "ExportDeclaration";
         this.binding = binding;
-        this.from = from;
         this.start = start;
         this.end = end;
     }
@@ -815,10 +803,11 @@ export class ExportDeclaration {
 
 export class ExportSpecifierSet {
 
-    constructor(list, start, end) {
+    constructor(list, from, start, end) {
     
         this.type = "ExportSpecifierSet";
         this.specifiers = list;
+        this.from = from;
         this.start = start;
         this.end = end;
     }
@@ -826,21 +815,21 @@ export class ExportSpecifierSet {
 
 export class ExportSpecifier {
 
-    constructor(ident, path, start, end) {
+    constructor(local, remote, start, end) {
     
         this.type = "ExportSpecifier";
-        this.ident = ident;
-        this.path = path;
+        this.local = local;
+        this.remote = remote;
         this.start = start;
         this.end = end;
     }
 }
 
-export class BindingPath {
+export class ModulePath {
     
     constructor(list, start, end) {
     
-        this.type = "BindingPath";
+        this.type = "ModulePath";
         this.elements = list;
         this.start = start;
         this.end = end;

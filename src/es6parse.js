@@ -2,7 +2,7 @@ import "TreeNode.js" as Node;
 import Parser from "Parser.js";
 import Scanner from "Scanner.js";
 
-export { Parser, Scanner, Node };
+export Parser, Scanner, Node;
 
 export function parseModule(input, options) {
 

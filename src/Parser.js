@@ -230,23 +230,16 @@ export class Parser {
     
         var token = this.readToken();
         
-        if (token.type === word || (token.type === "IDENTIFIER" && token.value === word))
+        if (token.type === word || token.type === "IDENTIFIER" && token.value === word)
             return token;
         
         this.fail("Unexpected token " + token.type, token);
     }
     
-    peekKeyword(word, noNewlineBefore) {
+    peekKeyword(word) {
     
         var token = this.peekToken();
-        
-        if (token.type === word)
-            return true;
-        
-        return  token.type === word ||
-                token.type === "IDENTIFIER" && 
-                token.value === word && 
-                !(noNewlineBefore && token.newlineBefore);
+        return token.type === word || token.type === "IDENTIFIER" && token.value === word;
     }
     
     // Context management
@@ -305,7 +298,7 @@ export class Parser {
         
             var p = this.peekToken("div", 1);
             
-            if (!p.newlineBefore && p.type === "STRING")
+            if (!p.newlineBefore && p.type === "IDENTIFIER")
                 return true;
         }
         
@@ -1848,7 +1841,7 @@ export class Parser {
         this.readKeyword("module");
         
         return new Node.ModuleDeclaration(
-            this.String(),
+            this.BindingIdentifier(),
             this.ModuleBody(),
             start,
             this.endOffset);
@@ -1872,7 +1865,8 @@ export class Parser {
     ImportDeclaration() {
     
         var start = this.startOffset,
-            binding,
+            ident,
+            list,
             from;
         
         this.read("import");
@@ -1881,68 +1875,52 @@ export class Parser {
         
             from = this.String();
             this.readKeyword("as");
-            binding = this.BindingIdentifier();
+            ident = this.BindingIdentifier();
             this.Semicolon();
             
-            return new Node.ImportAsDeclaration(from, binding, start, this.endOffset);
+            return new Node.ImportAsDeclaration(from, ident, start, this.endOffset);
         }
         
-        binding = this.peek() === "{" ?
-            this.ImportSpecifierSet() :
-            this.BindingIdentifier();
-        
-        this.readKeyword("from");
-        from = this.peek() === "STRING" ? this.String() : this.Identifier();
-        this.Semicolon();
-        
-        return new Node.ImportDeclaration(binding, from, start, this.endOffset);
-    }
-    
-    ImportSpecifierSet() {
-        
-        var start = this.startOffset,
-            list = [];
-        
-        this.read("{");
+        list = [];
         
         while (true) {
         
             list.push(this.ImportSpecifier());
             
-            if (this.peek("div") === ",") this.read();
+            if (this.peek() === ",") this.read();
             else break;
         }
         
-        this.read("}");
+        this.readKeyword("from");
+        from = this.peek() === "STRING" ? this.String() : this.ModulePath();
+        this.Semicolon();
         
-        return new Node.ImportSpecifierSet(list, start, this.endOffset);
+        return new Node.ImportDeclaration(list, from, start, this.endOffset);
     }
     
     ImportSpecifier() {
     
         var start = this.startOffset,
-            name = this.Identifier(),
-            ident = null;
+            remote = this.Identifier(),
+            local = null;
         
-        if (this.peek() === ":") {
+        if (this.peekKeyword("as")) {
         
             this.read();
-            ident = this.BindingIdentifier();
+            local = this.BindingIdentifier();
             
         } else {
         
-            this.checkBindingIdent(name);
+            this.checkBindingIdent(remote);
         }
         
-        return new Node.ImportSpecifier(name, ident, start, this.endOffset);
+        return new Node.ImportSpecifier(remote, local, start, this.endOffset);
     }
     
     ExportDeclaration() {
     
         var start = this.startOffset,
-            binding = null,
-            from = null,
-            maybeFrom = false;
+            binding;
         
         this.read("export");
         
@@ -1966,90 +1944,80 @@ export class Parser {
                 binding = this.ClassDeclaration();
                 break;
             
-            case "IDENTIFIER":
-            
-                binding = this.Identifier();
-                maybeFrom = true;
-                break;
-            
-            case "*":
-            
-                this.read();
-                maybeFrom = true;
-                break;
-            
             default:
-            
+                
                 binding = this.ExportSpecifierSet();
-                maybeFrom = true;
                 break;
         }
         
-        if (maybeFrom) {
-        
-            if (this.peekKeyword("from")) {
-            
-                this.read();
-                from = this.peek() === "STRING" ? this.String() : this.Identifier();
-            }
-            
-            this.Semicolon();
-        }
-        
-        return new Node.ExportDeclaration(binding, from, start, this.endOffset);
+        return new Node.ExportDeclaration(binding, start, this.endOffset);
     }
     
     ExportSpecifierSet() {
     
         var start = this.startOffset,
-            list = [];
+            list = null,
+            from = null;
         
-        this.read("{");
+        if (this.peek() === "*") {
         
-        while (true) {
-        
-            list.push(this.ExportSpecifier());
+            this.read();
             
-            if (this.peek("div") === ",") this.read();
-            else break;
+        } else {
+        
+            list = [];
+            
+            while (true) {
+        
+                list.push(this.ExportSpecifier());
+            
+                if (this.peek() === ",") this.read();
+                else break;
+            }
         }
         
-        this.read("}");
+        // TODO: Make sure that token after "from" is valid!
+        if (this.peekKeyword("from")) {
+            
+            this.read();
+            from = this.peek() === "STRING" ? this.String() : this.ModulePath();
+        }
         
-        return new Node.ExportSpecifierSet(list, start, this.endOffset);
+        this.Semicolon();
+        
+        return new Node.ExportSpecifierSet(list, from, start, this.endOffset);
     }
     
     ExportSpecifier() {
     
         var start = this.startOffset,
-            ident = this.Identifier(),
-            path = null;
-            
-        if (this.peek() === ":") {
+            local = this.Identifier(),
+            remote = null;
         
-            this.checkBindingIdent(ident);
-            
+        // TODO: Make sure that token after "as" is valid!
+        if (this.peekKeyword("as")) {
+        
             this.read();
-            path = this.BindingPath();
+            remote = this.BindingIdentifier();
         }
         
-        return new Node.ExportSpecifier(ident, path, start, this.endOffset);
+        return new Node.ExportSpecifier(local, remote, start, this.endOffset);
     }
     
-    BindingPath() {
+    ModulePath() {
     
         var start = this.startOffset,
             path = [];
         
         while (true) {
         
-            path.push(this.readToken("IDENTIFIER").value);
+            path.push(this.Identifier());
             
-            if (this.peek("div") === ".") this.read();
+            if (this.peek() === ".") this.read();
             else break;
         }
         
-        return new Node.BindingPath(path, start, this.endOffset);
+        return new Node.ModulePath(path, start, this.endOffset);
     }
     
     // === Classes ===
