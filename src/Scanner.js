@@ -54,9 +54,9 @@ var WHITESPACE = 1,
     LBRACE = 12;
 
 // === Character Type Lookup Table ===
-var charTable = () => {
+module LookupTable {
 
-    var table = new Array(128), i;
+    export var charTable = new Array(128), i;
     
     add(WHITESPACE, "\t\v\f ");
     add(NEWLINE, "\r\n");
@@ -71,17 +71,16 @@ var charTable = () => {
     add(TEMPLATE, "`");
     
     add(IDENTIFIER, "$_\\");
-    for (i = 65; i <= 90; ++i) table[i] = IDENTIFIER;
-    for (i = 97; i <= 122; ++i) table[i] = IDENTIFIER;
-    
-    return table;
+    for (i = 65; i <= 90; ++i) charTable[i] = IDENTIFIER;
+    for (i = 97; i <= 122; ++i) charTable[i] = IDENTIFIER;
     
     function add(type, string) {
     
-        string.split("").forEach(c => table[c.charCodeAt(0)] = type);
+        string.split("").forEach(c => charTable[c.charCodeAt(0)] = type);
     }
+}
 
-}();
+import charTable from LookupTable;
 
 // Performs a binary search on an array
 function binarySearch(array, val) {
