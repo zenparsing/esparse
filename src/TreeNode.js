@@ -743,6 +743,18 @@ export class ModuleDeclaration {
     }
 }
 
+export class CoveredModuleHead {
+
+    constructor(first, second, start, end) {
+    
+        this.type = "CoveredModuleHead";
+        this.first = first;
+        this.second = second;
+        this.start = start;
+        this.end = end;
+    }
+}
+
 export class ModuleBody {
 
     constructor(statements, start, end) {

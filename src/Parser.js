@@ -294,15 +294,27 @@ export class Parser {
     
     peekModule() {
     
+        var isModule = false;
+        
         if (this.peekToken().value === "module") {
         
-            var p = this.peekToken("div", 1);
+            var p = this.peekToken("div", 1),
+                offset;
             
-            if (!p.newlineBefore && p.type === "IDENTIFIER")
-                return true;
+            // If a module identifier follows...
+            if (!p.newlineBefore && p.type === "IDENTIFIER") {
+            
+                // Scan for "{" token
+                offset = this.readToken().start;
+                isModule = (this.peek(null, 1) === "{");
+                
+                // Restore scanner position
+                this.unpeek();
+                this.scanner.offset = offset;
+            }
         }
         
-        return false;
+        return isModule;
     }
     
     addInvalidNode(node, error) {
@@ -1920,11 +1932,12 @@ export class Parser {
     ExportDeclaration() {
     
         var start = this.startOffset,
-            binding;
+            binding,
+            tok;
         
         this.read("export");
         
-        switch (this.peek()) {
+        switch (tok = this.peek()) {
                 
             case "var":
             case "let":
@@ -1944,6 +1957,14 @@ export class Parser {
                 binding = this.ClassDeclaration();
                 break;
             
+            case "IDENTIFIER":
+            
+                if (this.peekModule()) {
+                
+                    binding = this.ModuleDeclaration();
+                    break;
+                }
+                
             default:
                 
                 binding = this.ExportSpecifierSet();
