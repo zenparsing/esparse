@@ -193,7 +193,6 @@ export class Scanner {
         this.regExpFlags = null;
         this.newlineBefore = false;
         this.flags = 0;
-        this.precedence = 0;
         this.error = "";
     }
     
@@ -205,7 +204,6 @@ export class Scanner {
         this.error = "";
         this.value = null;
         this.flags = 0;
-        this.precedence = 0;
         
         var type = null, 
             start;

@@ -182,7 +182,6 @@ export class Parser {
                 tok.regExpFlags = scanner.regExpFlags;
                 tok.templateEnd = scanner.templateEnd;
                 tok.flags = scanner.flags;
-                tok.precedence = 0;
                 
                 this.peek0 = tok;
                 return this.peek1 = this.nextToken(context);
@@ -292,7 +291,7 @@ export class Parser {
         return false;
     }
     
-    peekModule() {
+    peekModule(predict) {
     
         var isModule = false;
         
@@ -304,13 +303,20 @@ export class Parser {
             // If a module identifier follows...
             if (!p.newlineBefore && p.type === "IDENTIFIER") {
             
-                // Scan for "{" token
-                offset = this.readToken().start;
-                isModule = (this.peek(null, 1) === "{");
+                if (predict) {
                 
-                // Restore scanner position
-                this.unpeek();
-                this.scanner.offset = offset;
+                    // Scan for "{" token
+                    offset = this.readToken().start;
+                    isModule = (this.peek(null, 1) === "{");
+                
+                    // Restore scanner position
+                    this.unpeek();
+                    this.scanner.offset = offset;
+                    
+                } else {
+                
+                    isModule = true;
+                }
             }
         }
         
@@ -1680,7 +1686,7 @@ export class Parser {
             
             case "IDENTIFIER":
                 
-                if (this.peekModule())
+                if (this.peekModule(false))
                     return this.ModuleDeclaration();
                 
                 break;
@@ -1959,7 +1965,7 @@ export class Parser {
             
             case "IDENTIFIER":
             
-                if (this.peekModule()) {
+                if (this.peekModule(true)) {
                 
                     binding = this.ModuleDeclaration();
                     break;
