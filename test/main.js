@@ -1,7 +1,7 @@
-import "npm:path" as Path;
-import "npm:fs" as FS;
+import "node:path" as Path;
+import "node:fs" as FS;
 
-import inspect from "npm:util";
+import inspect from "node:util";
 import parseScript from "../src/es6parse.js";
 
 var HOP = {}.hasOwnProperty,

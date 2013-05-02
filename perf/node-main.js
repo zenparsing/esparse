@@ -1,7 +1,9 @@
-import "path" as Path;
-import "fs" as FS;
-import "../src/es6parse.js" as Parser;
+import "node:path" as Path;
+import "node:fs" as FS;
+import "node:./parsers/esprima.js" as Esprima;
+import "node:./parsers/acorn.js" as Acorn;
 
+import "../src/es6parse.js" as Parser;
 import Scanner from Parser;
 
 var Esprima = require("./parsers/esprima.js"),

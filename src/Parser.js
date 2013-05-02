@@ -127,13 +127,24 @@ export class Parser {
     
     nextToken(context) {
     
-        var scanner = this.scanner,
-            type = null;
+        var s = this.scanner,
+            type;
         
-        while (!type || type === "COMMENT")
-            type = scanner.next(context);
+        do { type = s.next(context); }
+        while (type === "COMMENT")
         
-        return scanner;
+        return {
+        
+            type: s.type,
+            start: s.start,
+            end: s.end,
+            value: s.value,
+            number: s.number,
+            templateEnd: s.templateEnd,
+            regExpFlags: s.regExpFlags,
+            newlineBefore: s.newlineBefore,
+            error: s.error
+        };
     }
     
     readToken(type, context) {
@@ -169,21 +180,6 @@ export class Parser {
             
             } else if (this.peek0) {
             
-                // Copy scanner state to token (inlined for performance)
-                var tok = this.token, 
-                    scanner = this.scanner;
-        
-                tok.type = scanner.type;
-                tok.value = scanner.value;
-                tok.number = scanner.number;
-                tok.newlineBefore = scanner.newlineBefore;
-                tok.start = scanner.start;
-                tok.end = scanner.end;
-                tok.regExpFlags = scanner.regExpFlags;
-                tok.templateEnd = scanner.templateEnd;
-                tok.flags = scanner.flags;
-                
-                this.peek0 = tok;
                 return this.peek1 = this.nextToken(context);
             }
         }
