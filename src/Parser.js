@@ -92,6 +92,22 @@ function isUnary(op) {
     return false;
 }
 
+class Token {
+
+    constructor(s) {
+    
+        this.type = s.type;
+        this.start = s.start;
+        this.end = s.end;
+        this.value = s.value;
+        this.number = s.number;
+        this.templateEnd = s.templateEnd;
+        this.regExpFlags = s.regExpFlags;
+        this.newlineBefore = s.newlineBefore;
+        this.error = s.error;
+    }
+}
+
 export class Parser {
 
     constructor(input, offset) {
@@ -127,24 +143,13 @@ export class Parser {
     
     nextToken(context) {
     
-        var s = this.scanner,
+        var scanner = this.scanner,
             type;
         
-        do { type = s.next(context); }
+        do { type = scanner.next(context); }
         while (type === "COMMENT")
         
-        return {
-        
-            type: s.type,
-            start: s.start,
-            end: s.end,
-            value: s.value,
-            number: s.number,
-            templateEnd: s.templateEnd,
-            regExpFlags: s.regExpFlags,
-            newlineBefore: s.newlineBefore,
-            error: s.error
-        };
+        return new Token(scanner);
     }
     
     readToken(type, context) {
@@ -696,7 +701,7 @@ export class Parser {
     
         var tok = this.peekToken(),
             type = tok.type,
-            start = tok.start;
+            start = this.startOffset;
         
         switch (type) {
             

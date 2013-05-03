@@ -102,16 +102,45 @@ function walkDirectory(dir, fn) {
     });
 }
 
-// Prints a message to the console
-function print(msg) {
+module Style {
 
-    console.log("=== " + msg + " ===");
+    export function green(msg) {
+    
+        return `\x1B[32m${ msg }\x1B[39m`;
+    }
+    
+    export function red(msg) {
+    
+        return `\x1B[31m${ msg }\x1B[39m`;
+    }
+    
+    export function gray(msg) {
+    
+        return `\x1B[90m${ msg }\x1B[39m`;
+    }
+    
+    export function bold(msg) {
+    
+        return `\x1B[1m${ msg }\x1B[22m`;
+    }
+}
+
+// Prints an application message to the console
+function printMessage(msg) {
+
+    console.log(Style.gray(msg));
+}
+
+// Prints a group header to the console
+function printHeader(msg) {
+
+    console.log(`\n${ Style.bold("== " + msg + " ==") }\n`);
 }
 
 // Prints a test result
 function printResult(msg, pass) {
 
-    console.log(msg + " [" + (pass ? "OK" : "FAIL") + "]");
+    console.log(msg + " " + (pass ? Style.green("OK") : Style.bold(Style.red("FAIL"))));
 }
 
 // Read a javascript or json file
@@ -147,6 +176,8 @@ function run() {
 
     var currentGroup = null;
     
+    printMessage("\nStarting es6parse tests...");
+    
     walkDirectory(__dirname, path => {
     
         var group = groupName(path),
@@ -159,7 +190,7 @@ function run() {
         
         // Print a group header
         if (group !== currentGroup)
-            print(currentGroup = group);
+            printHeader(currentGroup = group);
         
         var text = readFile(path),
             programs = parseTestComments(text),
@@ -188,7 +219,7 @@ function run() {
             
             if (!pass) {
         
-                console.log("");
+                printMessage("\nGenerated AST:\n");
                 displayTree(tree);
                 throw "stop";
             }
@@ -196,5 +227,21 @@ function run() {
     });
 }
 
-try { run(); }
-catch (err) { if (err !== "stop") throw err; }
+try { 
+
+    run();
+    printMessage("\nTesting complete - looks good to me!");
+
+} catch (err) { 
+
+    if (err !== "stop") {
+    
+        printMessage("\nSnap! An error has occurred.");
+        throw err;
+    }
+    
+} finally {
+
+    console.log("");
+}
+
