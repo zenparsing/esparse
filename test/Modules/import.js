@@ -1,13 +1,11 @@
-[
+({
 
 /** import x from "x.js"; **/
-{   type: "Script",
+"import from a url": {
+    type: "Script",
     statements: [
-    
     {   type: "ImportDeclaration",
-        
         specifiers: [
-        
         {   type: "ImportSpecifier",
             remote: {
                 type: "Identifier",
@@ -15,7 +13,6 @@
             },
             local: null
         }],
-        
         from: {
             type: "String",
             value: "x.js"
@@ -24,13 +21,11 @@
 },
 
 /** import x from y; **/
-{   type: "Script",
+"import from a lexical module": {
+    type: "Script",
     statements: [
-    
     {   type: "ImportDeclaration",
-        
         specifiers: [
-        
         {   type: "ImportSpecifier",
             remote: {
                 type: "Identifier",
@@ -38,11 +33,9 @@
             },
             local: null
         }],
-        
         from: {
             type: "ModulePath",
-            elements: [
-            
+            elements: [ 
             {   type: "Identifier",
                 value: "y"
             }]
@@ -51,13 +44,11 @@
 },
 
 /** import x as y from "x.js"; **/
-{   type: "Script",
+"renaming imported bindings": {
+    type: "Script",
     statements: [
-    
     {   type: "ImportDeclaration",
-        
         specifiers: [
-        
         {   type: "ImportSpecifier",
             remote: {
                 type: "Identifier",
@@ -68,7 +59,6 @@
                 value: "y"
             }
         }],
-        
         from: {
             type: "String",
             value: "x.js"
@@ -77,21 +67,19 @@
 },
 
 /** import "x.js" as x; **/
-{   type: "Script",
+"import as": { 
+    type: "Script",
     statements: [
-    
     {   type: "ImportAsDeclaration",
-        
-        from:
-        {   type: "String",
+        from: {
+            type: "String",
             value: "x.js"
         },
-        
-        ident:
-        {   type: "Identifier",
+        ident: {
+            type: "Identifier",
             value: "x"
         }
     }]
 },
 
-];
+})

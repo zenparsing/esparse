@@ -18,6 +18,8 @@ var SKIP_KEYS = {
     "context": 1
 }
 
+var testCount = 0;
+
 // Returns true if the argument is an object
 function isObject(obj) {
 
@@ -215,11 +217,12 @@ function run() {
             
             pass = astLike(tree, outputs[keys[i]]);
             
+            testCount++;
             printResult(name + " - " + keys[i], pass);
             
             if (!pass) {
         
-                printMessage("\nGenerated AST:\n");
+                printMessage("\nGenerated tree:\n");
                 displayTree(tree);
                 throw "stop";
             }
@@ -230,7 +233,7 @@ function run() {
 try { 
 
     run();
-    printMessage("\nTesting complete - looks good to me!");
+    printMessage("\nSuccessfully completed " + testCount + " tests - looks good to me!");
 
 } catch (err) { 
 

@@ -1,9 +1,9 @@
-[
+({
 
 /** module X {} **/
-{   type: "Script",
+"an empty module": {
+    type: "Script",
     statements: [
-    
     {   type: "ModuleDeclaration",
         ident: {
             type: "Identifier",
@@ -16,4 +16,4 @@
     }]
 },
 
-];
+})

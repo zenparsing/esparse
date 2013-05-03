@@ -292,36 +292,18 @@ export class Parser {
         return false;
     }
     
-    peekModule(predict) {
+    peekModule() {
     
-        var isModule = false;
-        
         if (this.peekToken().value === "module") {
         
-            var p = this.peekToken("div", 1),
-                offset;
+            var p = this.peekToken("div", 1);
             
             // If a module identifier follows...
-            if (!p.newlineBefore && p.type === "IDENTIFIER") {
-            
-                if (predict) {
-                
-                    // Scan for "{" token
-                    offset = this.readToken().start;
-                    isModule = (this.peek(null, 1) === "{");
-                
-                    // Restore scanner position
-                    this.unpeek();
-                    this.scanner.offset = offset;
-                    
-                } else {
-                
-                    isModule = true;
-                }
-            }
+            if (!p.newlineBefore && p.type === "IDENTIFIER")
+                return true;
         }
         
-        return isModule;
+        return false;
     }
     
     addInvalidNode(node, error) {
@@ -1687,7 +1669,7 @@ export class Parser {
             
             case "IDENTIFIER":
                 
-                if (this.peekModule(false))
+                if (this.peekModule())
                     return this.ModuleDeclaration();
                 
                 break;
@@ -1940,11 +1922,12 @@ export class Parser {
     
         var start = this.startOffset,
             binding,
-            tok;
+            offset,
+            isModule;
         
         this.read("export");
         
-        switch (tok = this.peek()) {
+        switch (this.peek()) {
                 
             case "var":
             case "let":
@@ -1966,10 +1949,21 @@ export class Parser {
             
             case "IDENTIFIER":
             
-                if (this.peekModule(true)) {
+                if (this.peekModule()) {
                 
-                    binding = this.ModuleDeclaration();
-                    break;
+                    // Scan for "{" token
+                    offset = this.readToken().start;
+                    isModule = (this.peek(null, 1) === "{");
+                
+                    // Restore scanner position
+                    this.unpeek();
+                    this.scanner.offset = offset;
+                    
+                    if (isModule) {
+                    
+                        binding = this.ModuleDeclaration();
+                        break;
+                    }
                 }
                 
             default:
