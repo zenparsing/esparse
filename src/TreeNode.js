@@ -754,13 +754,13 @@ export class ModuleBody {
     }
 }
 
-export class ImportAsDeclaration {
+export class ModuleFromDeclaration {
 
-    constructor(from, ident, start, end) {
+    constructor(ident, from, start, end) {
     
-        this.type = "ImportAsDeclaration";
-        this.from = from;
+        this.type = "ModuleFromDeclaration";
         this.ident = ident;
+        this.from = from;
         this.start = start;
         this.end = end;
     }

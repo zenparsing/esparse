@@ -16,4 +16,20 @@
     }]
 },
 
+/** module x from "x.js"; **/
+"module from": { 
+    type: "Script",
+    statements: [
+    {   type: "ModuleFromDeclaration",
+        ident: {
+            type: "Identifier",
+            value: "x"
+        },
+        from: {
+            type: "String",
+            value: "x.js"
+        }
+    }]
+},
+
 })

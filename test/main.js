@@ -1,8 +1,8 @@
-import "node:path" as Path;
-import "node:fs" as FS;
+module Path from "node:path";
+module FS from "node:fs";
 
-import inspect from "node:util";
-import parseScript from "../src/es6parse.js";
+import { inspect } from "node:util";
+import { parseScript } from "../src/es6parse.js";
 
 var HOP = {}.hasOwnProperty,
     TEST_COMMENT = /\/\*\*!?[\s\S]+?\*\*\//g,

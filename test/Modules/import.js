@@ -1,6 +1,6 @@
 ({
 
-/** import x from "x.js"; **/
+/** import { x } from "x.js"; **/
 "import from a url": {
     type: "Script",
     statements: [
@@ -20,7 +20,7 @@
     }]
 },
 
-/** import x from y; **/
+/** import { x } from y; **/
 "import from a lexical module": {
     type: "Script",
     statements: [
@@ -43,7 +43,7 @@
     }]
 },
 
-/** import x as y from "x.js"; **/
+/** import { x as y } from "x.js"; **/
 "renaming imported bindings": {
     type: "Script",
     statements: [
@@ -62,22 +62,6 @@
         from: {
             type: "String",
             value: "x.js"
-        }
-    }]
-},
-
-/** import "x.js" as x; **/
-"import as": { 
-    type: "Script",
-    statements: [
-    {   type: "ImportAsDeclaration",
-        from: {
-            type: "String",
-            value: "x.js"
-        },
-        ident: {
-            type: "Identifier",
-            value: "x"
         }
     }]
 },

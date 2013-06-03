@@ -80,7 +80,7 @@ module LookupTable {
     }
 }
 
-import charTable from LookupTable;
+import { charTable } from LookupTable;
 
 // Performs a binary search on an array
 function binarySearch(array, val) {
@@ -230,13 +230,17 @@ export class Scanner {
         token || (token = this);
         
         var offset = token.start,
-            i = binarySearch(this.lines, offset);
+            line = binarySearch(this.lines, offset),
+            pos = this.lines[line - 1],
+            column = offset - pos;
         
         return { 
         
-            offset: offset, 
-            line: i, 
-            column: offset - this.lines[i - 1]
+            line, 
+            column,
+            startOffset: offset, 
+            endOffset: token.end,
+            lineOffset: pos + 1
         };
     }
     
