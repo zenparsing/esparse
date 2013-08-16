@@ -56,7 +56,7 @@ var WHITESPACE = 1,
 // === Character Type Lookup Table ===
 module LookupTable {
 
-    export var charTable = new Array(128), i;
+    export var charTable = new Array(128);
     
     add(WHITESPACE, "\t\v\f ");
     add(NEWLINE, "\r\n");
@@ -69,8 +69,10 @@ module LookupTable {
     add(ZERO, "0");
     add(STRING, "'\"");
     add(TEMPLATE, "`");
-    
     add(IDENTIFIER, "$_\\");
+    
+    var i;
+    
     for (i = 65; i <= 90; ++i) charTable[i] = IDENTIFIER;
     for (i = 97; i <= 122; ++i) charTable[i] = IDENTIFIER;
     

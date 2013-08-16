@@ -32,4 +32,42 @@
     }]
 },
 
+/** module "X" {} **/
+"an empty module registration": {
+    type: "Script",
+    statements: [
+    {   type: "ModuleRegistration",
+        name: {
+            type: "String",
+            value: "X"
+        },
+        body: {
+            type: "ModuleBody",
+            statements: []
+        }
+    }]
+},
+
+/** module A = B.C; **/
+"module alias": {
+    type: "Script",
+    statements: [
+    {   type: "ModuleAlias",
+        ident: {
+            type: "Identifier",
+            value: "A"
+        },
+        path: {
+            type: "ModulePath",
+            elements: [
+            {   type: "Identifier",
+                value: "B"
+            },
+            {   type: "Identifier",
+                value: "C"
+            }]
+        }
+    }]
+},
+
 })

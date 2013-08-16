@@ -743,6 +743,18 @@ export class ModuleDeclaration {
     }
 }
 
+export class ModuleRegistration {
+
+    constructor(name, body, start, end) {
+    
+        this.type = "ModuleRegistration";
+        this.name = name;
+        this.body = body;
+        this.start = start;
+        this.end = end;
+    }
+}
+
 export class ModuleBody {
 
     constructor(statements, start, end) {
@@ -761,6 +773,18 @@ export class ModuleFromDeclaration {
         this.type = "ModuleFromDeclaration";
         this.ident = ident;
         this.from = from;
+        this.start = start;
+        this.end = end;
+    }
+}
+
+export class ModuleAlias {
+
+    constructor(ident, path, start, end) {
+    
+        this.type = "ModuleAlias";
+        this.ident = ident;
+        this.path = path;
         this.start = start;
         this.end = end;
     }

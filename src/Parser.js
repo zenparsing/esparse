@@ -300,7 +300,7 @@ export class Parser {
             var p = this.peekToken("div", 1);
             
             // If a module identifier follows...
-            if (!p.newlineBefore && p.type === "IDENTIFIER")
+            if (!p.newlineBefore && (p.type === "IDENTIFIER" || p.type === "STRING"))
                 return true;
         }
         
@@ -1315,7 +1315,6 @@ export class Parser {
         
         } else {
         
-            // TODO: token may be mutated!
             if (!labelSet[""] && !(keyword === "break" && this.context.switchDepth > 0))
                 this.fail("Invalid " + keyword + " statement", token);
         }
@@ -1671,7 +1670,7 @@ export class Parser {
             case "IDENTIFIER":
                 
                 if (this.peekModule())
-                    return this.ModuleDeclaration();
+                    return this.ModuleNode();
                 
                 break;
         }
@@ -1836,30 +1835,65 @@ export class Parser {
     
     // === Modules ===
     
-    ModuleDeclaration() {
-        
+    ModuleNode() {
+    
         var start = this.startOffset,
-            ident;
+            ident,
+            target;
         
         this.readKeyword("module");
         
+        if (this.peek() === "STRING") {
+        
+            return new Node.ModuleRegistration(
+                this.String(),
+                this.ModuleBody(),
+                start,
+                this.endOffset);
+        }
+        
         ident = this.BindingIdentifier();
         
-        if (this.peekKeyword("from")) {
-        
+        if (this.peek() === "=") {
+    
             this.read();
-            var from = this.peek() === "STRING" ? this.String() : this.ModulePath();
+            target = this.ModulePath();
             this.Semicolon();
+        
+            return new Node.ModuleAlias(
+                ident,
+                target,
+                start,
+                this.endOffset);
             
+        } else if (this.peekKeyword("from")) {
+    
+            this.read();
+            target = this.peek() === "STRING" ? this.String() : this.ModulePath();
+            this.Semicolon();
+        
             return new Node.ModuleFromDeclaration(
                 ident,
-                from,
+                target,
                 start,
                 this.endOffset);
         }
         
         return new Node.ModuleDeclaration(
             ident,
+            this.ModuleBody(),
+            start,
+            this.endOffset);
+    }
+    
+    ModuleDeclaration() {
+        
+        var start = this.startOffset;
+        
+        this.readKeyword("module");
+        
+        return new Node.ModuleDeclaration(
+            this.BindingIdentifier(),
             this.ModuleBody(),
             start,
             this.endOffset);
@@ -1888,16 +1922,17 @@ export class Parser {
             from;
         
         this.read("import");
+        
         this.read("{");
-        
+    
         while (this.peekUntil("}")) {
-        
+    
             list.push(this.ImportSpecifier());
-            
+        
             if (this.peek() === ",") 
                 this.read();
         }
-        
+    
         this.read("}");
         
         this.readKeyword("from");

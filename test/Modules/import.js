@@ -66,4 +66,17 @@
     }]
 },
 
+/** import {} from "x.js"; **/
+"empty import specifier set": {
+    type: "Script",
+    statements: [
+    {   type: "ImportDeclaration",
+        specifiers: [],
+        from: {
+            type: "String",
+            value: "x.js"
+        }
+    }]
+},
+
 })
