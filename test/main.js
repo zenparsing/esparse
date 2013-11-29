@@ -15,7 +15,8 @@ var SKIP_KEYS = {
     "newlineBefore": 1,
     "message": 1,
     "directive": 1,
-    "context": 1
+    "context": 1,
+    "error": 1
 }
 
 var testCount = 0;
@@ -104,28 +105,28 @@ function walkDirectory(dir, fn) {
     });
 }
 
-module Style {
+var Style = new class {
 
-    export function green(msg) {
+    green(msg) {
     
         return `\x1B[32m${ msg }\x1B[39m`;
     }
     
-    export function red(msg) {
+    red(msg) {
     
         return `\x1B[31m${ msg }\x1B[39m`;
     }
     
-    export function gray(msg) {
+    gray(msg) {
     
         return `\x1B[90m${ msg }\x1B[39m`;
     }
     
-    export function bold(msg) {
+    bold(msg) {
     
         return `\x1B[1m${ msg }\x1B[22m`;
     }
-}
+};
 
 // Prints an application message to the console
 function printMessage(msg) {

@@ -1,910 +1,765 @@
 
-export class Script {
+class Node {
 
-    constructor(statements, start, end) {
+    constructor(start, end) {
     
-        this.type = "Script";
-        this.statements = statements;
+        this.type = this.constructor.name;
         this.start = start;
         this.end = end;
+        this.error = "";
     }
 }
 
-export class Module {
+export class Script extends Node {
 
     constructor(statements, start, end) {
     
-        this.type = "Module";
+        super(start, end);
         this.statements = statements;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class Identifier {
+export class Module extends Node {
+
+    constructor(statements, start, end) {
+    
+        super(start, end);
+        this.statements = statements;
+    }
+}
+
+export class Identifier extends Node {
 
     constructor(value, context, start, end) {
     
-        this.type = "Identifier";
+        super(start, end);
         this.value = value;
         this.context = context;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class Number {
+export class Number extends Node {
 
     constructor(value, start, end) {
     
-        this.type = "Number";
+        super(start, end);
         this.value = value;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class String {
+export class String extends Node {
 
     constructor(value, start, end) {
     
-        this.type = "String";
+        super(start, end);
         this.value = value;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class Template {
+export class Template extends Node {
 
     constructor(value, isEnd, start, end) {
     
-        this.type = "Template";
+        super(start, end);
         this.value = value;
         this.templateEnd = isEnd;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class RegularExpression {
+export class RegularExpression extends Node {
 
     constructor(value, flags, start, end) {
     
-        this.type = "RegularExpression";
+        super(start, end);
         this.value = value;
         this.flags = flags;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class Null {
+export class Null extends Node {
 
-    constructor(start, end) {
-    
-        this.type = "Null";
-        this.start = start;
-        this.end = end;
-    }
+    constructor(start, end) { super(start, end) }
 }
 
-export class Boolean {
+export class Boolean extends Node {
 
     constructor(value, start, end) {
     
-        this.type = "Boolean";
+        super(start, end);
         this.value = value;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ThisExpression {
+export class ThisExpression extends Node {
 
-    constructor(start, end) {
-    
-        this.type = "ThisExpression";
-        this.start = start;
-        this.end = end;
-    }
+    constructor(start, end) { super(start, end) }
 }
 
-export class SuperExpression {
+export class SuperExpression extends Node {
 
-    constructor(start, end) {
-    
-        this.type = "SuperExpression";
-        this.start = start;
-        this.end = end;
-    }
+    constructor(start, end) { super(start, end) }
 }
 
-export class SequenceExpression {
+export class SequenceExpression extends Node {
 
     constructor(list, start, end) {
     
-        this.type = "SequenceExpression";
+        super(start, end);
         this.expressions = list;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class AssignmentExpression {
+export class AssignmentExpression extends Node {
 
     constructor(op, left, right, start, end) {
     
-        this.type = "AssignmentExpression";
+        super(start, end);
         this.operator = op;
         this.left = left;
         this.right = right;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class SpreadExpression {
+export class SpreadExpression extends Node {
 
     constructor(expr, start, end) {
     
-        this.type = "SpreadExpression";
+        super(start, end);
         this.expression = expr;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class YieldExpression {
+export class YieldExpression extends Node {
 
     constructor(expr, delegate, start, end) {
     
-        this.type = "YieldExpression";
+        super(start, end);
         this.delegate = delegate;
         this.expression = expr;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ConditionalExpression {
+export class ConditionalExpression extends Node {
 
     constructor(test, cons, alt, start, end) {
     
-        this.type = "ConditionalExpression";
+        super(start, end);
         this.test = test;
         this.consequent = cons;
         this.alternate = alt;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class BinaryExpression {
+export class BinaryExpression extends Node {
 
     constructor(op, left, right, start, end) {
     
-        this.type = "BinaryExpression";
+        super(start, end);
         this.operator = op;
         this.left = left;
         this.right = right;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class UpdateExpression {
+export class UpdateExpression extends Node {
 
     constructor(op, expr, prefix, start, end) {
     
-        this.type = "UpdateExpression";
+        super(start, end);
         this.operator = op;
         this.expression = expr;
         this.prefix = prefix;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class UnaryExpression {
+export class UnaryExpression extends Node {
 
     constructor(op, expr, start, end) {
     
-        this.type = "UnaryExpression";
+        super(start, end);
         this.operator = op;
         this.expression = expr;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class MemberExpression {
+export class MemberExpression extends Node {
 
     constructor(obj, prop, computed, start, end) {
     
-        this.type = "MemberExpression";
+        super(start, end);
         this.object = obj;
         this.property = prop;
         this.computed = computed;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class CallExpression {
+export class CallExpression extends Node {
 
     constructor(callee, args, start, end) {
     
-        this.type = "CallExpression";
+        super(start, end);
         this.callee = callee;
         this.arguments = args;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class TaggedTemplateExpression {
+export class TaggedTemplateExpression extends Node {
 
     constructor(tag, template, start, end) {
     
-        this.type = "TaggedTemplateExpression";
+        super(start, end);
         this.tag = tag;
         this.template = template;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class NewExpression {
+export class NewExpression extends Node {
 
     constructor(callee, args, start, end) {
     
-        this.type = "NewExpression";
+        super(start, end);
         this.callee = callee;
         this.arguments = args;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ParenExpression {
+export class ParenExpression extends Node {
     
     constructor(expr, start, end) {
     
-        this.type = "ParenExpression";
+        super(start, end);
         this.expression = expr;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ObjectExpression {
+export class ObjectExpression extends Node {
 
     constructor(props, start, end) {
     
-        this.type = "ObjectExpression";
+        super(start, end);
         this.properties = props;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class PropertyDefinition {
+export class PropertyDefinition extends Node {
 
     constructor(name, expr, start, end) {
     
-        this.type = "PropertyDefinition";
+        super(start, end);
         this.name = name;
         this.expression = expr;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class CoveredPatternProperty {
+export class PatternProperty extends Node {
 
-    constructor(name, pattern, init, start, end) {
+    constructor(name, pattern, initializer, start, end) {
     
-        this.type = "CoveredPatternProperty";
+        super(start, end);
         this.name = name;
         this.pattern = pattern;
-        this.init = init;
-        this.start = start;
-        this.end = end;
+        this.initializer = initializer;
     }
 }
 
-export class MethodDefinition {
+export class PatternElement extends Node {
 
-    constructor(modifier, name, params, body, start, end) {
+    constructor(pattern, initializer, rest, start, end) {
     
-        this.type = "MethodDefinition";
-        this.modifier = modifier;
+        super(start, end);
+        this.pattern = pattern;
+        this.initializer = initializer;
+        this.rest = rest;
+    }
+}
+
+export class MethodDefinition extends Node {
+
+    constructor(kind, name, params, body, start, end) {
+    
+        super(start, end);
+        this.kind = kind;
         this.name = name;
         this.params = params;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ArrayExpression {
+export class ArrayExpression extends Node {
 
     constructor(elements, start, end) {
     
-        this.type = "ArrayExpression";
+        super(start, end);
         this.elements = elements;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ArrayComprehension {
+export class ArrayComprehension extends Node {
 
     constructor(qualifiers, expr, start, end) {
     
-        this.type = "ArrayComprehension";
+        super(start, end);
         this.qualifiers = qualifiers;
         this.expression = expr;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class GeneratorComprehension {
+export class GeneratorComprehension extends Node {
 
     constructor(qualifiers, expr, start, end) {
     
-        this.type = "GeneratorComprehension";
+        super(start, end);
         this.qualifiers = qualifiers;
         this.expression = expr;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ComprehensionFor {
+export class ComprehensionFor extends Node {
 
     constructor(left, right, start, end) {
     
-        this.type = "ComprehensionFor";
+        super(start, end);
         this.left = left;
         this.right = right;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ComprehensionIf {
+export class ComprehensionIf extends Node {
 
     constructor(test, start, end) {
     
-        this.type = "ComprehensionIf";
+        super(start, end);
         this.test = test;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class TemplateExpression {
+export class TemplateExpression extends Node {
 
     constructor(lits, subs, start, end) {
     
-        this.type = "TemplateExpression";
+        super(start, end);
         this.literals = lits;
         this.substitutions = subs;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class Block {
+export class Block extends Node {
 
     constructor(statements, start, end) {
     
-        this.type = "Block";
+        super(start, end);
         this.statements = statements;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class LabelledStatement {
+export class LabelledStatement extends Node {
 
     constructor(label, statement, start, end) {
     
-        this.type = "LabelledStatement";
+        super(start, end);
         this.label = label;
         this.statement = statement;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ExpressionStatement {
+export class ExpressionStatement extends Node {
 
     constructor(expr, start, end) {
     
-        this.type = "ExpressionStatement";
+        super(start, end);
         this.expression = expr;
         this.directive = null;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class EmptyStatement {
+export class EmptyStatement extends Node {
 
-    constructor(start, end) {
-    
-        this.type = "EmptyStatement";
-        this.start = start;
-        this.end = end;
-    }
+    constructor(start, end) { super(start, end) }
 }
 
-export class VariableDeclaration {
+export class VariableDeclaration extends Node {
 
-    constructor(keyword, list, start, end) {
+    constructor(kind, list, start, end) {
     
-        this.type = "VariableDeclaration";
-        this.keyword = keyword;
+        super(start, end);
+        this.kind = kind;
         this.declarations = list;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class VariableDeclarator {
+export class VariableDeclarator extends Node {
 
-    constructor(pattern, init, start, end) {
+    constructor(pattern, initializer, start, end) {
     
-        this.type = "VariableDeclarator";
+        super(start, end);
         this.pattern = pattern;
-        this.init = init;
-        this.start = start;
-        this.end = end;
+        this.initializer = initializer;
     }
 }
 
-export class ReturnStatement {
+export class ReturnStatement extends Node {
 
     constructor(arg, start, end) {
     
-        this.type = "ReturnStatement";
+        super(start, end);
         this.argument = arg;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class BreakStatement {
+export class BreakStatement extends Node {
 
     constructor(label, start, end) {
     
-        this.type = "BreakStatement";
-        this.start = start;
-        this.end = end;
+        super(start, end);
+        this.label = label;
     }
 }
 
-export class ContinueStatement {
+export class ContinueStatement extends Node {
 
     constructor(label, start, end) {
     
-        this.type = "ContinueStatement";
-        this.start = start;
-        this.end = end;
+        super(start, end);
+        this.label = label;
     }
 }
 
-export class ThrowStatement {
+export class ThrowStatement extends Node {
 
     constructor(expr, start, end) {
     
-        this.type = "ThrowStatement";
+        super(start, end);
         this.expression = expr;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class DebuggerStatement {
+export class DebuggerStatement extends Node {
 
-    constructor(start, end) {
-    
-        this.type = "DebuggerStatement";
-        this.start = start;
-        this.end = end;
-    }
+    constructor(start, end) { super(start, end) }
 }
 
-export class IfStatement {
+export class IfStatement extends Node {
 
     constructor(test, cons, alt, start, end) {
     
-        this.type = "IfStatement";
+        super(start, end);
         this.test = test;
         this.consequent = cons;
         this.alternate = alt;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class DoWhileStatement {
+export class DoWhileStatement extends Node {
 
     constructor(body, test, start, end) {
     
-        this.type = "DoWhileStatement";
+        super(start, end);
         this.body = body;
         this.test = test;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class WhileStatement {
+export class WhileStatement extends Node {
 
     constructor(test, body, start, end) {
     
-        this.type = "WhileStatement";
+        super(start, end);
         this.test = test;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ForStatement {
+export class ForStatement extends Node {
 
-    constructor(init, test, update, body, start, end) {
+    constructor(initializer, test, update, body, start, end) {
     
-        this.type = "ForStatement";
-        this.init = init;
+        super(start, end);
+        this.initializer = initializer;
         this.test = test;
         this.update = update;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ForInStatement {
+export class ForInStatement extends Node {
 
     constructor(left, right, body, start, end) {
     
-        this.type = "ForInStatement";
+        super(start, end);
         this.left = left;
         this.right = right;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ForOfStatement {
+export class ForOfStatement extends Node {
 
     constructor(left, right, body, start, end) {
     
-        this.type = "ForOfStatement";
+        super(start, end);
         this.left = left;
         this.right = right;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class WithStatement {
+export class WithStatement extends Node {
 
     constructor(object, body, start, end) {
     
-        this.type = "WithStatement";
+        super(start, end);
         this.object = object;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class SwitchStatement {
+export class SwitchStatement extends Node {
 
     constructor(desc, cases, start, end) {
     
-        this.type = "SwitchStatement";
+        super(start, end);
         this.descriminant = desc;
         this.cases = cases;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class SwitchCase {
+export class SwitchCase extends Node {
 
     constructor(test, cons, start, end) {
     
-        this.type = "SwitchCase";
+        super(start, end);
         this.test = test;
         this.consequent = cons;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class TryStatement {
+export class TryStatement extends Node {
 
     constructor(block, handler, fin, start, end) {
     
-        this.type = "TryStatement";
+        super(start, end);
         this.block = block;
         this.handler = handler;
         this.finalizer = fin;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class CatchClause {
+export class CatchClause extends Node {
 
     constructor(param, body, start, end) {
     
-        this.type = "CatchClause";
+        super(start, end);
         this.param = param;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class FunctionDeclaration {
+export class FunctionDeclaration extends Node {
 
-    constructor(gen, ident, params, body, start, end) {
+    constructor(kind, identifier, params, body, start, end) {
     
-        this.type = "FunctionDeclaration";
-        this.generator = gen;
-        this.ident = ident;
+        super(start, end);
+        this.kind = kind;
+        this.identifier = identifier;
         this.params = params;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class FunctionExpression {
+export class FunctionExpression extends Node {
 
-    constructor(gen, ident, params, body, start, end) {
+    constructor(kind, identifier, params, body, start, end) {
     
-        this.type = "FunctionExpression";
-        this.generator = gen;
-        this.ident = ident;
+        super(start, end);
+        this.kind = kind;
+        this.identifier = identifier;
         this.params = params;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class FormalParameter {
+export class FormalParameter extends Node {
 
-    constructor(pattern, init, start, end) {
+    constructor(pattern, initializer, start, end) {
     
-        this.type = "FormalParameter";
+        super(start, end);
         this.pattern = pattern;
-        this.init = init;
-        this.start = start;
-        this.end = end;
+        this.initializer = initializer;
     }
 }
 
-export class RestParameter {
+export class RestParameter extends Node {
 
-    constructor(ident, start, end) {
+    constructor(identifier, start, end) {
     
-        this.type = "RestParameter";
-        this.ident = ident;
-        this.start = start;
-        this.end = end;
+        super(start, end);
+        this.identifier = identifier;
     }
 }
 
-export class FunctionBody {
+export class FunctionBody extends Node {
 
     constructor(statements, start, end) {
     
-        this.type = "FunctionBody";
+        super(start, end);
         this.statements = statements;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ArrowFunction {
+export class ArrowFunction extends Node {
 
     constructor(params, body, start, end) {
     
-        this.type = "ArrowFunction";
+        super(start, end);
         this.params = params;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ModuleDeclaration {
+export class ModuleDeclaration extends Node {
 
-    constructor(ident, body, start, end) {
+    constructor(identifier, body, start, end) {
     
-        this.type = "ModuleDeclaration";
-        this.ident = ident;
+        super(start, end);
+        this.identifier = identifier;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ModuleRegistration {
-
-    constructor(name, body, start, end) {
-    
-        this.type = "ModuleRegistration";
-        this.name = name;
-        this.body = body;
-        this.start = start;
-        this.end = end;
-    }
-}
-
-export class ModuleBody {
+export class ModuleBody extends Node {
 
     constructor(statements, start, end) {
     
-        this.type = "ModuleBody";
+        super(start, end);
         this.statements = statements;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ModuleFromDeclaration {
+export class ModuleFromDeclaration extends Node {
+
+    constructor(identifier, from, start, end) {
+    
+        super(start, end);
+        this.identifier = identifier;
+        this.from = from;
+    }
+}
+
+export class ModuleAlias extends Node {
+
+    constructor(identifier, path, start, end) {
+    
+        super(start, end);
+        this.identifier = identifier;
+        this.path = path;
+    }
+}
+
+export class ImportDefaultDeclaration extends Node {
 
     constructor(ident, from, start, end) {
     
-        this.type = "ModuleFromDeclaration";
-        this.ident = ident;
+        super(start, end);
+        this.identifier = ident;
         this.from = from;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ModuleAlias {
-
-    constructor(ident, path, start, end) {
-    
-        this.type = "ModuleAlias";
-        this.ident = ident;
-        this.path = path;
-        this.start = start;
-        this.end = end;
-    }
-}
-
-export class ImportDeclaration {
+export class ImportDeclaration extends Node {
 
     constructor(specifiers, from, start, end) {
     
-        this.type = "ImportDeclaration";
+        super(start, end);
         this.specifiers = specifiers;
         this.from = from;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ImportSpecifier {
+export class ImportSpecifier extends Node {
 
     constructor(remote, local, start, end) {
     
-        this.type = "ImportSpecifier";
+        super(start, end);
         this.remote = remote;
         this.local = local;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ExportDeclaration {
+export class ExportDeclaration extends Node {
 
     constructor(binding, start, end) {
     
-        this.type = "ExportDeclaration";
+        super(start, end);
         this.binding = binding;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ExportSpecifierSet {
+export class ExportSpecifierSet extends Node {
 
     constructor(list, from, start, end) {
     
-        this.type = "ExportSpecifierSet";
+        super(start, end);
         this.specifiers = list;
         this.from = from;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ExportSpecifier {
+export class ExportSpecifier extends Node {
 
     constructor(local, remote, start, end) {
     
-        this.type = "ExportSpecifier";
+        super(start, end);
         this.local = local;
         this.remote = remote;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ModulePath {
+export class ModulePath extends Node {
     
     constructor(list, start, end) {
     
-        this.type = "ModulePath";
+        super(start, end);
         this.elements = list;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ClassDeclaration {
+export class ClassDeclaration extends Node {
 
-    constructor(ident, base, body, start, end) {
+    constructor(identifier, base, body, start, end) {
     
-        this.type = "ClassDeclaration";
-        this.ident = ident;
+        super(start, end);
+        this.identifier = identifier;
         this.base = base;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ClassExpression {
+export class ClassExpression extends Node {
 
-    constructor(ident, base, body, start, end) {
+    constructor(identifier, base, body, start, end) {
     
-        this.type = "ClassExpression";
-        this.ident = ident;
+        super(start, end);
+        this.identifier = identifier;
         this.base = base;
         this.body = body;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ClassBody {
+export class ClassBody extends Node {
 
     constructor(elems, start, end) {
     
-        this.type = "ClassBody";
+        super(start, end);
         this.elements = elems;
-        this.start = start;
-        this.end = end;
     }
 }
 
-export class ClassElement {
+export class ClassElement extends Node {
 
     constructor(isStatic, method, start, end) {
     
-        this.type = "ClassElement";
+        super(start, end);
         this.static = isStatic;
         this.method = method;
-        this.start = start;
-        this.end = end;
     }
 }

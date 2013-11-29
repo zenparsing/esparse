@@ -5,7 +5,7 @@
     type: "Script",
     statements: [
     {   type: "ClassDeclaration",
-        ident: {
+        identifier: {
             type: "Identifier",
             value: "C"
         },
@@ -26,7 +26,7 @@
             type: "ParenExpression",
             expression: {
                 type: "ClassExpression",
-                ident: {
+                identifier: {
                     type: "Identifier",
                     value: "C"
                 },
@@ -45,7 +45,7 @@
     type: "Script",
     statements: [
     {   type: "ClassDeclaration",
-        ident: {
+        identifier: {
             type: "Identifier",
             value: "C"
         },
@@ -65,7 +65,7 @@
     type: "Script",
     statements: [
     {   type: "ClassDeclaration",
-        ident: {
+        identifier: {
             type: "Identifier",
             value: "C"
         },
@@ -78,7 +78,7 @@
                 static: true,
                 method: {
                     type: "MethodDefinition",
-                    modifier: null,
+                    kind: "",
                     name: {
                         type: "Identifier",
                         value: "S"

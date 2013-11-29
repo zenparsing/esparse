@@ -1,8 +1,13 @@
 // Object literal property name flags
 var PROP_NORMAL = 1,
-    PROP_ASSIGN = 2,
+    PROP_DATA = 2,
     PROP_GET = 4,
     PROP_SET = 8;
+
+// Identifiers which are reserved in strict mode    
+var strictReservedWord = new RegExp("^(?:" +
+    "implements|private|public|interface|package|let|protected|static|yield" +
+")$");
 
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
@@ -21,11 +26,24 @@ export class Validate {
         // Mark identifier node as a variable
         node.context = "variable";
         
-        if (!strict && !this.context.strict)
-            return;
+        if (isPoisonIdent(node.value)) {
         
-        if (isPoisonIdent(node.value))
-            this.fail("Cannot modify " + node.value + " in strict mode", node);
+            var msg = "Cannot modify " + node.value + " in strict mode";
+            
+            if (strict) this.fail(msg, node);
+            else this.addStrictError(msg, node);
+        }
+    }
+    
+    // Checks an identifier for strict mode reserved words
+    checkIdentifier(node) {
+    
+        var ident = node.value;
+        
+        if (ident === "yield" && this.context.isGenerator)
+            this.fail("yield cannot be an identifier inside of a generator function.", node);
+        else if (strictReservedWord.test(ident))
+            this.addStrictError(ident + " cannot be used as an identifier in strict mode.", node);
     }
     
     // Checks a binding identifier for strict mode restrictions
@@ -33,22 +51,21 @@ export class Validate {
     
         // Mark identifier node as a declaration
         node.context = "declaration";
-        
-        if (!strict && !this.context.strict)
-            return;
             
         var name = node.value;
         
-        if (isPoisonIdent(name))
-            this.fail("Binding cannot be created for '" + name + "' in strict mode", node);
+        if (isPoisonIdent(name)) {
+        
+            var msg = "Binding cannot be created for '" + name + "' in strict mode";
+            
+            if (strict) this.fail(msg, node);
+            else this.addStrictError(msg, node);
+        }
     }
     
     // Checks function formal parameters for strict mode restrictions
     checkParameters(params) {
     
-        if (!this.context.strict)
-            return;
-        
         var names = {}, 
             name,
             node,
@@ -64,10 +81,10 @@ export class Validate {
             name = node.pattern.value;
             
             if (isPoisonIdent(name))
-                this.fail("Parameter name " + name + " is not allowed in strict mode", node);
+                this.addStrictError("Parameter name " + name + " is not allowed in strict mode", node);
             
             if (names[name] === 1)
-                this.fail("Strict mode function may not have duplicate parameter names", node);
+                this.addStrictError("Strict mode function may not have duplicate parameter names", node);
             
             names[name] = 1;
         }
@@ -88,9 +105,9 @@ export class Validate {
                 
             var decl = init.declarations[0];
             
-            if (decl.init && (
+            if (decl.initializer && (
                 type === "of" ||
-                init.keyword !== "var" ||
+                init.kind !== "var" ||
                 decl.pattern.type !== "Identifier")) {
                 
                 this.fail("Invalid initializer in for-" + type + " statement", init);
@@ -104,16 +121,16 @@ export class Validate {
     }
     
     // Returns true if the specified name type is a duplicate for a given set of flags
-    isDuplicateName(type, flags) {
+    isDuplicateName(type, flags, strict) {
     
         if (!flags)
             return false;
         
         switch (type) {
         
-            case PROP_ASSIGN: return (this.context.strict || flags !== PROP_ASSIGN);
-            case PROP_GET: return (flags !== PROP_SET);
-            case PROP_SET: return (flags !== PROP_GET);
+            case PROP_DATA: return strict || flags !== PROP_DATA;
+            case PROP_GET: return flags !== PROP_SET;
+            case PROP_SET: return flags !== PROP_GET;
             default: return !!flags;
         }
     }
@@ -123,6 +140,7 @@ export class Validate {
     
         var context = this.context,
             list = context.invalidNodes,
+            item,
             node,
             i;
         
@@ -131,10 +149,14 @@ export class Validate {
         
         for (i = 0; i < list.length; ++i) {
         
-            node = list[i];
+            item = list[i];
+            node = item.node;
             
-            if (node.error)
-                this.fail(node.error, node);
+            if (node.error) {
+            
+                if (item.strict) this.addStrictError(node.error, node);
+                else this.fail(node.error, node);
+            }
         }
         
         context.invalidNodes = null;

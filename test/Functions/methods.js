@@ -15,7 +15,7 @@
                 
                 {   type: "MethodDefinition",
                     
-                    modifier: "*",
+                    kind: "generator",
                     
                     name: 
                     {   type: "Identifier",

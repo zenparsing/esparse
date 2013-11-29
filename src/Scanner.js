@@ -14,10 +14,6 @@ var reservedWord = new RegExp("^(?:" +
     "var|void|while|with" +
 ")$");
 
-var strictReservedWord = new RegExp("^(?:" +
-    "implements|private|public|interface|package|let|protected|static|yield" +
-")$");
-
 // === Punctuators ===
 var multiCharPunctuator = new RegExp("^(?:" +
     "[-+]{2}|" +
@@ -54,9 +50,9 @@ var WHITESPACE = 1,
     LBRACE = 12;
 
 // === Character Type Lookup Table ===
-module LookupTable {
+var charTable = _=> {
 
-    export var charTable = new Array(128);
+    var charTable = new Array(128);
     
     add(WHITESPACE, "\t\v\f ");
     add(NEWLINE, "\r\n");
@@ -76,13 +72,14 @@ module LookupTable {
     for (i = 65; i <= 90; ++i) charTable[i] = IDENTIFIER;
     for (i = 97; i <= 122; ++i) charTable[i] = IDENTIFIER;
     
+    return charTable;
+    
     function add(type, string) {
     
         string.split("").forEach(c => charTable[c.charCodeAt(0)] = type);
     }
-}
-
-import { charTable } from LookupTable;
+    
+}();
 
 // Performs a binary search on an array
 function binarySearch(array, val) {
@@ -184,8 +181,6 @@ export class Scanner {
         this.length = this.input.length;
         this.lines = [-1];
         
-        this.strict = false;
-        
         this.type = "";
         this.start = 0;
         this.end = 0;
@@ -194,7 +189,7 @@ export class Scanner {
         this.templateEnd = false;
         this.regExpFlags = null;
         this.newlineBefore = false;
-        this.error = "";
+        this.strictError = "";
     }
     
     next(context) {
@@ -202,7 +197,7 @@ export class Scanner {
         if (this.type !== "COMMENT")
             this.newlineBefore = false;
         
-        this.error = "";
+        this.strictError = "";
         this.value = null;
         
         var type = null, 
@@ -334,13 +329,9 @@ export class Scanner {
                 
                     return String.fromCharCode(0);
                 
-                } else if (this.strict) {
-                
-                    this.error = "Octal literals are not allowed in strict mode";
-                    return null;
-                    
                 } else {
                 
+                    this.strictError = "Octal literals are not allowed in strict mode";
                     return String.fromCharCode(parseInt(esc, 8));
                 }
             
@@ -730,9 +721,7 @@ export class Scanner {
                 break;
         }
         
-        if (this.strict)
-            return this.Error("Octal literals are not allowed in strict mode");
-        
+        this.strictError = "Octal literals are not allowed in strict mode";
         this.number = parseInt(this.input.slice(start, this.offset), 8);
         
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
@@ -823,7 +812,7 @@ export class Scanner {
         
         id += this.input.slice(start, this.offset);
         
-        if (reservedWord.test(id) || this.strict && strictReservedWord.test(id))
+        if (reservedWord.test(id))
             return id;
         
         this.value = id;
@@ -914,10 +903,6 @@ export class Scanner {
     Error(msg) {
     
         this.offset++;
-        
-        if (msg)
-            this.error = msg;
-        
         return "ILLEGAL";
     }
     

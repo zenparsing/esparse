@@ -1,0 +1,51 @@
+== Tasks ==
+
+- Arrow functions might present more of a problem for our approach to
+  strictness:  (a = function(eval) {}) => { "use strict"; }  It's going
+  to get the parent context all wrong.
+- checkParameters needs to check patterns, yes?  Find section of spec
+  which mentions this.  What if there
+- transformFormals needs to perform strict mode checks like checkParameters,
+  I think.  Investigate and write tests.
+- Write tests for parsing of yield within generators.
+- Create summarized list of early errors we need to check for.
+- For "super", we'll need to know whether we're in a class or not.  This
+  will necessitate another flag in the context object, but there should 
+  probably be a type string instead ("class,generator,async,etc")
+- Unicode escapes should not make a reserved word??
+- Arrow function parameterized on "in"?  Need to pass noIn into ArrowFunction
+
+== Syntax Errors ==
+
+ComprehensionFor : for ( ForBinding of AssignmentExpression )
+  It is a Syntax Error if the BoundNames of ForBinding contains "let".
+  It is a Syntax Error if the BoundNames of ForBinding contains any duplicate entries.
+
+  https://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension-static-semantics-early-errors
+
+
+PropertyDefinition : MethodDefinition
+  It is a Syntax Error if ReferencesSuper of MethodDefinition is true.
+  
+  https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object-initialiser-static-semantics-early-errors
+  
+GeneratorComprehension : ( Comprehension )
+  It is a Syntax Error if Comprehension Contains YieldExpression is true.
+  https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generator-comprehensions-static-semantics-early-errors
+  
+PrimaryExpression : RegularExpressionLiterl
+  It is a Syntax Error if BodyText of RegularExpressionLiteral cannot be recognised using the goal symbol Pattern of the ECMAScript RegExp grammar specified in 21.2.1.
+
+  It is a Syntax Error if FlagText of RegularExpressionLiteral contains any character other than "g", "i", "m", "u", or "y", or if it contains the same character more than once.
+  https://people.mozilla.org/~jorendorff/es6-draft.html#sec-primary-expressions-regular-expression-literals-static-semantics-early-errors
+  
+MemberExpression :
+    super [ Expression ]
+    super . IdentifierName
+    new super Argumentsopt
+    CallExpression : super Arguments
+    It is a Syntax Error if the source code parsed with this production is global code that is not eval code.
+
+    It is a Syntax Error if the source code parsed with this production is eval code and the source code is not being processed by a direct call to eval that is contained in function code.
+    
+    https://people.mozilla.org/~jorendorff/es6-draft.html#sec-super-keyword-static-semantics-early-errors

@@ -6,7 +6,7 @@ import { Validate } from "Validate.js";
 
 // Object literal property name flags
 var PROP_NORMAL = 1,
-    PROP_ASSIGN = 2,
+    PROP_DATA = 2,
     PROP_GET = 4,
     PROP_SET = 8;
 
@@ -104,7 +104,22 @@ class Token {
         this.templateEnd = s.templateEnd;
         this.regExpFlags = s.regExpFlags;
         this.newlineBefore = s.newlineBefore;
-        this.error = s.error;
+        this.strictError = s.strictError;
+    }
+}
+
+class Context {
+
+    constructor(isStrict, isFunction) {
+    
+        this.strict = isStrict;
+        this.isFunction = isFunction;
+        this.isFunctionBody = false;
+        this.isGenerator = false;
+        this.labelSet = {};
+        this.switchDepth = 0;
+        this.invalidNodes = null;
+        this.strictError = null;
     }
 }
 
@@ -240,36 +255,96 @@ export class Parser {
     peekKeyword(word) {
     
         var token = this.peekToken();
-        return token.type === word || token.type === "IDENTIFIER" && token.value === word;
+        return token.type === "IDENTIFIER" && token.value === word;
+    }
+    
+    peekLet() {
+    
+        if (this.peekKeyword("let")) {
+        
+            switch (this.peek("div", 1)) {
+            
+                case "{":
+                case "[":
+                case "IDENTIFIER": return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    peekModule() {
+    
+        if (this.peekKeyword("module")) {
+        
+            var token = this.peekToken("div", 1);
+            return (!token.newlineBefore && token.type === "IDENTIFIER");
+        }
+        
+        return false;
+    }
+    
+    peekYield() {
+    
+        return this.peekKeyword("yield") && this.context.isGenerator && this.context.isFunctionBody;
     }
     
     // Context management
     pushContext(isFunction, isStrict) {
     
-        this.context = { 
-            
-            strict: isStrict || (this.context ? this.context.strict : false),
-            isFunction: isFunction,
-            labelSet: {},
-            switchDepth: 0,
-            invalidNodes: null
-        };
+        isStrict = isStrict || (this.context ? this.context.strict : null);
         
+        this.context = new Context(isStrict, isFunction);
         this.contextStack.push(this.context);
-        this.scanner.strict = this.context.strict;
     }
     
     popContext() {
     
+        if (this.context.strict !== true)
+            this.setStrict(false);
+        
+        this.checkInvalidNodes();
+        
         this.contextStack.pop();
         this.context = this.contextStack[this.contextStack.length - 1];
-        this.scanner.strict = this.context ? this.context.strict : false;
     }
     
-    setStrict() {
+    setStrict(strict) {
     
-        this.context.strict = true;
-        this.scanner.strict = true;
+        if (this.context.strict === true)
+            return;
+        
+        this.context.strict = strict;
+        
+        var node = this.context.strictError;
+        if (!node) return;
+        
+        if (strict) {
+        
+            if (node.error)
+                this.fail(node.error, node);
+            
+        } else if (this.contextStack.length > 1) {
+        
+            var parent = this.contextStack[this.contextStack.length - 2];
+            
+            if (parent.strict === null && !parent.strictError)
+                parent.strictError = node;
+        }
+        
+        this.context.strictError = null;
+    }
+    
+    addStrictError(error, node) {
+    
+        var c = this.context;
+        
+        node.error = error;
+        
+        if (c.strict === true)
+            this.fail(error, node);
+        else if (c.strict === null && !c.strictError)
+            c.strictError = node;
     }
     
     maybeEnd() {
@@ -293,48 +368,42 @@ export class Parser {
         return false;
     }
     
-    peekModule() {
-    
-        if (this.peekToken().value === "module") {
-        
-            var p = this.peekToken("div", 1);
-            
-            // If a module identifier follows...
-            if (!p.newlineBefore && (p.type === "IDENTIFIER" || p.type === "STRING"))
-                return true;
-        }
-        
-        return false;
-    }
-    
-    addInvalidNode(node, error) {
+    addInvalidNode(error, node, strict) {
     
         var context = this.context,
-            list = context.invalidNodes;
+            list = context.invalidNodes,
+            item = { node: node, strict: strict };
         
         node.error = error;
         
-        if (!list) context.invalidNodes = [node];
-        else list.push(node);
+        if (!list) context.invalidNodes = [item];
+        else list.push(item);
     }
     
     // === Top Level ===
     
     Script() {
     
-        var start = this.startOffset;
+        this.pushContext(false);
         
-        return new Node.Script(this.StatementList(true, false), start, this.endOffset);
+        var start = this.startOffset,
+            statements = this.StatementList(true, false);
+        
+        this.popContext();
+        
+        return new Node.Script(statements, start, this.endOffset);
     }
     
     Module() {
     
-        var start = this.startOffset;
+        this.pushContext(false, true);
         
-        // Modules are always strict
-        this.setStrict();
+        var start = this.startOffset,
+            statements = this.StatementList(true, true);
         
-        return new Node.Module(this.StatementList(true, true), start, this.endOffset);
+        this.popContext();
+        
+        return new Node.Module(statements, start, this.endOffset);
     }
     
     // === Expressions ===
@@ -375,7 +444,7 @@ export class Parser {
             left,
             lhs;
         
-        if (this.peek() === "yield")
+        if (this.peekYield())
             return this.YieldExpression();
         
         left = this.ConditionalExpression(noIn);
@@ -433,7 +502,7 @@ export class Parser {
         var start = this.startOffset,
             delegate = false;
             
-        this.read("yield");
+        this.readKeyword("yield");
         
         if (this.peek() === "*") {
         
@@ -535,8 +604,8 @@ export class Parser {
             this.read();
             expr = this.UnaryExpression();
             
-            if (type === "delete" && this.context.strict && expr.type === "Identifier")
-                this.fail("Cannot delete unqualified property in strict mode", expr);
+            if (type === "delete" && expr.type === "Identifier")
+                this.addStrictError("Cannot delete unqualified property in strict mode", expr);
             
             return new Node.UnaryExpression(type, expr, start, this.endOffset);
         }
@@ -733,9 +802,14 @@ export class Parser {
     Identifier(isVar) {
     
         var token = this.readToken("IDENTIFIER"),
-            context = isVar ? "variable" : "";
+            context = isVar ? "variable" : "",
+            node;
+            
+        node = new Node.Identifier(token.value, context, token.start, token.end);
         
-        return new Node.Identifier(token.value, context, token.start, token.end);
+        this.checkIdentifier(node);
+        
+        return node;
     }
     
     IdentifierName() {
@@ -747,18 +821,33 @@ export class Parser {
     String() {
     
         var token = this.readToken("STRING");
+        
+        // Ocatal escapes are not allowed in strict mode
+        if (token.strictError)
+            this.addStrictError(token.strictError, token);
+            
         return new Node.String(token.value, token.start, token.end);
     }
     
     Number() {
     
         var token = this.readToken("NUMBER");
+        
+        // Legacy ocatals are not allowed in strict mode
+        if (token.strictError)
+            this.addStrictError(token.strictError, token);
+            
         return new Node.Number(token.number, token.start, token.end);
     }
     
     Template() {
     
         var token = this.readToken("TEMPLATE", "template");
+        
+        // Ocatal escapes are not allowed in strict mode
+        if (token.strictError)
+            this.addStrictError(token.strictError, token);
+            
         return new Node.Template(token.value, token.templateEnd, token.start, token.end);
     }
     
@@ -874,7 +963,7 @@ export class Parser {
                 
                 node = this.MethodDefinition();
                 
-                switch (node.modifier) {
+                switch (node.kind) {
                 
                     case "get": flag = PROP_GET; break;
                     case "set": flag = PROP_SET; break;
@@ -889,7 +978,7 @@ export class Parser {
             
             case ":":
                 
-                flag = PROP_ASSIGN;
+                flag = PROP_DATA;
                 
                 node = new Node.PropertyDefinition(
                     this.PropertyName(),
@@ -903,14 +992,14 @@ export class Parser {
             
                 this.unpeek();
                 
-                node = new Node.CoveredPatternProperty(
+                node = new Node.PatternProperty(
                     this.Identifier(),
                     null,
                     (this.read(), this.AssignmentExpression()),
                     start,
                     this.endOffset);
                 
-                this.addInvalidNode(node, "Invalid property definition in object literal");
+                this.addInvalidNode("Invalid property definition in object literal", node, false);
                 
                 break;
                 
@@ -929,8 +1018,13 @@ export class Parser {
         }
         
         // Check for duplicate names
-        if (this.isDuplicateName(flag, nameSet[name = "." + node.name.value]))
-            this.addInvalidNode(node, "Duplicate property names in object literal");
+        name = "." + node.name.value;
+        
+        if (this.isDuplicateName(flag, nameSet[name]), false)
+            this.addInvalidNode("Duplicate property names in object literal", node, false);
+        
+        else if (this.isDuplicateName(flag, nameSet[name], true))
+            this.addInvalidNode("Duplicate data properties are not permitted in strict mode.", node, true);
         
         // Set name flag
         nameSet[name] |= flag;
@@ -955,15 +1049,14 @@ export class Parser {
     MethodDefinition() {
     
         var start = this.startOffset,
-            modifier = null,
-            params,
+            kind = "",
             name;
         
         if (this.peek("name") === "*") {
         
             this.read();
             
-            modifier = "*";
+            kind = "generator";
             name = this.PropertyName();
         
         } else {
@@ -974,16 +1067,27 @@ export class Parser {
                 this.peek("name") !== "(" &&
                 (name.value === "get" || name.value === "set")) {
             
-                modifier = name.value;
+                kind = name.value;
                 name = this.PropertyName();
             }
         }
         
+        this.pushContext(true);
+        
+        if (kind === "generator")
+            this.context.isGenerator = true;
+        
+        var params = this.FormalParameters(),
+            body = this.FunctionBody();
+        
+        this.checkParameters(params);
+        this.popContext();
+        
         return new Node.MethodDefinition(
-            modifier,
+            kind,
             name,
-            params = this.FormalParameters(),
-            this.FunctionBody(null, params, false),
+            params,
+            body,
             start,
             this.endOffset);
     }
@@ -1169,7 +1273,7 @@ export class Parser {
         var start = this.startOffset;
         
         this.read("{");
-        var list = this.StatementList(false);
+        var list = this.StatementList(false, false);
         this.read("}");
         
         return new Node.Block(list, start, this.endOffset);
@@ -1230,11 +1334,12 @@ export class Parser {
     VariableDeclaration(noIn) {
     
         var start = this.startOffset,
-            keyword = this.peek(),
+            token = this.peekToken(),
+            kind = token.type,
             isConst = false,
             list = [];
         
-        switch (keyword) {
+        switch (kind) {
         
             case "var":
                 break;
@@ -1242,8 +1347,13 @@ export class Parser {
             case "const":
                 isConst = true;
             
-            case "let":
-                break;
+            case "IDENTIFIER":
+            
+                if (token.value === "let") {
+                
+                    kind = "let";
+                    break;
+                }
                 
             default:
                 this.fail("Expected var, const, or let");
@@ -1259,7 +1369,7 @@ export class Parser {
             else break;
         }
         
-        return new Node.VariableDeclaration(keyword, list, start, this.endOffset);
+        return new Node.VariableDeclaration(kind, list, start, this.endOffset);
     }
     
     VariableDeclarator(noIn, isConst) {
@@ -1423,10 +1533,17 @@ export class Parser {
                 break;
                 
             case "var":
-            case "let":
             case "const":
                 init = this.VariableDeclaration(true);
                 break;
+            
+            case "IDENTIFIER":
+            
+                if (this.peekLet()) {
+                
+                    init = this.VariableDeclaration(true);
+                    break;
+                }
             
             default:
                 init = this.Expression(true);
@@ -1435,7 +1552,7 @@ export class Parser {
         
         if (init) {
         
-            if (this.peekKeyword("in"))
+            if (this.peek() === "in")
                 return this.ForInStatement(init, start);
         
             if (this.peekKeyword("of"))
@@ -1493,8 +1610,9 @@ export class Parser {
     
     WithStatement() {
     
-        if (this.context.strict)
-            this.fail("With statement is not allowed in strict mode");
+        var token = this.readToken("with");
+        
+        this.addStrictError("With statement is not allowed in strict mode", token);
     
         var start = this.startOffset;
         
@@ -1635,16 +1753,13 @@ export class Parser {
                 
                 // Check for strict mode
                 if (dir === "use strict")
-                    this.setStrict();
-                    
+                    this.setStrict(true);
+            
             } else {
             
                 prologue = false;
             }
         }
-        
-        // Check for invalid nodes
-        this.checkInvalidNodes();
         
         return list;
     }
@@ -1655,9 +1770,7 @@ export class Parser {
             
             case "function": return this.FunctionDeclaration();
             case "class": return this.ClassDeclaration();
-            case "let": 
             case "const": return this.LexicalDeclaration();
-            
             case "import": return this.ImportDeclaration();
             
             case "export":
@@ -1668,6 +1781,9 @@ export class Parser {
                 break;
             
             case "IDENTIFIER":
+            
+                if (this.peekLet())
+                    return this.LexicalDeclaration();
                 
                 if (this.peekModule())
                     return this.ModuleNode();
@@ -1693,23 +1809,35 @@ export class Parser {
     FunctionDeclaration() {
     
         var start = this.startOffset,
-            gen = false,
-            ident,
-            params;
+            kind = "";
         
         this.read("function");
         
         if (this.peek() === "*") {
             
             this.read();
-            gen = true;
+            kind = "generator";
         }
         
-        return new Node.FunctionDeclaration(
-            gen,
-            ident = this.Identifier(),
+        this.pushContext(true);
+        
+        if (kind === "generator")
+            this.context.isGenerator = true;
+        
+        var ident = this.Identifier(),
             params = this.FormalParameters(),
-            this.FunctionBody(ident, params, false),
+            body = this.FunctionBody();
+            
+        this.checkBindingIdent(ident);
+        this.checkParameters(params);
+        
+        this.popContext();
+        
+        return new Node.FunctionDeclaration(
+            kind,
+            ident,
+            params,
+            body,
             start,
             this.endOffset);
     }
@@ -1717,26 +1845,40 @@ export class Parser {
     FunctionExpression() {
     
         var start = this.startOffset,
-            gen = false,
-            ident = null,
-            params;
+            kind = "",
+            ident = null;
         
         this.read("function");
         
         if (this.peek() === "*") {
             
             this.read();
-            gen = true;
+            kind = "generator";
         }
         
-        if (this.peek() !== "(")
+        if (this.peek() !== "(") {
+        
             ident = this.Identifier();
+            this.checkBindingIdent(ident);
+        }
+        
+        this.pushContext(true);
+        
+        if (kind === "generator")
+            this.context.isGenerator = true;
+        
+        var params = this.FormalParameters(),
+            body = this.FunctionBody();
+        
+        this.checkParameters(params);
+        
+        this.popContext();
         
         return new Node.FunctionExpression(
-            gen,
+            kind,
             ident,
-            params = this.FormalParameters(),
-            this.FunctionBody(ident, params, false),
+            params,
+            body,
             start,
             this.endOffset);
     }
@@ -1791,26 +1933,23 @@ export class Parser {
         return new Node.RestParameter(this.BindingIdentifier(), start, this.endOffset);
     }
     
-    FunctionBody(ident, params, isStrict) {
-    
-        this.pushContext(true, isStrict);
+    FunctionBody(concise) {
+        
+        this.context.isFunctionBody = true;
         
         var start = this.startOffset;
         
         this.read("{");
-        var statements = this.StatementList(true);
+        var statements = this.StatementList(!concise, false);
         this.read("}");
-        
-        if (ident) this.checkBindingIdent(ident);
-        this.checkParameters(params);
-        
-        this.popContext();
         
         return new Node.FunctionBody(statements, start, this.endOffset);
     }
     
     ArrowFunction(formals, rest, start) {
     
+        this.pushContext(true);
+        
         this.read("=>");
         
         var params = this.transformFormals(formals), 
@@ -1819,16 +1958,13 @@ export class Parser {
         if (rest)
             params.push(rest);
         
-        if (this.peek() === "{") {
+        this.checkParameters(params);
         
-            body = this.FunctionBody(null, params, true);
-            
-        } else {
+        var body = this.peek() === "{" ?
+            this.FunctionBody(true) :
+            this.AssignmentExpression();
         
-            // Check parameters in the current context
-            this.checkParameters(params);
-            body = this.AssignmentExpression();
-        }
+        this.popContext();
         
         return new Node.ArrowFunction(params, body, start, this.endOffset);
     }
@@ -1842,15 +1978,6 @@ export class Parser {
             target;
         
         this.readKeyword("module");
-        
-        if (this.peek() === "STRING") {
-        
-            return new Node.ModuleRegistration(
-                this.String(),
-                this.ModuleBody(),
-                start,
-                this.endOffset);
-        }
         
         ident = this.BindingIdentifier();
         
@@ -1914,6 +2041,12 @@ export class Parser {
         return new Node.ModuleBody(list, start, this.endOffset);
     }
     
+    ModuleSpecifier() {
+    
+        this.readKeyword("from");
+        return this.peek() === "STRING" ? this.String() : this.ModulePath();
+    }
+    
     ImportDeclaration() {
     
         var start = this.startOffset,
@@ -1922,6 +2055,15 @@ export class Parser {
             from;
         
         this.read("import");
+        
+        if (this.peek() === "IDENTIFIER") {
+        
+            ident = this.BindingIdentifier();
+            from = this.ModuleSpecifier();
+            this.Semicolon();
+            
+            return new Node.ImportDefaultDeclaration(ident, from, start, this.endOffset);
+        }
         
         this.read("{");
     
@@ -1934,9 +2076,7 @@ export class Parser {
         }
     
         this.read("}");
-        
-        this.readKeyword("from");
-        from = this.peek() === "STRING" ? this.String() : this.ModulePath();
+        from = this.ModuleSpecifier();
         this.Semicolon();
         
         return new Node.ImportDeclaration(list, from, start, this.endOffset);
@@ -1945,17 +2085,27 @@ export class Parser {
     ImportSpecifier() {
     
         var start = this.startOffset,
-            remote = this.Identifier(),
-            local = null;
+            hasLocal = false,
+            local = null,
+            remote;
         
-        if (this.peekKeyword("as")) {
+        if (this.peek() !== "IDENTIFIER") {
         
-            this.read();
-            local = this.BindingIdentifier();
+            // Re-scan token as an identifier name
+            this.unpeek();
+            remote = this.IdentifierName();
+            hasLocal = true;
             
         } else {
         
-            this.checkBindingIdent(remote);
+            remote = this.Identifier();
+            hasLocal = this.peekKeyword("as");
+        }
+        
+        if (hasLocal) {
+        
+            this.readKeyword("as");
+            local = this.BindingIdentifier();
         }
         
         return new Node.ImportSpecifier(remote, local, start, this.endOffset);
@@ -1971,7 +2121,6 @@ export class Parser {
         switch (this.peek()) {
                 
             case "var":
-            case "let":
             case "const":
             
                 binding = this.VariableDeclaration(false);
@@ -1989,6 +2138,13 @@ export class Parser {
                 break;
             
             case "IDENTIFIER":
+            
+                if (this.peekLet()) {
+                
+                    binding = this.VariableDeclaration(false);
+                    this.Semicolon();
+                    break;
+                }
             
                 if (this.peekModule()) {
                 
@@ -2015,12 +2171,7 @@ export class Parser {
         if (this.peek() === "*") {
         
             this.read();
-            
-            if (this.peekKeyword("from")) {
-            
-                this.read();
-                from = this.peek() === "STRING" ? this.String() : this.ModulePath();
-            }
+            from = this.ModuleSpecifier();
             
         } else {
         
@@ -2037,6 +2188,9 @@ export class Parser {
             }
             
             this.read("}");
+            
+            if (this.peekKeyword("from"))
+                from = this.ModuleSpecifier();
         }
         
         return new Node.ExportSpecifierSet(list, from, start, this.endOffset);
@@ -2164,14 +2318,16 @@ export class Parser {
         
         method = this.MethodDefinition();
         
-        switch (method.modifier) {
+        switch (method.kind) {
         
             case "get": flag = PROP_GET; break;
             case "set": flag = PROP_SET; break;
         }
         
+        name = "." + method.name.value;
+        
         // Check for duplicate names
-        if (this.isDuplicateName(flag, nameSet[name = "." + method.name.value]))
+        if (this.isDuplicateName(flag, nameSet[name], true))
             this.fail("Duplicate element name in class definition.", method);
         
         // Set name flag
@@ -2183,7 +2339,7 @@ export class Parser {
     
 }
 
-
 // Add externally defined methods
 Object.mixin(Parser.prototype, Transform.prototype);
 Object.mixin(Parser.prototype, Validate.prototype);
+

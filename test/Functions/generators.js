@@ -1,13 +1,14 @@
-[
+{
 
 /** function *g() {} **/
+"generator declarations": 
 {   type: "Script",
     statements: [
     
     {   type: "FunctionDeclaration",
-        generator: true,
+        kind: "generator",
         
-        ident: 
+        identifier: 
         {   type: "Identifier",
             value: "g"
         },
@@ -22,6 +23,7 @@
 },
 
 /** (function *g() {}); **/
+"generator expresions": 
 {   type: "Script",
     statements: [
     
@@ -32,9 +34,9 @@
             expression:
         
             {   type: "FunctionExpression",
-                generator: true,
+                kind: "generator",
                 
-                ident: 
+                identifier: 
                 {   type: "Identifier",
                     value: "g"
                 },
@@ -50,4 +52,36 @@
     }]
 },
 
-];
+/** function *g() { yield 1; } **/
+"yield is a keyword in generators": 
+{   type: "Script",
+    statements: [
+    
+    {   type: "FunctionDeclaration",
+        kind: "generator",
+        
+        identifier: 
+        {   type: "Identifier",
+            value: "g"
+        },
+        
+        params: [],
+        
+        body: 
+        {   type: "FunctionBody",
+            statements: [
+            {   type: "ExpressionStatement",
+                expression: 
+                {   type: "YieldExpression",
+                    delegate: false,
+                    expression:
+                    {   type: "Number",
+                        value: 1
+                    }
+                }
+            }]
+        }
+    }]
+},
+
+};

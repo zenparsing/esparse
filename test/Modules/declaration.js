@@ -5,7 +5,7 @@
     type: "Script",
     statements: [
     {   type: "ModuleDeclaration",
-        ident: {
+        identifier: {
             type: "Identifier",
             value: "X"
         },
@@ -21,7 +21,7 @@
     type: "Script",
     statements: [
     {   type: "ModuleFromDeclaration",
-        ident: {
+        identifier: {
             type: "Identifier",
             value: "x"
         },
@@ -32,28 +32,12 @@
     }]
 },
 
-/** module "X" {} **/
-"an empty module registration": {
-    type: "Script",
-    statements: [
-    {   type: "ModuleRegistration",
-        name: {
-            type: "String",
-            value: "X"
-        },
-        body: {
-            type: "ModuleBody",
-            statements: []
-        }
-    }]
-},
-
 /** module A = B.C; **/
 "module alias": {
     type: "Script",
     statements: [
     {   type: "ModuleAlias",
-        ident: {
+        identifier: {
             type: "Identifier",
             value: "A"
         },

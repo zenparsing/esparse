@@ -38,16 +38,16 @@ that we are interested in:
   of "ID_Start" or "ID_Continue" which can be represented in UTF-16 as 
   a single code unit.
 
-After obtaining list of valid code points for whitespace and identifiers,
+After obtaining the list of valid code points for whitespace and identifiers,
 we build a list of ranges and output code for each target language:
 
 - Javascript: We output three regular expressions that test whether a
   character is a Whitespace, IdentifierStart, IdentifierPart character.
 
 - C++:  We output two sorted arrays for whitespace and identifier characters.
-  Each element in the array contains a 16 bit starting code point and a 
-  16 bit range length.  We use the most significant bit of the length field
-  to flag IdentifierStart ranges.
+  Each element in the array contains a 32 bit starting code point, a 
+  16 bit range length, and a 16 bit flag field which is set to 1 if the range
+  is an IndentifierStart ranges.
   
   We also output a binary search algorithm which searches the array for a
   range which contains a given code point, and which has the appropriate

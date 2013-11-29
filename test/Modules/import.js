@@ -79,4 +79,30 @@
     }]
 },
 
+/** import { default as y } from "x.js"; **/
+"import a keyword-named binding": {
+    type: "Script",
+    statements: [
+    {   type: "ImportDeclaration",
+        specifiers: [
+        {   type: "ImportSpecifier",
+            remote: {
+                type: "Identifier",
+                value: "default"
+            },
+            local: {
+                type: "Identifier",
+                value: "y"
+            }
+        }],
+        from: {
+            type: "String",
+            value: "x.js"
+        }
+    }]
+},
+
+/** import { default } from "x.js"; **/
+"importing of non-identifier bindings is not allowed": {}
+
 })

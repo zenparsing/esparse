@@ -1,3 +1,5 @@
+module Node from "TreeNode.js";
+
 export class Transform {
 
     // Transform an expression into a formal parameter list
@@ -15,16 +17,7 @@ export class Transform {
         for (i = 0; i < list.length; ++i) {
         
             node = list[i];
-            
-            params.push(param = {
-            
-                type: "FormalParameter",
-                pattern: node,
-                init: null,
-                start: node.start,
-                end: node.end
-            });
-            
+            params.push(param = new Node.FormalParameter(node, null, node.start, node.end));
             this.transformPatternElement(param, true);
         }
         
@@ -51,15 +44,12 @@ export class Transform {
             
                 rest = (elem.type === "SpreadExpression");
                 
-                elem = elems[i] = {
-                
-                    type: "PatternElement",
-                    pattern: rest ? elem.expression : elem,
-                    init: null,
-                    rest: rest,
-                    start: elem.start,
-                    end: elem.end
-                };
+                elem = elems[i] = new Node.PatternElement(
+                    rest ? elem.expression : elem,
+                    null,
+                    rest,
+                    elem.start,
+                    elem.end);
                 
                 // No trailing comma allowed after rest
                 if (rest && (node.trailingComma || i < elems.length - 1))
@@ -83,34 +73,33 @@ export class Transform {
         
             prop = props[i];
             
+            // Clear the error flag
+            prop.error = "";
+            
             switch (prop.type) {
             
                 case "PatternProperty":
                 
                     break;
-                
-                case "CoveredPatternProperty":
-                    
-                    prop.type = "PatternProperty";
-                    break;
                     
                 case "PropertyDefinition":
                     
-                    prop.type = "PatternProperty";
-                    prop.pattern = prop.expression;
-                    prop.init = null;
+                    // Replace node
+                    prop = new Node.PatternProperty(
+                        prop.name,
+                        prop.expression,
+                        null,
+                        prop.start,
+                        prop.end);
                     
-                    delete prop.expression;
+                    props[i] = prop;
+                    
                     break;
                 
                 default:
                 
                     this.fail("Invalid pattern", prop);
             }
-            
-            // Clear error flags
-            if (prop.error)
-                delete prop.error;
             
             if (prop.pattern) this.transformPatternElement(prop, binding);
             else this.transformPattern(prop.name, binding);
@@ -125,7 +114,7 @@ export class Transform {
         if (node.type === "AssignmentExpression" && node.operator === "=") {
         
             elem.pattern = node.left;
-            elem.init = node.right;
+            elem.initializer = node.right;
         }
         
         this.transformPattern(elem.pattern, binding);
@@ -137,7 +126,6 @@ export class Transform {
         switch (node.type) {
         
             case "Identifier":
-            
                 if (binding) this.checkBindingIdent(node, true);
                 else this.checkAssignTarget(node, true);
                 

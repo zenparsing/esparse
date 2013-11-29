@@ -24,7 +24,7 @@
                             type: "Identifier",
                             value: "x"
                         },
-                        init: null
+                        initializer: null
                     }]
                 },
                 
@@ -58,7 +58,7 @@
                             value: "x"
                         },
                         pattern: null,
-                        init: null
+                        initializer: null
                     }]
                 },
                 
@@ -92,7 +92,7 @@
                             value: "x"
                         },
                         pattern: null,
-                        init: {
+                        initializer: {
                             type: "Number",
                             value: 123
                         }
@@ -131,7 +131,7 @@
                                 type: "Identifier",
                                 value: "x"
                             },
-                            init: null
+                            initializer: null
                         }]
                     }
                 }
@@ -186,7 +186,7 @@
                             type: "Identifier",
                             value: "a"
                         },
-                        init: null
+                        initializer: null
                     },
                     
                     {   type: "PatternProperty",
@@ -198,7 +198,7 @@
                             type: "Identifier",
                             value: "b"
                         },
-                        init: null
+                        initializer: null
                     }]
                 }
             },

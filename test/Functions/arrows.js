@@ -34,7 +34,7 @@
                 {   type: "Identifier",
                     value: "x"
                 },
-                init: null
+                initializer: null
             }],
             
             body: 
@@ -60,14 +60,14 @@
                 {   type: "Identifier",
                     value: "x"
                 },
-                init: null 
+                initializer: null 
             },
             {   type: "FormalParameter",
                 pattern: 
                 {   type: "Identifier",
                     value: "y"
                 },
-                init: null
+                initializer: null
             }],
             
             body: 
@@ -101,7 +101,7 @@
                 {   type: "Identifier",
                     value: "x"
                 },
-                init: null
+                initializer: null
             }],
             
             body: 
@@ -121,21 +121,59 @@
 
 // Binding to "arguments" should throw if function is strict mode
 
-/** (arguments) => { "use strict"; } **/
+/** "use strict"; (arguments) => {} **/
 {},
 
-/** ({ arguments }) => { "use strict"; } **/
+/** "use strict"; ({ arguments }) => {} **/
 {},
 
-/** ({ args: arguments }) => { "use strict"; } **/
+/** "use strict"; ({ args: arguments }) => {} **/
 {},
 
-/** ({ args: arguments }) => { "use strict"; } **/
+/** "use strict"; ({ args: arguments }) => {} **/
 {},
 
 // Duplicate parameters should throw in strict mode
 
-/** (a, a) => { "use strict"; } **/
+/** "use strict"; (a, a) => {} **/
 {},
+
+/** x => { "use strict"; delete x; } **/
+{   type: "Script",
+    statements: [
+    {   type: "ExpressionStatement",
+        expression:
+        {   type: "ArrowFunction",
+            params: [
+            {   type: "FormalParameter",
+                pattern:
+                {   type: "Identifier",
+                    value: "x"
+                },
+                initializer: null
+            }],
+            body:
+            {   type: "FunctionBody",
+                statements: [
+                {   type: "ExpressionStatement",
+                    expression:
+                    {   type: "String",
+                        value: "use strict"
+                    }
+                },
+                {   type: "ExpressionStatement",    
+                    expression:
+                    {   type: "UnaryExpression",
+                        operator: "delete",
+                        expression:
+                        {   type: "Identifier",
+                            value: "x"
+                        }
+                    }
+                }]
+            }
+        }
+    }]
+}
 
 ];
