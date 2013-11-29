@@ -2336,10 +2336,16 @@ export class Parser {
         return new Node.ClassElement(isStatic, method, start, this.endOffset);
     }
     
-    
+}
+
+
+function mixin(source) {
+
+    source = source.prototype;
+    Object.keys(source).forEach(key => Parser.prototype[key] = source[key]);
 }
 
 // Add externally defined methods
-Object.mixin(Parser.prototype, Transform.prototype);
-Object.mixin(Parser.prototype, Validate.prototype);
+mixin(Transform);
+mixin(Validate);
 
