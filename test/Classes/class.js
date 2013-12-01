@@ -94,4 +94,49 @@
     }]
 },
 
+/** class C { m() { new super; } } **/
+"new super without argument list": 
+{   type: "Script",
+    statements: [
+    {   type: "ClassDeclaration",
+        identifier: 
+        {   type: "Identifier",
+            value: "C" },
+        base: null,
+        body: 
+        {   type: "ClassBody",
+            elements: [
+            {   type: "ClassElement",
+                static: false,
+                method: 
+                {
+                    type: "MethodDefinition",
+                    kind: "",
+                    name: 
+                    {   type: "Identifier",
+                        value: "m" 
+                    },
+                    params: [],
+                    body: 
+                    {   type: "FunctionBody",
+                        statements: [
+                        {   type: "ExpressionStatement",
+                            expression: 
+                            {   type: "NewExpression",
+                                callee:
+                                {   type: "SuperExpression" 
+                                },
+                                arguments: null
+                            }
+                        }]
+                    }
+                }
+            }]
+        }
+    }]
+},
+
+/** class C extends A + B {} **/
+"extends clause does not allow assignment expression": {}
+
 })

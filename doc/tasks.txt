@@ -1,19 +1,17 @@
 == Tasks ==
 
-- Arrow functions might present more of a problem for our approach to
-  strictness:  (a = function(eval) {}) => { "use strict"; }  It's going
-  to get the parent context all wrong.
 - checkParameters needs to check patterns, yes?  Find section of spec
   which mentions this.  What if there
 - transformFormals needs to perform strict mode checks like checkParameters,
   I think.  Investigate and write tests.
-- Write tests for parsing of yield within generators.
 - Create summarized list of early errors we need to check for.
 - For "super", we'll need to know whether we're in a class or not.  This
   will necessitate another flag in the context object, but there should 
   probably be a type string instead ("class,generator,async,etc")
 - Unicode escapes should not make a reserved word??
 - Arrow function parameterized on "in"?  Need to pass noIn into ArrowFunction
+  Is precedence for arrow function wrong?
+- ClassElement: ; ?  What the hell is that for?
 
 == Syntax Errors ==
 

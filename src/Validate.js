@@ -21,7 +21,7 @@ export class Validate {
     checkAssignTarget(node, strict) {
     
         if (node.type !== "Identifier")
-            return;
+            this.fail("Invalid left-hand side in assignment.");
         
         // Mark identifier node as a variable
         node.context = "variable";

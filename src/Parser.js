@@ -298,15 +298,36 @@ export class Parser {
         this.contextStack.push(this.context);
     }
     
-    popContext() {
+    popContext(collapse) {
     
-        if (this.context.strict !== true)
+        var context = this.context,
+            stack = this.contextStack;
+        
+        if (context.strict !== true)
             this.setStrict(false);
+        
+        // If collapsing into parent context, copy invalid nodes into parent
+        if (collapse && context.invalidNodes && stack.length > 1) {
+            
+            var parent = stack[stack.length - 2];
+
+            if (!parent.invalidNodes) {
+            
+                parent.invalidNodes = context.invalidNodes;
+                
+            } else {
+                
+                for (var i = 0; i < context.invalidNodes.length; ++i)
+                    parent.invalidNodes.push(context.invalidNodes[i]);
+            }
+            
+            context.invalidNodes = null;
+        }
         
         this.checkInvalidNodes();
         
-        this.contextStack.pop();
-        this.context = this.contextStack[this.contextStack.length - 1];
+        stack.pop();
+        this.context = stack[stack.length - 1];
     }
     
     setStrict(strict) {
@@ -462,13 +483,14 @@ export class Parser {
             case "MemberExpression":
             case "CallExpression":
                 break;
-                
-            case "Identifier":
-                this.checkAssignTarget(lhs);
-                break;
         
-            default:
+            case "ObjectExpression":
+            case "ArrayExpression":
                 this.transformPattern(lhs, false);
+                break;
+            
+            default:
+                this.checkAssignTarget(lhs);
                 break;
         }
         
@@ -716,8 +738,11 @@ export class Parser {
         
         this.read("new");
         
-        var expr = this.MemberExpression(false),
-            args = this.peek("div") === "(" ? this.ArgumentList() : null;
+        var expr = this.peek() === "super" ?
+            this.SuperExpression() :
+            this.MemberExpression(false);
+        
+        var args = this.peek("div") === "(" ? this.ArgumentList() : null;
         
         return new Node.NewExpression(expr, args, start, this.endOffset);
     }
@@ -774,9 +799,13 @@ export class Parser {
             
             case "IDENTIFIER":
             
-                return this.peek("div", 1) === "=>" ?
-                    this.ArrowFunction(this.BindingIdentifier(), null, start) :
-                    this.Identifier(true);
+                if (this.peek("div", 1) === "=>") {
+                
+                    this.pushContext(true);
+                    return this.ArrowFunction(this.BindingIdentifier(), null, start);
+                }
+                    
+                return this.Identifier(true);
             
             case "REGEX":
                 this.read();
@@ -891,6 +920,9 @@ export class Parser {
             expr = null,
             rest = null;
         
+        // Push a new context in case we are parsing an arrow function
+        this.pushContext(false);
+        
         this.read("(");
         
         switch (this.peek()) {
@@ -919,9 +951,11 @@ export class Parser {
         
         this.read(")");
         
-        // Determine whether this is a paren expression or an arrow function
         if (expr === null || rest !== null || this.peek("div") === "=>")
             return this.ArrowFunction(expr, rest, start);
+        
+        // Collapse this context into its parent
+        this.popContext(true);
         
         return new Node.ParenExpression(expr, start, this.endOffset);
     }
@@ -1933,14 +1967,14 @@ export class Parser {
         return new Node.RestParameter(this.BindingIdentifier(), start, this.endOffset);
     }
     
-    FunctionBody(concise) {
+    FunctionBody() {
         
         this.context.isFunctionBody = true;
         
         var start = this.startOffset;
         
         this.read("{");
-        var statements = this.StatementList(!concise, false);
+        var statements = this.StatementList(true, false);
         this.read("}");
         
         return new Node.FunctionBody(statements, start, this.endOffset);
@@ -1948,7 +1982,8 @@ export class Parser {
     
     ArrowFunction(formals, rest, start) {
     
-        this.pushContext(true);
+        // Context should have already been pushed by caller
+        this.context.isFunction = true;
         
         this.read("=>");
         
@@ -1961,7 +1996,7 @@ export class Parser {
         this.checkParameters(params);
         
         var body = this.peek() === "{" ?
-            this.FunctionBody(true) :
+            this.FunctionBody() :
             this.AssignmentExpression();
         
         this.popContext();
@@ -2242,7 +2277,7 @@ export class Parser {
         if (this.peek() === "extends") {
         
             this.read();
-            base = this.AssignmentExpression();
+            base = this.MemberExpression(true);
         }
         
         return new Node.ClassDeclaration(

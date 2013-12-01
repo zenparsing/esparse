@@ -1,6 +1,7 @@
-[
+{
 
 /** () => x; **/
+"empty paren with expression": 
 {   type: "Script",
     statements: [
     
@@ -20,6 +21,7 @@
 },
 
 /** x => x; **/
+"identifier with expression": 
 {   type: "Script",
     statements: [
     
@@ -46,6 +48,7 @@
 },
 
 /** (x, y) => x + y; **/
+"paren with expression":
 {   type: "Script",
     statements: [
     
@@ -87,6 +90,7 @@
 },
 
 /** x => { return x; } **/
+"identifier with function body": 
 {   type: "Script",
     statements: [
     
@@ -119,61 +123,23 @@
     }]
 },
 
-// Binding to "arguments" should throw if function is strict mode
-
 /** "use strict"; (arguments) => {} **/
-{},
+"binding to arguments is disallowed in strict mode": {},
 
 /** "use strict"; ({ arguments }) => {} **/
-{},
+"binding to arguments with destructuring is disallowed in strict mode (1)": {},
 
 /** "use strict"; ({ args: arguments }) => {} **/
-{},
-
-/** "use strict"; ({ args: arguments }) => {} **/
-{},
-
-// Duplicate parameters should throw in strict mode
+"binding to arguments with destructuring is disallowed in strict mode (2)": {},
 
 /** "use strict"; (a, a) => {} **/
-{},
+"duplicate parameters are not allowed in strict mode": {},
 
 /** x => { "use strict"; delete x; } **/
-{   type: "Script",
-    statements: [
-    {   type: "ExpressionStatement",
-        expression:
-        {   type: "ArrowFunction",
-            params: [
-            {   type: "FormalParameter",
-                pattern:
-                {   type: "Identifier",
-                    value: "x"
-                },
-                initializer: null
-            }],
-            body:
-            {   type: "FunctionBody",
-                statements: [
-                {   type: "ExpressionStatement",
-                    expression:
-                    {   type: "String",
-                        value: "use strict"
-                    }
-                },
-                {   type: "ExpressionStatement",    
-                    expression:
-                    {   type: "UnaryExpression",
-                        operator: "delete",
-                        expression:
-                        {   type: "Identifier",
-                            value: "x"
-                        }
-                    }
-                }]
-            }
-        }
-    }]
-}
+"'use strict' prologue sets strictness of function": {},
 
-];
+/** (x = (delete x)) => { "use strict"; } **/
+"'use strict' prologue sets strictness of default expressions": {},
+
+
+};
