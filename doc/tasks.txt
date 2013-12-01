@@ -18,6 +18,7 @@
   the body until we bounce back?  Probably.  That will break up our logic, but
   arrows are just messy like that.
 - ClassElement: ; ?  What the hell is that for?
+- In StatementWithLabel, we're using an object as map without encoding the key.
 
 == Syntax Errors ==
 

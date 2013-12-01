@@ -92,6 +92,12 @@ function isUnary(op) {
     return false;
 }
 
+// Encodes a string as a map key for use in regular object
+function mapKey(name) {
+
+    return "." + (name || "");
+}
+
 class Token {
 
     constructor(s) {
@@ -1059,13 +1065,13 @@ export class Parser {
         }
         
         // Check for duplicate names
-        name = "." + node.name.value;
+        name = mapKey(node.name.value);
         
         if (this.isDuplicateName(flag, nameSet[name]), false)
-            this.addInvalidNode("Duplicate property names in object literal", node, false);
+            this.addInvalidNode("Duplicate property names in object literal not allowed", node, false);
         
         else if (this.isDuplicateName(flag, nameSet[name], true))
-            this.addInvalidNode("Duplicate data properties are not permitted in strict mode.", node, true);
+            this.addInvalidNode("Duplicate data property in object literal not allowed in strict mode", node, true);
         
         // Set name flag
         nameSet[name] |= flag;
@@ -1295,11 +1301,11 @@ export class Parser {
     
     StatementWithLabel(label) {
     
-        var name = label && label.value || "",
+        var name = mapKey(label && label.value),
             labelSet = this.context.labelSet,
             stmt;
         
-        if (!labelSet[name]) labelSet[name] = 1;
+        if (!labelSet[name]) labelSet[name] = 0;
         else if (label) this.fail("Invalid label", label);
         
         labelSet[name] += 1;
@@ -1453,20 +1459,22 @@ export class Parser {
             token = this.readToken(),
             keyword = token.type,
             labelSet = this.context.labelSet,
-            label;
+            label,
+            name;
         
         label = this.maybeEnd() ? null : this.Identifier();
+        name = mapKey(label && label.value);
         
         this.Semicolon();
         
         if (label) {
         
-            if (!labelSet[label.value])
+            if (!labelSet[name])
                 this.fail("Invalid label", label);
         
         } else {
         
-            if (!labelSet[""] && !(keyword === "break" && this.context.switchDepth > 0))
+            if (!labelSet[name] && !(keyword === "break" && this.context.switchDepth > 0))
                 this.fail("Invalid " + keyword + " statement", token);
         }
         
@@ -2375,7 +2383,7 @@ export class Parser {
             case "set": flag = PROP_SET; break;
         }
         
-        name = "." + method.name.value;
+        name = mapKey(method.name.value);
         
         // Check for duplicate names
         if (this.isDuplicateName(flag, nameSet[name], true))
