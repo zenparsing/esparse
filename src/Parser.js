@@ -470,6 +470,9 @@ export class Parser {
         
         left = this.ConditionalExpression(noIn);
         
+        if (left.type === "ArrowFunctionHead")
+            return this.ArrowFunctionBody(left, noIn);
+        
         // Check for assignment operator
         if (!isAssignment(this.peek("div")))
             return left;
@@ -806,7 +809,7 @@ export class Parser {
                 if (this.peek("div", 1) === "=>") {
                 
                     this.pushContext(true);
-                    return this.ArrowFunction(this.BindingIdentifier(), null, start);
+                    return this.ArrowFunctionHead(this.BindingIdentifier(), null, start);
                 }
                     
                 return this.Identifier(true);
@@ -956,7 +959,7 @@ export class Parser {
         this.read(")");
         
         if (expr === null || rest !== null || this.peek("div") === "=>")
-            return this.ArrowFunction(expr, rest, start);
+            return this.ArrowFunctionHead(expr, rest, start);
         
         // Collapse this context into its parent
         this.popContext(true);
@@ -1984,20 +1987,26 @@ export class Parser {
         return new Node.FunctionBody(statements, start, this.endOffset);
     }
     
-    ArrowFunction(formals, rest, start) {
+    ArrowFunctionHead(formals, rest, start) {
     
-        // Context should have already been pushed by caller
         this.context.isFunction = true;
         
+        var params = this.transformFormals(formals, rest);
+        this.checkParameters(params);
+        
+        return new Node.ArrowFunctionHead(params, start, this.endOffset);
+    }
+    
+    ArrowFunctionBody(head, noIn) {
+    
         this.read("=>");
         
-        var params = this.transformFormals(formals, rest);
-        
-        this.checkParameters(params);
+        var params = head.parameters,
+            start = head.start;
         
         var body = this.peek() === "{" ?
             this.FunctionBody() :
-            this.AssignmentExpression();
+            this.AssignmentExpression(noIn);
         
         this.popContext();
         

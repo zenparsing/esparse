@@ -606,6 +606,15 @@ export class FunctionBody extends Node {
     }
 }
 
+export class ArrowFunctionHead extends Node {
+
+    constructor(params, start, end) {
+    
+        super(start, end);
+        this.parameters = params;
+    }
+}
+
 export class ArrowFunction extends Node {
 
     constructor(params, body, start, end) {
