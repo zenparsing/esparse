@@ -141,4 +141,7 @@
 /** (x = (delete x)) => { "use strict"; } **/
 "'use strict' prologue sets strictness of default expressions": {},
 
+/** for (x => x in y;;); **/
+"arrow functions are restricted by no-in": {},
+
 };

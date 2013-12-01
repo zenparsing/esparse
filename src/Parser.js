@@ -1989,6 +1989,7 @@ export class Parser {
     
     ArrowFunctionHead(formals, rest, start) {
     
+        // Context must have been pushed by caller
         this.context.isFunction = true;
         
         var params = this.transformFormals(formals, rest);
@@ -2039,8 +2040,7 @@ export class Parser {
             
         } else if (this.peekKeyword("from")) {
     
-            this.read();
-            target = this.peek() === "STRING" ? this.String() : this.ModulePath();
+            target = this.ModuleSpecifier();
             this.Semicolon();
         
             return new Node.ModuleFromDeclaration(
