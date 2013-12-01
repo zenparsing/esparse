@@ -21,7 +21,7 @@ export class Validate {
     checkAssignTarget(node, strict) {
     
         if (node.type !== "Identifier")
-            this.fail("Invalid left-hand side in assignment.");
+            this.fail("Invalid left-hand side in assignment", node);
         
         // Mark identifier node as a variable
         node.context = "variable";
@@ -41,9 +41,9 @@ export class Validate {
         var ident = node.value;
         
         if (ident === "yield" && this.context.isGenerator)
-            this.fail("yield cannot be an identifier inside of a generator function.", node);
+            this.fail("yield cannot be an identifier inside of a generator function", node);
         else if (strictReservedWord.test(ident))
-            this.addStrictError(ident + " cannot be used as an identifier in strict mode.", node);
+            this.addStrictError(ident + " cannot be used as an identifier in strict mode", node);
     }
     
     // Checks a binding identifier for strict mode restrictions
@@ -93,30 +93,40 @@ export class Validate {
     // Performs validation on the init portion of a for-in or for-of statement
     checkForInit(init, type) {
     
-        if (init.type === "VariableDeclaration") {
+        switch (init.type) {
         
-            // For-in/of may only have one variable declaration
+            case "VariableDeclaration":
             
-            if (init.declarations.length !== 1)
-                this.fail("for-" + type + " statement may not have more than one variable declaration", init);
+                // For-in/of may only have one variable declaration
+                if (init.declarations.length !== 1)
+                    this.fail("for-" + type + " statement may not have more than one variable declaration", init);
             
-            // A variable initializer is only allowed in for-in where 
-            // variable type is "var" and it is not a pattern
+                // A variable initializer is only allowed in for-in where 
+                // variable type is "var" and it is not a pattern
                 
-            var decl = init.declarations[0];
+                var decl = init.declarations[0];
             
-            if (decl.initializer && (
-                type === "of" ||
-                init.kind !== "var" ||
-                decl.pattern.type !== "Identifier")) {
+                if (decl.initializer && (
+                    type === "of" ||
+                    init.kind !== "var" ||
+                    decl.pattern.type !== "Identifier")) {
                 
-                this.fail("Invalid initializer in for-" + type + " statement", init);
-            }
+                    this.fail("Invalid initializer in for-" + type + " statement", init);
+                }
+                
+                break;
             
-        } else {
-        
-            // Transform object and array patterns
-            this.transformPattern(init, false);
+            case "ObjectExpression":
+            case "ArrayExpression":
+                this.transformPattern(init, false);
+                break;
+            
+            case "Identifier":
+                break;
+                
+            default:
+                this.checkAssignTarget(init);
+                break;   
         }
     }
     

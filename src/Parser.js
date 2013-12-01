@@ -123,6 +123,7 @@ class Context {
         this.isFunction = isFunction;
         this.isFunctionBody = false;
         this.isGenerator = false;
+        this.isClass = false;
         this.labelSet = {};
         this.switchDepth = 0;
         this.invalidNodes = null;
@@ -296,7 +297,8 @@ export class Parser {
         return this.peekKeyword("yield") && this.context.isGenerator && this.context.isFunctionBody;
     }
     
-    // Context management
+    // == Context Management ==
+    
     pushContext(isFunction, isStrict) {
     
         isStrict = isStrict || (this.context ? this.context.strict : null);
@@ -2338,6 +2340,7 @@ export class Parser {
     ClassBody() {
     
         this.pushContext(false, true);
+        this.context.isClass = true;
         
         var start = this.startOffset,
             nameSet = {}, 
