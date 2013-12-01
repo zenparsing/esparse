@@ -2228,8 +2228,15 @@ export class Parser {
             
             this.read("}");
             
-            if (this.peekKeyword("from"))
+            if (this.peekKeyword("from")) {
+            
                 from = this.ModuleSpecifier();
+            
+            } else {
+            
+                // TODO: Make sure that export specifiers do
+                // not reference reserved words!
+            }
         }
         
         return new Node.ExportsList(list, from, start, this.endOffset);
@@ -2238,7 +2245,7 @@ export class Parser {
     ExportSpecifier() {
     
         var start = this.startOffset,
-            local = this.Identifier(),
+            local = this.IdentifierName(),
             remote = null;
         
         if (this.peekKeyword("as")) {
