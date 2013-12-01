@@ -1991,11 +1991,7 @@ export class Parser {
         
         this.read("=>");
         
-        var params = this.transformFormals(formals), 
-            body;
-        
-        if (rest)
-            params.push(rest);
+        var params = this.transformFormals(formals, rest);
         
         this.checkParameters(params);
         

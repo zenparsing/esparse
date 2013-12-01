@@ -10,9 +10,14 @@
   probably be a type string instead ("class,generator,async,etc")
 - Unicode escapes should not make a reserved word??
 - Arrow function parameterized on "in"?  Need to pass noIn into ArrowFunction
-  Is precedence for arrow function wrong?
+  Is precedence for arrow function wrong?  We're going to need to "bounce" the
+  arrow formal parameters back out into AssignmentExpression and then do the
+  rest of the parsing there.  The tricky part here is going to be how we handle
+  rest params in parenthesized argument lists.  We can't bounce that back as a
+  ParenExpression.  Do we transformFormals right there, and then defer parsing
+  the body until we bounce back?  Probably.  That will break up our logic, but
+  arrows are just messy like that.
 - ClassElement: ; ?  What the hell is that for?
-- ExportSpecifier[NoReference]
 
 == Syntax Errors ==
 

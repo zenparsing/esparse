@@ -3,7 +3,7 @@ module Node from "TreeNode.js";
 export class Transform {
 
     // Transform an expression into a formal parameter list
-    transformFormals(expr) {
+    transformFormals(expr, rest) {
     
         if (expr === null)
             return [];
@@ -20,6 +20,9 @@ export class Transform {
             params.push(param = new Node.FormalParameter(node, null, node.start, node.end));
             this.transformPatternElement(param, true);
         }
+        
+        if (rest)
+            params.push(rest);
         
         return params;
     }
