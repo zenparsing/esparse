@@ -116,8 +116,9 @@ class Token {
 
 class Context {
 
-    constructor(isStrict, isFunction) {
+    constructor(parent, isStrict, isFunction) {
     
+        this.parent = parent;
         this.strict = isStrict;
         this.isFunction = isFunction;
         this.isFunctionBody = false;
@@ -143,7 +144,7 @@ export class Parser {
         this.peek1 = null;
         this.endOffset = scanner.offset;
         
-        this.contextStack = [];
+        this.context = null;
         this.pushContext(false);
     }
 
@@ -299,23 +300,19 @@ export class Parser {
     pushContext(isFunction, isStrict) {
     
         isStrict = isStrict || (this.context ? this.context.strict : null);
-        
-        this.context = new Context(isStrict, isFunction);
-        this.contextStack.push(this.context);
+        this.context = new Context(this.context, isStrict, isFunction);
     }
     
     popContext(collapse) {
     
         var context = this.context,
-            stack = this.contextStack;
+            parent = context.parent;
         
         if (context.strict !== true)
             this.setStrict(false);
         
         // If collapsing into parent context, copy invalid nodes into parent
-        if (collapse && context.invalidNodes && stack.length > 1) {
-            
-            var parent = stack[stack.length - 2];
+        if (collapse && parent && context.invalidNodes) {
 
             if (!parent.invalidNodes) {
             
@@ -332,18 +329,20 @@ export class Parser {
         
         this.checkInvalidNodes();
         
-        stack.pop();
-        this.context = stack[stack.length - 1];
+        this.context = this.context.parent;
     }
     
     setStrict(strict) {
     
-        if (this.context.strict === true)
+        var context = this.context,
+            parent = this.context.parent;
+        
+        if (context.strict === true)
             return;
         
-        this.context.strict = strict;
+        context.strict = strict;
         
-        var node = this.context.strictError;
+        var node = context.strictError;
         if (!node) return;
         
         if (strict) {
@@ -351,15 +350,13 @@ export class Parser {
             if (node.error)
                 this.fail(node.error, node);
             
-        } else if (this.contextStack.length > 1) {
+        } else if (parent) {
         
-            var parent = this.contextStack[this.contextStack.length - 2];
-            
             if (parent.strict === null && !parent.strictError)
                 parent.strictError = node;
         }
         
-        this.context.strictError = null;
+        context.strictError = null;
     }
     
     addStrictError(error, node) {
@@ -1120,6 +1117,7 @@ export class Parser {
         }
         
         this.pushContext(true);
+        
         
         if (kind === "generator")
             this.context.isGenerator = true;
