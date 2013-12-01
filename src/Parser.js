@@ -382,11 +382,11 @@ export class Parser {
                     break;
                 
                 default:
-                    return true;
+                    return false;
             }
         }
         
-        return false;
+        return true;
     }
     
     addInvalidNode(error, node, strict) {
@@ -522,7 +522,8 @@ export class Parser {
     YieldExpression() {
     
         var start = this.startOffset,
-            delegate = false;
+            delegate = false,
+            expr = null;
             
         this.readKeyword("yield");
         
@@ -532,8 +533,11 @@ export class Parser {
             delegate = true;
         }
         
+        if (delegate || !this.maybeEnd())
+            expr = this.AssignmentExpression();
+        
         return new Node.YieldExpression(
-            this.AssignmentExpression(), 
+            expr, 
             delegate, 
             start, 
             this.endOffset);
@@ -1433,7 +1437,7 @@ export class Parser {
         var start = this.startOffset;
         
         this.read("return");
-        var value = this.maybeEnd() ? this.Expression() : null;
+        var value = this.maybeEnd() ? null : this.Expression();
         
         this.Semicolon();
         
@@ -1448,7 +1452,7 @@ export class Parser {
             labelSet = this.context.labelSet,
             label;
         
-        label = this.maybeEnd() ? this.Identifier() : null;
+        label = this.maybeEnd() ? null : this.Identifier();
         
         this.Semicolon();
         
@@ -1474,7 +1478,7 @@ export class Parser {
         
         this.read("throw");
         
-        var expr = this.maybeEnd() ? this.Expression() : null;
+        var expr = this.maybeEnd() ? null : this.Expression();
         
         if (expr === null)
             this.fail("Missing throw expression");
