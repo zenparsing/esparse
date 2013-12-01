@@ -12,6 +12,7 @@
 - Arrow function parameterized on "in"?  Need to pass noIn into ArrowFunction
   Is precedence for arrow function wrong?
 - ClassElement: ; ?  What the hell is that for?
+- ExportSpecifier[NoReference]
 
 == Syntax Errors ==
 

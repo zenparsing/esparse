@@ -694,7 +694,7 @@ export class ExportDeclaration extends Node {
     }
 }
 
-export class ExportSpecifierSet extends Node {
+export class ExportsList extends Node {
 
     constructor(list, from, start, end) {
     

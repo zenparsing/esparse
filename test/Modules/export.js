@@ -47,7 +47,7 @@
             statements: [
             {   type: "ExportDeclaration",
                 binding: {
-                    type: "ExportSpecifierSet",
+                    type: "ExportsList",
                     specifiers: [
                     {   type: "ExportSpecifier",
                         local: {
@@ -77,7 +77,7 @@
             statements: [
             {   type: "ExportDeclaration",
                 binding: {
-                    type: "ExportSpecifierSet",
+                    type: "ExportsList",
                     specifiers: [
                     {   type: "ExportSpecifier",
                         local: {
@@ -114,7 +114,7 @@
             statements: [
             {   type: "ExportDeclaration",
                 binding: {
-                    type: "ExportSpecifierSet",
+                    type: "ExportsList",
                     specifiers: [
                     {   type: "ExportSpecifier",
                         local: {
@@ -147,7 +147,7 @@
             statements: [
             {   type: "ExportDeclaration",
                 binding: {
-                    type: "ExportSpecifierSet",
+                    type: "ExportsList",
                     specifiers: [
                     {   type: "ExportSpecifier",
                         local: {
@@ -180,7 +180,7 @@
             statements: [
             {   type: "ExportDeclaration",
                 binding: {
-                    type: "ExportSpecifierSet",
+                    type: "ExportsList",
                     specifiers: [
                     {   type: "ExportSpecifier",
                         local: {
@@ -216,7 +216,7 @@
             statements: [
             {   type: "ExportDeclaration",
                 binding: {
-                    type: "ExportSpecifierSet",
+                    type: "ExportsList",
                     specifiers: null,
                     from: {
                         type: "String",

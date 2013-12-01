@@ -2193,7 +2193,7 @@ export class Parser {
                 
             default:
                 
-                binding = this.ExportSpecifierSet();
+                binding = this.ExportsList();
                 this.Semicolon();
                 break;
         }
@@ -2201,7 +2201,7 @@ export class Parser {
         return new Node.ExportDeclaration(binding, start, this.endOffset);
     }
     
-    ExportSpecifierSet() {
+    ExportsList() {
     
         var start = this.startOffset,
             list = null,
@@ -2232,7 +2232,7 @@ export class Parser {
                 from = this.ModuleSpecifier();
         }
         
-        return new Node.ExportSpecifierSet(list, from, start, this.endOffset);
+        return new Node.ExportsList(list, from, start, this.endOffset);
     }
     
     ExportSpecifier() {

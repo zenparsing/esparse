@@ -141,5 +141,4 @@
 /** (x = (delete x)) => { "use strict"; } **/
 "'use strict' prologue sets strictness of default expressions": {},
 
-
 };
