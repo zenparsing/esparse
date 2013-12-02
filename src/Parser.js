@@ -1901,7 +1901,7 @@ export class Parser {
                     return this.LexicalDeclaration();
                 
                 if (this.peekModule())
-                    return this.ModuleNode();
+                    return this.ModuleDefinition();
                 
                 break;
         }
@@ -2090,7 +2090,7 @@ export class Parser {
     
     // === Modules ===
     
-    ModuleNode() {
+    ModuleDefinition() {
     
         var start = this.startOffset,
             ident,
@@ -2117,7 +2117,7 @@ export class Parser {
             target = this.ModuleSpecifier();
             this.Semicolon();
         
-            return new Node.ModuleFromDeclaration(
+            return new Node.ModuleImport(
                 ident,
                 target,
                 start,

@@ -653,7 +653,7 @@ export class ModuleBody extends Node {
     }
 }
 
-export class ModuleFromDeclaration extends Node {
+export class ModuleImport extends Node {
 
     constructor(identifier, from, start, end) {
     

@@ -20,7 +20,7 @@
 "module from": { 
     type: "Script",
     statements: [
-    {   type: "ModuleFromDeclaration",
+    {   type: "ModuleImport",
         identifier: {
             type: "Identifier",
             value: "x"
