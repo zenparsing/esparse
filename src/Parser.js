@@ -489,8 +489,8 @@ export class Parser {
             case "CallExpression":
                 break;
         
-            case "ObjectExpression":
-            case "ArrayExpression":
+            case "ObjectLiteral":
+            case "ArrayLiteral":
                 this.transformPattern(lhs, false);
                 break;
             
@@ -796,7 +796,7 @@ export class Parser {
             case "TEMPLATE": return this.TemplateExpression();
             case "NUMBER": return this.Number();
             case "STRING": return this.String();
-            case "{": return this.ObjectExpression();
+            case "{": return this.ObjectLiteral();
             
             case "(": return this.peek(null, 1) === "for" ? 
                 this.GeneratorComprehension() :
@@ -804,7 +804,7 @@ export class Parser {
             
             case "[": return this.peek(null, 1) === "for" ?
                 this.ArrayComprehension() :
-                this.ArrayExpression();
+                this.ArrayLiteral();
             
             case "IDENTIFIER":
             
@@ -904,11 +904,11 @@ export class Parser {
         switch (this.peek()) { 
         
             case "{":
-                node = this.ObjectExpression();
+                node = this.ObjectLiteral();
                 break;
             
             case "[":
-                node = this.ArrayExpression();
+                node = this.ArrayLiteral();
                 break;
             
             default:
@@ -969,7 +969,7 @@ export class Parser {
         return new Node.ParenExpression(expr, start, this.endOffset);
     }
     
-    ObjectExpression() {
+    ObjectLiteral() {
     
         var start = this.startOffset,
             list = [],
@@ -988,7 +988,7 @@ export class Parser {
         
         this.read("}");
         
-        return new Node.ObjectExpression(list, start, this.endOffset);
+        return new Node.ObjectLiteral(list, start, this.endOffset);
     }
     
     PropertyDefinition(nameSet) {
@@ -1136,7 +1136,7 @@ export class Parser {
             this.endOffset);
     }
     
-    ArrayExpression() {
+    ArrayLiteral() {
     
         var start = this.startOffset,
             list = [],
@@ -1166,7 +1166,7 @@ export class Parser {
         
         this.read("]");
         
-        return new Node.ArrayExpression(list, start, this.endOffset);
+        return new Node.ArrayLiteral(list, start, this.endOffset);
     }
     
     ArrayComprehension() {

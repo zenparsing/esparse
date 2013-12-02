@@ -23,8 +23,20 @@ export class Validate {
     // Checks an assignment target for strict mode restrictions
     checkAssignTarget(node, strict) {
     
-        if (node.type !== "Identifier")
-            this.fail("Invalid left-hand side in assignment", node);
+        switch (node.type) {
+        
+            case "Identifier":
+                break;
+            
+            // LeftHandSideExpression
+            case "MemberExpression":
+            case "NewExpression":
+            case "CallExpression":
+                return;
+            
+            default:
+                this.fail("Invalid left-hand side in assignment", node);
+        }
         
         // Mark identifier node as a variable
         node.context = "variable";
@@ -121,8 +133,8 @@ export class Validate {
                 
                 break;
             
-            case "ObjectExpression":
-            case "ArrayExpression":
+            case "ObjectLiteral":
+            case "ArrayLiteral":
                 this.transformPattern(init, false);
                 break;
             

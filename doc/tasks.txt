@@ -1,5 +1,9 @@
 == Tasks ==
 
+- Change Object/ArrayExpression to Object/ArrayLiteral?
+- Computed property names in object literals.
+- checkAssignTarget/transformPattern need a complete audit to bring
+  into line with grammar.
 - checkParameters needs to check patterns, yes?  Find section of spec
   which mentions this.  What if there
 - transformFormals needs to perform strict mode checks like checkParameters,

@@ -10,7 +10,7 @@
         {   type: "ParenExpression",
             expression:
         
-            {   type: "ObjectExpression",
+            {   type: "ObjectLiteral",
                 properties: [
                 
                 {   type: "MethodDefinition",

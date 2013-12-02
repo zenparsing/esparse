@@ -139,12 +139,12 @@ export class Transform {
                 if (binding) this.fail("Invalid left-hand-side in binding pattern", node);
                 break;
             
-            case "ObjectExpression":
+            case "ObjectLiteral":
             case "ObjectPattern":
                 this.transformObjectPattern(node, binding);
                 break;
             
-            case "ArrayExpression":
+            case "ArrayLiteral":
             case "ArrayPattern":
                 this.transformArrayPattern(node, binding);
                 break;

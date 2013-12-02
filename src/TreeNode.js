@@ -232,7 +232,7 @@ export class ParenExpression extends Node {
     }
 }
 
-export class ObjectExpression extends Node {
+export class ObjectLiteral extends Node {
 
     constructor(props, start, end) {
     
@@ -285,7 +285,7 @@ export class MethodDefinition extends Node {
     }
 }
 
-export class ArrayExpression extends Node {
+export class ArrayLiteral extends Node {
 
     constructor(elements, start, end) {
     

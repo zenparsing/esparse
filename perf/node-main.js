@@ -1,10 +1,8 @@
-import "node:path" as Path;
-import "node:fs" as FS;
-import "node:./parsers/esprima.js" as Esprima;
-import "node:./parsers/acorn.js" as Acorn;
+module Path from "node:path";
+module FS from "node:fs";
+module Parser from "../src/es6parse.js";
 
-import "../src/es6parse.js" as Parser;
-import Scanner from Parser;
+import { Scanner } from Parser;
 
 var Esprima = require("./parsers/esprima.js"),
     Acorn = require("./parsers/acorn.js");
@@ -103,8 +101,16 @@ walkDirectory(Path.join(__dirname, "input"), path => {
         parser = parsers[lib],
         count = 50;
     
-    for (var i = count; i--;)
-        parser(input = input + " ");
+    try {
+    
+        for (var i = count; i--;)
+            parser(input = input + " ");
+            
+    } catch (err) {
+    
+        console.log(err);
+        throw err;
+    }
     
     var ms = ((+new Date) - ts) / count;
     
