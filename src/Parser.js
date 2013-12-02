@@ -93,10 +93,7 @@ function isUnary(op) {
 }
 
 // Encodes a string as a map key for use in regular object
-function mapKey(name) {
-
-    return "." + (name || "");
-}
+function mapKey(name) { return "." + (name || "") }
 
 class Token {
 
@@ -1066,7 +1063,7 @@ export class Parser {
         // Check for duplicate names
         name = mapKey(node.name.value);
         
-        if (this.isDuplicateName(flag, nameSet[name]), false)
+        if (this.isDuplicateName(flag, nameSet[name], false))
             this.addInvalidNode("Duplicate property names in object literal not allowed", node, false);
         
         else if (this.isDuplicateName(flag, nameSet[name], true))

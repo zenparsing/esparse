@@ -9,6 +9,9 @@ var strictReservedWord = new RegExp("^(?:" +
     "implements|private|public|interface|package|let|protected|static|yield" +
 ")$");
 
+// Encodes a string as a map key for use in regular object
+function mapKey(name) { return "." + (name || "") }
+
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
 
@@ -68,6 +71,7 @@ export class Validate {
     
         var names = {}, 
             name,
+            key,
             node,
             i;
         
@@ -79,14 +83,15 @@ export class Validate {
                 continue;
             
             name = node.pattern.value;
+            key = mapKey(name);
             
             if (isPoisonIdent(name))
                 this.addStrictError("Parameter name " + name + " is not allowed in strict mode", node);
             
-            if (names[name] === 1)
+            if (names[key])
                 this.addStrictError("Strict mode function may not have duplicate parameter names", node);
             
-            names[name] = 1;
+            names[key] = 1;
         }
     }
     
