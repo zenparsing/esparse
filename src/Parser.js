@@ -955,7 +955,10 @@ export class Parser {
     
         var start = this.startOffset,
             list = [],
-            nameSet = {};
+            nameSet = {},
+            node,
+            flag,
+            key;
         
         this.read("{");
         
@@ -964,8 +967,11 @@ export class Parser {
             if (list.length > 0)
                 this.read(",");
             
-            if (this.peek("name") !== "}")
-                list.push(this.PropertyDefinition(nameSet));
+            if (this.peek("name") !== "}") {
+            
+                list.push(node = this.PropertyDefinition());
+                this.checkPropertyName(node, nameSet);
+            }
         }
         
         this.read("}");
@@ -973,6 +979,86 @@ export class Parser {
         return new Node.ObjectLiteral(list, start, this.endOffset);
     }
     
+    PropertyDefinition() {
+    
+        var start = this.startOffset,
+            node,
+            name;
+        
+        if (this.peek("name") === "*")
+            return this.MethodDefinition();
+        
+        switch (this.peek("name", 1)) {
+        
+            case "=":
+        
+                // Re-read token as an identifier
+                this.unpeek();
+            
+                node = new Node.PatternProperty(
+                    this.Identifier(),
+                    null,
+                    (this.read(), this.AssignmentExpression()),
+                    start,
+                    this.endOffset);
+        
+                this.addInvalidNode("Invalid property definition in object literal", node, false);
+                return node;
+            
+            case ",":
+            case "}":
+            
+                // Re-read token as an identifier
+                this.unpeek();
+        
+                return new Node.PropertyDefinition(
+                    this.Identifier(),
+                    null,
+                    start,
+                    this.endOffset);
+        }
+            
+        name = this.PropertyName();
+        
+        if (this.peek("name") === ":") {
+        
+            return new Node.PropertyDefinition(
+                name,
+                (this.read(), this.AssignmentExpression()),
+                start,
+                this.endOffset);
+        }
+        
+        return this.MethodDefinition(name);
+    }
+    
+    PropertyName() {
+    
+        var type = this.peek("name");
+        
+        switch (type) {
+        
+            case "IDENTIFIER": return this.Identifier();
+            case "STRING": return this.String();
+            case "NUMBER": return this.Number();
+            case "[": return this.ComputedPropertyName();
+        }
+        
+        this.fail("Unexpected token " + type);
+    }
+    
+    ComputedPropertyName() {
+    
+        var start = this.startOffset;
+        
+        this.read("[");
+        var expr = this.AssignmentExpression();
+        this.read("]");
+        
+        return new Node.ComputedPropertyName(expr, start, this.endOffset);
+    }
+    
+    /*
     PropertyDefinition(nameSet) {
         
         var start = this.startOffset,
@@ -982,6 +1068,18 @@ export class Parser {
         
         switch (this.peek("name", 1)) {
         
+            case ":":
+                
+                flag = PROP_DATA;
+                
+                node = new Node.PropertyDefinition(
+                    this.PropertyName(),
+                    (this.read(), this.AssignmentExpression()),
+                    start,
+                    this.endOffset);
+                
+                break;
+                
             case "IDENTIFIER":
             case "STRING":
             case "NUMBER":
@@ -999,18 +1097,6 @@ export class Parser {
             case "(":
             
                 node = this.MethodDefinition();
-                break;
-            
-            case ":":
-                
-                flag = PROP_DATA;
-                
-                node = new Node.PropertyDefinition(
-                    this.PropertyName(),
-                    (this.read(), this.AssignmentExpression()),
-                    start,
-                    this.endOffset);
-                
                 break;
             
             case "=":
@@ -1070,14 +1156,14 @@ export class Parser {
         
         this.fail("Unexpected token " + type);
     }
+    */
     
-    MethodDefinition() {
+    MethodDefinition(name) {
     
         var start = this.startOffset,
-            kind = "",
-            name;
+            kind = "";
         
-        if (this.peek("name") === "*") {
+        if (!name && this.peek("name") === "*") {
         
             this.read();
             
@@ -1086,7 +1172,8 @@ export class Parser {
         
         } else {
         
-            name = this.PropertyName();
+            if (!name)
+                name = this.PropertyName();
             
             if (name.type === "Identifier" && 
                 this.peek("name") !== "(" &&
@@ -2356,21 +2443,7 @@ export class Parser {
         }
         
         method = this.MethodDefinition();
-        
-        switch (method.kind) {
-        
-            case "get": flag = PROP_GET; break;
-            case "set": flag = PROP_SET; break;
-        }
-        
-        name = mapKey(method.name.value);
-        
-        // Check for duplicate names
-        if (this.isDuplicateName(flag, nameSet[name], true))
-            this.fail("Duplicate element name in class definition.", method);
-        
-        // Set name flag
-        nameSet[name] |= flag;
+        this.checkClassElementName(method, nameSet);
         
         return new Node.ClassElement(isStatic, method, start, this.endOffset);
     }

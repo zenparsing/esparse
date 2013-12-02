@@ -1,12 +1,10 @@
 == Tasks ==
 
 - Computed property names in object literals.
-- checkAssignTarget/transformPattern need a complete audit to bring
-  into line with grammar.
-- checkParameters needs to check patterns, yes?  Find section of spec
-  which mentions this.  What if there
-- transformFormals needs to perform strict mode checks like checkParameters,
-  I think.  Investigate and write tests.
+- checkParameters needs to check patterns, yes?  If it's a simple parameter
+  list, then use the current strict-mode test.  Otherwise, any duplicate bound
+  names are disallowed.  We'll need to have a function that gets the bound names,
+  I suppose...
 - Create summarized list of early errors we need to check for.
 - For "super", we'll need to know whether we're in a class or not.  This
   will necessitate another flag in the context object, but there should 

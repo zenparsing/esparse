@@ -52,7 +52,6 @@ export class Validate {
             
             default:
                 this.fail("Invalid left-hand side in assignment", node);
-                break;
         }
     }
     
@@ -139,6 +138,63 @@ export class Validate {
         
             this.checkAssignTarget(init);
         }
+    }
+    
+    checkPropertyName(node, nameSet) {
+    
+        if (node.name.type !== "Identifier")
+            return;
+        
+        var flag = PROP_NORMAL,
+            name;
+        
+        switch (node.type) {
+
+            case "PropertyDefinition": flag = PROP_DATA; break;
+    
+            case "MethodDefinition":
+        
+                switch (node.kind) {
+
+                    case "get": flag = PROP_GET; break;
+                    case "set": flag = PROP_SET; break;
+                }
+        }
+
+        // Check for duplicate names
+        name = mapKey(node.name.value);
+
+        if (this.isDuplicateName(flag, nameSet[name], false))
+            this.addInvalidNode("Duplicate property names in object literal not allowed", node, false);
+        else if (this.isDuplicateName(flag, nameSet[name], true))
+            this.addInvalidNode("Duplicate data property names in object literal not allowed in strict mode", node, true);
+
+        // Set name flag
+        nameSet[name] |= flag;
+    }
+    
+    checkClassElementName(node, nameSet) {
+    
+        if (node.name.type !== "Identifier")
+            return;
+        
+        var flag = PROP_NORMAL,
+            name;
+        
+        switch (node.kind) {
+
+            case "get": flag = PROP_GET; break;
+            case "set": flag = PROP_SET; break;
+        }
+
+        // Check for duplicate names
+        name = mapKey(node.name.value);
+
+        if (this.isDuplicateName(flag, nameSet[name], false))
+            this.addInvalidNode("Duplicate method names in class not allowed", node, false);
+
+        // Set name flag
+        nameSet[name] |= flag;
     }
     
     // Returns true if the specified name type is a duplicate for a given set of flags

@@ -241,6 +241,15 @@ export class ObjectLiteral extends Node {
     }
 }
 
+export class ComputedPropertyName extends Node {
+
+    constructor(expr, start, end) {
+    
+        super(start, end);
+        this.expression = expr;
+    }
+}
+
 export class PropertyDefinition extends Node {
 
     constructor(name, expr, start, end) {
