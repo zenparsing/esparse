@@ -21,32 +21,38 @@ function isPoisonIdent(name) {
 export class Validate {
 
     // Checks an assignment target for strict mode restrictions
-    checkAssignTarget(node, strict) {
+    checkAssignTarget(node, simple) {
     
+        // Remove any parenthesis surrounding the target
+        for (; node.type === "ParenExpression"; node = node.expression);
+        
         switch (node.type) {
         
             case "Identifier":
+            
+                // Mark identifier node as a variable
+                node.context = "variable";
+
+                if (isPoisonIdent(node.value))
+                    this.addStrictError("Cannot modify " + node.value + " in strict mode", node);
+        
                 break;
             
-            // LeftHandSideExpression
             case "MemberExpression":
-            case "NewExpression":
-            case "CallExpression":
-                return;
+                break;
+                    
+            case "ObjectLiteral":
+            case "ArrayLiteral":
+            
+                if (!simple) {
+                
+                    this.transformPattern(node, false);
+                    break;
+                }
             
             default:
                 this.fail("Invalid left-hand side in assignment", node);
-        }
-        
-        // Mark identifier node as a variable
-        node.context = "variable";
-        
-        if (isPoisonIdent(node.value)) {
-        
-            var msg = "Cannot modify " + node.value + " in strict mode";
-            
-            if (strict) this.fail(msg, node);
-            else this.addStrictError(msg, node);
+                break;
         }
     }
     
@@ -110,40 +116,28 @@ export class Validate {
     // Performs validation on the init portion of a for-in or for-of statement
     checkForInit(init, type) {
     
-        switch (init.type) {
+        if (init.type === "VariableDeclaration") {
+            
+            // For-in/of may only have one variable declaration
+            if (init.declarations.length !== 1)
+                this.fail("for-" + type + " statement may not have more than one variable declaration", init);
         
-            case "VariableDeclaration":
+            // A variable initializer is only allowed in for-in where 
+            // variable type is "var" and it is not a pattern
             
-                // For-in/of may only have one variable declaration
-                if (init.declarations.length !== 1)
-                    this.fail("for-" + type + " statement may not have more than one variable declaration", init);
+            var decl = init.declarations[0];
+        
+            if (decl.initializer && (
+                type === "of" ||
+                init.kind !== "var" ||
+                decl.pattern.type !== "Identifier")) {
             
-                // A variable initializer is only allowed in for-in where 
-                // variable type is "var" and it is not a pattern
-                
-                var decl = init.declarations[0];
+                this.fail("Invalid initializer in for-" + type + " statement", init);
+            }
             
-                if (decl.initializer && (
-                    type === "of" ||
-                    init.kind !== "var" ||
-                    decl.pattern.type !== "Identifier")) {
-                
-                    this.fail("Invalid initializer in for-" + type + " statement", init);
-                }
-                
-                break;
-            
-            case "ObjectLiteral":
-            case "ArrayLiteral":
-                this.transformPattern(init, false);
-                break;
-            
-            case "Identifier":
-                break;
-                
-            default:
-                this.checkAssignTarget(init);
-                break;   
+        } else {
+        
+            this.checkAssignTarget(init);
         }
     }
     

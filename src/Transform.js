@@ -130,7 +130,7 @@ export class Transform {
         
             case "Identifier":
                 if (binding) this.checkBindingIdent(node, true);
-                else this.checkAssignTarget(node, true);
+                else this.checkAssignTarget(node);
                 
                 break;
             

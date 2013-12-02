@@ -150,11 +150,11 @@
 /** ({ if } = a); **/
 "keywords cannot be used as simple names": {},
  
-/** ({ args: arguments }) = a; **/
-"assignment to arguments throws": {},
+/** "use strict"; ({ args: arguments }) = a; **/
+"assignment to arguments throws in strict mode": {},
 
-/** ({ arguments }) = a; **/
-"shorthand assignment to arguments throws": {},
+/** "use strict"; ({ arguments }) = a; **/
+"shorthand assignment to arguments throws in strict mode": {},
 
 /** "use strict"; ({ x: a, x: b }) = q; **/
 "duplicate names do not throw": {   

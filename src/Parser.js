@@ -479,25 +479,7 @@ export class Parser {
         if (!isAssignment(this.peek("div")))
             return left;
         
-        // Binding forms can be contained within parens
-        for (lhs = left; lhs.type === "ParenExpression"; lhs = lhs.expression);
-        
-        // Make sure that left hand side is assignable
-        switch (lhs.type) {
-        
-            case "MemberExpression":
-            case "CallExpression":
-                break;
-        
-            case "ObjectLiteral":
-            case "ArrayLiteral":
-                this.transformPattern(lhs, false);
-                break;
-            
-            default:
-                this.checkAssignTarget(lhs);
-                break;
-        }
+        this.checkAssignTarget(left);
         
         return new Node.AssignmentExpression(
             this.read(),
@@ -625,7 +607,7 @@ export class Parser {
         
             this.read();
             expr = this.MemberExpression(true);
-            this.checkAssignTarget(expr);
+            this.checkAssignTarget(expr, true);
             
             return new Node.UpdateExpression(type, expr, true, start, this.endOffset);
         }
@@ -649,7 +631,7 @@ export class Parser {
         if (isIncrement(type) && !token.newlineBefore) {
         
             this.read();
-            this.checkAssignTarget(expr);
+            this.checkAssignTarget(expr, true);
             
             return new Node.UpdateExpression(type, expr, false, start, this.endOffset);
         }
