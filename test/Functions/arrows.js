@@ -144,4 +144,7 @@
 /** for (x => x in y;;); **/
 "arrow functions are restricted by no-in": {},
 
+/** x || x => x **/
+"arrow has correct precedence": {}
+
 };

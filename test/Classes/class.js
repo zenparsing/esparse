@@ -137,6 +137,6 @@
 },
 
 /** class C extends A + B {} **/
-"extends clause does not allow assignment expression": {}
+"extends clause does not allow assignment expression": {},
 
 })

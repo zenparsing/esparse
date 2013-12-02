@@ -50,7 +50,7 @@ var WHITESPACE = 1,
     LBRACE = 12;
 
 // === Character Type Lookup Table ===
-var charTable = _=> {
+var charTable = (_=> {
 
     var charTable = new Array(128);
     
@@ -79,7 +79,7 @@ var charTable = _=> {
         string.split("").forEach(c => charTable[c.charCodeAt(0)] = type);
     }
     
-}();
+})();
 
 // Performs a binary search on an array
 function binarySearch(array, val) {
