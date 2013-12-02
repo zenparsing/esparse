@@ -1,6 +1,6 @@
 module Path from "node:path";
 module FS from "node:fs";
-module Parser from "../src/es6parse.js";
+module Parser from "../src/main.js";
 
 import { Scanner } from Parser;
 
