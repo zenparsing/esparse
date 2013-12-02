@@ -140,6 +140,7 @@ export class Validate {
         }
     }
     
+    // Checks for duplicate object literal property names
     checkPropertyName(node, nameSet) {
     
         if (node.name.type !== "Identifier")
@@ -173,6 +174,7 @@ export class Validate {
         nameSet[name] |= flag;
     }
     
+    // Checks for duplicate class element names
     checkClassElementName(node, nameSet) {
     
         if (node.name.type !== "Identifier")
@@ -212,7 +214,6 @@ export class Validate {
         }
     }
     
-    // Checks for duplicate property names in object literals or classes
     checkInvalidNodes() {
     
         var context = this.context,
