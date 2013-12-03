@@ -2124,6 +2124,10 @@ export class Parser {
         
             this.readKeyword("as");
             local = this.BindingIdentifier();
+            
+        } else {
+        
+            this.checkBindingIdent(remote);
         }
         
         return new Node.ImportSpecifier(remote, local, start, this.endOffset);
