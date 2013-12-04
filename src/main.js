@@ -7,12 +7,12 @@ export { Parser, Scanner, Node };
 
 export function parseModule(input, options) {
 
-    return new Parser(input, options).parseModule();
+    return new Parser(input, options).Module();
 }
 
 export function parseScript(input, options) {
 
-    return new Parser(input, options).parseScript();
+    return new Parser(input, options).Script();
 }
 
 export function forEachChild(node, fn) {

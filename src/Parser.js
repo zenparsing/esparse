@@ -151,16 +151,6 @@ export class Parser {
         return this.peekToken().start;
     }
     
-    parseScript() { 
-    
-        return this.Script();
-    }
-    
-    parseModule() {
-    
-        return this.Module();
-    }
-    
     nextToken(context) {
     
         var scanner = this.scanner,
