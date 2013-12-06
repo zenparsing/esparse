@@ -1349,6 +1349,7 @@ export class Parser {
             
             case "const":
                 isConst = true;
+                break;
             
             case "IDENTIFIER":
             
