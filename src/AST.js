@@ -1,5 +1,4 @@
-
-class Node {
+export class Node {
 
     constructor(start, end) {
     
