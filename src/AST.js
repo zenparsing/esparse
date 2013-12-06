@@ -8,6 +8,38 @@ class Node {
         this.end = end;
         this.error = "";
     }
+    
+    forEachChild(fn) {
+
+        var keys = Object.keys(this), val, i, j;
+    
+        for (i = 0; i < keys.length; ++i) {
+    
+            // Don't iterate over backlink to parent
+            if (keys[i] === "parentNode")
+                continue;
+            
+            val = this[keys[i]];
+        
+            // Skip non-objects and functions
+            if (!val || typeof val !== "object") 
+                continue;
+        
+            if (typeof val.type === "string") {
+        
+                // Nodes have a "type" property
+                fn(val);
+        
+            } else {
+        
+                // Iterate arrays
+                for (j = 0; j < (val.length >>> 0); ++j)
+                    if (val[j] && typeof val[j].type === "string")
+                        fn(val[j]);
+            }
+        }
+    }
+    
 }
 
 export class Script extends Node {

@@ -1,4 +1,4 @@
-module Node from "TreeNode.js";
+module AST from "AST.js";
 
 export class Transform {
 
@@ -17,7 +17,7 @@ export class Transform {
         for (i = 0; i < list.length; ++i) {
         
             node = list[i];
-            params.push(param = new Node.FormalParameter(node, null, node.start, node.end));
+            params.push(param = new AST.FormalParameter(node, null, node.start, node.end));
             this.transformPatternElement(param, true);
         }
         
@@ -47,7 +47,7 @@ export class Transform {
             
                 rest = (elem.type === "SpreadExpression");
                 
-                elem = elems[i] = new Node.PatternElement(
+                elem = elems[i] = new AST.PatternElement(
                     rest ? elem.expression : elem,
                     null,
                     rest,
@@ -88,7 +88,7 @@ export class Transform {
                 case "PropertyDefinition":
                     
                     // Replace node
-                    prop = new Node.PatternProperty(
+                    prop = new AST.PatternProperty(
                         prop.name,
                         prop.expression,
                         null,
