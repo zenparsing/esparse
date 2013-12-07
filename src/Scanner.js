@@ -180,6 +180,7 @@ export class Scanner {
         this.offset = offset || 0;
         this.length = this.input.length;
         this.lines = [-1];
+        this.lastLineBreak = -1;
         
         this.type = "";
         this.start = 0;
@@ -222,12 +223,20 @@ export class Scanner {
         return this.input.slice(this.start, this.end);
     }
     
+    lineNumber(offset) {
+    
+        if (Number(offset) !== offset)
+            offset = (offset || this).start;
+        
+        return binarySearch(this.lines, offset);
+    }
+    
     position(token) {
     
         token || (token = this);
         
         var offset = token.start,
-            line = binarySearch(this.lines, offset),
+            line = this.lineNumber(offset),
             pos = this.lines[line - 1],
             column = offset - pos;
         
@@ -243,7 +252,8 @@ export class Scanner {
     
     addLineBreak(offset) {
     
-        this.lines.push(offset);
+        if (offset > this.lastLineBreak)
+            this.lines.push(this.lastLineBreak = offset);
     }
     
     readIdentifierEscape() {
