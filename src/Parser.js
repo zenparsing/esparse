@@ -2005,6 +2005,7 @@ export class Parser {
             
         } else if (this.peekKeyword("from")) {
     
+            this.read();
             target = this.ModuleSpecifier();
             this.Semicolon();
         
@@ -2052,27 +2053,37 @@ export class Parser {
     
     ModuleSpecifier() {
     
-        this.readKeyword("from");
         return this.peek() === "STRING" ? this.String() : this.ModulePath();
     }
     
     ImportDeclaration() {
     
         var start = this.startOffset,
-            list = [],
             ident,
             from;
         
         this.read("import");
         
-        if (this.peek() === "IDENTIFIER") {
+        switch (this.peek()) {
         
-            ident = this.BindingIdentifier();
-            from = this.ModuleSpecifier();
-            this.Semicolon();
+            case "IDENTIFIER":
             
-            return new AST.ImportDefaultDeclaration(ident, from, start, this.endOffset);
+                ident = this.BindingIdentifier();
+                this.readKeyword("from");
+                from = this.ModuleSpecifier();
+                this.Semicolon();
+                
+                return new AST.ImportDefaultDeclaration(ident, from, start, this.endOffset);
+            
+            case "STRING":
+            
+                from = this.ModuleSpecifier();
+                this.Semicolon();
+                
+                return new AST.ImportDeclaration(null, from, start, this.endOffset);
         }
+        
+        var list = [];
         
         this.read("{");
     
@@ -2085,6 +2096,7 @@ export class Parser {
         }
     
         this.read("}");
+        this.readKeyword("from");
         from = this.ModuleSpecifier();
         this.Semicolon();
         
@@ -2184,6 +2196,7 @@ export class Parser {
         if (this.peek() === "*") {
         
             this.read();
+            this.readKeyword("from");
             from = this.ModuleSpecifier();
             
         } else {
@@ -2204,6 +2217,7 @@ export class Parser {
             
             if (this.peekKeyword("from")) {
             
+                this.read();
                 from = this.ModuleSpecifier();
             
             } else {

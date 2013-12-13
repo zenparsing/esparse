@@ -103,6 +103,19 @@
 },
 
 /** import { default } from "x.js"; **/
-"importing of non-identifier bindings is not allowed": {}
+"importing of non-identifier bindings is not allowed": {},
+
+/** import "x.js"; **/
+"import declaration without a specifier list":
+{   type: "Script",
+    statements: [
+    {   type: "ImportDeclaration",
+        specifiers: null,
+        from:
+        {   type: "String",
+            value: "x.js"
+        }
+    }]
+},
 
 })
