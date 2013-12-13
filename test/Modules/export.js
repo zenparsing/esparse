@@ -3,232 +3,162 @@
 /** export var x; **/
 "export not allowed outside of module": {},
 
-/** module X { export var x; } **/
+/*** export var x; ***/
 "export a var": {
-    type: "Script",
+    type: "Module",
     statements: [
-    {   type: "ModuleDeclaration",
-        identifier: {
-            type: "Identifier",
-            value: "X"
-        },
-        body: {
-            type: "ModuleBody",
-            statements: [
-            {   type: "ExportDeclaration",
-                binding: {
-                    type: "VariableDeclaration",
-                    kind: "var",
-                    declarations: [
-                    {   type: "VariableDeclarator",
-                        pattern: {
-                            type: "Identifier",
-                            value: "x"
-                        },
-                        initializer: null
-                    }]
-                }
+    {   type: "ExportDeclaration",
+        binding: {
+            type: "VariableDeclaration",
+            kind: "var",
+            declarations: [
+            {   type: "VariableDeclarator",
+                pattern: {
+                    type: "Identifier",
+                    value: "x"
+                },
+                initializer: null
             }]
         }
     }]
 },
 
-/** module X { export { x }; } **/
+/*** export { x }; ***/
 "export an identifier": {
-    type: "Script",
+    type: "Module",
     statements: [
-    {   type: "ModuleDeclaration",
-        identifier: {
-            type: "Identifier",
-            value: "X"
-        },
-        body: {
-            type: "ModuleBody",
-            statements: [
-            {   type: "ExportDeclaration",
-                binding: {
-                    type: "ExportsList",
-                    specifiers: [
-                    {   type: "ExportSpecifier",
-                        local: {
-                            type: "Identifier",
-                            value: "x"
-                        },
-                        remote: null
-                    }],
-                    from: null
-                }
-            }]
+    {   type: "ExportDeclaration",
+        binding: {
+            type: "ExportsList",
+            specifiers: [
+            {   type: "ExportSpecifier",
+                local: {
+                    type: "Identifier",
+                    value: "x"
+                },
+                remote: null
+            }],
+            from: null
         }
     }]
 },
 
-/** module X { export { x, y }; } **/
-"export multiple identifiers": {
-    type: "Script",
+/*** export { x, y }; ***/
+"export multiple identifiers":{
+    type: "Module",
     statements: [
-    {   type: "ModuleDeclaration",
-        identifier: {
-            type: "Identifier",
-            value: "X"
-        },
-        body: {
-            type: "ModuleBody",
-            statements: [
-            {   type: "ExportDeclaration",
-                binding: {
-                    type: "ExportsList",
-                    specifiers: [
-                    {   type: "ExportSpecifier",
-                        local: {
-                            type: "Identifier",
-                            value: "x"
-                        },
-                        remote: null
-                    },
-                    {   type: "ExportSpecifier",
-                        local: {
-                            type: "Identifier",
-                            value: "y"
-                        },
-                        remote: null
-                    }],
-                    from: null
-                }
-            }]
+    {   type: "ExportDeclaration",
+        binding: {
+            type: "ExportsList",
+            specifiers: [
+            {   type: "ExportSpecifier",
+                local: {
+                    type: "Identifier",
+                    value: "x"
+                },
+                remote: null
+            },
+            {   type: "ExportSpecifier",
+                local: {
+                    type: "Identifier",
+                    value: "y"
+                },
+                remote: null
+            }],
+            from: null
         }
     }]
 },
 
-/** module X { export { x as y }; } **/
+/*** export { x as y }; ***/
 "export and rename identifier": {
-    type: "Script",
+    type: "Module",
     statements: [
-    {   type: "ModuleDeclaration",
-        identifier: {
-            type: "Identifier",
-            value: "X"
-        },
-        body: {
-            type: "ModuleBody",
-            statements: [
-            {   type: "ExportDeclaration",
-                binding: {
-                    type: "ExportsList",
-                    specifiers: [
-                    {   type: "ExportSpecifier",
-                        local: {
-                            type: "Identifier",
-                            value: "x"
-                        },
-                        remote: {
-                            type: "Identifier",
-                            value: "y"
-                        }
-                    }],
-                    from: null
+    {   type: "ExportDeclaration",
+        binding: {
+            type: "ExportsList",
+            specifiers: [
+            {   type: "ExportSpecifier",
+                local: {
+                    type: "Identifier",
+                    value: "x"
+                },
+                remote: {
+                    type: "Identifier",
+                    value: "y"
                 }
-            }]
+            }],
+            from: null
         }
     }]
 },
 
-/** module X { export { x as default }; } **/
+/*** export { x as default }; ***/
 "exporting a default binding": {
-    type: "Script",
+    type: "Module",
     statements: [
-    {   type: "ModuleDeclaration",
-        identifier: {
-            type: "Identifier",
-            value: "X"
-        },
-        body: {
-            type: "ModuleBody",
-            statements: [
-            {   type: "ExportDeclaration",
-                binding: {
-                    type: "ExportsList",
-                    specifiers: [
-                    {   type: "ExportSpecifier",
-                        local: {
-                            type: "Identifier",
-                            value: "x"
-                        },
-                        remote: {
-                            type: "Identifier",
-                            value: "default"
-                        }
-                    }],
-                    from: null
+    {   type: "ExportDeclaration",
+        binding: {
+            type: "ExportsList",
+            specifiers: [
+            {   type: "ExportSpecifier",
+                local: {
+                    type: "Identifier",
+                    value: "x"
+                },
+                remote: {
+                    type: "Identifier",
+                    value: "default"
                 }
-            }]
+            }],
+            from: null
         }
     }]
 },
 
-/** module X { export { x as y } from "x.js"; } **/
+/*** export { x as y } from "x.js"; ***/
 "exporting a named set from an external module": {
-    type: "Script",
+    type: "Module",
     statements: [
-    {   type: "ModuleDeclaration",
-        identifier: {
-            type: "Identifier",
-            value: "X"
-        },
-        body: {
-            type: "ModuleBody",
-            statements: [
-            {   type: "ExportDeclaration",
-                binding: {
-                    type: "ExportsList",
-                    specifiers: [
-                    {   type: "ExportSpecifier",
-                        local: {
-                            type: "Identifier",
-                            value: "x"
-                        },
-                        remote: {
-                            type: "Identifier",
-                            value: "y"
-                        }
-                    }],
-                    from: {
-                        type: "String",
-                        value: "x.js"
-                    }
+    {   type: "ExportDeclaration",
+        binding: {
+            type: "ExportsList",
+            specifiers: [
+            {   type: "ExportSpecifier",
+                local: {
+                    type: "Identifier",
+                    value: "x"
+                },
+                remote: {
+                    type: "Identifier",
+                    value: "y"
                 }
-            }]
+            }],
+            from: {
+                type: "String",
+                value: "x.js"
+            }
         }
     }]
 },
 
-/** module X { export * from "x.js"; } **/
+/*** export * from "x.js"; ***/
 "exporting everything from an external module": {
-    type: "Script",
+    type: "Module",
     statements: [
-    {   type: "ModuleDeclaration",
-        identifier: {
-            type: "Identifier",
-            value: "X"
-        },
-        body: {
-            type: "ModuleBody",
-            statements: [
-            {   type: "ExportDeclaration",
-                binding: {
-                    type: "ExportsList",
-                    specifiers: null,
-                    from: {
-                        type: "String",
-                        value: "x.js"
-                    }
-                }
-            }]
+    {   type: "ExportDeclaration",
+        binding: {
+            type: "ExportsList",
+            specifiers: null,
+            from: {
+                type: "String",
+                value: "x.js"
+            }
         }
     }]
 },
 
-/** module X { export *; } **/
+/*** export *; ***/
 "exporting everything must include a specifier": { }
 
 })

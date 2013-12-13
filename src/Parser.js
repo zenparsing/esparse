@@ -1777,7 +1777,11 @@ export class Parser {
             case "function": return this.FunctionDeclaration();
             case "class": return this.ClassDeclaration();
             case "const": return this.LexicalDeclaration();
-            case "import": return this.ImportDeclaration();
+            
+            case "import": 
+            
+                if (isModule)
+                    return this.ImportDeclaration();
             
             case "export":
                 

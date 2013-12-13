@@ -2,11 +2,11 @@ module Path from "node:path";
 module FS from "node:fs";
 
 import { inspect } from "node:util";
-import { parseScript } from "../src/main.js";
+import { parseModule, parseScript } from "../src/main.js";
 
 var HOP = {}.hasOwnProperty,
-    TEST_COMMENT = /\/\*\*!?[\s\S]+?\*\*\//g,
-    COMMENT_TRIM = /^\/\*\*!?|\*\*\/$/g;
+    TEST_COMMENT = /\/\*\*[\s\S]+?\*\*\//g,
+    COMMENT_TRIM = /^\/\*+\s+|\s+\*+\/$/g;
 
 var SKIP_KEYS = {
 
@@ -166,7 +166,15 @@ function parseTestComments(text) {
 
     var list = text.match(TEST_COMMENT) || [];
     
-    return list.map(source => source.replace(COMMENT_TRIM, "").trim());
+    return list.map(source => {
+        
+        console.log(source.startsWith("/**", 0));
+    
+        return {
+            module: source.startsWith("/***"),
+            source: source.replace(COMMENT_TRIM, "")
+        };
+    });
 }
 
 // Displays an object tree
@@ -199,14 +207,17 @@ function run() {
             programs = parseTestComments(text),
             outputs = (new Function("return " + text))(),
             keys = Object.keys(outputs),
+            program,
             pass,
             i;
         
         for (i = 0; i < programs.length; ++i) {
         
+            program = programs[i];
+            
             try { 
             
-                tree = parseScript(programs[i]);
+                tree = (program.module ? parseModule : parseScript)(program.source);
             
             } catch (err) {
                 
