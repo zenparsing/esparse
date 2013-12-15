@@ -118,9 +118,8 @@ class Context {
         this.parent = parent;
         this.strict = isStrict;
         this.isFunction = isFunction;
-        this.isFunctionBody = false;
-        this.isGenerator = false;
-        this.isClass = false;
+        this.functionBody = false;
+        this.functionType = null;
         this.labelSet = {};
         this.switchDepth = 0;
         this.invalidNodes = null;
@@ -281,7 +280,9 @@ export class Parser {
     
     peekYield() {
     
-        return this.peekKeyword("yield") && this.context.isGenerator && this.context.isFunctionBody;
+        return this.peekKeyword("yield") && 
+            this.context.functionType === "generator" && 
+            this.context.functionBody;
     }
     
     // == Context Management ==
@@ -1076,9 +1077,8 @@ export class Parser {
         
         this.pushContext(true);
         
-        
         if (kind === "generator")
-            this.context.isGenerator = true;
+            this.context.functionType = kind;
         
         var params = this.FormalParameters(),
             body = this.FunctionBody();
@@ -1832,7 +1832,7 @@ export class Parser {
         this.pushContext(true);
         
         if (kind === "generator")
-            this.context.isGenerator = true;
+            this.context.functionType = kind;
         
         var ident = this.Identifier(),
             params = this.FormalParameters(),
@@ -1875,7 +1875,7 @@ export class Parser {
         this.pushContext(true);
         
         if (kind === "generator")
-            this.context.isGenerator = true;
+            this.context.functionType = kind;
         
         var params = this.FormalParameters(),
             body = this.FunctionBody();
@@ -1945,7 +1945,7 @@ export class Parser {
     
     FunctionBody() {
         
-        this.context.isFunctionBody = true;
+        this.context.functionBody = true;
         
         var start = this.startOffset;
         
@@ -2319,7 +2319,6 @@ export class Parser {
     ClassBody() {
     
         this.pushContext(false, true);
-        this.context.isClass = true;
         
         var start = this.startOffset,
             nameSet = {}, 
