@@ -86,6 +86,7 @@ function isUnary(op) {
         case "~":
         case "+":
         case "-":
+        case "await": // [Async Functions]
             return true;
     }
     
@@ -283,6 +284,26 @@ export class Parser {
         return this.peekKeyword("yield") && 
             this.context.functionType === "generator" && 
             this.context.functionBody;
+    }
+    
+    // [Async Functions]
+    
+    peekAwait() {
+    
+        return this.peekKeyword("await") &&
+            this.context.functionType === "async" &&
+            this.context.functionBody;
+    }
+    
+    peekAsync() {
+    
+        if (this.peekKeyword("async")) {
+        
+            var token = this.peekToken("div", 1);
+            return (!token.newlineBefore && token.type === "IDENTIFIER");
+        }
+        
+        return false;
     }
     
     // == Context Management ==
@@ -521,6 +542,23 @@ export class Parser {
             this.endOffset);
     }
     
+    // [Async Functions]
+    AwaitExpression() {
+    
+        var start = this.startOffset,
+            expr = null;
+        
+        this.readKeyword("await");
+        
+        if (!this.maybeEnd())
+            expr = this.UnaryExpression();
+        
+        return new AST.AwaitExpression(
+            expr,
+            start,
+            this.endOffset);
+    }
+    
     ConditionalExpression(noIn) {
     
         var start = this.startOffset,
@@ -602,6 +640,10 @@ export class Parser {
             
             return new AST.UpdateExpression(type, expr, true, start, this.endOffset);
         }
+        
+        // [Async Functions]
+        if (this.peekAwait())
+            return this.AwaitExpression();
         
         if (isUnary(type)) {
         
@@ -781,7 +823,11 @@ export class Parser {
             
             case "IDENTIFIER":
             
-                if (this.peek("div", 1) === "=>") {
+                if (this.peekAsync()) {
+                
+                    return this.AsyncExpression();
+                
+                } else if (this.peek("div", 1) === "=>") {
                 
                     this.pushContext(true);
                     return this.ArrowFunctionHead(this.BindingIdentifier(), null, start);
@@ -1231,8 +1277,8 @@ export class Parser {
             
             case "IDENTIFIER":
             
-                return this.peek("div", 1) === ":" ?
-                    this.LabelledStatement() :
+                return this.peekAsync() ? this.AsyncDeclaration() :
+                    this.peek("div", 1) === ":" ? this.LabelledStatement() :
                     this.ExpressionStatement();
             
             case "{": return this.Block();
@@ -1830,9 +1876,7 @@ export class Parser {
         }
         
         this.pushContext(true);
-        
-        if (kind === "generator")
-            this.context.functionType = kind;
+        this.context.functionType = kind;
         
         var ident = this.Identifier(),
             params = this.FormalParameters(),
@@ -1873,9 +1917,7 @@ export class Parser {
         }
         
         this.pushContext(true);
-        
-        if (kind === "generator")
-            this.context.functionType = kind;
+        this.context.functionType = kind;
         
         var params = this.FormalParameters(),
             body = this.FunctionBody();
@@ -1886,6 +1928,58 @@ export class Parser {
         
         return new AST.FunctionExpression(
             kind,
+            ident,
+            params,
+            body,
+            start,
+            this.endOffset);
+    }
+    
+    AsyncDeclaration() {
+    
+        var start = this.startOffset;
+        
+        this.readKeyword("async");
+        this.pushContext(true);
+        this.context.functionType = "async";
+        
+        var ident = this.Identifier(),
+            params = this.FormalParameters(),
+            body = this.FunctionBody();
+            
+        this.checkBindingIdent(ident);
+        this.checkParameters(params);
+        
+        this.popContext();
+        
+        return new AST.FunctionDeclaration(
+            "async",
+            ident,
+            params,
+            body,
+            start,
+            this.endOffset);
+    }
+    
+    AsyncExpression() {
+    
+        var start = this.startOffset;
+        
+        this.readKeyword("async");
+        this.pushContext(true);
+        this.context.functionType = "async";
+        
+        var ident = this.Identifier(),
+            params = this.FormalParameters(),
+            body = this.FunctionBody();
+            
+        this.checkBindingIdent(ident);
+        this.checkParameters(params);
+        
+        this.popContext();
+        
+        return new AST.FunctionExpression(
+            "async",
             ident,
             params,
             body,
@@ -1973,6 +2067,8 @@ export class Parser {
         
         var params = head.parameters,
             start = head.start;
+        
+        // TODO: if AssignmentExpression, should we set context.functionBody = true?
         
         var body = this.peek() === "{" ?
             this.FunctionBody() :
@@ -2172,6 +2268,12 @@ export class Parser {
                 
                     binding = this.VariableDeclaration(false);
                     this.Semicolon();
+                    break;
+                }
+                
+                if (this.peekAsync()) {
+                
+                    binding = this.AsyncDeclaration();
                     break;
                 }
             

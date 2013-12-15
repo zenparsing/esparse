@@ -170,6 +170,15 @@ export class YieldExpression extends Node {
     }
 }
 
+export class AwaitExpression extends Node {
+
+    constructor(expression, start, end) {
+    
+        super(start, end);
+        this.expression = expression;
+    }
+}
+
 export class ConditionalExpression extends Node {
 
     constructor(test, cons, alt, start, end) {

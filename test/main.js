@@ -167,8 +167,6 @@ function parseTestComments(text) {
     var list = text.match(TEST_COMMENT) || [];
     
     return list.map(source => {
-        
-        console.log(source.startsWith("/**", 0));
     
         return {
             module: source.startsWith("/***"),
