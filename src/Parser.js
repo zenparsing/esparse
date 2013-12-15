@@ -1112,12 +1112,17 @@ export class Parser {
             if (!name)
                 name = this.PropertyName();
             
-            if (name.type === "Identifier" && 
-                this.peek("name") !== "(" &&
-                (name.value === "get" || name.value === "set")) {
+            if (name.type === "Identifier" && this.peek("name") !== "(") {
             
-                kind = name.value;
-                name = this.PropertyName();
+                switch (name.value) {
+                
+                    case "get":
+                    case "set":
+                    case "async":
+                        kind = name.value;
+                        name = this.PropertyName();
+                        break;
+                }
             }
         }
         

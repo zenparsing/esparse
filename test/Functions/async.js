@@ -125,7 +125,34 @@ f
     }]
 },
 
-/*** await 0; ***/
+/** await 0; **/
 "await not allowed outside of async": {},
+
+/** ({ async f() {} }); **/
+"async object methods": {
+    type: "Script",
+    statements: [
+    {   type: "ExpressionStatement",
+        expression:
+        {   type: "ParenExpression",
+            expression:
+            {   type: "ObjectLiteral",
+                properties: [
+                {   type: "MethodDefinition",
+                    kind: "async",
+                    name:
+                    {   type: "Identifier",
+                        value: "f"
+                    },
+                    params: [],
+                    body: 
+                    {   type: "FunctionBody",
+                        statements: []
+                    }
+                }]
+            }
+        }
+    }]
+},
 
 };
