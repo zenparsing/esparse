@@ -9,9 +9,8 @@
         expression:
         
         {   type: "ArrowFunction",
-            
+            kind: "",
             params: [],
-            
             body: 
             {   type: "Identifier",
                 value: "x"
@@ -29,7 +28,7 @@
         expression:
         
         {   type: "ArrowFunction",
-            
+            kind: "",
             params: [
             {   type: "FormalParameter",
                 pattern:
@@ -38,7 +37,6 @@
                 },
                 initializer: null
             }],
-            
             body: 
             {   type: "Identifier",
                 value: "x"
@@ -56,7 +54,7 @@
         expression:
         
         {   type: "ArrowFunction",
-            
+            kind: "",
             params: [
             {   type: "FormalParameter",
                 pattern:
@@ -98,7 +96,7 @@
         expression:
         
         {   type: "ArrowFunction",
-            
+            kind: "",
             params: [
             {   type: "FormalParameter",
                 pattern:
@@ -145,6 +143,104 @@
 "arrow functions are restricted by no-in": {},
 
 /** x || x => x **/
-"arrow has correct precedence": {}
+"arrow has correct precedence": {},
+
+/** x => { await } **/
+"async arrows with function body": 
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression:
+        
+        {   type: "ArrowFunction",
+            kind: "async",
+            params: [
+            {   type: "FormalParameter",
+                pattern:
+                {   type: "Identifier",
+                    value: "x"
+                },
+                initializer: null
+            }],
+            
+            body: 
+            {   type: "FunctionBody",
+                statements: [
+                    
+                {   type: "ExpressionStatement",
+                    expression:
+                    {   type: "AwaitExpression",
+                        expression: null
+                    }
+                }]
+            }
+        }
+    }]
+},
+
+/** x => await **/
+"async arrows with expression body": 
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression:
+        
+        {   type: "ArrowFunction",
+            kind: "async",
+            params: [
+            {   type: "FormalParameter",
+                pattern:
+                {   type: "Identifier",
+                    value: "x"
+                },
+                initializer: null
+            }],
+            
+            body: 
+            {   type: "AwaitExpression",
+                expression: null
+            }
+        }
+    }]
+},
+
+/** x => f(await g) **/
+"async arrows with expression body and nested await": 
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression:
+        
+        {   type: "ArrowFunction",
+            kind: "async",
+            params: [
+            {   type: "FormalParameter",
+                pattern:
+                {   type: "Identifier",
+                    value: "x"
+                },
+                initializer: null
+            }],
+            
+            body: 
+            {   type: "CallExpression",
+                callee:
+                {   type: "Identifier",
+                    value: "f"
+                },
+                arguments: [
+                {   type: "AwaitExpression",
+                    expression:
+                    {   type: "Identifier",
+                        value: "g"
+                    }
+                }]
+            }
+        }
+    }]
+},
 
 };

@@ -86,7 +86,6 @@ function isUnary(op) {
         case "~":
         case "+":
         case "-":
-        case "await": // [Async Functions]
             return true;
     }
     
@@ -290,9 +289,16 @@ export class Parser {
     
     peekAwait() {
     
-        return this.peekKeyword("await") &&
-            this.context.functionType === "async" &&
-            this.context.functionBody;
+        if (this.peekKeyword("await") && this.context.functionBody) {
+        
+            switch (this.context.functionType) {
+            
+                case "async": return true;
+                case "arrow": this.context.functionType = "async"; return true;
+            }
+        }
+        
+        return false;
     }
     
     peekAsync() {
@@ -1128,7 +1134,7 @@ export class Parser {
         
         this.pushContext(true);
         
-        if (kind === "generator")
+        if (kind === "generator" || kind === "async")
             this.context.functionType = kind;
         
         var params = this.FormalParameters(),
@@ -2071,17 +2077,23 @@ export class Parser {
         this.read("=>");
         
         var params = head.parameters,
-            start = head.start;
+            start = head.start,
+            kind = "";
         
-        // TODO: if AssignmentExpression, should we set context.functionBody = true?
+        // Use function body context even if parsing expression body form
+        this.context.functionType = "arrow";
+        this.context.functionBody = true;
         
         var body = this.peek() === "{" ?
             this.FunctionBody() :
             this.AssignmentExpression(noIn);
         
+        if (this.context.functionType === "async")
+            kind = "async";
+        
         this.popContext();
         
-        return new AST.ArrowFunction(params, body, start, this.endOffset);
+        return new AST.ArrowFunction(kind, params, body, start, this.endOffset);
     }
     
     // === Modules ===

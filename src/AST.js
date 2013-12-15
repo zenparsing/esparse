@@ -666,9 +666,10 @@ export class ArrowFunctionHead extends Node {
 
 export class ArrowFunction extends Node {
 
-    constructor(params, body, start, end) {
+    constructor(kind, params, body, start, end) {
     
         super(start, end);
+        this.kind = kind;
         this.params = params;
         this.body = body;
     }
