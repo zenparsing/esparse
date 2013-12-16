@@ -95,7 +95,7 @@ f
 },
 
 
-/* * async f() { (await 0); } *
+/** async f() { (await); } **/
 "await expression inside of paren": {
     type: "Script",
     statements: [
@@ -111,16 +111,16 @@ f
             statements: [
             {   type: "ExpressionStatement",
                 expression:
-                {   type: "AwaitExpression",
+                {   type: "ParenExpression",
                     expression:
-                    {   type: "Number",
-                        value: 0
+                    {   type: "AwaitExpression",
+                        expression: null
                     }
                 }
             }]
         }
     }]
-},*/
+},
 
 
 /** async f() { await 

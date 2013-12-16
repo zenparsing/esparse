@@ -399,6 +399,7 @@ export class Parser {
                 case "EOF":
                 case "}":
                 case ";":
+                case ")":
                     break;
                 
                 default:
@@ -955,7 +956,10 @@ export class Parser {
             rest = null;
         
         // Push a new context in case we are parsing an arrow function
-        this.pushContext(false);
+        var parent = this.context;
+        this.pushContext(this.context.isFunction);
+        this.context.functionBody = parent.functionBody;
+        this.context.functionType = parent.functionType;
         
         this.read("(");
         

@@ -84,6 +84,38 @@
     }]
 },
 
+/** function *g() { (yield) } **/
+"yield expression inside of parens": 
+{   type: "Script",
+    statements: [
+    
+    {   type: "FunctionDeclaration",
+        kind: "generator",
+        
+        identifier: 
+        {   type: "Identifier",
+            value: "g"
+        },
+        
+        params: [],
+        
+        body: 
+        {   type: "FunctionBody",
+            statements: [
+            {   type: "ExpressionStatement",
+                expression: 
+                {   type: "ParenExpression",
+                    expression:
+                    {   type: "YieldExpression",
+                        delegate: false,
+                        expression: null
+                    }
+                }
+            }]
+        }
+    }]
+},
+
 /** function *g() { 
 yield
 x } **/
