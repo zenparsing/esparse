@@ -533,14 +533,16 @@ export class Parser {
             
         this.readKeyword("yield");
         
-        if (this.peek() === "*") {
+        if (!this.maybeEnd()) {
         
-            this.read();
-            delegate = true;
-        }
+            if (this.peek() === "*") {
         
-        if (delegate || !this.maybeEnd())
+                this.read();
+                delegate = true;
+            }
+        
             expr = this.AssignmentExpression(noIn);
+        }
         
         return new AST.YieldExpression(
             expr, 

@@ -153,4 +153,8 @@ x } **/
     }]
 },
 
+/** function *g() { yield
+* x } **/
+"no newline between yield and *": {}
+
 };
