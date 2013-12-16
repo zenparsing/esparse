@@ -2428,7 +2428,7 @@ export class Parser {
         if (this.peek() === "extends") {
         
             this.read();
-            base = this.AssignmentExpression();
+            base = this.MemberExpression(true);
         }
         
         return new AST.ClassExpression(
