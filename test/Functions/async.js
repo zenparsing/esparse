@@ -94,6 +94,35 @@ f
     }]
 },
 
+
+/* * async f() { (await 0); } *
+"await expression inside of paren": {
+    type: "Script",
+    statements: [
+    {   type: "FunctionDeclaration",
+        kind: "async",
+        identifier:
+        {   type: "Identifier",
+            value: "f"
+        },
+        params: [],
+        body:
+        {   type: "FunctionBody",
+            statements: [
+            {   type: "ExpressionStatement",
+                expression:
+                {   type: "AwaitExpression",
+                    expression:
+                    {   type: "Number",
+                        value: 0
+                    }
+                }
+            }]
+        }
+    }]
+},*/
+
+
 /** async f() { await 
 0; } **/
 "empty await expression with newline": {

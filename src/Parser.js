@@ -486,7 +486,7 @@ export class Parser {
             lhs;
         
         if (this.peekYield())
-            return this.YieldExpression();
+            return this.YieldExpression(noIn);
         
         left = this.ConditionalExpression(noIn);
         
@@ -524,7 +524,7 @@ export class Parser {
         return this.AssignmentExpression(noIn);
     }
     
-    YieldExpression() {
+    YieldExpression(noIn) {
     
         var start = this.startOffset,
             delegate = false,
@@ -539,29 +539,12 @@ export class Parser {
         }
         
         if (delegate || !this.maybeEnd())
-            expr = this.AssignmentExpression();
+            expr = this.AssignmentExpression(noIn);
         
         return new AST.YieldExpression(
             expr, 
             delegate, 
             start, 
-            this.endOffset);
-    }
-    
-    // [Async Functions]
-    AwaitExpression() {
-    
-        var start = this.startOffset,
-            expr = null;
-        
-        this.readKeyword("await");
-        
-        if (!this.maybeEnd())
-            expr = this.UnaryExpression();
-        
-        return new AST.AwaitExpression(
-            expr,
-            start,
             this.endOffset);
     }
     
@@ -676,6 +659,23 @@ export class Parser {
         }
         
         return expr;
+    }
+    
+    // [Async Functions]
+    AwaitExpression() {
+    
+        var start = this.startOffset,
+            expr = null;
+        
+        this.readKeyword("await");
+        
+        if (!this.maybeEnd())
+            expr = this.UnaryExpression();
+        
+        return new AST.AwaitExpression(
+            expr,
+            start,
+            this.endOffset);
     }
     
     MemberExpression(allowCall) {
