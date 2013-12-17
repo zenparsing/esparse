@@ -107,10 +107,7 @@ export class RegularExpression extends Node {
     }
 }
 
-export class Null extends Node {
-
-    constructor(start, end) { super(start, end) }
-}
+export class Null extends Node {}
 
 export class Boolean extends Node {
 
@@ -121,15 +118,9 @@ export class Boolean extends Node {
     }
 }
 
-export class ThisExpression extends Node {
+export class ThisExpression extends Node {}
 
-    constructor(start, end) { super(start, end) }
-}
-
-export class SuperExpression extends Node {
-
-    constructor(start, end) { super(start, end) }
-}
+export class SuperExpression extends Node {}
 
 export class SequenceExpression extends Node {
 
@@ -421,10 +412,7 @@ export class ExpressionStatement extends Node {
     }
 }
 
-export class EmptyStatement extends Node {
-
-    constructor(start, end) { super(start, end) }
-}
+export class EmptyStatement extends Node {}
 
 export class VariableDeclaration extends Node {
 
@@ -482,10 +470,7 @@ export class ThrowStatement extends Node {
     }
 }
 
-export class DebuggerStatement extends Node {
-
-    constructor(start, end) { super(start, end) }
-}
+export class DebuggerStatement extends Node {}
 
 export class IfStatement extends Node {
 
