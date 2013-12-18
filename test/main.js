@@ -128,6 +128,8 @@ var Style = new class {
     }
 };
 
+console.log(Style);
+
 // Prints an application message to the console
 function printMessage(msg) {
 

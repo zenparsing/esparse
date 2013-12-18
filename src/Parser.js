@@ -170,7 +170,7 @@ export class Parser {
         this.endOffset = token.end;
         
         if (type && token.type !== type)
-            this.fail("Unexpected token " + token.type, token);
+            this.unexpected(token);
         
         return token;
     }
@@ -222,6 +222,17 @@ export class Parser {
         return tok !== "EOF" && tok !== type ? tok : null;
     }
     
+    unexpected(token) {
+    
+        var type = token.type, msg;
+        
+        msg = type === "EOF" ?
+            "Unexpected end of input" :
+            "Unexpected token " + token.type;
+        
+        this.fail(msg, token);
+    }
+    
     fail(msg, loc) {
     
         var pos = this.scanner.position(loc || this.peek0),
@@ -243,7 +254,7 @@ export class Parser {
         if (token.type === word || token.type === "IDENTIFIER" && token.value === word)
             return token;
         
-        this.fail("Unexpected token " + token.type, token);
+        this.unexpected(token);
     }
     
     peekKeyword(word) {
@@ -809,8 +820,8 @@ export class Parser {
     
     PrimaryExpression() {
     
-        var tok = this.peekToken(),
-            type = tok.type,
+        var token = this.peekToken(),
+            type = token.type,
             start = this.startOffset;
         
         switch (type) {
@@ -846,23 +857,28 @@ export class Parser {
             
             case "REGEX":
                 this.read();
-                return new AST.RegularExpression(tok.value, tok.regExpFlags, tok.start, tok.end);
+                
+                return new AST.RegularExpression(
+                    token.value, 
+                    token.regExpFlags, 
+                    token.start, 
+                    token.end);
             
             case "null":
                 this.read();
-                return new AST.Null(tok.start, tok.end);
+                return new AST.Null(token.start, token.end);
             
             case "true":
             case "false":
                 this.read();
-                return new AST.Boolean(type === "true", tok.start, tok.end);
+                return new AST.Boolean(type === "true", token.start, token.end);
             
             case "this":
                 this.read();
-                return new AST.ThisExpression(tok.start, tok.end);
+                return new AST.ThisExpression(token.start, token.end);
         }
         
-        this.fail("Unexpected token " + type);
+        this.unexpected(token);
     }
     
     Identifier(isVar) {
@@ -1083,9 +1099,9 @@ export class Parser {
     
     PropertyName() {
     
-        var type = this.peek("name");
+        var token = this.peekToken("name");
         
-        switch (type) {
+        switch (token.type) {
         
             case "IDENTIFIER": return this.Identifier();
             case "STRING": return this.String();
@@ -1093,7 +1109,7 @@ export class Parser {
             case "[": return this.ComputedPropertyName();
         }
         
-        this.fail("Unexpected token " + type);
+        this.unexpected(token);
     }
     
     ComputedPropertyName() {
