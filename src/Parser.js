@@ -888,7 +888,6 @@ export class Parser {
             node;
             
         node = new AST.Identifier(token.value, context, token.start, token.end);
-        
         this.checkIdentifier(node);
         
         return node;
@@ -935,9 +934,10 @@ export class Parser {
     
     BindingIdentifier() {
     
-        var node = this.Identifier();
+        var token = this.readToken("IDENTIFIER", "name"),
+            node = new AST.Identifier(token.value, "", token.start, token.end);
         
-        this.checkBindingIdent(node);
+        this.checkBindingIdentifier(node);
         return node;
     }
     
@@ -1911,13 +1911,11 @@ export class Parser {
         this.pushContext(true);
         this.context.functionType = kind;
         
-        var ident = this.Identifier(),
+        var ident = this.BindingIdentifier(),
             params = this.FormalParameters(),
             body = this.FunctionBody();
-            
-        this.checkBindingIdent(ident);
+
         this.checkParameters(params);
-        
         this.popContext();
         
         return new AST.FunctionDeclaration(
@@ -1943,20 +1941,16 @@ export class Parser {
             kind = "generator";
         }
         
-        if (this.peek() !== "(") {
-        
-            ident = this.Identifier();
-            this.checkBindingIdent(ident);
-        }
-        
         this.pushContext(true);
         this.context.functionType = kind;
+        
+        if (this.peek() !== "(")
+            ident = this.BindingIdentifier();
         
         var params = this.FormalParameters(),
             body = this.FunctionBody();
         
         this.checkParameters(params);
-        
         this.popContext();
         
         return new AST.FunctionExpression(
@@ -1976,13 +1970,11 @@ export class Parser {
         this.pushContext(true);
         this.context.functionType = "async";
         
-        var ident = this.Identifier(),
+        var ident = this.BindingIdentifier(),
             params = this.FormalParameters(),
             body = this.FunctionBody();
             
-        this.checkBindingIdent(ident);
         this.checkParameters(params);
-        
         this.popContext();
         
         return new AST.FunctionDeclaration(
@@ -2002,13 +1994,11 @@ export class Parser {
         this.pushContext(true);
         this.context.functionType = "async";
         
-        var ident = this.Identifier(),
+        var ident = this.BindingIdentifier(),
             params = this.FormalParameters(),
             body = this.FunctionBody();
-            
-        this.checkBindingIdent(ident);
-        this.checkParameters(params);
-        
+
+        this.checkParameters(params);        
         this.popContext();
         
         return new AST.FunctionExpression(
@@ -2269,7 +2259,7 @@ export class Parser {
             
         } else {
         
-            this.checkBindingIdent(remote);
+            this.checkBindingIdentifier(remote);
         }
         
         return new AST.ImportSpecifier(remote, local, start, this.endOffset);

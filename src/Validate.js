@@ -9,8 +9,17 @@ var strictReservedWord = new RegExp("^(?:" +
     "implements|private|public|interface|package|let|protected|static|yield" +
 ")$");
 
+// Returns true if the identifier is a reserved word in strict mode
+function isStrictReserved(word) {
+
+    return strictReservedWord.test(word);
+}
+
 // Encodes a string as a map key for use in regular object
-function mapKey(name) { return "." + (name || "") }
+function mapKey(name) { 
+
+    return "." + (name || "");
+}
 
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
@@ -60,15 +69,18 @@ export class Validate {
     
         var ident = node.value;
         
-        if (ident === "yield" && this.context.isGenerator)
+        if (ident === "yield" && this.context.functionType === "generator")
             this.fail("yield cannot be an identifier inside of a generator function", node);
-        else if (strictReservedWord.test(ident))
+        else if (isStrictReserved(ident))
             this.addStrictError(ident + " cannot be used as an identifier in strict mode", node);
     }
     
     // Checks a binding identifier for strict mode restrictions
-    checkBindingIdent(node, strict) {
+    checkBindingIdentifier(node, strict) {
     
+        // Perform basic identifier check
+        this.checkIdentifier(node);
+        
         // Mark identifier node as a declaration
         node.context = "declaration";
             

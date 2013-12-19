@@ -155,6 +155,12 @@ x } **/
 
 /** function *g() { yield
 * x } **/
-"no newline between yield and *": {}
+"no newline between yield and *": {},
+
+/** function *g() { -yield; } **/
+"yield is not allowed as an identifier within a generator": {},
+
+/** function *g() { var yield; } **/
+"yield is not allowed as a binding identifier within a generator": {},
 
 };
