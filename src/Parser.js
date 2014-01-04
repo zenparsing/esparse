@@ -1103,7 +1103,7 @@ export class Parser {
         
         switch (token.type) {
         
-            case "IDENTIFIER": return this.Identifier();
+            case "IDENTIFIER": return this.IdentifierName();
             case "STRING": return this.String();
             case "NUMBER": return this.Number();
             case "[": return this.ComputedPropertyName();
