@@ -33,5 +33,27 @@
     }]
 },
 
+/** 1+-1 **/
+{   type: "Script",
+    statements: [
+    {   type: "ExpressionStatement",
+        expression:
+        {   type: "BinaryExpression",
+            operator: "+",
+            left:
+            {   type: "Number",
+                value: 1
+            },
+            right:
+            {   type: "UnaryExpression",
+                operator: "-",
+                expression:                
+                {   type: "Number",
+                    value: 1
+                }
+            }
+        }
+    }]
+},
 
 ];

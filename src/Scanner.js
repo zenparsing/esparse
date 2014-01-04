@@ -16,8 +16,8 @@ var reservedWord = new RegExp("^(?:" +
 
 // === Punctuators ===
 var multiCharPunctuator = new RegExp("^(?:" +
-    "[-+]{2}|" +
-    "[&|]{2}|" +
+    "--|[+]{2}|" +
+    "&&|[|]{2}|" +
     "<<=?|" +
     ">>>?=?|" +
     "[!=]==|" +
