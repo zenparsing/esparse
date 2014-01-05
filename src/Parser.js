@@ -1695,13 +1695,12 @@ export class Parser {
     
     WithStatement() {
     
+        var start = this.startOffset;
+        
         var token = this.readToken("with");
         
         this.addStrictError("With statement is not allowed in strict mode", token);
-    
-        var start = this.startOffset;
         
-        this.read("with");
         this.read("(");
         
         return new AST.WithStatement(
