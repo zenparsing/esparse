@@ -79,6 +79,7 @@ function isUnary(op) {
     
     switch (op) {
     
+        case "await":
         case "delete":
         case "void": 
         case "typeof":
@@ -644,9 +645,8 @@ export class Parser {
             return new AST.UpdateExpression(type, expr, true, start, this.endOffset);
         }
         
-        // [Async Functions]
         if (this.peekAwait())
-            return this.AwaitExpression();
+            type = "await";
         
         if (isUnary(type)) {
         
@@ -673,23 +673,6 @@ export class Parser {
         }
         
         return expr;
-    }
-    
-    // [Async Functions]
-    AwaitExpression() {
-    
-        var start = this.startOffset,
-            expr = null;
-        
-        this.readKeyword("await");
-        
-        if (!this.maybeEnd())
-            expr = this.UnaryExpression();
-        
-        return new AST.AwaitExpression(
-            expr,
-            start,
-            this.endOffset);
     }
     
     MemberExpression(allowCall) {

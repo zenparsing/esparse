@@ -83,7 +83,8 @@ f
             statements: [
             {   type: "ExpressionStatement",
                 expression:
-                {   type: "AwaitExpression",
+                {   type: "UnaryExpression",
+                    operator: "await",
                     expression:
                     {   type: "Number",
                         value: 0
@@ -95,7 +96,7 @@ f
 },
 
 
-/** async f() { (await); } **/
+/** async f() { (await 0); } **/
 "await expression inside of paren": {
     type: "Script",
     statements: [
@@ -113,8 +114,12 @@ f
                 expression:
                 {   type: "ParenExpression",
                     expression:
-                    {   type: "AwaitExpression",
-                        expression: null
+                    {   type: "UnaryExpression",
+                        operator: "await",
+                        expression: 
+                        {   type: "Number",
+                            value: 0
+                        }
                     }
                 }
             }]
@@ -140,14 +145,12 @@ f
             statements: [
             {   type: "ExpressionStatement",
                 expression:
-                {   type: "AwaitExpression",
-                    expression: null
-                }
-            },
-            {   type: "ExpressionStatement",
-                expression:
-                {   type: "Number",
-                    value: 0
+                {   type: "UnaryExpression",
+                    operator: "await",
+                    expression: 
+                    {   type: "Number",
+                        value: 0
+                    }
                 }
             }]
         }
@@ -156,6 +159,9 @@ f
 
 /** await 0; **/
 "await not allowed outside of async": {},
+
+/** async f() { await } **/
+"empty await not allowed": {},
 
 /** ({ async f() {} }); **/
 "async object methods": {
@@ -184,7 +190,7 @@ f
     }]
 },
 
-/** x => { await } **/
+/** x => { await 0 } **/
 "async arrows with function body": 
 {   type: "Script",
     statements: [
@@ -209,8 +215,12 @@ f
                     
                 {   type: "ExpressionStatement",
                     expression:
-                    {   type: "AwaitExpression",
-                        expression: null
+                    {   type: "UnaryExpression",
+                        operator: "await",
+                        expression: 
+                        {   type: "Number",
+                            value: 0
+                        }
                     }
                 }]
             }
@@ -218,7 +228,7 @@ f
     }]
 },
 
-/** x => await **/
+/** x => await 0 **/
 "async arrows with expression body": 
 {   type: "Script",
     statements: [
@@ -238,8 +248,12 @@ f
             }],
             
             body: 
-            {   type: "AwaitExpression",
-                expression: null
+            {   type: "UnaryExpression",
+                operator: "await",
+                expression: 
+                {   type: "Number",
+                    value: 0
+                }
             }
         }
     }]
@@ -271,7 +285,8 @@ f
                     value: "f"
                 },
                 arguments: [
-                {   type: "AwaitExpression",
+                {   type: "UnaryExpression",
+                    operator: "await",
                     expression:
                     {   type: "Identifier",
                         value: "g"
