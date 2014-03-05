@@ -244,6 +244,7 @@ export class Parser {
         err.lineOffset = pos.lineOffset;
         err.startOffset = pos.startOffset;
         err.endOffset = pos.endOffset;
+        err.sourceText = this.input;
         
         throw err;
     }
