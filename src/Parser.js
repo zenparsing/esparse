@@ -1804,6 +1804,7 @@ export class Parser {
             node,
             dir;
         
+        // TODO: is this wrong for braceless statement lists?
         while (this.peekUntil("}")) {
         
             list.push(element = this.Declaration(isModule));

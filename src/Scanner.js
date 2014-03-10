@@ -509,7 +509,7 @@ export class Scanner {
         while (code = this.input.charCodeAt(this.offset)) {
         
             // ASCII Whitespace:  [\t] [\v] [\f] [ ] 
-            if (code === 9 || code === 11 || code === 12 || code ===32)
+            if (code === 9 || code === 11 || code === 12 || code === 32)
                 this.offset++;
             else
                 break;

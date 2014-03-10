@@ -6,7 +6,7 @@ export class Transform {
     transformFormals(expr, rest) {
     
         if (expr === null)
-            return [];
+            return rest ? [ rest ] : [];
             
         var list = (expr.type === "SequenceExpression") ? expr.expressions : [expr],
             params = [],

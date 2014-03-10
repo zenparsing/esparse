@@ -121,6 +121,65 @@
     }]
 },
 
+/** (...args) => { } **/
+"single rest parameter":
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression:
+        
+        {   type: "ArrowFunction",
+            kind: "",
+            params: [
+            {   type: "RestParameter",
+                identifier:
+                {   type: "Identifier",
+                    value: "args"
+                }
+            }],
+            
+            body: 
+            {   type: "FunctionBody",
+                statements: []
+            }
+        }
+    }]
+},
+
+/** (x, ...args) => { } **/
+"rest parameter with multiple parameters":
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression:
+        
+        {   type: "ArrowFunction",
+            kind: "",
+            params: [
+            {   type: "FormalParameter",
+                pattern:
+                {   type: "Identifier",
+                    value: "x"
+                },
+                initializer: null
+            },
+            {   type: "RestParameter",
+                identifier:
+                {   type: "Identifier",
+                    value: "args"
+                }
+            }],
+            
+            body: 
+            {   type: "FunctionBody",
+                statements: []
+            }
+        }
+    }]
+},
+
 /** "use strict"; (arguments) => {} **/
 "binding to arguments is disallowed in strict mode": {},
 
