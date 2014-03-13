@@ -1,6 +1,6 @@
 {
 
-/** async f() {} **/
+/** async function f() {} **/
 "async declaration": {   
     type: "Script",
     statements: [
@@ -23,7 +23,7 @@
 },
 
 /** async
-f
+function f() {}
 **/
 "async declaration has newline restriction": {
     type: "Script",
@@ -34,15 +34,21 @@ f
             value: "async"
         }
     },
-    {   type: "ExpressionStatement",
-        expression:
+    {   type: "FunctionDeclaration",
+        kind: "",
+        identifier:
         {   type: "Identifier",
             value: "f"
+        },
+        params: [],
+        body: 
+        {   type: "FunctionBody",
+            statements: []
         }
     }]
 },
 
-/** (async f() {}); **/
+/** (async function f() {}); **/
 "async expression": {   
     type: "Script",
     statements: [
@@ -67,7 +73,7 @@ f
     }]
 },
 
-/** async f() { await 0; } **/
+/** async function f() { await 0; } **/
 "await expression": {
     type: "Script",
     statements: [
@@ -96,7 +102,7 @@ f
 },
 
 
-/** async f() { (await 0); } **/
+/** async function f() { (await 0); } **/
 "await expression inside of paren": {
     type: "Script",
     statements: [
@@ -128,7 +134,7 @@ f
 },
 
 
-/** async f() { await 
+/** async function f() { await 
 0; } **/
 "empty await expression with newline": {
     type: "Script",
@@ -160,7 +166,7 @@ f
 /** await 0; **/
 "await not allowed outside of async": {},
 
-/** async f() { await } **/
+/** async function f() { await } **/
 "empty await not allowed": {},
 
 /** ({ async f() {} }); **/
