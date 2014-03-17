@@ -196,7 +196,7 @@ function f() {}
     }]
 },
 
-/** x => { await 0 } **/
+/** async x => { await 0 } **/
 "async arrows with function body": 
 {   type: "Script",
     statements: [
@@ -234,7 +234,7 @@ function f() {}
     }]
 },
 
-/** x => await 0 **/
+/** async x => await 0 **/
 "async arrows with expression body": 
 {   type: "Script",
     statements: [
@@ -265,7 +265,7 @@ function f() {}
     }]
 },
 
-/** x => f(await g) **/
+/** async x => f(await g) **/
 "async arrows with expression body and nested await": 
 {   type: "Script",
     statements: [
@@ -302,5 +302,31 @@ function f() {}
         }
     }]
 },
+
+/** async (x) => null **/
+"async arrow with parenthesized argument list": 
+{   type: "Script",
+    statements: [
+    
+    {   type: "ExpressionStatement",
+        expression:
+        
+        {   type: "ArrowFunction",
+            kind: "async",
+            params: [
+            {   type: "FormalParameter",
+                pattern:
+                {   type: "Identifier",
+                    value: "x"
+                },
+                initializer: null
+            }],
+            
+            body: 
+            {   type: "Null"
+            }
+        }
+    }]
+}
 
 };

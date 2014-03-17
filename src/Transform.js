@@ -5,14 +5,42 @@ export class Transform {
     // Transform an expression into a formal parameter list
     transformFormals(expr, rest) {
     
+        // TODO:  Handle case where expr is an argument list (an array of nodes),
+        // which may include a rest parameter as the last element.  Or maybe provide
+        // expr as a CallExpression and go into the "arguments" property.
+        
+        // TODO:  We need to throw if an initizlier contains stuff that's not allowed,
+        // like a yield expression or await expression.
+        
         if (expr === null)
-            return rest ? [ rest ] : [];
+            return rest ? [rest] : [];
             
-        var list = (expr.type === "SequenceExpression") ? expr.expressions : [expr],
-            params = [],
+        var params = [],
             param,
+            list,
             node,
             i;
+        
+        switch (expr.type) {
+        
+            case "SequenceExpression":
+                list = expr.expressions;
+                break;
+            
+            case "CallExpression":
+                list = expr.arguments;
+                break;
+            
+            default:
+                list = [expr];
+                break;
+        }
+        
+        if (!rest && list.length > 0 && list[list.length - 1].type === "SpreadExpression") {
+        
+            node = list.pop();
+            rest = new AST.RestParameter(node.expression, node.start, node.end);
+        }
     
         for (i = 0; i < list.length; ++i) {
         

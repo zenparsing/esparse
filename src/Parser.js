@@ -93,6 +93,17 @@ function isUnary(op) {
     return false;
 }
 
+// Returns true if the value is a function modifier keyword
+function isFunctionModifier(value) {
+
+    switch (value) {
+    
+        case "async": return true;
+    }
+    
+    return false;
+}
+
 // Encodes a string as a map key for use in regular object
 function mapKey(name) { return "." + (name || "") }
 
@@ -298,31 +309,22 @@ export class Parser {
             this.context.functionBody;
     }
     
-    // [Async Functions]
-    
     peekAwait() {
     
-        if (this.peekKeyword("await") && this.context.functionBody) {
-        
-            switch (this.context.functionType) {
-            
-                case "async": return true;
-                case "arrow": this.context.functionType = "async"; return true;
-            }
-        }
-        
-        return false;
+        return this.peekKeyword("await") && 
+            this.context.functionType === "async" &&
+            this.context.functionBody;
     }
     
-    peekAsync() {
+    peekFunctionModifier() {
     
-        if (this.peekKeyword("async")) {
+        var token = this.peekToken();
         
-            var token = this.peekToken("div", 1);
-            return (!token.newlineBefore && token.type === "function");
-        }
+        if (!(token.type === "IDENTIFIER" && isFunctionModifier(token.value)))
+            return false;
         
-        return false;
+        token = this.peekToken("div", 1);
+        return token.type === "function" && !token.newlineBefore;
     }
     
     // == Context Management ==
@@ -331,6 +333,14 @@ export class Parser {
     
         isStrict = isStrict || (this.context ? this.context.strict : null);
         this.context = new Context(this.context, isStrict, isFunction);
+    }
+    
+    pushMaybeContext() {
+    
+        var parent = this.context;
+        this.pushContext(parent.isFunction);
+        this.context.functionBody = parent.functionBody;
+        this.context.functionType = parent.functionType;
     }
     
     popContext(collapse) {
@@ -680,6 +690,7 @@ export class Parser {
     
         var start = this.startOffset,
             type = this.peek(),
+            arrowType = "",
             exit = false,
             prop,
             expr;
@@ -729,11 +740,29 @@ export class Parser {
                         break;
                     }
                     
+                    if (expr.type === "Identifier" && isFunctionModifier(expr.value)) {
+                    
+                        arrowType = expr.value;
+                        this.pushMaybeContext();
+                    }
+                    
                     expr = new AST.CallExpression(
                         expr, 
                         this.ArgumentList(), 
                         start, 
                         this.endOffset);
+                    
+                    if (arrowType) {
+                    
+                        if (this.peek("div") === "=>") {
+                        
+                            expr = this.ArrowFunctionHead(arrowType, expr, null, start);
+                        
+                        } else {
+                            
+                            this.popContext(true);
+                        }
+                    }
                     
                     break;
                 
@@ -806,7 +835,8 @@ export class Parser {
     
         var token = this.peekToken(),
             type = token.type,
-            start = this.startOffset;
+            start = this.startOffset,
+            next;
         
         switch (type) {
             
@@ -826,17 +856,27 @@ export class Parser {
                 this.ArrayLiteral();
             
             case "IDENTIFIER":
-            
-                if (this.peekAsync()) {
                 
-                    return this.AsyncExpression();
+                next = this.peekToken("div", 1);
                 
-                } else if (this.peek("div", 1) === "=>") {
+                if (next.type === "=>") {
                 
                     this.pushContext(true);
-                    return this.ArrowFunctionHead(this.BindingIdentifier(), null, start);
-                }
+                    return this.ArrowFunctionHead("", this.BindingIdentifier(), null, start);
+                
+                } else if (!next.newlineBefore) {
+                
+                    if (next.type === "function")
+                        return this.FunctionExpression();
                     
+                    if (next.type === "IDENTIFIER" && isFunctionModifier(token.value)) {
+                    
+                        this.read();
+                        this.pushContext(true);
+                        return this.ArrowFunctionHead(token.value, this.BindingIdentifier(), null, start);
+                    }
+                }
+                
                 return this.Identifier(true);
             
             case "REGEX":
@@ -958,10 +998,7 @@ export class Parser {
             rest = null;
         
         // Push a new context in case we are parsing an arrow function
-        var parent = this.context;
-        this.pushContext(this.context.isFunction);
-        this.context.functionBody = parent.functionBody;
-        this.context.functionType = parent.functionType;
+        this.pushMaybeContext();
         
         this.read("(");
         
@@ -992,7 +1029,7 @@ export class Parser {
         this.read(")");
         
         if (expr === null || rest !== null || this.peek("div") === "=>")
-            return this.ArrowFunctionHead(expr, rest, start);
+            return this.ArrowFunctionHead("", expr, rest, start);
         
         // Collapse this context into its parent
         this.popContext(true);
@@ -1290,13 +1327,21 @@ export class Parser {
     
     Statement() {
     
+        var next;
+        
         switch (this.peek()) {
             
             case "IDENTIFIER":
             
-                return this.peekAsync() ? this.AsyncDeclaration() :
-                    this.peek("div", 1) === ":" ? this.LabelledStatement() :
-                    this.ExpressionStatement();
+                next = this.peekToken("div", 1);
+                
+                if (next.type === ":")
+                    return this.LabelledStatement();
+                
+                if (next.type === "function" && !next.newlineBefore)
+                    return this.FunctionDeclaration();
+                
+                return this.ExpressionStatement();
             
             case "{": return this.Block();
             case ";": return this.EmptyStatement();
@@ -1879,13 +1924,20 @@ export class Parser {
     
     // === Functions ===
     
-    FunctionDeclaration(kind, start) {
+    FunctionDeclaration() {
     
-        if (kind === void 0)
-            kind = "";
+        var start = this.startOffset,
+            kind = "",
+            tok;
         
-        if (start === void 0)
-            start = this.startOffset;
+        tok = this.peekToken();
+        
+        // TODO: We are not checking newline constraints here.  Should we?
+        if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
+        
+            this.read();
+            kind = tok.value;
+        }
         
         this.read("function");
         
@@ -1914,15 +1966,20 @@ export class Parser {
             this.endOffset);
     }
     
-    FunctionExpression(kind, start) {
+    FunctionExpression() {
     
-        if (kind === void 0)
-            kind = "";
+        var start = this.startOffset,
+            ident = null,
+            kind = "",
+            tok;
         
-        if (start === void 0)
-            start = this.startOffset;
-            
-        var ident = null;
+        tok = this.peekToken();
+        
+        if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
+        
+            this.read();
+            kind = tok.value;
+        }
         
         this.read("function");
         
@@ -1951,20 +2008,6 @@ export class Parser {
             body,
             start,
             this.endOffset);
-    }
-    
-    AsyncDeclaration() {
-    
-        var start = this.startOffset;
-        this.readKeyword("async");
-        return this.FunctionDeclaration("async", start);
-    }
-    
-    AsyncExpression() {
-    
-        var start = this.startOffset;
-        this.readKeyword("async");
-        return this.FunctionExpression("async", start);
     }
     
     FormalParameters() {
@@ -2030,10 +2073,11 @@ export class Parser {
         return new AST.FunctionBody(statements, start, this.endOffset);
     }
     
-    ArrowFunctionHead(formals, rest, start) {
+    ArrowFunctionHead(kind, formals, rest, start) {
     
         // Context must have been pushed by caller
         this.context.isFunction = true;
+        this.context.functionType = kind;
         
         var params = this.transformFormals(formals, rest);
         this.checkParameters(params);
@@ -2047,18 +2091,14 @@ export class Parser {
         
         var params = head.parameters,
             start = head.start,
-            kind = "";
+            kind = this.context.functionType;
         
         // Use function body context even if parsing expression body form
-        this.context.functionType = "arrow";
         this.context.functionBody = true;
         
         var body = this.peek() === "{" ?
             this.FunctionBody() :
             this.AssignmentExpression(noIn);
-        
-        if (this.context.functionType === "async")
-            kind = "async";
         
         this.popContext();
         
@@ -2257,9 +2297,9 @@ export class Parser {
                     break;
                 }
                 
-                if (this.peekAsync()) {
+                if (this.peekFunctionModifier()) {
                 
-                    binding = this.AsyncDeclaration();
+                    binding = this.FunctionDeclaration();
                     break;
                 }
             
