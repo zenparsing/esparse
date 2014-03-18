@@ -35,42 +35,28 @@ var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
     blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
     hexChar = /[0-9a-f]/i;
 
-// === Character Types ===
-var WHITESPACE = 1,
-    NEWLINE = 2,
-    DECIMAL_DIGIT = 3,
-    PUNCTUATOR = 4,
-    PUNCTUATOR_CHAR = 5,
-    STRING = 6,
-    TEMPLATE = 7,
-    IDENTIFIER = 8,
-    ZERO = 9,
-    DOT = 10,
-    SLASH = 11,
-    LBRACE = 12;
-
 // === Character Type Lookup Table ===
 var charTable = (_=> {
 
     var charTable = new Array(128);
     
-    add(WHITESPACE, "\t\v\f ");
-    add(NEWLINE, "\r\n");
-    add(DECIMAL_DIGIT, "123456789");
-    add(PUNCTUATOR_CHAR, "{[]();,?:");
-    add(PUNCTUATOR, "<>+-*%&|^!~=");
-    add(DOT, ".");
-    add(SLASH, "/");
-    add(LBRACE, "}");
-    add(ZERO, "0");
-    add(STRING, "'\"");
-    add(TEMPLATE, "`");
-    add(IDENTIFIER, "$_\\");
+    add("whitespace", "\t\v\f ");
+    add("newline", "\r\n");
+    add("decimal-digit", "123456789");
+    add("punctuator-char", "{[]();,?:");
+    add("punctuator", "<>+-*%&|^!~=");
+    add("dot", ".");
+    add("slash", "/");
+    add("lbrace", "}");
+    add("zero", "0");
+    add("string", "'\"");
+    add("template", "`");
+    add("identifier", "$_\\");
     
     var i;
     
-    for (i = 65; i <= 90; ++i) charTable[i] = IDENTIFIER;
-    for (i = 97; i <= 122; ++i) charTable[i] = IDENTIFIER;
+    for (i = 65; i <= 90; ++i) charTable[i] = "identifier";
+    for (i = 97; i <= 122; ++i) charTable[i] = "identifier";
     
     return charTable;
     
@@ -429,32 +415,32 @@ export class Scanner {
             
         switch (charTable[code]) {
         
-            case PUNCTUATOR_CHAR: return this.PunctuatorChar(code);
+            case "punctuator-char": return this.PunctuatorChar(code);
             
-            case WHITESPACE: return this.Whitespace(code);
+            case "whitespace": return this.Whitespace(code);
             
-            case IDENTIFIER: 
+            case "identifier": 
             
                 return context === "name" ? 
                     this.IdentifierName(code) : 
                     this.Identifier(code);
             
-            case LBRACE:
+            case "lbrace":
             
                 if (context === "template") return this.Template(code);
                 else return this.PunctuatorChar(code);
             
-            case PUNCTUATOR: return this.Punctuator(code);
+            case "punctuator": return this.Punctuator(code);
             
-            case NEWLINE: return this.Newline(code);
+            case "newline": return this.Newline(code);
             
-            case DECIMAL_DIGIT: return this.Number(code);
+            case "decimal-digit": return this.Number(code);
             
-            case TEMPLATE: return this.Template(code);
+            case "template": return this.Template(code);
             
-            case STRING: return this.String(code);
+            case "string": return this.String(code);
             
-            case ZERO: 
+            case "zero": 
             
                 switch (next = this.input.charCodeAt(this.offset + 1)) {
                 
@@ -467,14 +453,14 @@ export class Scanner {
                     this.LegacyOctalNumber(code) :
                     this.Number(code);
             
-            case DOT: 
+            case "dot": 
             
                 next = this.input.charCodeAt(this.offset + 1);
                 
                 if (next >= 48 && next <= 57) return this.Number(code);
                 else return this.Punctuator(code);
             
-            case SLASH:
+            case "slash":
             
                 next = this.input.charCodeAt(this.offset + 1);
 

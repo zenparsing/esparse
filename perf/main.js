@@ -1,8 +1,7 @@
 module Path from "node:path";
 module FS from "node:fs";
-module Parser from "../src/main.js";
 
-import { Scanner } from Parser;
+import { Scanner, parseScript } from "../src/main.js";
 
 var Esprima = require("./parsers/esprima.js"),
     Acorn = require("./parsers/acorn.js");
@@ -82,39 +81,44 @@ var parsers = {
     "native": nativeParse, 
     "es6parse-scanner": scanOnly,
     "acorn": Acorn.parse,
-    "es6parse": Parser.parseScript,
+    "es6parse": parseScript,
     "esprima": Esprima.parse
 };
 
-walkDirectory(Path.join(__dirname, "input"), path => {
 
-    var input = FS.readFileSync(path, "utf8"),
-        name = Path.basename(path),
-        libs = {};
+export function main(args) {
+
+    walkDirectory(Path.join(__dirname, "input"), path => {
+
+        var input = FS.readFileSync(path, "utf8"),
+            name = Path.basename(path),
+            libs = {};
     
-    Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
+        Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
     
-    console.log("[" + name + "]");
+        console.log("[" + name + "]");
+        
+        var ts = +new Date,
+            lib = args[2] || "es6parse",
+            parser = parsers[lib],
+            count = 50;
     
-    var ts = +new Date,
-        lib = process.argv[3] || "es6parse",
-        parser = parsers[lib],
-        count = 50;
+        try {
     
-    try {
-    
-        for (var i = count; i--;)
-            parser(input = input + " ");
+            for (var i = count; i--;)
+                parser(input = input + " ");
             
-    } catch (err) {
+        } catch (err) {
     
-        console.log(err);
-        throw err;
-    }
+            console.log(err);
+            throw err;
+        }
     
-    var ms = ((+new Date) - ts) / count;
+        var ms = ((+new Date) - ts) / count;
     
-    console.log("  " + lib + ": " + 
-        (ms / input.length * 1024 * 1024).toFixed(2) + " ms/MB, " +
-        (input.length * 1000 / ms / 1024 / 1024).toFixed(2) + " MB/sec");
-});
+        console.log("  " + lib + ": " + 
+            (ms / input.length * 1024 * 1024).toFixed(2) + " ms/MB, " +
+            (input.length * 1000 / ms / 1024 / 1024).toFixed(2) + " MB/sec");
+    });
+    
+}

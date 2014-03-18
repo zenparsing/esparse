@@ -11,7 +11,7 @@
  *
  * Date: 2013-2-4
  */
-(function( window, undefined ) {
+(this.parserInput = function IIFE( window, undefined ) {
 
 // Can't do this because several apps including ASP.NET trace
 // the stack via arguments.caller.callee and Firefox dies if
