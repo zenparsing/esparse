@@ -1147,7 +1147,8 @@ export class Parser {
     MethodDefinition(name) {
     
         var start = name ? name.start : this.startOffset,
-            kind = "";
+            kind = "",
+            val;
         
         if (!name && this.peek("name") === "*") {
         
@@ -1163,21 +1164,19 @@ export class Parser {
             
             if (name.type === "Identifier" && this.peek("name") !== "(") {
             
-                switch (name.value) {
+                val = name.value;
                 
-                    case "get":
-                    case "set":
-                    case "async":
-                        kind = name.value;
-                        name = this.PropertyName();
-                        break;
+                if (val === "get" || val === "set" || isFunctionModifier(val)) {
+                
+                    kind = name.value;
+                    name = this.PropertyName();
                 }
             }
         }
         
         this.pushContext(true);
         
-        if (kind === "generator" || kind === "async")
+        if (kind === "generator" || isFunctionModifier(kind))
             this.context.functionType = kind;
         
         var params = this.FormalParameters(),

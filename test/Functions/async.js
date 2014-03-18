@@ -327,6 +327,9 @@ function f() {}
             }
         }
     }]
-}
+},
+
+/** x => await null **/
+"await not allowed in a non-async arrow": {},
 
 };
