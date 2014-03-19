@@ -1,5 +1,4 @@
-module AST from "AST.js";
-
+import { AST } from "AST.js";
 import { Scanner } from "Scanner.js";
 import { Transform } from "Transform.js";
 import { Validate } from "Validate.js";

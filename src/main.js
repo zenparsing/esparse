@@ -1,5 +1,4 @@
-module AST from "AST.js";
-
+import { AST } from "AST.js";
 import { Parser } from "Parser.js";
 import { Scanner } from "Scanner.js";
 

@@ -1,14 +1,10 @@
-module AST from "AST.js";
+import { AST } from "AST.js";
 
 export class Transform {
 
     // Transform an expression into a formal parameter list
     transformFormals(expr, rest) {
     
-        // TODO:  Handle case where expr is an argument list (an array of nodes),
-        // which may include a rest parameter as the last element.  Or maybe provide
-        // expr as a CallExpression and go into the "arguments" property.
-        
         // TODO:  We need to throw if an initizlier contains stuff that's not allowed,
         // like a yield expression or await expression.
         
@@ -57,6 +53,7 @@ export class Transform {
     
     transformArrayPattern(node, binding) {
     
+        // ArrayPattern and ArrayLiteral are isomorphic, so we simply change the type
         node.type = "ArrayPattern";
         
         var elems = node.elements,
@@ -94,6 +91,7 @@ export class Transform {
     
     transformObjectPattern(node, binding) {
 
+        // ObjectPattern and ObjectLiteral are isomorphic, so we simply change the type
         node.type = "ObjectPattern";
         
         var props = node.properties, 

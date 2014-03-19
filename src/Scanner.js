@@ -36,7 +36,7 @@ var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
     hexChar = /[0-9a-f]/i;
 
 // === Character Type Lookup Table ===
-var charTable = (_=> {
+var charTable = ($=> {
 
     var charTable = new Array(128);
     
