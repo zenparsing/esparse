@@ -40,8 +40,12 @@ function astLike(a, b) {
 	
 	// Each key in control must be in test
 	for (keys = Object.keys(b), i = 0; i < keys.length; ++i)
-	    if (!HOP.call(a, keys[i]))
+	    if (keys[i] !== "type" && !HOP.call(a, keys[i]))
 	        return false;
+	
+	// Type must be the same
+	if (a.type !== b.type)
+	    return false;
 	
 	for (keys = Object.keys(a), i = 0; i < keys.length; ++i) {
 	
@@ -127,8 +131,6 @@ var Style = new class {
         return `\x1B[1m${ msg }\x1B[22m`;
     }
 };
-
-console.log(Style);
 
 // Prints an application message to the console
 function printMessage(msg) {

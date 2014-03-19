@@ -16,7 +16,7 @@
         console.log("parsing javascript...");
         
         for (var i = 0; i < 3; ++i)
-            es6parse.parseScript(parserInput.toString());
+            acorn.parse(parserInput.toString());
         
         console.log("finished");
     }

@@ -1,825 +1,770 @@
-// Initializes common node properties.  This is used in preference
-// to super() for performance reasons.
-function init(node, type, start, end) {
+function define(obj, name, value, enumerable) {
 
-    node.type = type;
-    node.start = start;
-    node.end = end;
-    node.error = "";
+    Object.defineProperty(obj, name, {
+    
+        enumerable,
+        writable: true,
+        configurable: true,
+        value
+    });
+}
+    
+function proto(fn) {
+
+    var p = Object.create(null);
+    
+    define(p, "constructor", fn, false);
+    define(p, "type", fn.name, true);
+    define(p, "error", "", false);
+    define(p, "parentNode", null, false);
+    define(p, "forEachChild", forEachChild, false);
+    
+    fn.prototype = p;
 }
 
-export class Node {
+function forEachChild(fn) {
 
-    constructor(type, start, end) {
-    
-        init(this, type, start, end);
-    }
-    
-    forEachChild(fn) {
+    var keys = Object.keys(this), val, i, j;
 
-        var keys = Object.keys(this), val, i, j;
+    for (i = 0; i < keys.length; ++i) {
+
+        // Don't iterate over backlink to parent
+        if (keys[i] === "parentNode")
+            continue;
     
-        for (i = 0; i < keys.length; ++i) {
-    
-            // Don't iterate over backlink to parent
-            if (keys[i] === "parentNode")
-                continue;
-            
-            val = this[keys[i]];
-        
-            // Skip non-objects and functions
-            if (!val || typeof val !== "object") 
-                continue;
-        
-            if (typeof val.type === "string") {
-        
-                // Nodes have a "type" property
-                fn(val);
-        
-            } else {
-        
-                // Iterate arrays
-                for (j = 0; j < (val.length >>> 0); ++j)
-                    if (val[j] && typeof val[j].type === "string")
-                        fn(val[j]);
-            }
+        val = this[keys[i]];
+
+        // Skip non-objects and functions
+        if (!val || typeof val !== "object") 
+            continue;
+
+        if (typeof val.type === "string") {
+
+            // Nodes have a "type" property
+            fn(val);
+
+        } else {
+
+            // Iterate arrays
+            for (j = 0; j < (val.length >>> 0); ++j)
+                if (val[j] && typeof val[j].type === "string")
+                    fn(val[j]);
         }
     }
-    
-}
-
-export class Script extends Node {
-
-    constructor(statements, start, end) {
-    
-        init(this, "Script", start, end);
-        this.statements = statements;
-    }
 }
 
-export class Module extends Node {
+export function Node(type, start, end) {
 
-    constructor(statements, start, end) {
+    this.start = start;
+    this.end = end;
     
-        init(this, "Module", start, end);
-        this.statements = statements;
-    }
-}
+} proto(Node);
 
-export class Identifier extends Node {
-
-    constructor(value, context, start, end) {
+export function Script(statements, start, end) {
     
-        init(this, "Identifier", start, end);
-        this.value = value;
-        this.context = context;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.statements = statements;
 
-export class Number extends Node {
+} proto(Script);
 
-    constructor(value, start, end) {
-    
-        init(this, "Number", start, end);
-        this.value = value;
-    }
-}
+export function Module(statements, start, end) {
 
-export class String extends Node {
+    this.start = start;
+    this.end = end;
+    this.statements = statements;
 
-    constructor(value, start, end) {
-    
-        init(this, "String", start, end);
-        this.value = value;
-    }
-}
+} proto(Module);
 
-export class Template extends Node {
+export function Identifier(value, context, start, end) {
 
-    constructor(value, isEnd, start, end) {
+    this.start = start;
+    this.end = end;
+    this.value = value;
+    this.context = context;
     
-        init(this, "Template", start, end);
-        this.value = value;
-        this.templateEnd = isEnd;
-    }
-}
+} proto(Identifier);
 
-export class RegularExpression extends Node {
-
-    constructor(value, flags, start, end) {
+export function Number(value, start, end) {
     
-        init(this, "RegularExpression", start, end);
-        this.value = value;
-        this.flags = flags;
-    }
-}
-
-export class Null extends Node { 
+    this.start = start;
+    this.end = end;
+    this.value = value;
 
-    constructor(start, end) { init(this, "Null", start, end) }
-}
+} proto(Number);
 
-export class Boolean extends Node {
+export function String(value, start, end) {
 
-    constructor(value, start, end) {
+    this.start = start;
+    this.end = end;
+    this.value = value;
     
-        init(this, "Boolean", start, end);
-        this.value = value;
-    }
-}
-
-export class ThisExpression extends Node {
-
-    constructor(start, end) { init(this, "ThisExpression", start, end) }
-}
+} proto(String);
 
-export class SuperExpression extends Node {
+export function Template(value, isEnd, start, end) {
     
-    constructor(start, end) { init(this, "SuperExpression", start, end) }
-}
-
-export class SequenceExpression extends Node {
-
-    constructor(list, start, end) {
+    this.start = start;
+    this.end = end;
+    this.value = value;
+    this.templateEnd = isEnd;
     
-        init(this, "SequenceExpression", start, end);
-        this.expressions = list;
-    }
-}
+} proto(Template);
 
-export class AssignmentExpression extends Node {
-
-    constructor(op, left, right, start, end) {
+export function RegularExpression(value, flags, start, end) {
     
-        init(this, "AssignmentExpression", start, end);
-        this.operator = op;
-        this.left = left;
-        this.right = right;
-    }
-}
-
-export class SpreadExpression extends Node {
-
-    constructor(expr, start, end) {
+    this.start = start;
+    this.end = end;
+    this.value = value;
+    this.flags = flags;
     
-        init(this, "SpreadExpression", start, end);
-        this.expression = expr;
-    }
-}
+} proto(RegularExpression);
 
-export class YieldExpression extends Node {
+export function Null(start, end) { 
 
-    constructor(expr, delegate, start, end) {
-    
-        init(this, "YieldExpression", start, end);
-        this.delegate = delegate;
-        this.expression = expr;
-    }
-}
+    this.start = start;
+    this.end = end;
 
-export class ConditionalExpression extends Node {
+} proto(Null);
 
-    constructor(test, cons, alt, start, end) {
+export function Boolean(value, start, end) {
     
-        init(this, "ConditionalExpression", start, end);
-        this.test = test;
-        this.consequent = cons;
-        this.alternate = alt;
-    }
-}
-
-export class BinaryExpression extends Node {
-
-    constructor(op, left, right, start, end) {
+    this.start = start;
+    this.end = end;
+    this.value = value;
     
-        init(this, "BinaryExpression", start, end);
-        this.operator = op;
-        this.left = left;
-        this.right = right;
-    }
-}
+} proto(Boolean);
 
-export class UpdateExpression extends Node {
+export function ThisExpression(start, end) { 
 
-    constructor(op, expr, prefix, start, end) {
+    this.start = start;
+    this.end = end;
     
-        init(this, "UpdateExpression", start, end);
-        this.operator = op;
-        this.expression = expr;
-        this.prefix = prefix;
-    }
-}
+} proto(ThisExpression);
 
-export class UnaryExpression extends Node {
+export function SuperExpression(start, end) { 
 
-    constructor(op, expr, start, end) {
+    this.start = start;
+    this.end = end;
     
-        init(this, "UnaryExpression", start, end);
-        this.operator = op;
-        this.expression = expr;
-    }
-}
+} proto(SuperExpression);
 
-export class MemberExpression extends Node {
+export function SequenceExpression(list, start, end) {
 
-    constructor(obj, prop, computed, start, end) {
-    
-        init(this, "MemberExpression", start, end);
-        this.object = obj;
-        this.property = prop;
-        this.computed = computed;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.expressions = list;
 
-export class CallExpression extends Node {
+} proto(SequenceExpression);
 
-    constructor(callee, args, start, end) {
+export function AssignmentExpression(op, left, right, start, end) {
     
-        init(this, "CallExpression", start, end);
-        this.callee = callee;
-        this.arguments = args;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.operator = op;
+    this.left = left;
+    this.right = right;
 
-export class TaggedTemplateExpression extends Node {
+} proto(AssignmentExpression);
 
-    constructor(tag, template, start, end) {
+export function SpreadExpression(expr, start, end) {
     
-        init(this, "TaggedTemplateExpression", start, end);
-        this.tag = tag;
-        this.template = template;
-    }
-}
-
-export class NewExpression extends Node {
-
-    constructor(callee, args, start, end) {
+    this.start = start;
+    this.end = end;
+    this.expression = expr;
     
-        init(this, "NewExpression", start, end);
-        this.callee = callee;
-        this.arguments = args;
-    }
-}
+} proto(SpreadExpression);
 
-export class ParenExpression extends Node {
+export function YieldExpression(expr, delegate, start, end) {
     
-    constructor(expr, start, end) {
+    this.start = start;
+    this.end = end;
+    this.delegate = delegate;
+    this.expression = expr;
     
-        init(this, "ParenExpression", start, end);
-        this.expression = expr;
-    }
-}
-
-export class ObjectLiteral extends Node {
+} proto(YieldExpression);
 
-    constructor(props, start, end) {
+export function ConditionalExpression(test, cons, alt, start, end) {
     
-        init(this, "ObjectLiteral", start, end);
-        this.properties = props;
-    }
-}
-
-export class ComputedPropertyName extends Node {
-
-    constructor(expr, start, end) {
+    this.start = start;
+    this.end = end;
+    this.test = test;
+    this.consequent = cons;
+    this.alternate = alt;
     
-        init(this, "ComputedPropertyName", start, end);
-        this.expression = expr;
-    }
-}
-
-export class PropertyDefinition extends Node {
+} proto(ConditionalExpression);
 
-    constructor(name, expr, start, end) {
+export function BinaryExpression(op, left, right, start, end) {
     
-        init(this, "PropertyDefinition", start, end);
-        this.name = name;
-        this.expression = expr;
-    }
-}
-
-export class PatternProperty extends Node {
-
-    constructor(name, pattern, initializer, start, end) {
+    this.start = start;
+    this.end = end;
+    this.operator = op;
+    this.left = left;
+    this.right = right;
     
-        init(this, "PatternProperty", start, end);
-        this.name = name;
-        this.pattern = pattern;
-        this.initializer = initializer;
-    }
-}
-
-export class PatternElement extends Node {
+} proto(BinaryExpression);
 
-    constructor(pattern, initializer, rest, start, end) {
+export function UpdateExpression(op, expr, prefix, start, end) {
     
-        init(this, "PatternElement", start, end);
-        this.pattern = pattern;
-        this.initializer = initializer;
-        this.rest = rest;
-    }
-}
-
-export class MethodDefinition extends Node {
-
-    constructor(kind, name, params, body, start, end) {
+    this.start = start;
+    this.end = end;
+    this.operator = op;
+    this.expression = expr;
+    this.prefix = prefix;
     
-        init(this, "MethodDefinition", start, end);
-        this.kind = kind;
-        this.name = name;
-        this.params = params;
-        this.body = body;
-    }
-}
+} proto(UpdateExpression);
 
-export class ArrayLiteral extends Node {
-
-    constructor(elements, start, end) {
+export function UnaryExpression(op, expr, start, end) {
     
-        init(this, "ArrayLiteral", start, end);
-        this.elements = elements;
-    }
-}
-
-export class ArrayComprehension extends Node {
-
-    constructor(qualifiers, expr, start, end) {
+    this.start = start;
+    this.end = end;
+    this.operator = op;
+    this.expression = expr;
     
-        init(this, "ArrayComprehension", start, end);
-        this.qualifiers = qualifiers;
-        this.expression = expr;
-    }
-}
-
-export class GeneratorComprehension extends Node {
+} proto(UnaryExpression);
 
-    constructor(qualifiers, expr, start, end) {
+export function MemberExpression(obj, prop, computed, start, end) {
     
-        init(this, "GeneratorComprehension", start, end);
-        this.qualifiers = qualifiers;
-        this.expression = expr;
-    }
-}
-
-export class ComprehensionFor extends Node {
-
-    constructor(left, right, start, end) {
+    this.start = start;
+    this.end = end;
+    this.object = obj;
+    this.property = prop;
+    this.computed = computed;
     
-        init(this, "ComprehensionFor", start, end);
-        this.left = left;
-        this.right = right;
-    }
-}
-
-export class ComprehensionIf extends Node {
+} proto(MemberExpression);
 
-    constructor(test, start, end) {
+export function CallExpression(callee, args, start, end) {
     
-        init(this, "ComprehensionIf", start, end);
-        this.test = test;
-    }
-}
-
-export class TemplateExpression extends Node {
-
-    constructor(lits, subs, start, end) {
+    this.start = start;
+    this.end = end;
+    this.callee = callee;
+    this.arguments = args;
     
-        init(this, "TemplateExpression", start, end);
-        this.literals = lits;
-        this.substitutions = subs;
-    }
-}
-
-export class Block extends Node {
+} proto(CallExpression);
 
-    constructor(statements, start, end) {
+export function TaggedTemplateExpression(tag, template, start, end) {
     
-        init(this, "Block", start, end);
-        this.statements = statements;
-    }
-}
-
-export class LabelledStatement extends Node {
-
-    constructor(label, statement, start, end) {
+    this.start = start;
+    this.end = end;
+    this.tag = tag;
+    this.template = template;
     
-        init(this, "LabelledStatement", start, end);
-        this.label = label;
-        this.statement = statement;
-    }
-}
+} proto(TaggedTemplateExpression);
 
-export class ExpressionStatement extends Node {
-
-    constructor(expr, start, end) {
+export function NewExpression(callee, args, start, end) {
     
-        init(this, "ExpressionStatement", start, end);
-        this.expression = expr;
-        this.directive = null;
-    }
-}
-
-export class EmptyStatement extends Node {
-
-    constructor(start, end) { init(this, "EmptyStatement", start, end) }
-}
-
-export class VariableDeclaration extends Node {
-
-    constructor(kind, list, start, end) {
+    this.start = start;
+    this.end = end;
+    this.callee = callee;
+    this.arguments = args;
     
-        init(this, "VariableDeclaration", start, end);
-        this.kind = kind;
-        this.declarations = list;
-    }
-}
+} proto(NewExpression);
 
-export class VariableDeclarator extends Node {
-
-    constructor(pattern, initializer, start, end) {
+export function ParenExpression(expr, start, end) {
     
-        init(this, "VariableDeclarator", start, end);
-        this.pattern = pattern;
-        this.initializer = initializer;
-    }
-}
-
-export class ReturnStatement extends Node {
-
-    constructor(arg, start, end) {
+    this.start = start;
+    this.end = end;
+    this.expression = expr;
     
-        init(this, "ReturnStatement", start, end);
-        this.argument = arg;
-    }
-}
-
-export class BreakStatement extends Node {
+} proto(ParenExpression);
 
-    constructor(label, start, end) {
+export function ObjectLiteral(props, start, end) {
     
-        init(this, "BreakStatement", start, end);
-        this.label = label;
-    }
-}
-
-export class ContinueStatement extends Node {
-
-    constructor(label, start, end) {
+    this.start = start;
+    this.end = end;
+    this.properties = props;
     
-        init(this, "ContinueStatement", start, end);
-        this.label = label;
-    }
-}
-
-export class ThrowStatement extends Node {
+} proto(ObjectLiteral);
 
-    constructor(expr, start, end) {
+export function ComputedPropertyName(expr, start, end) {
     
-        init(this, "ThrowStatement", start, end);
-        this.expression = expr;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.expression = expr;
+    
+} proto(ComputedPropertyName);
 
-export class DebuggerStatement extends Node {
+export function PropertyDefinition(name, expr, start, end) {
     
-    constructor(start, end) {
+    this.start = start;
+    this.end = end;
+    this.name = name;
+    this.expression = expr;
     
-        init(this, "DebuggerStatement", start, end);
-    }
-}
+} proto(PropertyDefinition);
 
-export class IfStatement extends Node {
-
-    constructor(test, cons, alt, start, end) {
+export function PatternProperty(name, pattern, initializer, start, end) {
     
-        init(this, "IfStatement", start, end);
-        this.test = test;
-        this.consequent = cons;
-        this.alternate = alt;
-    }
-}
-
-export class DoWhileStatement extends Node {
-
-    constructor(body, test, start, end) {
+    this.start = start;
+    this.end = end;
+    this.name = name;
+    this.pattern = pattern;
+    this.initializer = initializer;
     
-        init(this, "DoWhileStatement", start, end);
-        this.body = body;
-        this.test = test;
-    }
-}
-
-export class WhileStatement extends Node {
+} proto(PatternProperty);
 
-    constructor(test, body, start, end) {
+export function PatternElement(pattern, initializer, rest, start, end) {
     
-        init(this, "WhileStatement", start, end);
-        this.test = test;
-        this.body = body;
-    }
-}
-
-export class ForStatement extends Node {
-
-    constructor(initializer, test, update, body, start, end) {
+    this.start = start;
+    this.end = end;
+    this.pattern = pattern;
+    this.initializer = initializer;
+    this.rest = rest;
     
-        init(this, "ForStatement", start, end);
-        this.initializer = initializer;
-        this.test = test;
-        this.update = update;
-        this.body = body;
-    }
-}
+} proto(PatternElement);
 
-export class ForInStatement extends Node {
-
-    constructor(left, right, body, start, end) {
+export function MethodDefinition(kind, name, params, body, start, end) {
     
-        init(this, "ForInStatement", start, end);
-        this.left = left;
-        this.right = right;
-        this.body = body;
-    }
-}
-
-export class ForOfStatement extends Node {
-
-    constructor(left, right, body, start, end) {
+    this.start = start;
+    this.end = end;
+    this.kind = kind;
+    this.name = name;
+    this.params = params;
+    this.body = body;
     
-        init(this, "ForOfStatement", start, end);
-        this.left = left;
-        this.right = right;
-        this.body = body;
-    }
-}
+} proto(MethodDefinition);
 
-export class WithStatement extends Node {
-
-    constructor(object, body, start, end) {
+export function ArrayLiteral(elements, start, end) {
     
-        init(this, "WithStatement", start, end);
-        this.object = object;
-        this.body = body;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.elements = elements;
+    
+} proto(ArrayLiteral);
 
-export class SwitchStatement extends Node {
+export function ArrayComprehension(qualifiers, expr, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.qualifiers = qualifiers;
+    this.expression = expr;
+    
+} proto(ArrayComprehension);
 
-    constructor(desc, cases, start, end) {
+export function GeneratorComprehension(qualifiers, expr, start, end) {
     
-        init(this, "SwitchStatement", start, end);
-        this.descriminant = desc;
-        this.cases = cases;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.qualifiers = qualifiers;
+    this.expression = expr;
+    
+} proto(GeneratorComprehension);
 
-export class SwitchCase extends Node {
+export function ComprehensionFor(left, right, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.left = left;
+    this.right = right;
+    
+} proto(ComprehensionFor);
 
-    constructor(test, cons, start, end) {
+export function ComprehensionIf(test, start, end) {
     
-        init(this, "SwitchCase", start, end);
-        this.test = test;
-        this.consequent = cons;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.test = test;
+    
+} proto(ComprehensionIf);
 
-export class TryStatement extends Node {
+export function TemplateExpression(lits, subs, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.literals = lits;
+    this.substitutions = subs;
+    
+} proto(TemplateExpression);
 
-    constructor(block, handler, fin, start, end) {
+export function Block(statements, start, end) {
     
-        init(this, "TryStatement", start, end);
-        this.block = block;
-        this.handler = handler;
-        this.finalizer = fin;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.statements = statements;
+    
+} proto(Block);
 
-export class CatchClause extends Node {
+export function LabelledStatement(label, statement, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.label = label;
+    this.statement = statement;
+    
+} proto(LabelledStatement);
 
-    constructor(param, body, start, end) {
+export function ExpressionStatement(expr, start, end) {
     
-        init(this, "CatchClause", start, end);
-        this.param = param;
-        this.body = body;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.expression = expr;
+    this.directive = null;
+    
+} proto(ExpressionStatement);
 
-export class FunctionDeclaration extends Node {
+export function EmptyStatement(start, end) { 
 
-    constructor(kind, identifier, params, body, start, end) {
+    this.start = start;
+    this.end = end;
     
-        init(this, "FunctionDeclaration", start, end);
-        this.kind = kind;
-        this.identifier = identifier;
-        this.params = params;
-        this.body = body;
-    }
-}
-
-export class FunctionExpression extends Node {
+} proto(EmptyStatement);
 
-    constructor(kind, identifier, params, body, start, end) {
+export function VariableDeclaration(kind, list, start, end) {
     
-        init(this, "FunctionExpression", start, end);
-        this.kind = kind;
-        this.identifier = identifier;
-        this.params = params;
-        this.body = body;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.kind = kind;
+    this.declarations = list;
+    
+} proto(VariableDeclaration);
 
-export class FormalParameter extends Node {
+export function VariableDeclarator(pattern, initializer, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.pattern = pattern;
+    this.initializer = initializer;
+    
+} proto(VariableDeclarator);
 
-    constructor(pattern, initializer, start, end) {
+export function ReturnStatement(arg, start, end) {
     
-        init(this, "FormalParameter", start, end);
-        this.pattern = pattern;
-        this.initializer = initializer;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.argument = arg;
+    
+} proto(ReturnStatement);
 
-export class RestParameter extends Node {
+export function BreakStatement(label, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.label = label;
+    
+} proto(BreakStatement);
 
-    constructor(identifier, start, end) {
+export function ContinueStatement(label, start, end) {
     
-        init(this, "RestParameter", start, end);
-        this.identifier = identifier;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.label = label;
+    
+} proto(ContinueStatement);
 
-export class FunctionBody extends Node {
+export function ThrowStatement(expr, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.expression = expr;
+    
+} proto(ThrowStatement);
 
-    constructor(statements, start, end) {
+export function DebuggerStatement(start, end) {
     
-        init(this, "FunctionBody", start, end);
-        this.statements = statements;
-    }
-}
+    this.start = start;
+    this.end = end;
+    
+} proto(DebuggerStatement);
 
-export class ArrowFunctionHead extends Node {
+export function IfStatement(test, cons, alt, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.test = test;
+    this.consequent = cons;
+    this.alternate = alt;
+    
+} proto(IfStatement);
 
-    constructor(params, start, end) {
+export function DoWhileStatement(body, test, start, end) {
     
-        init(this, "ArrowFunctionHead", start, end);
-        this.parameters = params;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.body = body;
+    this.test = test;
+    
+} proto(DoWhileStatement);
 
-export class ArrowFunction extends Node {
+export function WhileStatement(test, body, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.test = test;
+    this.body = body;
+    
+} proto(WhileStatement);
 
-    constructor(kind, params, body, start, end) {
+export function ForStatement(initializer, test, update, body, start, end) {
     
-        init(this, "ArrowFunction", start, end);
-        this.kind = kind;
-        this.params = params;
-        this.body = body;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.initializer = initializer;
+    this.test = test;
+    this.update = update;
+    this.body = body;
+    
+} proto(ForStatement);
 
-export class ModuleDeclaration extends Node {
+export function ForInStatement(left, right, body, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.left = left;
+    this.right = right;
+    this.body = body;
+    
+} proto(ForInStatement);
 
-    constructor(identifier, body, start, end) {
+export function ForOfStatement(left, right, body, start, end) {
     
-        init(this, "ModuleDeclaration", start, end);
-        this.identifier = identifier;
-        this.body = body;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.left = left;
+    this.right = right;
+    this.body = body;
+    
+} proto(ForOfStatement);
 
-export class ModuleBody extends Node {
+export function WithStatement(object, body, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.object = object;
+    this.body = body;
+    
+} proto(WithStatement);
 
-    constructor(statements, start, end) {
+export function SwitchStatement(desc, cases, start, end) {
     
-        init(this, "ModuleBody", start, end);
-        this.statements = statements;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.descriminant = desc;
+    this.cases = cases;
+    
+} proto(SwitchStatement);
 
-export class ModuleImport extends Node {
+export function SwitchCase(test, cons, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.test = test;
+    this.consequent = cons;
+    
+} proto(SwitchCase);
 
-    constructor(identifier, from, start, end) {
+export function TryStatement(block, handler, fin, start, end) {
     
-        init(this, "ModuleImport", start, end);
-        this.identifier = identifier;
-        this.from = from;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.block = block;
+    this.handler = handler;
+    this.finalizer = fin;
+    
+} proto(TryStatement);
 
-export class ModuleAlias extends Node {
+export function CatchClause(param, body, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.param = param;
+    this.body = body;
+    
+} proto(CatchClause);
 
-    constructor(identifier, path, start, end) {
+export function FunctionDeclaration(kind, identifier, params, body, start, end) {
     
-        init(this, "ModuleAlias", start, end);
-        this.identifier = identifier;
-        this.path = path;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.kind = kind;
+    this.identifier = identifier;
+    this.params = params;
+    this.body = body;
+    
+} proto(FunctionDeclaration);
 
-export class ImportDefaultDeclaration extends Node {
+export function FunctionExpression(kind, identifier, params, body, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.kind = kind;
+    this.identifier = identifier;
+    this.params = params;
+    this.body = body;
+    
+} proto(FunctionExpression);
 
-    constructor(ident, from, start, end) {
+export function FormalParameter(pattern, initializer, start, end) {
     
-        init(this, "ImportDefaultDeclaration", start, end);
-        this.identifier = ident;
-        this.from = from;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.pattern = pattern;
+    this.initializer = initializer;
+    
+} proto(FormalParameter);
 
-export class ImportDeclaration extends Node {
+export function RestParameter(identifier, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.identifier = identifier;
+    
+} proto(RestParameter);
 
-    constructor(specifiers, from, start, end) {
+export function FunctionBody(statements, start, end) {
     
-        init(this, "ImportDeclaration", start, end);
-        this.specifiers = specifiers;
-        this.from = from;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.statements = statements;
+    
+} proto(FunctionBody);
 
-export class ImportSpecifier extends Node {
+export function ArrowFunctionHead(params, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.parameters = params;
+    
+} proto(ArrowFunctionHead);
 
-    constructor(remote, local, start, end) {
+export function ArrowFunction(kind, params, body, start, end) {
     
-        init(this, "ImportSpecifier", start, end);
-        this.remote = remote;
-        this.local = local;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.kind = kind;
+    this.params = params;
+    this.body = body;
+    
+} proto(ArrowFunction);
 
-export class ExportDeclaration extends Node {
+export function ModuleDeclaration(identifier, body, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.identifier = identifier;
+    this.body = body;
+    
+} proto(ModuleDeclaration);
 
-    constructor(binding, start, end) {
+export function ModuleBody(statements, start, end) {
     
-        init(this, "ExportDeclaration", start, end);
-        this.binding = binding;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.statements = statements;
+    
+} proto(ModuleBody);
 
-export class ExportsList extends Node {
+export function ModuleImport(identifier, from, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.identifier = identifier;
+    this.from = from;
+    
+} proto(ModuleImport);
 
-    constructor(list, from, start, end) {
+export function ModuleAlias(identifier, path, start, end) {
     
-        init(this, "ExportsList", start, end);
-        this.specifiers = list;
-        this.from = from;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.identifier = identifier;
+    this.path = path;
+    
+} proto(ModuleAlias);
 
-export class ExportSpecifier extends Node {
+export function ImportDefaultDeclaration(ident, from, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.identifier = ident;
+    this.from = from;
+    
+} proto(ImportDefaultDeclaration);
 
-    constructor(local, remote, start, end) {
+export function ImportDeclaration(specifiers, from, start, end) {
     
-        init(this, "ExportSpecifier", start, end);
-        this.local = local;
-        this.remote = remote;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.specifiers = specifiers;
+    this.from = from;
+    
+} proto(ImportDeclaration);
 
-export class ModulePath extends Node {
+export function ImportSpecifier(remote, local, start, end) {
     
-    constructor(list, start, end) {
+    this.start = start;
+    this.end = end;
+    this.remote = remote;
+    this.local = local;
     
-        init(this, "ModulePath", start, end);
-        this.elements = list;
-    }
-}
+} proto(ImportSpecifier);
 
-export class ClassDeclaration extends Node {
+export function ExportDeclaration(binding, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.binding = binding;
+    
+} proto(ExportDeclaration);
 
-    constructor(identifier, base, body, start, end) {
+export function ExportsList(list, from, start, end) {
     
-        init(this, "ClassDeclaration", start, end);
-        this.identifier = identifier;
-        this.base = base;
-        this.body = body;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.specifiers = list;
+    this.from = from;
+    
+} proto(ExportsList);
 
-export class ClassExpression extends Node {
+export function ExportSpecifier(local, remote, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.local = local;
+    this.remote = remote;
+    
+} proto(ExportSpecifier);
 
-    constructor(identifier, base, body, start, end) {
+export function ModulePath(list, start, end) {
     
-        init(this, "ClassExpression", start, end);
-        this.identifier = identifier;
-        this.base = base;
-        this.body = body;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.elements = list;
+    
+} proto(ModulePath);
 
-export class ClassBody extends Node {
+export function ClassDeclaration(identifier, base, body, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.identifier = identifier;
+    this.base = base;
+    this.body = body;
+    
+} proto(ClassDeclaration);
 
-    constructor(elems, start, end) {
+export function ClassExpression(identifier, base, body, start, end) {
     
-        init(this, "ClassBody", start, end);
-        this.elements = elems;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.identifier = identifier;
+    this.base = base;
+    this.body = body;
+    
+} proto(ClassExpression);
 
-export class ClassElement extends Node {
+export function ClassBody(elems, start, end) {
+    
+    this.start = start;
+    this.end = end;
+    this.elements = elems;
+    
+} proto(ClassBody);
 
-    constructor(isStatic, method, start, end) {
+export function ClassElement(isStatic, method, start, end) {
     
-        init(this, "ClassElement", start, end);
-        this.static = isStatic;
-        this.method = method;
-    }
-}
+    this.start = start;
+    this.end = end;
+    this.static = isStatic;
+    this.method = method;
+    
+} proto(ClassElement);
+

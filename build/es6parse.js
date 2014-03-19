@@ -1224,21 +1224,21 @@ this.es6now.async = function(iterable) {
 
 var AST_ = (function(exports) {
 
+// Initializes common node properties.  This is used in preference
+// to super() for performance reasons.
 function init(node, type, start, end) {
 
     node.type = type;
     node.start = start;
     node.end = end;
+    node.error = "";
 }
 
 var Node = es6now.Class(function(__super) { return {
 
     constructor: function Node(type, start, end) {
     
-        this.type = type;
-        this.start = start;
-        this.end = end;
-        this.error = "";
+        init(this, type, start, end);
     },
     
     forEachChild: function(fn) {
@@ -2469,7 +2469,10 @@ var Scanner = es6now.Class(function(__super) { return {
     
         var code = this.input.charCodeAt(this.offset),
             next;
-            
+        
+        if (code === 32)
+            return this.Whitespace(code);
+        
         switch (charTable[code]) {
         
             case "punctuator-char": return this.PunctuatorChar(code);

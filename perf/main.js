@@ -53,7 +53,7 @@ function analyzeChars(string) {
     .map(k => ({ chr: k, num: occ[k] }))
     .filter((obj, i) => {
     
-        console.log(obj.chr + " > " + obj.num);
+        console.log(`${ JSON.stringify(obj.chr) } (${ obj.chr.charCodeAt(0) }): ${obj.num}`);
         return i < 100;
     });
 }
@@ -79,7 +79,7 @@ var parsers = {
 
     "dry-loop": dryLoop,
     "native": nativeParse, 
-    "es6parse-scanner": scanOnly,
+    "scanner": scanOnly,
     "acorn": Acorn.parse,
     "es6parse": parseScript,
     "esprima": Esprima.parse
@@ -103,6 +103,9 @@ export function main(args) {
             parser = parsers[lib],
             count = 50;
     
+        if (lib === "chars")
+            return analyzeChars(input);
+            
         try {
     
             for (var i = count; i--;)
@@ -119,6 +122,7 @@ export function main(args) {
         console.log("  " + lib + ": " + 
             (ms / input.length * 1024 * 1024).toFixed(2) + " ms/MB, " +
             (input.length * 1000 / ms / 1024 / 1024).toFixed(2) + " MB/sec");
+        
     });
     
 }

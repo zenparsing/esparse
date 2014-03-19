@@ -412,7 +412,10 @@ export class Scanner {
     
         var code = this.input.charCodeAt(this.offset),
             next;
-            
+        
+        if (code === 32)
+            return this.Whitespace(code);
+        
         switch (charTable[code]) {
         
             case "punctuator-char": return this.PunctuatorChar(code);
