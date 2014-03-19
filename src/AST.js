@@ -1,3 +1,4 @@
+// AST Node Constructors
 export var AST = {
 
     Node(type, start, end) {

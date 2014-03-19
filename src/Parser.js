@@ -108,6 +108,8 @@ function mapKey(name) { return "." + (name || "") }
 
 class Token {
 
+    get isToken() { return true }
+
     constructor(s) {
     
         this.type = s.type;
@@ -119,7 +121,9 @@ class Token {
         this.regExpFlags = s.regExpFlags;
         this.newlineBefore = s.newlineBefore;
         this.strictError = s.strictError;
+        // TODO:  Should we do this? this.error = "";
     }
+    
 }
 
 class Context {
@@ -158,6 +162,8 @@ export class Parser {
 
     get startOffset() {
     
+        // TODO:  What if we should be scanning using a different context and
+        // the token buffer is empty?
         return this.peekToken().start;
     }
     
@@ -401,6 +407,10 @@ export class Parser {
     addStrictError(error, node) {
     
         var c = this.context;
+        
+        // Copy tokens (since tokens objects are reused)
+        if (node.isToken)
+            node = new Token(node);
         
         node.error = error;
         
@@ -756,9 +766,11 @@ export class Parser {
                         if (this.peek("div") === "=>") {
                         
                             expr = this.ArrowFunctionHead(arrowType, expr, null, start);
+                            exit = true;
                         
                         } else {
                             
+                            arrowType = "";
                             this.popContext(true);
                         }
                     }
@@ -1722,9 +1734,8 @@ export class Parser {
     
     WithStatement() {
     
-        var start = this.startOffset;
-        
-        var token = this.readToken("with");
+        var start = this.startOffset,
+            token = this.readToken("with");
         
         this.addStrictError("With statement is not allowed in strict mode", token);
         
