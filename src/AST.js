@@ -636,17 +636,19 @@ export var AST = {
 
 };
 
+// Returns a function for defining object properties
 function define(obj, name, value, enumerable) {
 
-    Object.defineProperty(obj, name, {
+    function d(name, value, enumerable) {
     
-        enumerable,
-        writable: true,
-        configurable: true,
-        value
-    });
+        Object.defineProperty(obj, name, { value, enumerable, configurable: true, writable: true });
+        return d;
+    };
+    
+    return d;
 }
 
+// Executes a callback for every child of "this"
 function forEachChild(fn) {
 
     var keys = Object.keys(this), val, i, j;
@@ -681,14 +683,12 @@ function forEachChild(fn) {
 // Assign a prototype for each constructor
 Object.keys(AST).forEach(name => {
 
-    var p = Object.create(null),
-        fn = AST[name];
+    var fn = AST[name];
     
-    define(p, "constructor", fn, false);
-    define(p, "type", name, true);
-    define(p, "error", "", false);
-    define(p, "parentNode", null, false);
-    define(p, "forEachChild", forEachChild, false);
-    
-    fn.prototype = p;
+    define(fn.prototype = Object.create(null))
+    ("constructor", fn, false)
+    ("type", name, true)
+    ("error", "", false)
+    ("parentNode", null, false)
+    ("forEachChild", forEachChild, false);
 });
