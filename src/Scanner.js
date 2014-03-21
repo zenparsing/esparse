@@ -85,20 +85,15 @@ function binarySearch(array, val) {
 }
 
 // Returns true if the character is a valid identifier part
-function isIdentifierPart(c) {
+function isIdentifierPart(code) {
 
-    if (c === void 0)
-        return false;
-    
-    var code = c.charCodeAt(0);
-    
     return  code > 64 && code < 91 || 
             code > 96 && code < 123 ||
             code > 47 && code < 58 ||
             code === 36 ||
             code === 95 ||
             code === 92 ||
-            code > 123 && identifierPart.test(c);
+            code > 123 && identifierPart.test(String.fromCharCode(code));
 }
 
 // Returns true if the specified character is a newline
@@ -175,6 +170,30 @@ export class Scanner {
         this.strictError = "";
     }
     
+    skip() {
+    
+        if (this.type !== "COMMENT")
+            this.newlineBefore = false;
+        
+        this.strictError = "";
+        this.value = null;
+        
+        var type = null, 
+            start;
+        
+        while (type === null) {
+        
+            start = this.offset;
+            type = start >= this.length ? "EOF" : this.Skip();
+        }
+        
+        this.type = type;
+        this.start = start;
+        this.end = this.offset;
+        
+        return type;
+    }
+    
     next(context) {
 
         if (this.type !== "COMMENT")
@@ -238,19 +257,44 @@ export class Scanner {
             this.lines.push(this.lastLineBreak = offset);
     }
     
+    peekChar() {
+    
+        return this.input.charAt(this.offset);
+    }
+    
+    peekCharAt(n) {
+    
+        return this.input.charAt(this.offset + n);
+    }
+    
+    peekCode() {
+    
+        return this.input.charCodeAt(this.offset);
+    }
+    
+    peekCodeAt(n) {
+    
+        return this.input.charCodeAt(this.offset + n);
+    }
+    
+    readChar() {
+    
+        return this.input.charAt(this.offset++);
+    }
+    
     readIdentifierEscape() {
     
-        if (this.input[this.offset++] !== "u")
+        if (this.readChar() !== "u")
             return null;
         
         var hex;
         
-        if (this.input[this.offset] === "{") {
+        if (this.peekChar() === "{") {
         
             this.offset++;
             hex = this.readHex(0);
             
-            if (this.input[this.offset++] !== "}")
+            if (this.readChar() !== "}")
                 return null;
         
         } else {
@@ -280,7 +324,7 @@ export class Scanner {
         
         var chr, esc;
         
-        switch (chr = this.input[this.offset++]) {
+        switch (chr = this.readChar()) {
         
             case "t": return "\t";
             case "b": return "\b";
@@ -293,7 +337,7 @@ export class Scanner {
             
                 this.addLineBreak(this.offset - 1);
                 
-                if (this.input[this.offset] === "\n")
+                if (this.peekChar() === "\n")
                     this.offset++;
                 
                 return "";
@@ -334,12 +378,12 @@ export class Scanner {
             
             case "u":
             
-                if (this.input[this.offset] === "{") {
+                if (this.peekChar() === "{") {
                 
                     this.offset++;
                     esc = this.readHex(0);
                     
-                    if (this.input[this.offset++] !== "}")
+                    if (this.readChar() !== "}")
                         return null;
                     
                 } else {
@@ -361,7 +405,7 @@ export class Scanner {
         var start = this.offset,
             code;
         
-        while (code = this.input.charCodeAt(this.offset)) {
+        while (code = this.peekCode()) {
         
             if (code >= low && code <= high) this.offset++;
             else break;
@@ -375,7 +419,7 @@ export class Scanner {
         var start = this.offset,
             code;
         
-        while (code = this.input.charCodeAt(this.offset)) {
+        while (code = this.peekCode()) {
         
             if (code >= 48 && code <= 57) this.offset++;
             else break;
@@ -389,7 +433,7 @@ export class Scanner {
         var str = "", 
             chr;
         
-        while (chr = this.input[this.offset]) {
+        while (chr = this.peekChar()) {
         
             if (!hexChar.test(chr))
                 break;
@@ -404,13 +448,44 @@ export class Scanner {
         return str;
     }
     
+    Skip() {
+    
+        var code = this.peekCode(), next;
+        
+        if (code < 128) {
+        
+            switch (charTable[code]) {
+        
+                case "whitespace": return this.Whitespace(code);
+            
+                case "newline": return this.Newline(code);
+            
+                case "slash":
+            
+                    next = this.peekCodeAt(1);
+
+                    if (next === 47) return this.LineComment(code);       // /
+                    else if (next === 42) return this.BlockComment(code); // *
+            }
+            
+        }
+        
+        var chr = this.peekChar();
+        
+        // Unicode newlines
+        if (isNewlineChar(chr))
+            return this.Newline(code);
+        
+        // Unicode whitespace
+        if (whitespaceChars.test(chr))
+            return this.UnicodeWhitespace(code);
+        
+        return "UNKNOWN";
+    }
+    
     Start(context) {
     
-        var code = this.input.charCodeAt(this.offset),
-            next;
-        
-        if (code === 32)
-            return this.Whitespace(code);
+        var code = this.peekCode(), next;
         
         switch (charTable[code]) {
         
@@ -437,7 +512,7 @@ export class Scanner {
             
             case "zero": 
             
-                switch (next = this.input.charCodeAt(this.offset + 1)) {
+                switch (next = this.peekCodeAt(1)) {
                 
                     case 88: case 120: return this.HexNumber(code);   // x
                     case 66: case 98: return this.BinaryNumber(code); // b
@@ -450,14 +525,14 @@ export class Scanner {
             
             case "dot": 
             
-                next = this.input.charCodeAt(this.offset + 1);
+                next = this.peekCodeAt(1);
                 
                 if (next >= 48 && next <= 57) return this.Number(code);
                 else return this.Punctuator(code);
             
             case "slash":
             
-                next = this.input.charCodeAt(this.offset + 1);
+                next = this.peekCodeAt(1);
 
                 if (next === 47) return this.LineComment(code);       // /
                 else if (next === 42) return this.BlockComment(code); // *
@@ -466,7 +541,7 @@ export class Scanner {
             
         }
         
-        var chr = this.input[this.offset];
+        var chr = this.peekChar();
         
         // Unicode newlines
         if (isNewlineChar(chr))
@@ -487,7 +562,7 @@ export class Scanner {
     
         this.offset++;
         
-        while (code = this.input.charCodeAt(this.offset)) {
+        while (code = this.peekCode()) {
         
             // ASCII Whitespace:  [\t] [\v] [\f] [ ] 
             if (code === 9 || code === 11 || code === 12 || code === 32)
@@ -504,7 +579,7 @@ export class Scanner {
         this.offset++;
         
         // General unicode whitespace
-        while (whitespaceChars.test(this.input[this.offset]))
+        while (whitespaceChars.test(this.peekChar()))
             this.offset++;
         
         return null;
@@ -515,7 +590,7 @@ export class Scanner {
         this.addLineBreak(this.offset++);
         
         // Treat /r/n as a single newline
-        if (code === 13 && this.input.charCodeAt(this.offset) === 10)
+        if (code === 13 && this.peekCode() === 10)
             this.offset++;
         
         this.newlineBefore = true;
@@ -525,17 +600,17 @@ export class Scanner {
     
     PunctuatorChar() {
     
-        return this.input[this.offset++];
+        return this.readChar();
     }
     
     Punctuator() {
         
-        var op = this.input[this.offset++], 
+        var op = this.readChar(), 
             chr,
             next;
         
         while (
-            isPunctuatorNext(chr = this.input[this.offset]) &&
+            isPunctuatorNext(chr = this.peekChar()) &&
             multiCharPunctuator.test(next = op + chr)) {
     
             this.offset++;
@@ -554,13 +629,13 @@ export class Scanner {
     
     Template() {
     
-        var first = this.input[this.offset++],
+        var first = this.readChar(),
             end = false, 
             val = "", 
             esc,
             chr;
         
-        while (chr = this.input[this.offset]) {
+        while (chr = this.peekChar()) {
             
             if (chr === "`") {
             
@@ -568,7 +643,7 @@ export class Scanner {
                 break;
             }
             
-            if (chr === "$" && this.input[this.offset + 1] === "{") {
+            if (chr === "$" && this.peekCharAt(1) === "{") {
             
                 this.offset++;
                 break;
@@ -603,7 +678,7 @@ export class Scanner {
     
     String() {
     
-        var delim = this.input[this.offset++],
+        var delim = this.readChar(),
             val = "",
             esc,
             chr;
@@ -651,7 +726,7 @@ export class Scanner {
             val = "", 
             chr;
         
-        while (chr = this.input[this.offset++]) {
+        while (chr = this.readChar()) {
         
             if (isNewlineChar(chr))
                 return this.Error();
@@ -688,7 +763,7 @@ export class Scanner {
         if (!chr)
             return this.Error();
         
-        if (isIdentifierPart(this.input[this.offset]))
+        if (isIdentifierPart(this.peekCode()))
             flags = this.Identifier("name").value;
         
         this.value = val;
@@ -704,7 +779,7 @@ export class Scanner {
         var start = this.offset,
             code;
         
-        while (code = this.input.charCodeAt(this.offset)) {
+        while (code = this.peekCode()) {
         
             if (code >= 48 && code <= 55)
                 this.offset++;
@@ -715,7 +790,7 @@ export class Scanner {
         this.strictError = "Octal literals are not allowed in strict mode";
         this.number = parseInt(this.input.slice(start, this.offset), 8);
         
-        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+        return isNumberFollow(this.peekChar()) ? "NUMBER" : this.Error();
     }
     
     Number() {
@@ -725,19 +800,18 @@ export class Scanner {
         
         this.readInteger();
         
-        if (this.input[this.offset] === ".") {
+        if ((next = this.peekChar()) === ".") {
         
             this.offset++;
             this.readInteger();
+            next = this.peekChar();
         }
-        
-        next = this.input[this.offset];
         
         if (next === "e" || next === "E") {
         
             this.offset++;
             
-            next = this.input[this.offset];
+            next = this.peekChar();
             
             if (next === "+" || next === "-")
                 this.offset++;
@@ -779,12 +853,12 @@ export class Scanner {
     
         var start = this.offset,
             id = "",
-            chr,
+            code,
             esc;
 
-        while (isIdentifierPart(chr = this.input[this.offset])) {
+        while (isIdentifierPart(code = this.peekCode())) {
         
-            if (chr === "\\") {
+            if (code === 92 /* backslash */) {
             
                 id += this.input.slice(start, this.offset++);
                 esc = this.readIdentifierEscape();
@@ -818,7 +892,7 @@ export class Scanner {
         var start = this.offset,
             chr;
         
-        while (chr = this.input[this.offset]) {
+        while (chr = this.peekChar()) {
         
             if (isNewlineChar(chr))
                 break;

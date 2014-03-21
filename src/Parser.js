@@ -162,9 +162,12 @@ export class Parser {
 
     get startOffset() {
     
-        // TODO:  What if we should be scanning using a different context and
-        // the token buffer is empty?
-        return this.peekToken().start;
+        if (this.peek0)
+            return this.peek0.start;
+        
+        // Skip over whitespace and comments
+        this.scanner.skip();
+        return this.scanner.offset;
     }
     
     nextToken(context) {
@@ -197,30 +200,37 @@ export class Parser {
         return this.readToken(type, context).type;
     }
     
-    peekToken(context, index) {
+    peekToken(context) {
     
-        if (index === 0 || index === void 0) {
+        if (!this.peek0)
+            this.peek0 = this.nextToken(context);
         
-            return this.peek0 || (this.peek0 = this.nextToken(context));
+        return this.peek0;
+    }
+    
+    peek(context) {
+    
+        return this.peekToken(context).type;
+    }
+    
+    peekTokenAt(context, index) {
+    
+        switch (index) {
         
-        } else if (index === 1) {
-        
-            if (this.peek1) {
+            case 0: 
+                return this.peekToken(context);
             
-                return this.peek1;
-            
-            } else if (this.peek0) {
-            
-                return this.peek1 = this.nextToken(context);
-            }
+            case 1:
+                if (this.peek1) return this.peek1;
+                if (this.peek0) return this.peek1 = this.nextToken(context);
         }
         
         throw new Error("Invalid lookahead");
     }
     
-    peek(context, index) {
+    peekAt(context, index) {
     
-        return this.peekToken(context, index).type;
+        return this.peekTokenAt(context, index).type;
     }
     
     unpeek() {
@@ -285,7 +295,7 @@ export class Parser {
     
         if (this.peekKeyword("let")) {
         
-            switch (this.peek("div", 1)) {
+            switch (this.peekAt("div", 1)) {
             
                 case "{":
                 case "[":
@@ -300,7 +310,7 @@ export class Parser {
     
         if (this.peekKeyword("module")) {
         
-            var token = this.peekToken("div", 1);
+            var token = this.peekTokenAt("div", 1);
             return (!token.newlineBefore && token.type === "IDENTIFIER");
         }
         
@@ -328,11 +338,11 @@ export class Parser {
         if (!(token.type === "IDENTIFIER" && isFunctionModifier(token.value)))
             return false;
         
-        token = this.peekToken("div", 1);
+        token = this.peekTokenAt("div", 1);
         return token.type === "function" && !token.newlineBefore;
     }
     
-    maybeEnd() {
+    peekEnd() {
     
         var token = this.peekToken();
         
@@ -401,7 +411,8 @@ export class Parser {
     
     setStrict(strict) {
     
-        var context = this.context;
+        var context = this.context,
+            parent = context.parent;
         
         if (context.strict === true)
             return;
@@ -417,8 +428,6 @@ export class Parser {
                 this.fail(node.error, node);
             
         } else if (parent) {
-        
-            var parent = this.context.parent;
             
             if (parent.strict === null && !parent.strictError)
                 parent.strictError = node;
@@ -496,7 +505,7 @@ export class Parser {
             // list with a trailing rest parameter.  Return the 
             // expression up to, but not including ",".
             
-            if (this.peek(null, 1) === "...")
+            if (this.peekAt(null, 1) === "...")
                 break;
             
             this.read();
@@ -566,7 +575,7 @@ export class Parser {
             
         this.readKeyword("yield");
         
-        if (!this.maybeEnd()) {
+        if (!this.peekEnd()) {
         
             if (this.peek() === "*") {
         
@@ -859,17 +868,17 @@ export class Parser {
             case "STRING": return this.String();
             case "{": return this.ObjectLiteral();
             
-            case "(": return this.peek(null, 1) === "for" ? 
+            case "(": return this.peekAt(null, 1) === "for" ? 
                 this.GeneratorComprehension() :
                 this.ParenExpression();
             
-            case "[": return this.peek(null, 1) === "for" ?
+            case "[": return this.peekAt(null, 1) === "for" ?
                 this.ArrayComprehension() :
                 this.ArrayLiteral();
             
             case "IDENTIFIER":
                 
-                next = this.peekToken("div", 1);
+                next = this.peekTokenAt("div", 1);
                 
                 if (next.type === "=>") {
                 
@@ -1032,7 +1041,7 @@ export class Parser {
         }
         
         // Look for a trailing rest formal parameter within an arrow formal list
-        if (!rest && this.peek() === "," && this.peek(null, 1) === "...") {
+        if (!rest && this.peek() === "," && this.peekAt(null, 1) === "...") {
         
             this.read();
             rest = this.RestParameter();
@@ -1086,7 +1095,7 @@ export class Parser {
         if (this.peek("name") === "*")
             return this.MethodDefinition();
         
-        switch (this.peek("name", 1)) {
+        switch (this.peekAt("name", 1)) {
         
             case "=":
         
@@ -1344,7 +1353,7 @@ export class Parser {
             
             case "IDENTIFIER":
             
-                next = this.peekToken("div", 1);
+                next = this.peekTokenAt("div", 1);
                 
                 if (next.type === ":")
                     return this.LabelledStatement();
@@ -1522,7 +1531,7 @@ export class Parser {
         var start = this.startOffset;
         
         this.read("return");
-        var value = this.maybeEnd() ? null : this.Expression();
+        var value = this.peekEnd() ? null : this.Expression();
         
         this.Semicolon();
         
@@ -1538,7 +1547,7 @@ export class Parser {
             label,
             name;
         
-        label = this.maybeEnd() ? null : this.Identifier();
+        label = this.peekEnd() ? null : this.Identifier();
         name = mapKey(label && label.value);
         
         this.Semicolon();
@@ -1565,7 +1574,7 @@ export class Parser {
         
         this.read("throw");
         
-        var expr = this.maybeEnd() ? null : this.Expression();
+        var expr = this.peekEnd() ? null : this.Expression();
         
         if (expr === null)
             this.fail("Missing throw expression");
@@ -2485,7 +2494,7 @@ export class Parser {
         
         // Check for static modifier
         if (this.peekToken("name").value === "static" &&
-            this.peek("name", 1) !== "(") {
+            this.peekAt("name", 1) !== "(") {
         
             isStatic = true;
             nameSet = staticSet;
