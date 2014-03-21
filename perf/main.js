@@ -4,7 +4,15 @@ module FS from "node:fs";
 import { Scanner, parseScript } from "../src/main.js";
 
 var Esprima = require("./parsers/esprima.js"),
+    EsprimaHarmony = require("./parsers/esprima-harmony.js"),
     Acorn = require("./parsers/acorn.js");
+
+var reservedWord = new RegExp("^(?:" +
+    "break|case|catch|class|const|continue|debugger|default|delete|do|" +
+    "else|enum|export|extends|false|finally|for|function|if|import|in|" +
+    "instanceof|new|null|return|super|switch|this|throw|true|try|typeof|" +
+    "var|void|while|with" +
+")$");
 
 // Returns a stat object for a path
 function statPath(path) {
@@ -58,6 +66,46 @@ function analyzeChars(string) {
     });
 }
 
+function analyzeReserved(string) {
+
+    var scanner = new Scanner(string),
+        words = Object.create(null),
+        word;
+    
+    reservedWord
+    .toString()
+    .replace(/^[^a-z]+|[^a-z]+$/ig, "")
+    .split("|")
+    .forEach(word => words[word] = 0);
+    
+    while (scanner.next("div") !== "EOF") {
+    
+        word = scanner.type;
+        
+        if (reservedWord.test(word)) {
+        
+            if (!(word in words))
+                words[word] = 0;
+            
+            words[word] += 1;
+        }
+    }
+    
+    var freq = Object.keys(words)
+    .sort((a, b) => words[b] - words[a])
+    .map(k => ({ word: k, num: words[k] }));
+    
+    freq.filter((obj, i) => {
+    
+        console.log(`${obj.word}: ${obj.num}`);
+        return i < 100;
+    });
+    
+    var cases = freq.map(obj => `case "${obj.word}":`).join(" ");
+    
+    console.log(cases);
+}
+
 function nativeParse(src) {
 
     new Function(src);
@@ -82,7 +130,8 @@ var parsers = {
     "scanner": scanOnly,
     "acorn": Acorn.parse,
     "es6parse": parseScript,
-    "esprima": Esprima.parse
+    "esprima": Esprima.parse,
+    "esprima-harmony": EsprimaHarmony.parse
 };
 
 
@@ -105,6 +154,9 @@ export function main(args) {
     
         if (lib === "chars")
             return analyzeChars(input);
+        
+        if (lib === "reserved")
+            return analyzeReserved(input);
             
         try {
     

@@ -332,6 +332,28 @@ export class Parser {
         return token.type === "function" && !token.newlineBefore;
     }
     
+    maybeEnd() {
+    
+        var token = this.peekToken();
+        
+        if (!token.newlineBefore) {
+            
+            switch (token.type) {
+            
+                case "EOF":
+                case "}":
+                case ";":
+                case ")":
+                    break;
+                
+                default:
+                    return false;
+            }
+        }
+        
+        return true;
+    }
+    
     // == Context Management ==
     
     pushContext(isFunction, isStrict) {
@@ -379,8 +401,7 @@ export class Parser {
     
     setStrict(strict) {
     
-        var context = this.context,
-            parent = this.context.parent;
+        var context = this.context;
         
         if (context.strict === true)
             return;
@@ -397,6 +418,8 @@ export class Parser {
             
         } else if (parent) {
         
+            var parent = this.context.parent;
+            
             if (parent.strict === null && !parent.strictError)
                 parent.strictError = node;
         }
@@ -420,33 +443,11 @@ export class Parser {
             c.strictError = node;
     }
     
-    maybeEnd() {
-    
-        var token = this.peekToken();
-        
-        if (!token.newlineBefore) {
-            
-            switch (token.type) {
-            
-                case "EOF":
-                case "}":
-                case ";":
-                case ")":
-                    break;
-                
-                default:
-                    return false;
-            }
-        }
-        
-        return true;
-    }
-    
     addInvalidNode(error, node, strict) {
     
         var context = this.context,
             list = context.invalidNodes,
-            item = { node: node, strict: strict };
+            item = { node, strict };
         
         node.error = error;
         
@@ -2505,6 +2506,8 @@ function mixin(source) {
     source = source.prototype;
     Object.keys(source).forEach(key => Parser.prototype[key] = source[key]);
 }
+
+// TODO:  Use Object.assign
 
 // Add externally defined methods
 mixin(Transform);

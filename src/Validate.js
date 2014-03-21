@@ -69,6 +69,7 @@ export class Validate {
     
         var ident = node.value;
         
+        // TODO:  Add a restriction for await in async functions?
         if (ident === "yield" && this.context.functionType === "generator")
             this.fail("yield cannot be an identifier inside of a generator function", node);
         else if (isStrictReserved(ident))

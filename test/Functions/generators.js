@@ -163,4 +163,10 @@ x } **/
 /** function *g() { var yield; } **/
 "yield is not allowed as a binding identifier within a generator": {},
 
+/** function* g(yield) {} **/
+"yield is not allowed as a binding identifier within a generator head": {},
+
+// Should this work?
+// function* g() { (yield) => null }
+
 };

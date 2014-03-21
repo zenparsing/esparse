@@ -2846,8 +2846,10 @@ var Transform = es6now.Class(function(__super) { return {
     // Transform an expression into a formal parameter list
     transformFormals: function(expr, rest) {
     
-        // TODO:  We need to throw if an initizlier contains stuff that's not allowed,
+        // TODO: We need to throw if an initizlier contains stuff that's not allowed,
         // like a yield expression or await expression.
+        
+        // TODO: Do we transform empty yield expressions into identifiers [(yield) => 0]
         
         if (expr === null)
             return rest ? [rest] : [];
@@ -3103,6 +3105,7 @@ var Validate = es6now.Class(function(__super) { return {
     
         var ident = node.value;
         
+        // TODO:  Add a restriction for await in async functions?
         if (ident === "yield" && this.context.functionType === "generator")
             this.fail("yield cannot be an identifier inside of a generator function", node);
         else if (isStrictReserved(ident))
@@ -3626,6 +3629,28 @@ var Parser = es6now.Class(function(__super) { return {
         return token.type === "function" && !token.newlineBefore;
     },
     
+    maybeEnd: function() {
+    
+        var token = this.peekToken();
+        
+        if (!token.newlineBefore) {
+            
+            switch (token.type) {
+            
+                case "EOF":
+                case "}":
+                case ";":
+                case ")":
+                    break;
+                
+                default:
+                    return false;
+            }
+        }
+        
+        return true;
+    },
+    
     // == Context Management ==
     
     pushContext: function(isFunction, isStrict) {
@@ -3673,8 +3698,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     setStrict: function(strict) {
     
-        var context = this.context,
-            parent = this.context.parent;
+        var context = this.context;
         
         if (context.strict === true)
             return;
@@ -3691,6 +3715,8 @@ var Parser = es6now.Class(function(__super) { return {
             
         } else if (parent) {
         
+            var parent = this.context.parent;
+            
             if (parent.strict === null && !parent.strictError)
                 parent.strictError = node;
         }
@@ -3712,28 +3738,6 @@ var Parser = es6now.Class(function(__super) { return {
             this.fail(error, node);
         else if (c.strict === null && !c.strictError)
             c.strictError = node;
-    },
-    
-    maybeEnd: function() {
-    
-        var token = this.peekToken();
-        
-        if (!token.newlineBefore) {
-            
-            switch (token.type) {
-            
-                case "EOF":
-                case "}":
-                case ";":
-                case ")":
-                    break;
-                
-                default:
-                    return false;
-            }
-        }
-        
-        return true;
     },
     
     addInvalidNode: function(error, node, strict) {
@@ -4060,9 +4064,11 @@ var Parser = es6now.Class(function(__super) { return {
                         if (this.peek("div") === "=>") {
                         
                             expr = this.ArrowFunctionHead(arrowType, expr, null, start);
+                            exit = true;
                         
                         } else {
                             
+                            arrowType = "";
                             this.popContext(true);
                         }
                     }
@@ -5797,6 +5803,8 @@ function mixin(source) {
     source = source.prototype;
     Object.keys(source).forEach((function(key) { return Parser.prototype[key] = source[key]; }));
 }
+
+// TODO:  Use Object.assign
 
 // Add externally defined methods
 mixin(Transform);

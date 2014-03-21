@@ -26,10 +26,6 @@ var multiCharPunctuator = new RegExp("^(?:" +
     "[-+&|<>!=*&\^%\/]=" +
 ")$");
 
-var ASSIGNMENT = 1,
-    UNARY = 2,
-    INCREMENT = 4;
-
 // === Miscellaneous Patterns ===
 var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
     blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
@@ -422,11 +418,7 @@ export class Scanner {
             
             case "whitespace": return this.Whitespace(code);
             
-            case "identifier": 
-            
-                return context === "name" ? 
-                    this.IdentifierName(code) : 
-                    this.Identifier(code);
+            case "identifier": return this.Identifier(context);
             
             case "lbrace":
             
@@ -486,7 +478,7 @@ export class Scanner {
         
         // Unicode identifier chars
         if (identifierStart.test(chr))
-            return context === "name" ? this.IdentifierName(code) : this.Identifier(code);
+            return this.Identifier(context);
         
         return this.Error();
     }
@@ -697,7 +689,7 @@ export class Scanner {
             return this.Error();
         
         if (isIdentifierPart(this.input[this.offset]))
-            flags = this.IdentifierName().value;
+            flags = this.Identifier("name").value;
         
         this.value = val;
         this.regExpFlags = flags;
@@ -783,7 +775,7 @@ export class Scanner {
         return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
     }
     
-    Identifier() {
+    Identifier(context) {
     
         var start = this.offset,
             id = "",
@@ -811,41 +803,10 @@ export class Scanner {
         
         id += this.input.slice(start, this.offset);
         
-        if (reservedWord.test(id))
+        if (context !== "name" && reservedWord.test(id))
             return id;
         
         this.value = id;
-        
-        return "IDENTIFIER";
-    }
-    
-    IdentifierName() {
-    
-        var start = this.offset,
-            id = "",
-            chr,
-            esc;
-
-        while (isIdentifierPart(chr = this.input[this.offset])) {
-        
-            if (chr === "\\") {
-            
-                id += this.input.slice(start, this.offset++);
-                esc = this.readIdentifierEscape();
-                
-                if (esc === null)
-                    return this.Error();
-                
-                id += esc;
-                start = this.offset;
-                
-            } else {
-            
-                this.offset++;
-            }
-        }
-        
-        this.value = id + this.input.slice(start, this.offset);
         
         return "IDENTIFIER";
     }
