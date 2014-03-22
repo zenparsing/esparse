@@ -1,6 +1,83 @@
 export var AST = {
+    
+    // === Tokens ===
+    
+    Token(type, start, end) {
+    
+        this.start = start;
+        this.end = end;
+        this.type = type;
+        this.newlineBefore = false;
+    },
+    
+    Identifier(value, context, start, end) {
 
+        this.start = start;
+        this.end = end;
+        this.value = value;
+        this.context = context;
+        this.newlineBefore = false;
+    },
+
+    Number(value, start, end) {
+    
+        this.start = start;
+        this.end = end;
+        this.value = value;
+        this.newlineBefore = false;
+    },
+
+    String(value, start, end) {
+
+        this.start = start;
+        this.end = end;
+        this.value = value;
+        this.newlineBefore = false;
+    },
+
+    Template(value, isEnd, start, end) {
+    
+        this.start = start;
+        this.end = end;
+        this.value = value;
+        this.templateEnd = isEnd;
+        this.newlineBefore = false;
+    },
+
+    RegularExpression(value, flags, start, end) {
+    
+        this.start = start;
+        this.end = end;
+        this.value = value;
+        this.flags = flags;
+        this.newlineBefore = false;
+    },
+    
+    Comment(value, start, end) {
+    
+        this.start = start;
+        this.end = end;
+        this.value = value;
+        this.newlineBefore = false;
+    },
+    
+    // === Symbols ===
+    
     Node(type, start, end) {
+
+        this.start = start;
+        this.end = end;
+        this.type = type;
+    },
+
+    Boolean(value, start, end) {
+    
+        this.start = start;
+        this.end = end;
+        this.value = value;
+    },
+    
+    Null(start, end) { 
 
         this.start = start;
         this.end = end;
@@ -18,57 +95,6 @@ export var AST = {
         this.start = start;
         this.end = end;
         this.statements = statements;
-    },
-
-    Identifier(value, context, start, end) {
-
-        this.start = start;
-        this.end = end;
-        this.value = value;
-        this.context = context;
-    },
-
-    Number(value, start, end) {
-    
-        this.start = start;
-        this.end = end;
-        this.value = value;
-    },
-
-    String(value, start, end) {
-
-        this.start = start;
-        this.end = end;
-        this.value = value;
-    },
-
-    Template(value, isEnd, start, end) {
-    
-        this.start = start;
-        this.end = end;
-        this.value = value;
-        this.templateEnd = isEnd;
-    },
-
-    RegularExpression(value, flags, start, end) {
-    
-        this.start = start;
-        this.end = end;
-        this.value = value;
-        this.flags = flags;
-    },
-
-    Null(start, end) { 
-
-        this.start = start;
-        this.end = end;
-    },
-
-    Boolean(value, start, end) {
-    
-        this.start = start;
-        this.end = end;
-        this.value = value;
     },
 
     ThisExpression(start, end) { 

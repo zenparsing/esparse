@@ -169,4 +169,7 @@ x } **/
 /** function* g() { (yield) => null } **/
 "yield is not allowed within an arrow parameter list inside of a generator": {},
 
+// What about this?
+// function* g() { ({ abc }) => null }
+
 };

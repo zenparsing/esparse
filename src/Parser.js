@@ -106,25 +106,6 @@ function isFunctionModifier(value) {
 // Encodes a string as a map key for use in regular object
 function mapKey(name) { return "." + (name || "") }
 
-class Token {
-
-    get isToken() { return true }
-
-    constructor(s) {
-    
-        this.type = s.type;
-        this.start = s.start;
-        this.end = s.end;
-        this.value = s.value;
-        this.number = s.number;
-        this.templateEnd = s.templateEnd;
-        this.regExpFlags = s.regExpFlags;
-        this.newlineBefore = s.newlineBefore;
-        this.strictError = s.strictError;
-        // TODO:  Should we do this? this.error = "";
-    }
-    
-}
 
 class Context {
 
@@ -167,18 +148,19 @@ export class Parser {
         
         // Skip over whitespace and comments
         this.scanner.skip();
+        
         return this.scanner.offset;
     }
     
     nextToken(context) {
     
         var scanner = this.scanner,
-            type;
+            token;
         
-        do { type = scanner.next(context); }
-        while (type === "COMMENT")
+        do { token = scanner.next(context); }
+        while (token.type === "Comment")
         
-        return new Token(scanner);
+        return token;
     }
     
     readToken(type, context) {
@@ -249,37 +231,11 @@ export class Parser {
         return tok !== "EOF" && tok !== type ? tok : null;
     }
     
-    unexpected(token) {
-    
-        var type = token.type, msg;
-        
-        msg = type === "EOF" ?
-            "Unexpected end of input" :
-            "Unexpected token " + token.type;
-        
-        this.fail(msg, token);
-    }
-    
-    fail(msg, loc) {
-    
-        var pos = this.scanner.position(loc || this.peek0),
-            err = new SyntaxError(msg);
-        
-        err.line = pos.line;
-        err.column = pos.column;
-        err.lineOffset = pos.lineOffset;
-        err.startOffset = pos.startOffset;
-        err.endOffset = pos.endOffset;
-        err.sourceText = this.input;
-        
-        throw err;
-    }
-    
     readKeyword(word) {
     
         var token = this.readToken();
         
-        if (token.type === word || token.type === "IDENTIFIER" && token.value === word)
+        if (token.type === word || token.type === "Identifier" && token.value === word)
             return token;
         
         this.unexpected(token);
@@ -288,7 +244,7 @@ export class Parser {
     peekKeyword(word) {
     
         var token = this.peekToken();
-        return token.type === "IDENTIFIER" && token.value === word;
+        return token.type === "Identifier" && token.value === word;
     }
     
     peekLet() {
@@ -299,7 +255,7 @@ export class Parser {
             
                 case "{":
                 case "[":
-                case "IDENTIFIER": return true;
+                case "Identifier": return true;
             }
         }
         
@@ -311,7 +267,7 @@ export class Parser {
         if (this.peekKeyword("module")) {
         
             var token = this.peekTokenAt("div", 1);
-            return (!token.newlineBefore && token.type === "IDENTIFIER");
+            return (!token.newlineBefore && token.type === "Identifier");
         }
         
         return false;
@@ -335,7 +291,7 @@ export class Parser {
     
         var token = this.peekToken();
         
-        if (!(token.type === "IDENTIFIER" && isFunctionModifier(token.value)))
+        if (!(token.type === "Identifier" && isFunctionModifier(token.value)))
             return false;
         
         token = this.peekTokenAt("div", 1);
@@ -362,6 +318,32 @@ export class Parser {
         }
         
         return true;
+    }
+    
+    unexpected(token) {
+    
+        var type = token.type, msg;
+        
+        msg = type === "EOF" ?
+            "Unexpected end of input" :
+            "Unexpected token " + token.type;
+        
+        this.fail(msg, token);
+    }
+    
+    fail(msg, loc) {
+    
+        var pos = this.scanner.position(loc || this.peek0),
+            err = new SyntaxError(msg);
+        
+        err.line = pos.line;
+        err.column = pos.column;
+        err.lineOffset = pos.lineOffset;
+        err.startOffset = pos.startOffset;
+        err.endOffset = pos.endOffset;
+        err.sourceText = this.input;
+        
+        throw err;
     }
     
     // == Context Management ==
@@ -440,14 +422,11 @@ export class Parser {
     
         var c = this.context;
         
-        // Copy tokens (since tokens objects are reused)
-        if (node.isToken)
-            node = new Token(node);
-        
-        node.error = error;
+        if (error)
+            node.error = error;
         
         if (c.strict === true)
-            this.fail(error, node);
+            this.fail(node.error, node);
         else if (c.strict === null && !c.strictError)
             c.strictError = node;
     }
@@ -787,7 +766,7 @@ export class Parser {
                     
                     break;
                 
-                case "TEMPLATE":
+                case "Template":
                 
                     expr = new AST.TaggedTemplateExpression(
                         expr,
@@ -863,9 +842,9 @@ export class Parser {
             
             case "function": return this.FunctionExpression();
             case "class": return this.ClassExpression();
-            case "TEMPLATE": return this.TemplateExpression();
-            case "NUMBER": return this.Number();
-            case "STRING": return this.String();
+            case "Template": return this.TemplateExpression();
+            case "Number": return this.Number();
+            case "String": return this.String();
             case "{": return this.ObjectLiteral();
             
             case "(": return this.peekAt(null, 1) === "for" ? 
@@ -876,7 +855,7 @@ export class Parser {
                 this.ArrayComprehension() :
                 this.ArrayLiteral();
             
-            case "IDENTIFIER":
+            case "Identifier":
                 
                 next = this.peekTokenAt("div", 1);
                 
@@ -890,7 +869,7 @@ export class Parser {
                     if (next.type === "function")
                         return this.FunctionExpression();
                     
-                    if (next.type === "IDENTIFIER" && isFunctionModifier(token.value)) {
+                    if (next.type === "Identifier" && isFunctionModifier(token.value)) {
                     
                         this.read();
                         this.pushContext(true);
@@ -900,14 +879,7 @@ export class Parser {
                 
                 return this.Identifier(true);
             
-            case "REGEX":
-                this.read();
-                
-                return new AST.RegularExpression(
-                    token.value, 
-                    token.regExpFlags, 
-                    token.start, 
-                    token.end);
+            case "RegularExpression": return this.readToken();
             
             case "null":
                 this.read();
@@ -928,60 +900,56 @@ export class Parser {
     
     Identifier(isVar) {
     
-        var token = this.readToken("IDENTIFIER"),
-            context = isVar ? "variable" : "",
-            node;
-            
-        node = new AST.Identifier(token.value, context, token.start, token.end);
-        this.checkIdentifier(node);
+        var node = this.readToken("Identifier");
         
+        if (isVar)
+            node.context = "variable";
+        
+        this.checkIdentifier(node);
         return node;
     }
     
     IdentifierName() {
     
-        var token = this.readToken("IDENTIFIER", "name");
-        return new AST.Identifier(token.value, "", token.start, token.end);
+        return this.readToken("Identifier", "name");
     }
     
     String() {
     
-        var token = this.readToken("STRING");
+        var token = this.readToken("String");
         
         // Ocatal escapes are not allowed in strict mode
-        if (token.strictError)
-            this.addStrictError(token.strictError, token);
-            
-        return new AST.String(token.value, token.start, token.end);
+        if (token.error)
+            this.addStrictError(null, token);
+        
+        return token;
     }
     
     Number() {
     
-        var token = this.readToken("NUMBER");
+        var token = this.readToken("Number");
         
         // Legacy ocatals are not allowed in strict mode
-        if (token.strictError)
-            this.addStrictError(token.strictError, token);
-            
-        return new AST.Number(token.number, token.start, token.end);
+        if (token.error)
+            this.addStrictError(null, token);
+        
+        return token;
     }
     
     Template() {
     
-        var token = this.readToken("TEMPLATE", "template");
+        var token = this.readToken("Template", "template");
         
         // Ocatal escapes are not allowed in strict mode
-        if (token.strictError)
-            this.addStrictError(token.strictError, token);
-            
-        return new AST.Template(token.value, token.templateEnd, token.start, token.end);
+        if (token.error)
+            this.addStrictError(null, token);
+        
+        return token;
     }
     
     BindingIdentifier() {
     
-        var token = this.readToken("IDENTIFIER", "name"),
-            node = new AST.Identifier(token.value, "", token.start, token.end);
-        
+        var node = this.readToken("Identifier", "name");
         this.checkBindingIdentifier(node);
         return node;
     }
@@ -1145,9 +1113,9 @@ export class Parser {
         
         switch (token.type) {
         
-            case "IDENTIFIER": return this.IdentifierName();
-            case "STRING": return this.String();
-            case "NUMBER": return this.Number();
+            case "Identifier": return this.IdentifierName();
+            case "String": return this.String();
+            case "Number": return this.Number();
             case "[": return this.ComputedPropertyName();
         }
         
@@ -1351,7 +1319,7 @@ export class Parser {
         
         switch (this.peek()) {
             
-            case "IDENTIFIER":
+            case "Identifier":
             
                 next = this.peekTokenAt("div", 1);
                 
@@ -1479,7 +1447,7 @@ export class Parser {
                 isConst = true;
                 break;
             
-            case "IDENTIFIER":
+            case "Identifier":
             
                 if (token.value === "let") {
                 
@@ -1671,7 +1639,7 @@ export class Parser {
                 init = this.VariableDeclaration(true);
                 break;
             
-            case "IDENTIFIER":
+            case "Identifier":
             
                 if (this.peekLet()) {
                 
@@ -1917,7 +1885,7 @@ export class Parser {
                 
                 break;
             
-            case "IDENTIFIER":
+            case "Identifier":
             
                 if (this.peekLet())
                     return this.LexicalDeclaration();
@@ -1952,7 +1920,7 @@ export class Parser {
         tok = this.peekToken();
         
         // TODO: We are not checking newline constraints here.  Should we?
-        if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
+        if (tok.type === "Identifier" && isFunctionModifier(tok.value)) {
         
             this.read();
             kind = tok.value;
@@ -1994,7 +1962,7 @@ export class Parser {
         
         tok = this.peekToken();
         
-        if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
+        if (tok.type === "Identifier" && isFunctionModifier(tok.value)) {
         
             this.read();
             kind = tok.value;
@@ -2198,7 +2166,7 @@ export class Parser {
     
     ModuleSpecifier() {
     
-        return this.peek() === "STRING" ? this.String() : this.ModulePath();
+        return this.peek() === "String" ? this.String() : this.ModulePath();
     }
     
     ImportDeclaration() {
@@ -2211,7 +2179,7 @@ export class Parser {
         
         switch (this.peek()) {
         
-            case "IDENTIFIER":
+            case "Identifier":
             
                 ident = this.BindingIdentifier();
                 this.readKeyword("from");
@@ -2220,7 +2188,7 @@ export class Parser {
                 
                 return new AST.ImportDefaultDeclaration(ident, from, start, this.endOffset);
             
-            case "STRING":
+            case "String":
             
                 from = this.ModuleSpecifier();
                 this.Semicolon();
@@ -2255,7 +2223,7 @@ export class Parser {
             local = null,
             remote;
         
-        if (this.peek() !== "IDENTIFIER") {
+        if (this.peek() !== "Identifier") {
         
             // Re-scan token as an identifier name
             this.unpeek();
@@ -2307,7 +2275,7 @@ export class Parser {
                 binding = this.ClassDeclaration();
                 break;
             
-            case "IDENTIFIER":
+            case "Identifier":
             
                 if (this.peekLet()) {
                 
@@ -2446,7 +2414,7 @@ export class Parser {
         
         this.read("class");
         
-        if (this.peek() === "IDENTIFIER")
+        if (this.peek() === "Identifier")
             ident = this.BindingIdentifier();
         
         if (this.peek() === "extends") {
@@ -2509,16 +2477,6 @@ export class Parser {
     
 }
 
-
-function mixin(source) {
-
-    source = source.prototype;
-    Object.keys(source).forEach(key => Parser.prototype[key] = source[key]);
-}
-
-// TODO:  Use Object.assign
-
 // Add externally defined methods
-mixin(Transform);
-mixin(Validate);
-
+Object.assign(Parser.prototype, Transform.prototype);
+Object.assign(Parser.prototype, Validate.prototype);

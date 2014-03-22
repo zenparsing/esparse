@@ -69,7 +69,8 @@ export class Validate {
     
         var ident = node.value;
         
-        // TODO:  Add a restriction for await in async functions?
+        // TODO: Add a restriction for await in async functions?
+        
         if (ident === "yield" && this.context.functionType === "generator")
             this.fail("yield cannot be an identifier inside of a generator function", node);
         else if (isStrictReserved(ident))
@@ -105,6 +106,10 @@ export class Validate {
             node,
             i;
         
+        // TODO: We need to check for duplicate names in some non-strict contexts
+        // as well (method definitions, arrow parameters, and maybe generator functions).
+        // How do these rules apply when parameters are patterns, though?
+        
         for (i = 0; i < params.length; ++i) {
         
             node = params[i];
@@ -124,6 +129,15 @@ export class Validate {
             names[key] = 1;
         }
     }
+    
+    // TODO: Add a method for validating the parameter list of arrow functions, which may
+    // contain identifiers or initializers which are not valid within the containing context.
+    
+    // TODO: For identifiers within an arrow function parameter list, we have
+    // to take into account the parent context.  For example, yield is not
+    // allowed as an identifier within the parameter list of an arrow function
+    // contained within a generator.  For "modified" arrow functions (e.g. 
+    // async arrows) we'll have to take the union of these restrictions.
     
     // Performs validation on the init portion of a for-in or for-of statement
     checkForInit(init, type) {
