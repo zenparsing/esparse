@@ -1,1 +1,0 @@
-== ECMAScript 6 Early Errors ==

@@ -4,10 +4,6 @@ export class Transform {
 
     // Transform an expression into a formal parameter list
     transformFormals(expr, rest) {
-    
-        // TODO: We need to fail if an initizlier contains stuff that's not allowed,
-        // like a yield expression or await expression.  We should probably take
-        // are of that within an 
         
         if (expr === null)
             return rest ? [rest] : [];

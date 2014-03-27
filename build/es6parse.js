@@ -1224,31 +1224,18 @@ this.es6now.async = function(iterable) {
 
 var AST_ = (function(exports) {
 
-// AST Node Constructors
 var AST = {
-
+    
     Node: function(type, start, end) {
 
+        this.type = type;
         this.start = start;
         this.end = end;
     },
-
-    Script: function(statements, start, end) {
     
-        this.start = start;
-        this.end = end;
-        this.statements = statements;
-    },
-
-    Module: function(statements, start, end) {
-
-        this.start = start;
-        this.end = end;
-        this.statements = statements;
-    },
-
     Identifier: function(value, context, start, end) {
 
+        this.type = "Identifier";
         this.start = start;
         this.end = end;
         this.value = value;
@@ -1257,6 +1244,7 @@ var AST = {
 
     Number: function(value, start, end) {
     
+        this.type = "Number";
         this.start = start;
         this.end = end;
         this.value = value;
@@ -1264,6 +1252,7 @@ var AST = {
 
     String: function(value, start, end) {
 
+        this.type = "String";
         this.start = start;
         this.end = end;
         this.value = value;
@@ -1271,6 +1260,7 @@ var AST = {
 
     Template: function(value, isEnd, start, end) {
     
+        this.type = "Template";
         this.start = start;
         this.end = end;
         this.value = value;
@@ -1279,39 +1269,61 @@ var AST = {
 
     RegularExpression: function(value, flags, start, end) {
     
+        this.type = "RegularExpression";
         this.start = start;
         this.end = end;
         this.value = value;
         this.flags = flags;
     },
 
-    Null: function(start, end) { 
-
-        this.start = start;
-        this.end = end;
-    },
-
     Boolean: function(value, start, end) {
     
+        this.type = "Boolean";
         this.start = start;
         this.end = end;
         this.value = value;
     },
+    
+    Null: function(start, end) { 
+
+        this.type = "Null";
+        this.start = start;
+        this.end = end;
+    },
+
+    Script: function(statements, start, end) {
+    
+        this.type = "Script";
+        this.start = start;
+        this.end = end;
+        this.statements = statements;
+    },
+
+    Module: function(statements, start, end) {
+
+        this.type = "Module";
+        this.start = start;
+        this.end = end;
+        this.statements = statements;
+    },
 
     ThisExpression: function(start, end) { 
 
+        this.type = "ThisExpression";
         this.start = start;
         this.end = end;
     },
 
     SuperExpression: function(start, end) { 
 
+        this.type = "SuperExpression";
         this.start = start;
         this.end = end;
     },
 
     SequenceExpression: function(list, start, end) {
 
+        this.type = "SequenceExpression";
         this.start = start;
         this.end = end;
         this.expressions = list;
@@ -1319,6 +1331,7 @@ var AST = {
 
     AssignmentExpression: function(op, left, right, start, end) {
     
+        this.type = "AssignmentExpression";
         this.start = start;
         this.end = end;
         this.operator = op;
@@ -1328,6 +1341,7 @@ var AST = {
 
     SpreadExpression: function(expr, start, end) {
     
+        this.type = "SpreadExpression";
         this.start = start;
         this.end = end;
         this.expression = expr;
@@ -1335,6 +1349,7 @@ var AST = {
 
     YieldExpression: function(expr, delegate, start, end) {
     
+        this.type = "YieldExpression";
         this.start = start;
         this.end = end;
         this.delegate = delegate;
@@ -1343,6 +1358,7 @@ var AST = {
 
     ConditionalExpression: function(test, cons, alt, start, end) {
     
+        this.type = "ConditionalExpression";
         this.start = start;
         this.end = end;
         this.test = test;
@@ -1352,6 +1368,7 @@ var AST = {
 
     BinaryExpression: function(op, left, right, start, end) {
     
+        this.type = "BinaryExpression";
         this.start = start;
         this.end = end;
         this.operator = op;
@@ -1361,6 +1378,7 @@ var AST = {
 
     UpdateExpression: function(op, expr, prefix, start, end) {
     
+        this.type = "UpdateExpression";
         this.start = start;
         this.end = end;
         this.operator = op;
@@ -1370,6 +1388,7 @@ var AST = {
 
     UnaryExpression: function(op, expr, start, end) {
     
+        this.type = "UnaryExpression";
         this.start = start;
         this.end = end;
         this.operator = op;
@@ -1378,6 +1397,7 @@ var AST = {
 
     MemberExpression: function(obj, prop, computed, start, end) {
     
+        this.type = "MemberExpression";
         this.start = start;
         this.end = end;
         this.object = obj;
@@ -1387,6 +1407,7 @@ var AST = {
 
     CallExpression: function(callee, args, start, end) {
     
+        this.type = "CallExpression";
         this.start = start;
         this.end = end;
         this.callee = callee;
@@ -1395,6 +1416,7 @@ var AST = {
 
     TaggedTemplateExpression: function(tag, template, start, end) {
     
+        this.type = "TaggedTemplateExpression";
         this.start = start;
         this.end = end;
         this.tag = tag;
@@ -1403,6 +1425,7 @@ var AST = {
 
     NewExpression: function(callee, args, start, end) {
     
+        this.type = "NewExpression";
         this.start = start;
         this.end = end;
         this.callee = callee;
@@ -1411,6 +1434,7 @@ var AST = {
 
     ParenExpression: function(expr, start, end) {
     
+        this.type = "ParenExpression";
         this.start = start;
         this.end = end;
         this.expression = expr;
@@ -1418,6 +1442,7 @@ var AST = {
 
     ObjectLiteral: function(props, start, end) {
     
+        this.type = "ObjectLiteral";
         this.start = start;
         this.end = end;
         this.properties = props;
@@ -1425,6 +1450,7 @@ var AST = {
 
     ComputedPropertyName: function(expr, start, end) {
     
+        this.type = "ComputedPropertyName";
         this.start = start;
         this.end = end;
         this.expression = expr;
@@ -1432,6 +1458,7 @@ var AST = {
 
     PropertyDefinition: function(name, expr, start, end) {
     
+        this.type = "PropertyDefinition";
         this.start = start;
         this.end = end;
         this.name = name;
@@ -1440,6 +1467,7 @@ var AST = {
 
     PatternProperty: function(name, pattern, initializer, start, end) {
     
+        this.type = "PatternProperty";
         this.start = start;
         this.end = end;
         this.name = name;
@@ -1449,6 +1477,7 @@ var AST = {
 
     PatternElement: function(pattern, initializer, rest, start, end) {
     
+        this.type = "PatternElement";
         this.start = start;
         this.end = end;
         this.pattern = pattern;
@@ -1458,6 +1487,7 @@ var AST = {
 
     MethodDefinition: function(kind, name, params, body, start, end) {
     
+        this.type = "MethodDefinition";
         this.start = start;
         this.end = end;
         this.kind = kind;
@@ -1468,6 +1498,7 @@ var AST = {
 
     ArrayLiteral: function(elements, start, end) {
     
+        this.type = "ArrayLiteral";
         this.start = start;
         this.end = end;
         this.elements = elements;
@@ -1475,6 +1506,7 @@ var AST = {
 
     ArrayComprehension: function(qualifiers, expr, start, end) {
     
+        this.type = "ArrayComprehension";
         this.start = start;
         this.end = end;
         this.qualifiers = qualifiers;
@@ -1483,6 +1515,7 @@ var AST = {
 
     GeneratorComprehension: function(qualifiers, expr, start, end) {
     
+        this.type = "GeneratorComprehension";
         this.start = start;
         this.end = end;
         this.qualifiers = qualifiers;
@@ -1491,6 +1524,7 @@ var AST = {
 
     ComprehensionFor: function(left, right, start, end) {
     
+        this.type = "ComprehensionFor";
         this.start = start;
         this.end = end;
         this.left = left;
@@ -1499,6 +1533,7 @@ var AST = {
 
     ComprehensionIf: function(test, start, end) {
     
+        this.type = "ComprehensionIf";
         this.start = start;
         this.end = end;
         this.test = test;
@@ -1506,6 +1541,7 @@ var AST = {
 
     TemplateExpression: function(lits, subs, start, end) {
     
+        this.type = "TemplateExpression";
         this.start = start;
         this.end = end;
         this.literals = lits;
@@ -1514,6 +1550,7 @@ var AST = {
 
     Block: function(statements, start, end) {
     
+        this.type = "Block";
         this.start = start;
         this.end = end;
         this.statements = statements;
@@ -1521,6 +1558,7 @@ var AST = {
 
     LabelledStatement: function(label, statement, start, end) {
     
+        this.type = "LabelledStatement";
         this.start = start;
         this.end = end;
         this.label = label;
@@ -1529,6 +1567,7 @@ var AST = {
 
     ExpressionStatement: function(expr, start, end) {
     
+        this.type = "ExpressionStatement";
         this.start = start;
         this.end = end;
         this.expression = expr;
@@ -1537,12 +1576,14 @@ var AST = {
 
     EmptyStatement: function(start, end) { 
 
+        this.type = "EmptyStatement";
         this.start = start;
         this.end = end;
     },
 
     VariableDeclaration: function(kind, list, start, end) {
     
+        this.type = "VariableDeclaration";
         this.start = start;
         this.end = end;
         this.kind = kind;
@@ -1551,6 +1592,7 @@ var AST = {
 
     VariableDeclarator: function(pattern, initializer, start, end) {
     
+        this.type = "VariableDeclarator";
         this.start = start;
         this.end = end;
         this.pattern = pattern;
@@ -1559,6 +1601,7 @@ var AST = {
 
     ReturnStatement: function(arg, start, end) {
     
+        this.type = "ReturnStatement";
         this.start = start;
         this.end = end;
         this.argument = arg;
@@ -1566,6 +1609,7 @@ var AST = {
 
     BreakStatement: function(label, start, end) {
     
+        this.type = "BreakStatement";
         this.start = start;
         this.end = end;
         this.label = label;
@@ -1573,6 +1617,7 @@ var AST = {
 
     ContinueStatement: function(label, start, end) {
     
+        this.type = "ContinueStatement";
         this.start = start;
         this.end = end;
         this.label = label;
@@ -1580,6 +1625,7 @@ var AST = {
 
     ThrowStatement: function(expr, start, end) {
     
+        this.type = "ThrowStatement";
         this.start = start;
         this.end = end;
         this.expression = expr;
@@ -1587,12 +1633,14 @@ var AST = {
 
     DebuggerStatement: function(start, end) {
     
+        this.type = "DebuggerStatement";
         this.start = start;
         this.end = end;
     },
 
     IfStatement: function(test, cons, alt, start, end) {
     
+        this.type = "IfStatement";
         this.start = start;
         this.end = end;
         this.test = test;
@@ -1602,6 +1650,7 @@ var AST = {
 
     DoWhileStatement: function(body, test, start, end) {
     
+        this.type = "DoWhileStatement";
         this.start = start;
         this.end = end;
         this.body = body;
@@ -1610,6 +1659,7 @@ var AST = {
 
     WhileStatement: function(test, body, start, end) {
     
+        this.type = "WhileStatement";
         this.start = start;
         this.end = end;
         this.test = test;
@@ -1618,6 +1668,7 @@ var AST = {
 
     ForStatement: function(initializer, test, update, body, start, end) {
     
+        this.type = "ForStatement";
         this.start = start;
         this.end = end;
         this.initializer = initializer;
@@ -1628,6 +1679,7 @@ var AST = {
 
     ForInStatement: function(left, right, body, start, end) {
     
+        this.type = "ForInStatement";
         this.start = start;
         this.end = end;
         this.left = left;
@@ -1637,6 +1689,7 @@ var AST = {
 
     ForOfStatement: function(left, right, body, start, end) {
     
+        this.type = "ForOfStatement";
         this.start = start;
         this.end = end;
         this.left = left;
@@ -1646,6 +1699,7 @@ var AST = {
 
     WithStatement: function(object, body, start, end) {
     
+        this.type = "WithStatement";
         this.start = start;
         this.end = end;
         this.object = object;
@@ -1654,6 +1708,7 @@ var AST = {
 
     SwitchStatement: function(desc, cases, start, end) {
     
+        this.type = "SwitchStatement";
         this.start = start;
         this.end = end;
         this.descriminant = desc;
@@ -1662,6 +1717,7 @@ var AST = {
 
     SwitchCase: function(test, cons, start, end) {
     
+        this.type = "SwitchCase";
         this.start = start;
         this.end = end;
         this.test = test;
@@ -1670,6 +1726,7 @@ var AST = {
 
     TryStatement: function(block, handler, fin, start, end) {
     
+        this.type = "TryStatement";
         this.start = start;
         this.end = end;
         this.block = block;
@@ -1679,6 +1736,7 @@ var AST = {
 
     CatchClause: function(param, body, start, end) {
     
+        this.type = "CatchClause";
         this.start = start;
         this.end = end;
         this.param = param;
@@ -1687,6 +1745,7 @@ var AST = {
 
     FunctionDeclaration: function(kind, identifier, params, body, start, end) {
     
+        this.type = "FunctionDeclaration";
         this.start = start;
         this.end = end;
         this.kind = kind;
@@ -1697,6 +1756,7 @@ var AST = {
 
     FunctionExpression: function(kind, identifier, params, body, start, end) {
     
+        this.type = "FunctionExpression";
         this.start = start;
         this.end = end;
         this.kind = kind;
@@ -1707,6 +1767,7 @@ var AST = {
 
     FormalParameter: function(pattern, initializer, start, end) {
     
+        this.type = "FormalParameter";
         this.start = start;
         this.end = end;
         this.pattern = pattern;
@@ -1715,6 +1776,7 @@ var AST = {
 
     RestParameter: function(identifier, start, end) {
     
+        this.type = "RestParameter";
         this.start = start;
         this.end = end;
         this.identifier = identifier;
@@ -1722,6 +1784,7 @@ var AST = {
 
     FunctionBody: function(statements, start, end) {
     
+        this.type = "FunctionBody";
         this.start = start;
         this.end = end;
         this.statements = statements;
@@ -1729,6 +1792,7 @@ var AST = {
 
     ArrowFunctionHead: function(params, start, end) {
     
+        this.type = "ArrowFunctionHead";
         this.start = start;
         this.end = end;
         this.parameters = params;
@@ -1736,6 +1800,7 @@ var AST = {
 
     ArrowFunction: function(kind, params, body, start, end) {
     
+        this.type = "ArrowFunction";
         this.start = start;
         this.end = end;
         this.kind = kind;
@@ -1745,6 +1810,7 @@ var AST = {
 
     ModuleDeclaration: function(identifier, body, start, end) {
     
+        this.type = "ModuleDeclaration";
         this.start = start;
         this.end = end;
         this.identifier = identifier;
@@ -1753,6 +1819,7 @@ var AST = {
 
     ModuleBody: function(statements, start, end) {
     
+        this.type = "ModuleBody";
         this.start = start;
         this.end = end;
         this.statements = statements;
@@ -1760,6 +1827,7 @@ var AST = {
 
     ModuleImport: function(identifier, from, start, end) {
     
+        this.type = "ModuleImport";
         this.start = start;
         this.end = end;
         this.identifier = identifier;
@@ -1768,6 +1836,7 @@ var AST = {
 
     ModuleAlias: function(identifier, path, start, end) {
     
+        this.type = "ModuleAlias";
         this.start = start;
         this.end = end;
         this.identifier = identifier;
@@ -1776,6 +1845,7 @@ var AST = {
 
     ImportDefaultDeclaration: function(ident, from, start, end) {
     
+        this.type = "ImportDefaultDeclaration";
         this.start = start;
         this.end = end;
         this.identifier = ident;
@@ -1784,6 +1854,7 @@ var AST = {
 
     ImportDeclaration: function(specifiers, from, start, end) {
     
+        this.type = "ImportDeclaration";
         this.start = start;
         this.end = end;
         this.specifiers = specifiers;
@@ -1792,6 +1863,7 @@ var AST = {
 
     ImportSpecifier: function(remote, local, start, end) {
     
+        this.type = "ImportSpecifier";
         this.start = start;
         this.end = end;
         this.remote = remote;
@@ -1800,6 +1872,7 @@ var AST = {
 
     ExportDeclaration: function(binding, start, end) {
     
+        this.type = "ExportDeclaration";
         this.start = start;
         this.end = end;
         this.binding = binding;
@@ -1807,6 +1880,7 @@ var AST = {
 
     ExportsList: function(list, from, start, end) {
     
+        this.type = "ExportsList";
         this.start = start;
         this.end = end;
         this.specifiers = list;
@@ -1815,6 +1889,7 @@ var AST = {
 
     ExportSpecifier: function(local, remote, start, end) {
     
+        this.type = "ExportSpecifier";
         this.start = start;
         this.end = end;
         this.local = local;
@@ -1823,6 +1898,7 @@ var AST = {
 
     ModulePath: function(list, start, end) {
     
+        this.type = "ModulePath";
         this.start = start;
         this.end = end;
         this.elements = list;
@@ -1830,6 +1906,7 @@ var AST = {
 
     ClassDeclaration: function(identifier, base, body, start, end) {
     
+        this.type = "ClassDeclaration";
         this.start = start;
         this.end = end;
         this.identifier = identifier;
@@ -1839,6 +1916,7 @@ var AST = {
 
     ClassExpression: function(identifier, base, body, start, end) {
     
+        this.type = "ClassExpression";
         this.start = start;
         this.end = end;
         this.identifier = identifier;
@@ -1848,6 +1926,7 @@ var AST = {
 
     ClassBody: function(elems, start, end) {
     
+        this.type = "ClassBody";
         this.start = start;
         this.end = end;
         this.elements = elems;
@@ -1855,6 +1934,7 @@ var AST = {
 
     ClassElement: function(isStatic, method, start, end) {
     
+        this.type = "ClassElement";
         this.start = start;
         this.end = end;
         this.static = isStatic;
@@ -1863,62 +1943,36 @@ var AST = {
 
 };
 
-// Returns a function for defining object properties
-function define(obj, name, value, enumerable) {
+function isNode(x) {
 
-    function d(name, value, enumerable) {
-    
-        Object.defineProperty(obj, name, { value: value, enumerable: enumerable, configurable: true, writable: true });
-        return d;
-    };
-    
-    return d;
+    return x !== null && typeof x === "object" && typeof x.type === "string";
 }
 
-// Executes a callback for every child of "this"
-function forEachChild(fn) {
+var NodeBase = es6now.Class(function(__super) { return {
 
-    var keys = Object.keys(this), val, i, j;
-
-    for (i = 0; i < keys.length; ++i) {
-
-        // Don't iterate over backlink to parent
-        if (keys[i] === "parentNode")
-            continue;
+    children: function() { var __this = this;
     
-        val = this[keys[i]];
+        var list = [];
+        
+        Object.keys(this).forEach((function(k) {
+        
+            // Don't iterate over backlinks to parent node
+            if (k === "parent")
+                return;
+            
+            var value = __this[k];
+            
+            if (Array.isArray(value))
+                value.forEach((function(x) { if (isNode(x)) list.push(x) }));
+            else if (isNode(value))
+                list.push(value);
+        }));
+        
+        return list;
+    }, constructor: function NodeBase() {}
+} });
 
-        // Skip non-objects and functions
-        if (!val || typeof val !== "object") 
-            continue;
-
-        if (typeof val.type === "string") {
-
-            // Nodes have a "type" property
-            fn(val);
-
-        } else {
-
-            // Iterate arrays
-            for (j = 0; j < (val.length >>> 0); ++j)
-                if (val[j] && typeof val[j].type === "string")
-                    fn(val[j]);
-        }
-    }
-}
-
-// Assign a prototype for each constructor
-Object.keys(AST).forEach((function(name) {
-
-    var fn = AST[name];
-    
-    define(fn.prototype = Object.create(null))
-    ("constructor", fn, false)
-    ("type", name, true)
-    ("error", "", false)
-    ("parentNode", null, false)
-    ("forEachChild", forEachChild, false);
-}));
+Object.keys(AST).forEach((function(k) { return AST[k].prototype = NodeBase.prototype; }));
 
 
 exports.AST = AST; return exports; }).call(this, {});
@@ -1953,19 +2007,20 @@ var multiCharPunctuator = new RegExp("^(?:" +
     "[-+&|<>!=*&\^%\/]=" +
 ")$");
 
-var ASSIGNMENT = 1,
-    UNARY = 2,
-    INCREMENT = 4;
-
 // === Miscellaneous Patterns ===
 var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
     blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
     hexChar = /[0-9a-f]/i;
 
-// === Character Type Lookup Table ===
-var charTable = ((function($) {
+// === Character type lookup table ===
+function makeCharTable() {
 
-    var charTable = new Array(128);
+    var table = [],
+        i;
+    
+    for (i = 0; i < 128; ++i) table[i] = "";
+    for (i = 65; i <= 90; ++i) table[i] = "identifier";
+    for (i = 97; i <= 122; ++i) table[i] = "identifier";
     
     add("whitespace", "\t\v\f ");
     add("newline", "\r\n");
@@ -1980,19 +2035,15 @@ var charTable = ((function($) {
     add("template", "`");
     add("identifier", "$_\\");
     
-    var i;
-    
-    for (i = 65; i <= 90; ++i) charTable[i] = "identifier";
-    for (i = 97; i <= 122; ++i) charTable[i] = "identifier";
-    
-    return charTable;
+    return table;
     
     function add(type, string) {
     
-        string.split("").forEach((function(c) { return charTable[c.charCodeAt(0)] = type; }));
+        string.split("").forEach((function(c) { return table[c.charCodeAt(0)] = type; }));
     }
-    
-}))();
+}
+
+var charTable = makeCharTable();
 
 // Performs a binary search on an array
 function binarySearch(array, val) {
@@ -2007,9 +2058,11 @@ function binarySearch(array, val) {
         mid = (left + right) >> 1;
         test = array[mid];
         
-        if (val > test) left = mid + 1;
-        else if (val < test) right = mid - 1;
-        else return mid;
+        if (val === test)
+            return mid;
+        
+        if (val < test) right = mid - 1;
+        else left = mid + 1;
     }
     
     return left;
@@ -2018,18 +2071,21 @@ function binarySearch(array, val) {
 // Returns true if the character is a valid identifier part
 function isIdentifierPart(c) {
 
-    if (c === void 0)
-        return false;
+    if (c > 123)
+        return isIdentifierPartUnicode(c);
     
-    var code = c.charCodeAt(0);
-    
-    return  code > 64 && code < 91 || 
-            code > 96 && code < 123 ||
-            code > 47 && code < 58 ||
-            code === 36 ||
-            code === 95 ||
-            code === 92 ||
-            code > 123 && identifierPart.test(c);
+    return  c > 64 && c < 91 || 
+            c > 96 && c < 123 ||
+            c > 47 && c < 58 ||
+            c === 36 ||
+            c === 95 ||
+            c === 92;
+}
+
+// Returns true if the character is a valid identifier part
+function isIdentifierPartUnicode(c) {
+
+    return identifierPart.test(String.fromCharCode(c));
 }
 
 // Returns true if the specified character is a newline
@@ -2069,20 +2125,23 @@ function isPunctuatorNext(c) {
 // Returns true if the specified character is a valid numeric following character
 function isNumberFollow(c) {
 
-    if (c === void 0)
-        return true;
-    
-    var code = c.charCodeAt(0);
+    if (c > 123)
+        return isNumberFollowUnicode(c);
     
     return !(
-        code > 64 && code < 91 || 
-        code > 96 && code < 123 ||
-        code > 47 && code < 58 ||
-        code === 36 ||
-        code === 95 ||
-        code === 92 ||
-        code > 123 && identifierStart.test(c)
+        c > 64 && c < 91 || 
+        c > 96 && c < 123 ||
+        c > 47 && c < 58 ||
+        c === 36 ||
+        c === 95 ||
+        c === 92
     );
+}
+
+// Returns true if the specified character is a valid numeric following character
+function isNumberFollowUnicode(c) {
+
+    return identifierStart.test(String.fromCharCode(c));
 }
 
 var Scanner = es6now.Class(function(__super) { return {
@@ -2090,20 +2149,24 @@ var Scanner = es6now.Class(function(__super) { return {
     constructor: function Scanner(input, offset) {
 
         this.input = input || "";
-        this.offset = offset || 0;
+        this.offset = offset | 0;
         this.length = this.input.length;
         this.lines = [-1];
         this.lastLineBreak = -1;
         
-        this.type = "";
-        this.start = 0;
-        this.end = 0;
         this.value = "";
         this.number = 0;
+        this.regexFlags = "";
         this.templateEnd = false;
-        this.regExpFlags = null;
         this.newlineBefore = false;
         this.strictError = "";
+        this.start = 0;
+        this.end = 0;
+    },
+    
+    skip: function() {
+        
+        return this.next("skip");
     },
     
     next: function(context) {
@@ -2112,55 +2175,40 @@ var Scanner = es6now.Class(function(__super) { return {
             this.newlineBefore = false;
         
         this.strictError = "";
-        this.value = null;
         
-        var type = null, 
-            start;
+        do {
         
-        while (type === null) {
+            this.start = this.offset;
+            
+            this.type = 
+                this.start >= this.length ? this.EOF() : 
+                context === "skip" ? this.Skip() :
+                this.Start(context);
         
-            start = this.offset;
-            type = start >= this.length ? "EOF" : this.Start(context);
-        }
+        } while (!this.type);
         
-        this.type = type;
-        this.start = start;
         this.end = this.offset;
         
-        return type;
+        return this.type;
     },
     
     raw: function(token) {
     
-        token || (token = this);
-        return this.input.slice(this.start, this.end);
+        return this.input.slice(token.start, token.end);
     },
     
     lineNumber: function(offset) {
     
-        if (Number(offset) !== offset)
-            offset = (offset || this).start;
-        
         return binarySearch(this.lines, offset);
     },
     
-    position: function(token) {
+    position: function(offset) {
     
-        token || (token = this);
-        
-        var offset = token.start,
-            line = this.lineNumber(offset),
+        var line = this.lineNumber(offset),
             pos = this.lines[line - 1],
             column = offset - pos;
         
-        return { 
-        
-            line: line, 
-            column: column,
-            startOffset: offset, 
-            endOffset: token.end,
-            lineOffset: pos + 1
-        };
+        return { line: line, column: column, lineOffset: pos + 1 };
     },
     
     addLineBreak: function(offset) {
@@ -2169,27 +2217,52 @@ var Scanner = es6now.Class(function(__super) { return {
             this.lines.push(this.lastLineBreak = offset);
     },
     
+    peekChar: function() {
+    
+        return this.input.charAt(this.offset);
+    },
+    
+    peekCharAt: function(n) {
+    
+        return this.input.charAt(this.offset + n);
+    },
+    
+    peekCode: function() {
+    
+        return this.input.charCodeAt(this.offset) | 0;
+    },
+    
+    peekCodeAt: function(n) {
+    
+        return this.input.charCodeAt(this.offset + n) | 0;
+    },
+    
+    readChar: function() {
+    
+        return this.input.charAt(this.offset++);
+    },
+    
     readIdentifierEscape: function() {
     
-        if (this.input[this.offset++] !== "u")
-            return null;
+        if (this.readChar() !== "u")
+            return "";
         
-        var hex;
+        var hex = "";
         
-        if (this.input[this.offset] === "{") {
+        if (this.peekChar() === "{") {
         
             this.offset++;
             hex = this.readHex(0);
             
-            if (this.input[this.offset++] !== "}")
-                return null;
+            if (this.readChar() !== "}")
+                return "";
         
         } else {
         
             hex = this.readHex(4);
         
             if (hex.length < 4)
-                return null;
+                return "";
         }
         
         return String.fromCharCode(parseInt(hex, 16));
@@ -2209,9 +2282,10 @@ var Scanner = es6now.Class(function(__super) { return {
     
         this.offset++;
         
-        var chr, esc;
+        var chr = "", 
+            esc = "";
         
-        switch (chr = this.input[this.offset++]) {
+        switch (chr = this.readChar()) {
         
             case "t": return "\t";
             case "b": return "\b";
@@ -2224,7 +2298,7 @@ var Scanner = es6now.Class(function(__super) { return {
             
                 this.addLineBreak(this.offset - 1);
                 
-                if (this.input[this.offset] === "\n")
+                if (this.peekChar() === "\n")
                     this.offset++;
                 
                 return "";
@@ -2265,12 +2339,12 @@ var Scanner = es6now.Class(function(__super) { return {
             
             case "u":
             
-                if (this.input[this.offset] === "{") {
+                if (this.peekChar() === "{") {
                 
                     this.offset++;
                     esc = this.readHex(0);
                     
-                    if (this.input[this.offset++] !== "}")
+                    if (this.readChar() !== "}")
                         return null;
                     
                 } else {
@@ -2290,9 +2364,9 @@ var Scanner = es6now.Class(function(__super) { return {
     readRange: function(low, high) {
     
         var start = this.offset,
-            code;
+            code = 0;
         
-        while (code = this.input.charCodeAt(this.offset)) {
+        while (code = this.peekCode()) {
         
             if (code >= low && code <= high) this.offset++;
             else break;
@@ -2304,9 +2378,9 @@ var Scanner = es6now.Class(function(__super) { return {
     readInteger: function() {
     
         var start = this.offset,
-            code;
+            code = 0;
         
-        while (code = this.input.charCodeAt(this.offset)) {
+        while (code = this.peekCode()) {
         
             if (code >= 48 && code <= 57) this.offset++;
             else break;
@@ -2318,9 +2392,9 @@ var Scanner = es6now.Class(function(__super) { return {
     readHex: function(maxLen) {
         
         var str = "", 
-            chr;
+            chr = "";
         
-        while (chr = this.input[this.offset]) {
+        while (chr = this.peekChar()) {
         
             if (!hexChar.test(chr))
                 break;
@@ -2335,73 +2409,102 @@ var Scanner = es6now.Class(function(__super) { return {
         return str;
     },
     
+    Skip: function() {
+    
+        var code = this.peekCode();
+        
+        if (code < 128) {
+        
+            switch (charTable[code]) {
+        
+                case "whitespace": return this.Whitespace(code);
+            
+                case "newline": return this.Newline(code);
+            
+                case "slash":
+            
+                    var next = this.peekCodeAt(1);
+
+                    if (next === 47) return this.LineComment(code);       // /
+                    else if (next === 42) return this.BlockComment(code); // *
+            }
+        
+        } else {
+        
+            var chr = this.peekChar();
+        
+            // Unicode newlines
+            if (isNewlineChar(chr))
+                return this.Newline(code);
+        
+            // Unicode whitespace
+            if (whitespaceChars.test(chr))
+                return this.UnicodeWhitespace(code);
+        }
+        
+        return "UNKNOWN";
+    },
+    
     Start: function(context) {
     
-        var code = this.input.charCodeAt(this.offset),
-            next;
-        
-        if (code === 32)
-            return this.Whitespace(code);
+        var code = this.peekCode(), 
+            next = 0;
         
         switch (charTable[code]) {
         
-            case "punctuator-char": return this.PunctuatorChar(code);
+            case "punctuator-char": return this.PunctuatorChar();
             
-            case "whitespace": return this.Whitespace(code);
+            case "whitespace": return this.Whitespace();
             
-            case "identifier": 
-            
-                return context === "name" ? 
-                    this.IdentifierName(code) : 
-                    this.Identifier(code);
+            case "identifier": return this.Identifier(context);
             
             case "lbrace":
             
-                if (context === "template") return this.Template(code);
-                else return this.PunctuatorChar(code);
+                if (context === "template") return this.Template();
+                else return this.PunctuatorChar();
             
-            case "punctuator": return this.Punctuator(code);
+            case "punctuator": return this.Punctuator();
             
             case "newline": return this.Newline(code);
             
-            case "decimal-digit": return this.Number(code);
+            case "decimal-digit": return this.Number();
             
-            case "template": return this.Template(code);
+            case "template": return this.Template();
             
-            case "string": return this.String(code);
+            case "string": return this.String();
             
             case "zero": 
             
-                switch (next = this.input.charCodeAt(this.offset + 1)) {
+                switch (next = this.peekCodeAt(1)) {
                 
-                    case 88: case 120: return this.HexNumber(code);   // x
-                    case 66: case 98: return this.BinaryNumber(code); // b
-                    case 79: case 111: return this.OctalNumber(code); // o
+                    case 88: case 120: return this.HexNumber();   // x
+                    case 66: case 98: return this.BinaryNumber(); // b
+                    case 79: case 111: return this.OctalNumber(); // o
                 }
                 
                 return next >= 48 && next <= 55 ?
-                    this.LegacyOctalNumber(code) :
-                    this.Number(code);
+                    this.LegacyOctalNumber() :
+                    this.Number();
             
             case "dot": 
             
-                next = this.input.charCodeAt(this.offset + 1);
+                next = this.peekCodeAt(1);
                 
-                if (next >= 48 && next <= 57) return this.Number(code);
-                else return this.Punctuator(code);
+                if (next >= 48 && next <= 57) return this.Number();
+                else return this.Punctuator();
             
             case "slash":
             
-                next = this.input.charCodeAt(this.offset + 1);
+                next = this.peekCodeAt(1);
 
-                if (next === 47) return this.LineComment(code);       // /
-                else if (next === 42) return this.BlockComment(code); // *
-                else if (context === "div") return this.Punctuator(code);
-                else return this.RegularExpression(code);
+                if (next === 47) return this.LineComment();       // /
+                else if (next === 42) return this.BlockComment(); // *
+                else if (context === "div") return this.Punctuator();
+                else return this.RegularExpression();
             
         }
         
-        var chr = this.input[this.offset];
+        var chr = this.peekChar();
         
         // Unicode newlines
         if (isNewlineChar(chr))
@@ -2409,20 +2512,22 @@ var Scanner = es6now.Class(function(__super) { return {
         
         // Unicode whitespace
         if (whitespaceChars.test(chr))
-            return this.UnicodeWhitespace(code);
+            return this.UnicodeWhitespace();
         
         // Unicode identifier chars
         if (identifierStart.test(chr))
-            return context === "name" ? this.IdentifierName(code) : this.Identifier(code);
+            return this.Identifier(context);
         
         return this.Error();
     },
     
-    Whitespace: function(code) {
+    Whitespace: function() {
     
         this.offset++;
         
-        while (code = this.input.charCodeAt(this.offset)) {
+        var code = 0;
+        
+        while (code = this.peekCode()) {
         
             // ASCII Whitespace:  [\t] [\v] [\f] [ ] 
             if (code === 9 || code === 11 || code === 12 || code === 32)
@@ -2431,7 +2536,7 @@ var Scanner = es6now.Class(function(__super) { return {
                 break;
         }
         
-        return null;
+        return "";
     },
     
     UnicodeWhitespace: function() {
@@ -2439,10 +2544,10 @@ var Scanner = es6now.Class(function(__super) { return {
         this.offset++;
         
         // General unicode whitespace
-        while (whitespaceChars.test(this.input[this.offset]))
+        while (whitespaceChars.test(this.peekChar()))
             this.offset++;
         
-        return null;
+        return "";
     },
     
     Newline: function(code) {
@@ -2450,27 +2555,27 @@ var Scanner = es6now.Class(function(__super) { return {
         this.addLineBreak(this.offset++);
         
         // Treat /r/n as a single newline
-        if (code === 13 && this.input.charCodeAt(this.offset) === 10)
+        if (code === 13 && this.peekCode() === 10)
             this.offset++;
         
         this.newlineBefore = true;
         
-        return null;
+        return "";
     },
     
     PunctuatorChar: function() {
     
-        return this.input[this.offset++];
+        return this.readChar();
     },
     
     Punctuator: function() {
         
-        var op = this.input[this.offset++], 
-            chr,
-            next;
+        var op = this.readChar(), 
+            chr = "",
+            next = "";
         
         while (
-            isPunctuatorNext(chr = this.input[this.offset]) &&
+            isPunctuatorNext(chr = this.peekChar()) &&
             multiCharPunctuator.test(next = op + chr)) {
     
             this.offset++;
@@ -2489,13 +2594,13 @@ var Scanner = es6now.Class(function(__super) { return {
     
     Template: function() {
     
-        var first = this.input[this.offset++],
+        var first = this.readChar(),
             end = false, 
             val = "", 
-            esc,
-            chr;
+            esc = "",
+            chr = "";
         
-        while (chr = this.input[this.offset]) {
+        while (chr = this.peekChar()) {
             
             if (chr === "`") {
             
@@ -2503,7 +2608,7 @@ var Scanner = es6now.Class(function(__super) { return {
                 break;
             }
             
-            if (chr === "$" && this.input[this.offset + 1] === "{") {
+            if (chr === "$" && this.peekCharAt(1) === "{") {
             
                 this.offset++;
                 break;
@@ -2529,7 +2634,6 @@ var Scanner = es6now.Class(function(__super) { return {
             return this.Error();
         
         this.offset++;
-        
         this.value = val;
         this.templateEnd = end;
         
@@ -2538,10 +2642,10 @@ var Scanner = es6now.Class(function(__super) { return {
     
     String: function() {
     
-        var delim = this.input[this.offset++],
+        var delim = this.readChar(),
             val = "",
-            esc,
-            chr;
+            esc = "",
+            chr = "";
         
         while (chr = this.input[this.offset]) {
         
@@ -2584,9 +2688,9 @@ var Scanner = es6now.Class(function(__super) { return {
             inClass = false,
             flags = null,
             val = "", 
-            chr;
+            chr = "";
         
-        while (chr = this.input[this.offset++]) {
+        while (chr = this.readChar()) {
         
             if (isNewlineChar(chr))
                 return this.Error();
@@ -2623,11 +2727,11 @@ var Scanner = es6now.Class(function(__super) { return {
         if (!chr)
             return this.Error();
         
-        if (isIdentifierPart(this.input[this.offset]))
-            flags = this.IdentifierName().value;
+        if (isIdentifierPart(this.peekCode()))
+            flags = this.Identifier("name");
         
         this.value = val;
-        this.regExpFlags = flags;
+        this.regexFlags = flags;
         
         return "REGEX";
     },
@@ -2637,9 +2741,9 @@ var Scanner = es6now.Class(function(__super) { return {
         this.offset++;
         
         var start = this.offset,
-            code;
+            code = 0;
         
-        while (code = this.input.charCodeAt(this.offset)) {
+        while (code = this.peekCode()) {
         
             if (code >= 48 && code <= 55)
                 this.offset++;
@@ -2648,31 +2752,36 @@ var Scanner = es6now.Class(function(__super) { return {
         }
         
         this.strictError = "Octal literals are not allowed in strict mode";
-        this.number = parseInt(this.input.slice(start, this.offset), 8);
         
-        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+        var val = parseInt(this.input.slice(start, this.offset), 8);
+        
+        if (!isNumberFollow(this.peekCode()))
+            return this.Error();
+        
+        this.number = val;
+        
+        return "NUMBER";
     },
     
     Number: function() {
     
         var start = this.offset,
-            next;
+            next = "";
         
         this.readInteger();
         
-        if (this.input[this.offset] === ".") {
+        if ((next = this.peekChar()) === ".") {
         
             this.offset++;
             this.readInteger();
+            next = this.peekChar();
         }
-        
-        next = this.input[this.offset];
         
         if (next === "e" || next === "E") {
         
             this.offset++;
             
-            next = this.input[this.offset];
+            next = this.peekChar();
             
             if (next === "+" || next === "-")
                 this.offset++;
@@ -2681,45 +2790,68 @@ var Scanner = es6now.Class(function(__super) { return {
                 return this.Error();
         }
         
-        this.number = parseFloat(this.input.slice(start, this.offset));
+        var val = parseFloat(this.input.slice(start, this.offset));
         
-        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+        if (!isNumberFollow(this.peekCode()))
+            return this.Error();
+        
+        this.number = val;
+        
+        return "NUMBER";
     },
     
     BinaryNumber: function() {
     
         this.offset += 2;
-        this.number = parseInt(this.readRange(48, 49), 2);
         
-        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+        var val = parseInt(this.readRange(48, 49), 2);
+        
+        if (!isNumberFollow(this.peekCode()))
+            return this.Error();
+        
+        this.number = val;
+        
+        return "NUMBER";
     },
     
     OctalNumber: function() {
     
         this.offset += 2;
-        this.number = parseInt(this.readRange(48, 55), 8);
         
-        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+        var val = parseInt(this.readRange(48, 55), 8);
+        
+        if (!isNumberFollow(this.peekCode()))
+            return this.Error();
+        
+        this.number = val;
+        
+        return "NUMBER";
     },
     
     HexNumber: function() {
     
         this.offset += 2;
-        this.number = parseInt(this.readHex(0), 16);
         
-        return isNumberFollow(this.input[this.offset]) ? "NUMBER" : this.Error();
+        var val = parseInt(this.readHex(0), 16);
+        
+        if (!isNumberFollow(this.peekCode()))
+            return this.Error();
+        
+        this.number = val;
+        
+        return "NUMBER";
     },
     
-    Identifier: function() {
+    Identifier: function(context) {
     
         var start = this.offset,
             id = "",
-            chr,
-            esc;
+            code = 0,
+            esc = "";
 
-        while (isIdentifierPart(chr = this.input[this.offset])) {
+        while (isIdentifierPart(code = this.peekCode())) {
         
-            if (chr === "\\") {
+            if (code === 92 /* backslash */) {
             
                 id += this.input.slice(start, this.offset++);
                 esc = this.readIdentifierEscape();
@@ -2738,41 +2870,10 @@ var Scanner = es6now.Class(function(__super) { return {
         
         id += this.input.slice(start, this.offset);
         
-        if (reservedWord.test(id))
+        if (context !== "name" && reservedWord.test(id))
             return id;
         
         this.value = id;
-        
-        return "IDENTIFIER";
-    },
-    
-    IdentifierName: function() {
-    
-        var start = this.offset,
-            id = "",
-            chr,
-            esc;
-
-        while (isIdentifierPart(chr = this.input[this.offset])) {
-        
-            if (chr === "\\") {
-            
-                id += this.input.slice(start, this.offset++);
-                esc = this.readIdentifierEscape();
-                
-                if (esc === null)
-                    return this.Error();
-                
-                id += esc;
-                start = this.offset;
-                
-            } else {
-            
-                this.offset++;
-            }
-        }
-        
-        this.value = id + this.input.slice(start, this.offset);
         
         return "IDENTIFIER";
     },
@@ -2782,9 +2883,9 @@ var Scanner = es6now.Class(function(__super) { return {
         this.offset += 2;
         
         var start = this.offset,
-            chr;
+            chr = "";
         
-        while (chr = this.input[this.offset]) {
+        while (chr = this.peekChar()) {
         
             if (isNewlineChar(chr))
                 break;
@@ -2803,7 +2904,7 @@ var Scanner = es6now.Class(function(__super) { return {
         
         var pattern = blockCommentPattern,
             start = this.offset,
-            m;
+            m = null;
         
         while (true) {
         
@@ -2826,7 +2927,12 @@ var Scanner = es6now.Class(function(__super) { return {
         return "COMMENT";
     },
     
-    Error: function(msg) {
+    EOF: function() {
+    
+        return "EOF";
+    },
+    
+    Error: function() {
     
         this.offset++;
         return "ILLEGAL";
@@ -2845,11 +2951,6 @@ var Transform = es6now.Class(function(__super) { return {
 
     // Transform an expression into a formal parameter list
     transformFormals: function(expr, rest) {
-    
-        // TODO: We need to throw if an initizlier contains stuff that's not allowed,
-        // like a yield expression or await expression.
-        
-        // TODO: Do we transform empty yield expressions into identifiers [(yield) => 0]
         
         if (expr === null)
             return rest ? [rest] : [];
@@ -3063,6 +3164,21 @@ function isPoisonIdent(name) {
     return name === "eval" || name === "arguments";
 }
 
+// Returns true if the specified name type is a duplicate for a given set of flags
+function isDuplicateName(type, flags, strict) {
+
+    if (!flags)
+        return false;
+    
+    switch (type) {
+    
+        case PROP_DATA: return strict || flags !== PROP_DATA;
+        case PROP_GET: return flags !== PROP_SET;
+        case PROP_SET: return flags !== PROP_GET;
+        default: return !!flags;
+    }
+}
+
 var Validate = es6now.Class(function(__super) { return {
 
     // Checks an assignment target for strict mode restrictions
@@ -3105,7 +3221,8 @@ var Validate = es6now.Class(function(__super) { return {
     
         var ident = node.value;
         
-        // TODO:  Add a restriction for await in async functions?
+        // TODO: Add a restriction for await in async functions?
+        
         if (ident === "yield" && this.context.functionType === "generator")
             this.fail("yield cannot be an identifier inside of a generator function", node);
         else if (isStrictReserved(ident))
@@ -3141,6 +3258,15 @@ var Validate = es6now.Class(function(__super) { return {
             node,
             i;
         
+        // TODO: We need to check for duplicate names in some non-strict contexts
+        // as well (method definitions, arrow parameters, and maybe generator functions).
+        // How do these rules apply when parameters are patterns, though?
+        
+        // I think (the early errors portion of the spec is very hard to understand)
+        // that you have to force strict-like validation in the following cases:
+        // method definitions, functions and generators using new parameter list 
+        // features (patterns, initializers, or rest), and arrow functions.
+        
         for (i = 0; i < params.length; ++i) {
         
             node = params[i];
@@ -3159,6 +3285,21 @@ var Validate = es6now.Class(function(__super) { return {
             
             names[key] = 1;
         }
+    },
+    
+    // TODO: Add a method for validating the parameter list of arrow functions, which may
+    // contain identifiers or initializers which are not valid within the containing context.
+    
+    // TODO: For identifiers within an arrow function parameter list, we have
+    // to take into account the parent context.  For example, yield is not
+    // allowed as an identifier within the parameter list of an arrow function
+    // contained within a generator.  For "modified" arrow functions (e.g. 
+    // async arrows) we'll have to take the union of these restrictions.
+    
+    // Performs validation on transformed arrow formal parameters
+    checkArrowParameters: function(params) {
+    
+        this.checkParameters(params);
     },
     
     // Performs validation on the init portion of a for-in or for-of statement
@@ -3214,10 +3355,10 @@ var Validate = es6now.Class(function(__super) { return {
         // Check for duplicate names
         name = mapKey(node.name.value);
 
-        if (this.isDuplicateName(flag, nameSet[name], false))
-            this.addInvalidNode("Duplicate property names in object literal not allowed", node, false);
-        else if (this.isDuplicateName(flag, nameSet[name], true))
-            this.addInvalidNode("Duplicate data property names in object literal not allowed in strict mode", node, true);
+        if (isDuplicateName(flag, nameSet[name], false))
+            this.addInvalidNode("Duplicate property names in object literal not allowed", node);
+        else if (isDuplicateName(flag, nameSet[name], true))
+            this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
 
         // Set name flag
         nameSet[name] |= flag;
@@ -3241,52 +3382,52 @@ var Validate = es6now.Class(function(__super) { return {
         // Check for duplicate names
         name = mapKey(node.name.value);
 
-        if (this.isDuplicateName(flag, nameSet[name], false))
-            this.addInvalidNode("Duplicate method names in class not allowed", node, false);
+        if (isDuplicateName(flag, nameSet[name], false))
+            this.addInvalidNode("Duplicate method names in class not allowed", node);
 
         // Set name flag
         nameSet[name] |= flag;
     },
     
-    // Returns true if the specified name type is a duplicate for a given set of flags
-    isDuplicateName: function(type, flags, strict) {
-    
-        if (!flags)
-            return false;
-        
-        switch (type) {
-        
-            case PROP_DATA: return strict || flags !== PROP_DATA;
-            case PROP_GET: return flags !== PROP_SET;
-            case PROP_SET: return flags !== PROP_GET;
-            default: return !!flags;
-        }
-    },
-    
     checkInvalidNodes: function() {
     
         var context = this.context,
+            parent = context.parent,
             list = context.invalidNodes,
             item,
             node,
+            error,
             i;
-        
-        if (list === null)
-            return;
         
         for (i = 0; i < list.length; ++i) {
         
             item = list[i];
             node = item.node;
+            error = node.error;
             
-            if (node.error) {
+            // Skip if error has been resolved
+            if (!error)
+                continue;
             
-                if (item.strict) this.addStrictError(node.error, node);
-                else this.fail(node.error, node);
-            }
+            // Throw if item is not a strict-mode error, or
+            // if the current context is strict
+            if (!item.strict || context.mode === "strict")
+                this.fail(error, node);
+            
+            // Skip strict errors in sloppy mode
+            if (context.mode === "sloppy")
+                continue;
+            
+            // NOTE:  If parent context is sloppy, then we ignore.
+            // If the parent context is strict, then this context would
+            // also be known to be strict and therefore handled above.
+            
+            // If parent mode has not been determined, add error to
+            // parent context
+            if (!parent.mode)
+                parent.invalidNodes.push(item);
         }
         
-        context.invalidNodes = null;
     }, constructor: function Validate() {}
     
 } });
@@ -3403,39 +3544,34 @@ function isFunctionModifier(value) {
 // Encodes a string as a map key for use in regular object
 function mapKey(name) { return "." + (name || "") }
 
-var Token = es6now.Class(function(__super) { return {
+// Copies token data
+function copyToken(from, to) {
 
-    get isToken() { return true },
-
-    constructor: function Token(s) {
+    to.type = from.type;
+    to.value = from.value;
+    to.number = from.number;
+    to.regexFlags = from.regexFlags;
+    to.templateEnd = from.templateEnd;
+    to.newlineBefore = from.newlineBefore;
+    to.strictError = from.strictError;
+    to.start = from.start;
+    to.end = from.end;
     
-        this.type = s.type;
-        this.start = s.start;
-        this.end = s.end;
-        this.value = s.value;
-        this.number = s.number;
-        this.templateEnd = s.templateEnd;
-        this.regExpFlags = s.regExpFlags;
-        this.newlineBefore = s.newlineBefore;
-        this.strictError = s.strictError;
-        // TODO:  Should we do this? this.error = "";
-    }
-    
-} });
+    return to;
+}
 
 var Context = es6now.Class(function(__super) { return {
 
-    constructor: function Context(parent, isStrict, isFunction) {
+    constructor: function Context(parent, isFunction) {
     
         this.parent = parent;
-        this.strict = isStrict;
+        this.mode = "";
         this.isFunction = isFunction;
         this.functionBody = false;
-        this.functionType = null;
+        this.functionType = "";
         this.labelSet = {};
         this.switchDepth = 0;
-        this.invalidNodes = null;
-        this.strictError = null;
+        this.invalidNodes = [];
     }
 } });
 
@@ -3446,33 +3582,42 @@ var Parser = es6now.Class(function(__super) { return {
         var scanner = new Scanner(input, offset);
         
         this.scanner = scanner;
-        this.token = new Scanner;
         this.input = input;
         
         this.peek0 = null;
         this.peek1 = null;
-        this.endOffset = scanner.offset;
+        this.tokenStash = new Scanner;
+        this.tokenEnd = scanner.offset;
         
-        this.context = null;
-        this.pushContext(false);
-    },
-
-    get startOffset() {
-    
-        // TODO:  What if we should be scanning using a different context and
-        // the token buffer is empty?
-        return this.peekToken().start;
+        this.context = new Context(null, false);
+        this.setStrict(false);
     },
     
     nextToken: function(context) {
     
         var scanner = this.scanner,
-            type;
+            type = "";
         
-        do { type = scanner.next(context); }
+        do { type = scanner.next(context || ""); }
         while (type === "COMMENT");
         
-        return new Token(scanner);
+        return scanner;
+    },
+    
+    nodeStart: function() {
+    
+        if (this.peek0)
+            return this.peek0.start;
+        
+        // Skip over whitespace and comments
+        this.scanner.skip();
+        
+        return this.scanner.offset;
+    },
+    
+    nodeEnd: function() {
+    
+        return this.tokenEnd;
     },
     
     readToken: function(type, context) {
@@ -3481,11 +3626,11 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.peek0 = this.peek1;
         this.peek1 = null;
-        this.endOffset = token.end;
+        this.tokenEnd = token.end;
         
         if (type && token.type !== type)
             this.unexpected(token);
-        
+            
         return token;
     },
     
@@ -3494,30 +3639,36 @@ var Parser = es6now.Class(function(__super) { return {
         return this.readToken(type, context).type;
     },
     
-    peekToken: function(context, index) {
+    peekToken: function(context) {
     
-        if (index === 0 || index === void 0) {
+        if (!this.peek0)
+            this.peek0 = this.nextToken(context);
         
-            return this.peek0 || (this.peek0 = this.nextToken(context));
-        
-        } else if (index === 1) {
-        
-            if (this.peek1) {
-            
-                return this.peek1;
-            
-            } else if (this.peek0) {
-            
-                return this.peek1 = this.nextToken(context);
-            }
-        }
-        
-        throw new Error("Invalid lookahead");
+        return this.peek0;
     },
     
-    peek: function(context, index) {
+    peek: function(context) {
     
-        return this.peekToken(context, index).type;
+        return this.peekToken(context).type;
+    },
+    
+    peekTokenAt: function(context, index) {
+    
+        if (index !== 1 || this.peek0 === null)
+            throw new Error("Invalid lookahead")
+        
+        if (this.peek1 === null) {
+        
+            this.peek0 = copyToken(this.peek0, this.tokenStash);
+            this.peek1 = this.nextToken(context);
+        }
+        
+        return this.peek1;
+    },
+    
+    peekAt: function(context, index) {
+    
+        return this.peekTokenAt(context, index).type;
     },
     
     unpeek: function() {
@@ -3534,32 +3685,6 @@ var Parser = es6now.Class(function(__super) { return {
     
         var tok = this.peek(context);
         return tok !== "EOF" && tok !== type ? tok : null;
-    },
-    
-    unexpected: function(token) {
-    
-        var type = token.type, msg;
-        
-        msg = type === "EOF" ?
-            "Unexpected end of input" :
-            "Unexpected token " + token.type;
-        
-        this.fail(msg, token);
-    },
-    
-    fail: function(msg, loc) {
-    
-        var pos = this.scanner.position(loc || this.peek0),
-            err = new SyntaxError(msg);
-        
-        err.line = pos.line;
-        err.column = pos.column;
-        err.lineOffset = pos.lineOffset;
-        err.startOffset = pos.startOffset;
-        err.endOffset = pos.endOffset;
-        err.sourceText = this.input;
-        
-        throw err;
     },
     
     readKeyword: function(word) {
@@ -3582,7 +3707,7 @@ var Parser = es6now.Class(function(__super) { return {
     
         if (this.peekKeyword("let")) {
         
-            switch (this.peek("div", 1)) {
+            switch (this.peekAt("div", 1)) {
             
                 case "{":
                 case "[":
@@ -3597,7 +3722,7 @@ var Parser = es6now.Class(function(__super) { return {
     
         if (this.peekKeyword("module")) {
         
-            var token = this.peekToken("div", 1);
+            var token = this.peekTokenAt("div", 1);
             return (!token.newlineBefore && token.type === "IDENTIFIER");
         }
         
@@ -3625,11 +3750,11 @@ var Parser = es6now.Class(function(__super) { return {
         if (!(token.type === "IDENTIFIER" && isFunctionModifier(token.value)))
             return false;
         
-        token = this.peekToken("div", 1);
+        token = this.peekTokenAt("div", 1);
         return token.type === "function" && !token.newlineBefore;
     },
     
-    maybeEnd: function() {
+    peekEnd: function() {
     
         var token = this.peekToken();
         
@@ -3651,12 +3776,45 @@ var Parser = es6now.Class(function(__super) { return {
         return true;
     },
     
+    unexpected: function(token) {
+    
+        var type = token.type, msg;
+        
+        msg = type === "EOF" ?
+            "Unexpected end of input" :
+            "Unexpected token " + token.type;
+        
+        this.fail(msg, token);
+    },
+    
+    fail: function(msg, node) {
+    
+        if (!node)
+            node = this.peek0;
+        
+        var pos = this.scanner.position(node.start),
+            err = new SyntaxError(msg);
+        
+        err.line = pos.line;
+        err.column = pos.column;
+        err.lineOffset = pos.lineOffset;
+        err.startOffset = node.start;
+        err.endOffset = node.end;
+        err.sourceText = this.input;
+        
+        throw err;
+    },
+    
     // == Context Management ==
     
-    pushContext: function(isFunction, isStrict) {
+    pushContext: function(isFunction) {
     
-        isStrict = isStrict || (this.context ? this.context.strict : null);
-        this.context = new Context(this.context, isStrict, isFunction);
+        var parent = this.context;
+        
+        this.context = new Context(parent, isFunction);
+        
+        if (parent.mode === "strict")
+            this.context.mode = "strict";
     },
     
     pushMaybeContext: function() {
@@ -3672,84 +3830,34 @@ var Parser = es6now.Class(function(__super) { return {
         var context = this.context,
             parent = context.parent;
         
-        if (context.strict !== true)
-            this.setStrict(false);
-        
         // If collapsing into parent context, copy invalid nodes into parent
-        if (collapse && parent && context.invalidNodes) {
+        if (collapse) {
 
-            if (!parent.invalidNodes) {
+            for (var i = 0; i < context.invalidNodes.length; ++i)
+                parent.invalidNodes.push(context.invalidNodes[i]);
             
-                parent.invalidNodes = context.invalidNodes;
-                
-            } else {
-                
-                for (var i = 0; i < context.invalidNodes.length; ++i)
-                    parent.invalidNodes.push(context.invalidNodes[i]);
-            }
-            
-            context.invalidNodes = null;
-        }
+        } else {
         
-        this.checkInvalidNodes();
+            this.checkInvalidNodes();
+        }
         
         this.context = this.context.parent;
     },
     
     setStrict: function(strict) {
     
-        var context = this.context;
-        
-        if (context.strict === true)
-            return;
-        
-        context.strict = strict;
-        
-        var node = context.strictError;
-        if (!node) return;
-        
-        if (strict) {
-        
-            if (node.error)
-                this.fail(node.error, node);
-            
-        } else if (parent) {
-        
-            var parent = this.context.parent;
-            
-            if (parent.strict === null && !parent.strictError)
-                parent.strictError = node;
-        }
-        
-        context.strictError = null;
+        this.context.mode = strict ? "strict" : "sloppy";
     },
     
     addStrictError: function(error, node) {
     
-        var c = this.context;
-        
-        // Copy tokens (since tokens objects are reused)
-        if (node.isToken)
-            node = new Token(node);
-        
-        node.error = error;
-        
-        if (c.strict === true)
-            this.fail(error, node);
-        else if (c.strict === null && !c.strictError)
-            c.strictError = node;
+        this.addInvalidNode(error, node, true);
     },
     
     addInvalidNode: function(error, node, strict) {
     
-        var context = this.context,
-            list = context.invalidNodes,
-            item = { node: node, strict: strict };
-        
         node.error = error;
-        
-        if (!list) context.invalidNodes = [item];
-        else list.push(item);
+        this.context.invalidNodes.push({ node: node, strict: !!strict });
     },
     
     // === Top Level ===
@@ -3758,31 +3866,32 @@ var Parser = es6now.Class(function(__super) { return {
     
         this.pushContext(false);
         
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             statements = this.StatementList(true, false);
         
         this.popContext();
         
-        return new AST.Script(statements, start, this.endOffset);
+        return new AST.Script(statements, start, this.nodeEnd());
     },
     
     Module: function() {
     
-        this.pushContext(false, true);
+        this.pushContext(false);
+        this.setStrict(true);
         
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             statements = this.StatementList(true, true);
         
         this.popContext();
         
-        return new AST.Module(statements, start, this.endOffset);
+        return new AST.Module(statements, start, this.nodeEnd());
     },
     
     // === Expressions ===
     
     Expression: function(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             expr = this.AssignmentExpression(noIn),
             list = null;
             
@@ -3793,7 +3902,7 @@ var Parser = es6now.Class(function(__super) { return {
             // list with a trailing rest parameter.  Return the 
             // expression up to, but not including ",".
             
-            if (this.peek(null, 1) === "...")
+            if (this.peekAt(null, 1) === "...")
                 break;
             
             this.read();
@@ -3805,14 +3914,14 @@ var Parser = es6now.Class(function(__super) { return {
         }
         
         if (list)
-            expr.end = this.endOffset;
+            expr.end = this.nodeEnd();
         
         return expr;
     },
     
     AssignmentExpression: function(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             left,
             lhs;
         
@@ -3835,21 +3944,21 @@ var Parser = es6now.Class(function(__super) { return {
             left,
             this.AssignmentExpression(noIn),
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     SpreadAssignment: function(noIn) {
     
         if (this.peek() === "...") {
         
-            var start = this.startOffset;
+            var start = this.nodeStart();
             
             this.read();
             
             return new AST.SpreadExpression(
                 this.AssignmentExpression(noIn), 
                 start, 
-                this.endOffset);
+                this.nodeEnd());
         }
         
         return this.AssignmentExpression(noIn);
@@ -3857,13 +3966,13 @@ var Parser = es6now.Class(function(__super) { return {
     
     YieldExpression: function(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             delegate = false,
             expr = null;
             
         this.readKeyword("yield");
         
-        if (!this.maybeEnd()) {
+        if (!this.peekEnd()) {
         
             if (this.peek() === "*") {
         
@@ -3878,12 +3987,12 @@ var Parser = es6now.Class(function(__super) { return {
             expr, 
             delegate, 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ConditionalExpression: function(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             left = this.BinaryExpression(noIn),
             middle,
             right;
@@ -3896,7 +4005,7 @@ var Parser = es6now.Class(function(__super) { return {
         this.read(":");
         right = this.AssignmentExpression(noIn);
         
-        return new AST.ConditionalExpression(left, middle, right, start, this.endOffset);
+        return new AST.ConditionalExpression(left, middle, right, start, this.nodeEnd());
     },
     
     BinaryExpression: function(noIn) {
@@ -3906,11 +4015,11 @@ var Parser = es6now.Class(function(__super) { return {
     
     PartialBinaryExpression: function(lhs, minPrec, noIn) {
     
-        var prec,
-            next, 
-            max, 
-            rhs,
-            op;
+        var prec = 0,
+            next = "", 
+            max = 0, 
+            op = "",
+            rhs;
         
         while (next = this.peek("div")) {
             
@@ -3949,7 +4058,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     UnaryExpression: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             type = this.peek(),
             token,
             expr;
@@ -3960,7 +4069,7 @@ var Parser = es6now.Class(function(__super) { return {
             expr = this.MemberExpression(true);
             this.checkAssignTarget(expr, true);
             
-            return new AST.UpdateExpression(type, expr, true, start, this.endOffset);
+            return new AST.UpdateExpression(type, expr, true, start, this.nodeEnd());
         }
         
         if (this.peekAwait())
@@ -3974,7 +4083,7 @@ var Parser = es6now.Class(function(__super) { return {
             if (type === "delete" && expr.type === "Identifier")
                 this.addStrictError("Cannot delete unqualified property in strict mode", expr);
             
-            return new AST.UnaryExpression(type, expr, start, this.endOffset);
+            return new AST.UnaryExpression(type, expr, start, this.nodeEnd());
         }
         
         expr = this.MemberExpression(true);
@@ -3987,7 +4096,7 @@ var Parser = es6now.Class(function(__super) { return {
             this.read();
             this.checkAssignTarget(expr, true);
             
-            return new AST.UpdateExpression(type, expr, false, start, this.endOffset);
+            return new AST.UpdateExpression(type, expr, false, start, this.nodeEnd());
         }
         
         return expr;
@@ -3995,7 +4104,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     MemberExpression: function(allowCall) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             type = this.peek(),
             arrowType = "",
             exit = false,
@@ -4020,7 +4129,7 @@ var Parser = es6now.Class(function(__super) { return {
                         this.IdentifierName(), 
                         false, 
                         start, 
-                        this.endOffset);
+                        this.nodeEnd());
                     
                     break;
                 
@@ -4035,7 +4144,7 @@ var Parser = es6now.Class(function(__super) { return {
                         prop, 
                         true, 
                         start, 
-                        this.endOffset);
+                        this.nodeEnd());
         
                     break;
                 
@@ -4057,7 +4166,7 @@ var Parser = es6now.Class(function(__super) { return {
                         expr, 
                         this.ArgumentList(), 
                         start, 
-                        this.endOffset);
+                        this.nodeEnd());
                     
                     if (arrowType) {
                     
@@ -4081,7 +4190,7 @@ var Parser = es6now.Class(function(__super) { return {
                         expr,
                         this.TemplateExpression(),
                         start,
-                        this.endOffset);
+                        this.nodeEnd());
                     
                     break;
                 
@@ -4100,7 +4209,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     NewExpression: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("new");
         
@@ -4110,15 +4219,15 @@ var Parser = es6now.Class(function(__super) { return {
         
         var args = this.peek("div") === "(" ? this.ArgumentList() : null;
         
-        return new AST.NewExpression(expr, args, start, this.endOffset);
+        return new AST.NewExpression(expr, args, start, this.nodeEnd());
     },
     
     SuperExpression: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         this.read("super");
         
-        return new AST.SuperExpression(start, this.endOffset);
+        return new AST.SuperExpression(start, this.nodeEnd());
     },
     
     ArgumentList: function() {
@@ -4144,7 +4253,7 @@ var Parser = es6now.Class(function(__super) { return {
     
         var token = this.peekToken(),
             type = token.type,
-            start = this.startOffset,
+            start = this.nodeStart(),
             next;
         
         switch (type) {
@@ -4156,17 +4265,17 @@ var Parser = es6now.Class(function(__super) { return {
             case "STRING": return this.String();
             case "{": return this.ObjectLiteral();
             
-            case "(": return this.peek(null, 1) === "for" ? 
+            case "(": return this.peekAt(null, 1) === "for" ? 
                 this.GeneratorComprehension() :
                 this.ParenExpression();
             
-            case "[": return this.peek(null, 1) === "for" ?
+            case "[": return this.peekAt(null, 1) === "for" ?
                 this.ArrayComprehension() :
                 this.ArrayLiteral();
             
             case "IDENTIFIER":
                 
-                next = this.peekToken("div", 1);
+                next = this.peekTokenAt("div", 1);
                 
                 if (next.type === "=>") {
                 
@@ -4188,14 +4297,7 @@ var Parser = es6now.Class(function(__super) { return {
                 
                 return this.Identifier(true);
             
-            case "REGEX":
-                this.read();
-                
-                return new AST.RegularExpression(
-                    token.value, 
-                    token.regExpFlags, 
-                    token.start, 
-                    token.end);
+            case "REGEX": return this.RegularExpression();
             
             case "null":
                 this.read();
@@ -4217,12 +4319,12 @@ var Parser = es6now.Class(function(__super) { return {
     Identifier: function(isVar) {
     
         var token = this.readToken("IDENTIFIER"),
-            context = isVar ? "variable" : "",
-            node;
-            
-        node = new AST.Identifier(token.value, context, token.start, token.end);
-        this.checkIdentifier(node);
+            node = new AST.Identifier(token.value, "", token.start, token.end);
         
+        if (isVar)
+            node.context = "variable";
+        
+        this.checkIdentifier(node);
         return node;
     },
     
@@ -4234,40 +4336,46 @@ var Parser = es6now.Class(function(__super) { return {
     
     String: function() {
     
-        var token = this.readToken("STRING");
+        var token = this.readToken("STRING"),
+            node = new AST.String(token.value, token.start, token.end);
         
-        // Ocatal escapes are not allowed in strict mode
         if (token.strictError)
-            this.addStrictError(token.strictError, token);
-            
-        return new AST.String(token.value, token.start, token.end);
+            this.addStrictError(token.strictError, node);
+        
+        return node;
     },
     
     Number: function() {
     
-        var token = this.readToken("NUMBER");
+        var token = this.readToken("NUMBER"),
+            node = new AST.Number(token.number, token.start, token.end);
         
-        // Legacy ocatals are not allowed in strict mode
         if (token.strictError)
-            this.addStrictError(token.strictError, token);
-            
-        return new AST.Number(token.number, token.start, token.end);
+            this.addStrictError(token.strictError, node);
+        
+        return node;
     },
     
     Template: function() {
     
-        var token = this.readToken("TEMPLATE", "template");
+        var token = this.readToken("TEMPLATE", "template"),
+            node = new AST.Template(token.value, token.templateEnd, token.start, token.end);
         
-        // Ocatal escapes are not allowed in strict mode
         if (token.strictError)
-            this.addStrictError(token.strictError, token);
-            
-        return new AST.Template(token.value, token.templateEnd, token.start, token.end);
+            this.addStrictError(token.strictError, node);
+        
+        return node;
+    },
+    
+    RegularExpression: function() {
+    
+        var token = this.readToken("REGEX");
+        return new AST.RegularExpression(token.value, token.regexFlags, token.start, token.end);
     },
     
     BindingIdentifier: function() {
     
-        var token = this.readToken("IDENTIFIER", "name"),
+        var token = this.readToken("IDENTIFIER"),
             node = new AST.Identifier(token.value, "", token.start, token.end);
         
         this.checkBindingIdentifier(node);
@@ -4302,7 +4410,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     ParenExpression: function() {
 
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             expr = null,
             rest = null;
         
@@ -4329,7 +4437,7 @@ var Parser = es6now.Class(function(__super) { return {
         }
         
         // Look for a trailing rest formal parameter within an arrow formal list
-        if (!rest && this.peek() === "," && this.peek(null, 1) === "...") {
+        if (!rest && this.peek() === "," && this.peekAt(null, 1) === "...") {
         
             this.read();
             rest = this.RestParameter();
@@ -4343,12 +4451,12 @@ var Parser = es6now.Class(function(__super) { return {
         // Collapse this context into its parent
         this.popContext(true);
         
-        return new AST.ParenExpression(expr, start, this.endOffset);
+        return new AST.ParenExpression(expr, start, this.nodeEnd());
     },
     
     ObjectLiteral: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             list = [],
             nameSet = {},
             node,
@@ -4371,19 +4479,19 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.read("}");
         
-        return new AST.ObjectLiteral(list, start, this.endOffset);
+        return new AST.ObjectLiteral(list, start, this.nodeEnd());
     },
     
     PropertyDefinition: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             node,
             name;
         
         if (this.peek("name") === "*")
             return this.MethodDefinition();
         
-        switch (this.peek("name", 1)) {
+        switch (this.peekAt("name", 1)) {
         
             case "=":
         
@@ -4395,9 +4503,9 @@ var Parser = es6now.Class(function(__super) { return {
                     null,
                     (this.read(), this.AssignmentExpression()),
                     start,
-                    this.endOffset);
+                    this.nodeEnd());
         
-                this.addInvalidNode("Invalid property definition in object literal", node, false);
+                this.addInvalidNode("Invalid property definition in object literal", node);
                 return node;
             
             case ",":
@@ -4410,7 +4518,7 @@ var Parser = es6now.Class(function(__super) { return {
                     this.Identifier(),
                     null,
                     start,
-                    this.endOffset);
+                    this.nodeEnd());
         }
             
         name = this.PropertyName();
@@ -4421,7 +4529,7 @@ var Parser = es6now.Class(function(__super) { return {
                 name,
                 (this.read(), this.AssignmentExpression()),
                 start,
-                this.endOffset);
+                this.nodeEnd());
         }
         
         return this.MethodDefinition(name);
@@ -4444,18 +4552,18 @@ var Parser = es6now.Class(function(__super) { return {
     
     ComputedPropertyName: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("[");
         var expr = this.AssignmentExpression();
         this.read("]");
         
-        return new AST.ComputedPropertyName(expr, start, this.endOffset);
+        return new AST.ComputedPropertyName(expr, start, this.nodeEnd());
     },
     
     MethodDefinition: function(name) {
     
-        var start = name ? name.start : this.startOffset,
+        var start = name ? name.start : this.nodeStart(),
             kind = "",
             val;
         
@@ -4500,12 +4608,12 @@ var Parser = es6now.Class(function(__super) { return {
             params,
             body,
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ArrayLiteral: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             list = [],
             comma = false,
             next,
@@ -4533,12 +4641,12 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.read("]");
         
-        return new AST.ArrayLiteral(list, start, this.endOffset);
+        return new AST.ArrayLiteral(list, start, this.nodeEnd());
     },
     
     ArrayComprehension: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("[");
         
@@ -4547,12 +4655,12 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.read("]");
         
-        return new AST.ArrayComprehension(list, expr, start, this.endOffset);
+        return new AST.ArrayComprehension(list, expr, start, this.nodeEnd());
     },
     
     GeneratorComprehension: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("(");
         
@@ -4561,7 +4669,7 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.read(")");
         
-        return new AST.GeneratorComprehension(list, expr, start, this.endOffset);
+        return new AST.GeneratorComprehension(list, expr, start, this.nodeEnd());
     },
     
     ComprehensionQualifierList: function() {
@@ -4586,7 +4694,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     ComprehensionFor: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("for");
         
@@ -4594,12 +4702,12 @@ var Parser = es6now.Class(function(__super) { return {
             this.BindingPattern(),
             (this.readKeyword("of"), this.AssignmentExpression()),
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ComprehensionIf: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             test;
             
         this.read("if");
@@ -4608,14 +4716,14 @@ var Parser = es6now.Class(function(__super) { return {
         test = this.AssignmentExpression();
         this.read(")");
         
-        return new AST.ComprehensionIf(test, start, this.endOffset);
+        return new AST.ComprehensionIf(test, start, this.nodeEnd());
     },
     
     TemplateExpression: function() {
         
         var atom = this.Template(),
             start = atom.start,
-            lit = [ atom ],
+            lit = [atom],
             sub = [];
         
         while (!atom.templateEnd) {
@@ -4628,7 +4736,7 @@ var Parser = es6now.Class(function(__super) { return {
             lit.push(atom = this.Template());
         }
         
-        return new AST.TemplateExpression(lit, sub, start, this.endOffset);
+        return new AST.TemplateExpression(lit, sub, start, this.nodeEnd());
     },
     
     // === Statements ===
@@ -4641,7 +4749,7 @@ var Parser = es6now.Class(function(__super) { return {
             
             case "IDENTIFIER":
             
-                next = this.peekToken("div", 1);
+                next = this.peekTokenAt("div", 1);
                 
                 if (next.type === ":")
                     return this.LabelledStatement();
@@ -4689,13 +4797,13 @@ var Parser = es6now.Class(function(__super) { return {
     
     Block: function() {
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("{");
         var list = this.StatementList(false, false);
         this.read("}");
         
-        return new AST.Block(list, start, this.endOffset);
+        return new AST.Block(list, start, this.nodeEnd());
     },
     
     Semicolon: function() {
@@ -4709,7 +4817,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     LabelledStatement: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             label = this.Identifier();
         
         this.read(":");
@@ -4718,26 +4826,26 @@ var Parser = es6now.Class(function(__super) { return {
             label, 
             this.StatementWithLabel(label),
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ExpressionStatement: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             expr = this.Expression();
         
         this.Semicolon();
         
-        return new AST.ExpressionStatement(expr, start, this.endOffset);
+        return new AST.ExpressionStatement(expr, start, this.nodeEnd());
     },
     
     EmptyStatement: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.Semicolon();
         
-        return new AST.EmptyStatement(start, this.endOffset);
+        return new AST.EmptyStatement(start, this.nodeEnd());
     },
     
     VariableStatement: function() {
@@ -4745,14 +4853,14 @@ var Parser = es6now.Class(function(__super) { return {
         var node = this.VariableDeclaration(false);
         
         this.Semicolon();
-        node.end = this.endOffset;
+        node.end = this.nodeEnd();
         
         return node;
     },
     
     VariableDeclaration: function(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             token = this.peekToken(),
             kind = token.type,
             isConst = false,
@@ -4789,12 +4897,12 @@ var Parser = es6now.Class(function(__super) { return {
             else break;
         }
         
-        return new AST.VariableDeclaration(kind, list, start, this.endOffset);
+        return new AST.VariableDeclaration(kind, list, start, this.nodeEnd());
     },
     
     VariableDeclarator: function(noIn, isConst) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             pattern = this.BindingPattern(),
             init = null;
         
@@ -4808,7 +4916,7 @@ var Parser = es6now.Class(function(__super) { return {
             this.fail("Missing const initializer", pattern);
         }
         
-        return new AST.VariableDeclarator(pattern, init, start, this.endOffset);
+        return new AST.VariableDeclarator(pattern, init, start, this.nodeEnd());
     },
     
     ReturnStatement: function() {
@@ -4816,30 +4924,33 @@ var Parser = es6now.Class(function(__super) { return {
         if (!this.context.isFunction)
             this.fail("Return statement outside of function");
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("return");
-        var value = this.maybeEnd() ? null : this.Expression();
+        var value = this.peekEnd() ? null : this.Expression();
         
         this.Semicolon();
         
-        return new AST.ReturnStatement(value, start, this.endOffset);
+        return new AST.ReturnStatement(value, start, this.nodeEnd());
     },
-    
+
+    // TODO: Separate out break and continue, so it's easier to follow the logic?
     BreakOrContinueStatement: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             token = this.readToken(),
             keyword = token.type,
-            labelSet = this.context.labelSet,
-            label,
-            name;
+            labelSet = this.context.labelSet;
         
-        label = this.maybeEnd() ? null : this.Identifier();
-        name = mapKey(label && label.value);
+        var label = this.peekEnd() ? null : this.Identifier(),
+            name = mapKey(label && label.value);
         
         this.Semicolon();
         
+        var node = keyword === "break" ?
+            new AST.BreakStatement(label, start, this.nodeEnd()) :
+            new AST.ContinueStatement(label, start, this.nodeEnd());
+            
         if (label) {
         
             if (!labelSet[name])
@@ -4848,43 +4959,41 @@ var Parser = es6now.Class(function(__super) { return {
         } else {
         
             if (!labelSet[name] && !(keyword === "break" && this.context.switchDepth > 0))
-                this.fail("Invalid " + keyword + " statement", token);
+                this.fail("Invalid " + keyword + " statement", node);
         }
         
-        return keyword === "break" ?
-            new AST.BreakStatement(label, start, this.endOffset) :
-            new AST.ContinueStatement(label, start, this.endOffset);
+        return node;
     },
     
     ThrowStatement: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("throw");
         
-        var expr = this.maybeEnd() ? null : this.Expression();
+        var expr = this.peekEnd() ? null : this.Expression();
         
         if (expr === null)
             this.fail("Missing throw expression");
         
         this.Semicolon();
         
-        return new AST.ThrowStatement(expr, start, this.endOffset);
+        return new AST.ThrowStatement(expr, start, this.nodeEnd());
     },
     
     DebuggerStatement: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("debugger");
         this.Semicolon();
         
-        return new AST.DebuggerStatement(start, this.endOffset);
+        return new AST.DebuggerStatement(start, this.nodeEnd());
     },
     
     IfStatement: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("if");
         this.read("(");
@@ -4902,12 +5011,12 @@ var Parser = es6now.Class(function(__super) { return {
             elseBody = this.Statement();
         }
         
-        return new AST.IfStatement(test, body, elseBody, start, this.endOffset);
+        return new AST.IfStatement(test, body, elseBody, start, this.nodeEnd());
     },
     
     DoWhileStatement: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             body, 
             test;
         
@@ -4921,12 +5030,12 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.read(")");
         
-        return new AST.DoWhileStatement(body, test, start, this.endOffset);
+        return new AST.DoWhileStatement(body, test, start, this.nodeEnd());
     },
     
     WhileStatement: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("while");
         this.read("(");
@@ -4935,12 +5044,12 @@ var Parser = es6now.Class(function(__super) { return {
             this.Expression(), 
             (this.read(")"), this.StatementWithLabel()), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ForStatement: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             init = null,
             test,
             step;
@@ -4995,7 +5104,7 @@ var Parser = es6now.Class(function(__super) { return {
             step, 
             this.StatementWithLabel(), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ForInStatement: function(init, start) {
@@ -5011,7 +5120,7 @@ var Parser = es6now.Class(function(__super) { return {
             expr, 
             this.StatementWithLabel(), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ForOfStatement: function(init, start) {
@@ -5027,28 +5136,30 @@ var Parser = es6now.Class(function(__super) { return {
             expr, 
             this.StatementWithLabel(), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     },
     
     WithStatement: function() {
     
-        var start = this.startOffset,
-            token = this.readToken("with");
+        var start = this.nodeStart();
         
-        this.addStrictError("With statement is not allowed in strict mode", token);
-        
+        this.read("with");
         this.read("(");
         
-        return new AST.WithStatement(
+        var node = new AST.WithStatement(
             this.Expression(), 
             (this.read(")"), this.Statement()),
             start,
-            this.endOffset);
+            this.nodeEnd());
+            
+        this.addStrictError("With statement is not allowed in strict mode", node);
+        
+        return node;
     },
     
     SwitchStatement: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("switch");
         this.read("(");
@@ -5069,7 +5180,7 @@ var Parser = es6now.Class(function(__super) { return {
             if (node.test === null) {
             
                 if (hasDefault)
-                    this.fail("Switch statement cannot have more than one default");
+                    this.fail("Switch statement cannot have more than one default", node);
                 
                 hasDefault = true;
             }
@@ -5080,12 +5191,12 @@ var Parser = es6now.Class(function(__super) { return {
         this.context.switchDepth -= 1;
         this.read("}");
         
-        return new AST.SwitchStatement(head, cases, start, this.endOffset);
+        return new AST.SwitchStatement(head, cases, start, this.nodeEnd());
     },
     
     SwitchCase: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             expr = null, 
             list = [],
             type;
@@ -5110,12 +5221,12 @@ var Parser = es6now.Class(function(__super) { return {
             list.push(this.Statement());
         }
         
-        return new AST.SwitchCase(expr, list, start, this.endOffset);
+        return new AST.SwitchCase(expr, list, start, this.nodeEnd());
     },
     
     TryStatement: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("try");
         
@@ -5132,19 +5243,19 @@ var Parser = es6now.Class(function(__super) { return {
             fin = this.Block();
         }
         
-        return new AST.TryStatement(tryBlock, handler, fin, start, this.endOffset);
+        return new AST.TryStatement(tryBlock, handler, fin, start, this.nodeEnd());
     },
     
     CatchClause: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("catch");
         this.read("(");
         var param = this.BindingPattern();
         this.read(")");
         
-        return new AST.CatchClause(param, this.Block(), start, this.endOffset);
+        return new AST.CatchClause(param, this.Block(), start, this.nodeEnd());
     },
     
     // === Declarations ===
@@ -5162,23 +5273,25 @@ var Parser = es6now.Class(function(__super) { return {
             list.push(element = this.Declaration(isModule));
             
             // Check for directives
-            if (prologue && 
-                element.type === "ExpressionStatement" &&
-                element.expression.type === "String") {
-                
-                // Get the non-escaped literal text of the string
-                node = element.expression;
-                dir = this.input.slice(node.start + 1, node.end - 1);
-                
-                element.directive = dir;
-                
-                // Check for strict mode
-                if (dir === "use strict")
-                    this.setStrict(true);
+            if (prologue) {
             
-            } else {
-            
-                prologue = false;
+                if (element.type === "ExpressionStatement" &&
+                    element.expression.type === "String") {
+                
+                    // Get the non-escaped literal text of the string
+                    node = element.expression;
+                    dir = this.input.slice(node.start + 1, node.end - 1);
+                
+                    element.directive = dir;
+                
+                    // Check for strict mode
+                    if (dir === "use strict")
+                        this.setStrict(true);
+                        
+                } else {
+                
+                    prologue = false;
+                }
             }
         }
         
@@ -5224,7 +5337,7 @@ var Parser = es6now.Class(function(__super) { return {
         var node = this.VariableDeclaration(false);
         
         this.Semicolon();
-        node.end = this.endOffset;
+        node.end = this.nodeEnd();
         
         return node;
     },
@@ -5233,13 +5346,12 @@ var Parser = es6now.Class(function(__super) { return {
     
     FunctionDeclaration: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             kind = "",
             tok;
         
         tok = this.peekToken();
         
-        // TODO: We are not checking newline constraints here.  Should we?
         if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
         
             this.read();
@@ -5270,12 +5382,12 @@ var Parser = es6now.Class(function(__super) { return {
             params,
             body,
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     FunctionExpression: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             ident = null,
             kind = "",
             tok;
@@ -5314,7 +5426,7 @@ var Parser = es6now.Class(function(__super) { return {
             params,
             body,
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     FormalParameters: function() {
@@ -5345,7 +5457,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     FormalParameter: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             pattern = this.BindingPattern(),
             init = null;
         
@@ -5355,29 +5467,29 @@ var Parser = es6now.Class(function(__super) { return {
             init = this.AssignmentExpression();
         }
         
-        return new AST.FormalParameter(pattern, init, start, this.endOffset);
+        return new AST.FormalParameter(pattern, init, start, this.nodeEnd());
     },
     
     RestParameter: function() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("...");
         
-        return new AST.RestParameter(this.BindingIdentifier(), start, this.endOffset);
+        return new AST.RestParameter(this.BindingIdentifier(), start, this.nodeEnd());
     },
     
     FunctionBody: function() {
         
         this.context.functionBody = true;
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("{");
         var statements = this.StatementList(true, false);
         this.read("}");
         
-        return new AST.FunctionBody(statements, start, this.endOffset);
+        return new AST.FunctionBody(statements, start, this.nodeEnd());
     },
     
     ArrowFunctionHead: function(kind, formals, rest, start) {
@@ -5387,9 +5499,11 @@ var Parser = es6now.Class(function(__super) { return {
         this.context.functionType = kind;
         
         var params = this.transformFormals(formals, rest);
-        this.checkParameters(params);
         
-        return new AST.ArrowFunctionHead(params, start, this.endOffset);
+        // Perform validation on transformed formal parameters
+        this.checkArrowParameters(params);
+        
+        return new AST.ArrowFunctionHead(params, start, this.nodeEnd());
     },
     
     ArrowFunctionBody: function(head, noIn) {
@@ -5409,14 +5523,14 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.popContext();
         
-        return new AST.ArrowFunction(kind, params, body, start, this.endOffset);
+        return new AST.ArrowFunction(kind, params, body, start, this.nodeEnd());
     },
     
     // === Modules ===
     
     ModuleDefinition: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             ident,
             target;
         
@@ -5434,7 +5548,7 @@ var Parser = es6now.Class(function(__super) { return {
                 ident,
                 target,
                 start,
-                this.endOffset);
+                this.nodeEnd());
             
         } else if (this.peekKeyword("from")) {
     
@@ -5446,19 +5560,19 @@ var Parser = es6now.Class(function(__super) { return {
                 ident,
                 target,
                 start,
-                this.endOffset);
+                this.nodeEnd());
         }
         
         return new AST.ModuleDeclaration(
             ident,
             this.ModuleBody(),
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ModuleDeclaration: function() {
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.readKeyword("module");
         
@@ -5466,14 +5580,15 @@ var Parser = es6now.Class(function(__super) { return {
             this.BindingIdentifier(),
             this.ModuleBody(),
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ModuleBody: function() {
     
-        this.pushContext(false, true);
+        this.pushContext(false);
+        this.setStrict(true);
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("{");
         var list = this.StatementList(true, true);
@@ -5481,7 +5596,7 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.popContext();
         
-        return new AST.ModuleBody(list, start, this.endOffset);
+        return new AST.ModuleBody(list, start, this.nodeEnd());
     },
     
     ModuleSpecifier: function() {
@@ -5491,7 +5606,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     ImportDeclaration: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             ident,
             from;
         
@@ -5506,14 +5621,14 @@ var Parser = es6now.Class(function(__super) { return {
                 from = this.ModuleSpecifier();
                 this.Semicolon();
                 
-                return new AST.ImportDefaultDeclaration(ident, from, start, this.endOffset);
+                return new AST.ImportDefaultDeclaration(ident, from, start, this.nodeEnd());
             
             case "STRING":
             
                 from = this.ModuleSpecifier();
                 this.Semicolon();
                 
-                return new AST.ImportDeclaration(null, from, start, this.endOffset);
+                return new AST.ImportDeclaration(null, from, start, this.nodeEnd());
         }
         
         var list = [];
@@ -5533,12 +5648,12 @@ var Parser = es6now.Class(function(__super) { return {
         from = this.ModuleSpecifier();
         this.Semicolon();
         
-        return new AST.ImportDeclaration(list, from, start, this.endOffset);
+        return new AST.ImportDeclaration(list, from, start, this.nodeEnd());
     },
     
     ImportSpecifier: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             hasLocal = false,
             local = null,
             remote;
@@ -5566,12 +5681,12 @@ var Parser = es6now.Class(function(__super) { return {
             this.checkBindingIdentifier(remote);
         }
         
-        return new AST.ImportSpecifier(remote, local, start, this.endOffset);
+        return new AST.ImportSpecifier(remote, local, start, this.nodeEnd());
     },
     
     ExportDeclaration: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             binding;
         
         this.read("export");
@@ -5623,12 +5738,12 @@ var Parser = es6now.Class(function(__super) { return {
                 break;
         }
         
-        return new AST.ExportDeclaration(binding, start, this.endOffset);
+        return new AST.ExportDeclaration(binding, start, this.nodeEnd());
     },
     
     ExportsList: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             list = null,
             from = null;
         
@@ -5666,12 +5781,12 @@ var Parser = es6now.Class(function(__super) { return {
             }
         }
         
-        return new AST.ExportsList(list, from, start, this.endOffset);
+        return new AST.ExportsList(list, from, start, this.nodeEnd());
     },
     
     ExportSpecifier: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             local = this.IdentifierName(),
             remote = null;
         
@@ -5681,12 +5796,12 @@ var Parser = es6now.Class(function(__super) { return {
             remote = this.IdentifierName();
         }
         
-        return new AST.ExportSpecifier(local, remote, start, this.endOffset);
+        return new AST.ExportSpecifier(local, remote, start, this.nodeEnd());
     },
     
     ModulePath: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             path = [];
         
         while (true) {
@@ -5697,14 +5812,14 @@ var Parser = es6now.Class(function(__super) { return {
             else break;
         }
         
-        return new AST.ModulePath(path, start, this.endOffset);
+        return new AST.ModulePath(path, start, this.nodeEnd());
     },
     
     // === Classes ===
     
     ClassDeclaration: function() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             ident = null,
             base = null;
         
@@ -5723,12 +5838,12 @@ var Parser = es6now.Class(function(__super) { return {
             base,
             this.ClassBody(),
             start,
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ClassExpression: function() {
     
-        var start = this.startOffset, 
+        var start = this.nodeStart(), 
             ident = null,
             base = null;
         
@@ -5748,14 +5863,15 @@ var Parser = es6now.Class(function(__super) { return {
             base, 
             this.ClassBody(), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     },
     
     ClassBody: function() {
     
-        this.pushContext(false, true);
+        this.pushContext(false);
+        this.setStrict(true);
         
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             nameSet = {}, 
             staticSet = {},
             list = [];
@@ -5769,12 +5885,12 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.popContext();
         
-        return new AST.ClassBody(list, start, this.endOffset);
+        return new AST.ClassBody(list, start, this.nodeEnd());
     },
     
     ClassElement: function(nameSet, staticSet) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             isStatic = false,
             flag = PROP_NORMAL,
             method,
@@ -5782,7 +5898,7 @@ var Parser = es6now.Class(function(__super) { return {
         
         // Check for static modifier
         if (this.peekToken("name").value === "static" &&
-            this.peek("name", 1) !== "(") {
+            this.peekAt("name", 1) !== "(") {
         
             isStatic = true;
             nameSet = staticSet;
@@ -5792,24 +5908,14 @@ var Parser = es6now.Class(function(__super) { return {
         method = this.MethodDefinition();
         this.checkClassElementName(method, nameSet);
         
-        return new AST.ClassElement(isStatic, method, start, this.endOffset);
+        return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
     }
     
 } });
 
-
-function mixin(source) {
-
-    source = source.prototype;
-    Object.keys(source).forEach((function(key) { return Parser.prototype[key] = source[key]; }));
-}
-
-// TODO:  Use Object.assign
-
 // Add externally defined methods
-mixin(Transform);
-mixin(Validate);
-
+Object.assign(Parser.prototype, Transform.prototype);
+Object.assign(Parser.prototype, Validate.prototype);
 
 
 exports.Parser = Parser; return exports; }).call(this, {});

@@ -27,6 +27,21 @@ function isPoisonIdent(name) {
     return name === "eval" || name === "arguments";
 }
 
+// Returns true if the specified name type is a duplicate for a given set of flags
+function isDuplicateName(type, flags, strict) {
+
+    if (!flags)
+        return false;
+    
+    switch (type) {
+    
+        case PROP_DATA: return strict || flags !== PROP_DATA;
+        case PROP_GET: return flags !== PROP_SET;
+        case PROP_SET: return flags !== PROP_GET;
+        default: return !!flags;
+    }
+}
+
 export class Validate {
 
     // Checks an assignment target for strict mode restrictions
@@ -110,6 +125,11 @@ export class Validate {
         // as well (method definitions, arrow parameters, and maybe generator functions).
         // How do these rules apply when parameters are patterns, though?
         
+        // I think (the early errors portion of the spec is very hard to understand)
+        // that you have to force strict-like validation in the following cases:
+        // method definitions, functions and generators using new parameter list 
+        // features (patterns, initializers, or rest), and arrow functions.
+        
         for (i = 0; i < params.length; ++i) {
         
             node = params[i];
@@ -138,6 +158,12 @@ export class Validate {
     // allowed as an identifier within the parameter list of an arrow function
     // contained within a generator.  For "modified" arrow functions (e.g. 
     // async arrows) we'll have to take the union of these restrictions.
+    
+    // Performs validation on transformed arrow formal parameters
+    checkArrowParameters(params) {
+    
+        this.checkParameters(params);
+    }
     
     // Performs validation on the init portion of a for-in or for-of statement
     checkForInit(init, type) {
@@ -192,10 +218,10 @@ export class Validate {
         // Check for duplicate names
         name = mapKey(node.name.value);
 
-        if (this.isDuplicateName(flag, nameSet[name], false))
-            this.addInvalidNode("Duplicate property names in object literal not allowed", node, false);
-        else if (this.isDuplicateName(flag, nameSet[name], true))
-            this.addInvalidNode("Duplicate data property names in object literal not allowed in strict mode", node, true);
+        if (isDuplicateName(flag, nameSet[name], false))
+            this.addInvalidNode("Duplicate property names in object literal not allowed", node);
+        else if (isDuplicateName(flag, nameSet[name], true))
+            this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
 
         // Set name flag
         nameSet[name] |= flag;
@@ -219,52 +245,52 @@ export class Validate {
         // Check for duplicate names
         name = mapKey(node.name.value);
 
-        if (this.isDuplicateName(flag, nameSet[name], false))
-            this.addInvalidNode("Duplicate method names in class not allowed", node, false);
+        if (isDuplicateName(flag, nameSet[name], false))
+            this.addInvalidNode("Duplicate method names in class not allowed", node);
 
         // Set name flag
         nameSet[name] |= flag;
     }
     
-    // Returns true if the specified name type is a duplicate for a given set of flags
-    isDuplicateName(type, flags, strict) {
-    
-        if (!flags)
-            return false;
-        
-        switch (type) {
-        
-            case PROP_DATA: return strict || flags !== PROP_DATA;
-            case PROP_GET: return flags !== PROP_SET;
-            case PROP_SET: return flags !== PROP_GET;
-            default: return !!flags;
-        }
-    }
-    
     checkInvalidNodes() {
     
         var context = this.context,
+            parent = context.parent,
             list = context.invalidNodes,
             item,
             node,
+            error,
             i;
-        
-        if (list === null)
-            return;
         
         for (i = 0; i < list.length; ++i) {
         
             item = list[i];
             node = item.node;
+            error = node.error;
             
-            if (node.error) {
+            // Skip if error has been resolved
+            if (!error)
+                continue;
             
-                if (item.strict) this.addStrictError(node.error, node);
-                else this.fail(node.error, node);
-            }
+            // Throw if item is not a strict-mode error, or
+            // if the current context is strict
+            if (!item.strict || context.mode === "strict")
+                this.fail(error, node);
+            
+            // Skip strict errors in sloppy mode
+            if (context.mode === "sloppy")
+                continue;
+            
+            // NOTE:  If parent context is sloppy, then we ignore.
+            // If the parent context is strict, then this context would
+            // also be known to be strict and therefore handled above.
+            
+            // If parent mode has not been determined, add error to
+            // parent context
+            if (!parent.mode)
+                parent.invalidNodes.push(item);
         }
         
-        context.invalidNodes = null;
     }
     
 }

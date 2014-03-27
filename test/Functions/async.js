@@ -332,4 +332,7 @@ function f() {}
 /** x => await null **/
 "await not allowed in a non-async arrow": {},
 
+/** async (x, ...args, y) => null **/
+"rest parameter can only appear as the last formal parameter": {}
+
 };

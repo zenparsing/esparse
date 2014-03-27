@@ -1,7 +1,7 @@
 module Path from "node:path";
 module FS from "node:fs";
 
-import { Scanner, parseScript } from "../src/main.js";
+import { Scanner, parseScript } from "../build/es6parse.js";
 
 var Esprima = require("./parsers/esprima.js"),
     EsprimaHarmony = require("./parsers/esprima-harmony.js"),

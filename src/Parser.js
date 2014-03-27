@@ -106,20 +106,34 @@ function isFunctionModifier(value) {
 // Encodes a string as a map key for use in regular object
 function mapKey(name) { return "." + (name || "") }
 
+// Copies token data
+function copyToken(from, to) {
+
+    to.type = from.type;
+    to.value = from.value;
+    to.number = from.number;
+    to.regexFlags = from.regexFlags;
+    to.templateEnd = from.templateEnd;
+    to.newlineBefore = from.newlineBefore;
+    to.strictError = from.strictError;
+    to.start = from.start;
+    to.end = from.end;
+    
+    return to;
+}
 
 class Context {
 
-    constructor(parent, isStrict, isFunction) {
+    constructor(parent, isFunction) {
     
         this.parent = parent;
-        this.strict = isStrict;
+        this.mode = "";
         this.isFunction = isFunction;
         this.functionBody = false;
-        this.functionType = null;
+        this.functionType = "";
         this.labelSet = {};
         this.switchDepth = 0;
-        this.invalidNodes = null;
-        this.strictError = null;
+        this.invalidNodes = [];
     }
 }
 
@@ -130,18 +144,29 @@ export class Parser {
         var scanner = new Scanner(input, offset);
         
         this.scanner = scanner;
-        this.token = new Scanner;
         this.input = input;
         
         this.peek0 = null;
         this.peek1 = null;
-        this.endOffset = scanner.offset;
+        this.tokenStash = new Scanner;
+        this.tokenEnd = scanner.offset;
         
-        this.context = null;
-        this.pushContext(false);
+        this.context = new Context(null, false);
+        this.setStrict(false);
     }
-
-    get startOffset() {
+    
+    nextToken(context) {
+    
+        var scanner = this.scanner,
+            type = "";
+        
+        do { type = scanner.next(context || ""); }
+        while (type === "COMMENT")
+        
+        return scanner;
+    }
+    
+    nodeStart() {
     
         if (this.peek0)
             return this.peek0.start;
@@ -152,15 +177,9 @@ export class Parser {
         return this.scanner.offset;
     }
     
-    nextToken(context) {
+    nodeEnd() {
     
-        var scanner = this.scanner,
-            token;
-        
-        do { token = scanner.next(context); }
-        while (token.type === "Comment")
-        
-        return token;
+        return this.tokenEnd;
     }
     
     readToken(type, context) {
@@ -169,11 +188,11 @@ export class Parser {
         
         this.peek0 = this.peek1;
         this.peek1 = null;
-        this.endOffset = token.end;
+        this.tokenEnd = token.end;
         
         if (type && token.type !== type)
             this.unexpected(token);
-        
+            
         return token;
     }
     
@@ -197,17 +216,16 @@ export class Parser {
     
     peekTokenAt(context, index) {
     
-        switch (index) {
+        if (index !== 1 || this.peek0 === null)
+            throw new Error("Invalid lookahead")
         
-            case 0: 
-                return this.peekToken(context);
-            
-            case 1:
-                if (this.peek1) return this.peek1;
-                if (this.peek0) return this.peek1 = this.nextToken(context);
+        if (this.peek1 === null) {
+        
+            this.peek0 = copyToken(this.peek0, this.tokenStash);
+            this.peek1 = this.nextToken(context);
         }
         
-        throw new Error("Invalid lookahead");
+        return this.peek1;
     }
     
     peekAt(context, index) {
@@ -235,7 +253,7 @@ export class Parser {
     
         var token = this.readToken();
         
-        if (token.type === word || token.type === "Identifier" && token.value === word)
+        if (token.type === word || token.type === "IDENTIFIER" && token.value === word)
             return token;
         
         this.unexpected(token);
@@ -244,7 +262,7 @@ export class Parser {
     peekKeyword(word) {
     
         var token = this.peekToken();
-        return token.type === "Identifier" && token.value === word;
+        return token.type === "IDENTIFIER" && token.value === word;
     }
     
     peekLet() {
@@ -255,7 +273,7 @@ export class Parser {
             
                 case "{":
                 case "[":
-                case "Identifier": return true;
+                case "IDENTIFIER": return true;
             }
         }
         
@@ -267,7 +285,7 @@ export class Parser {
         if (this.peekKeyword("module")) {
         
             var token = this.peekTokenAt("div", 1);
-            return (!token.newlineBefore && token.type === "Identifier");
+            return (!token.newlineBefore && token.type === "IDENTIFIER");
         }
         
         return false;
@@ -291,7 +309,7 @@ export class Parser {
     
         var token = this.peekToken();
         
-        if (!(token.type === "Identifier" && isFunctionModifier(token.value)))
+        if (!(token.type === "IDENTIFIER" && isFunctionModifier(token.value)))
             return false;
         
         token = this.peekTokenAt("div", 1);
@@ -331,16 +349,19 @@ export class Parser {
         this.fail(msg, token);
     }
     
-    fail(msg, loc) {
+    fail(msg, node) {
     
-        var pos = this.scanner.position(loc || this.peek0),
+        if (!node)
+            node = this.peek0;
+        
+        var pos = this.scanner.position(node.start),
             err = new SyntaxError(msg);
         
         err.line = pos.line;
         err.column = pos.column;
         err.lineOffset = pos.lineOffset;
-        err.startOffset = pos.startOffset;
-        err.endOffset = pos.endOffset;
+        err.startOffset = node.start;
+        err.endOffset = node.end;
         err.sourceText = this.input;
         
         throw err;
@@ -348,10 +369,14 @@ export class Parser {
     
     // == Context Management ==
     
-    pushContext(isFunction, isStrict) {
+    pushContext(isFunction) {
     
-        isStrict = isStrict || (this.context ? this.context.strict : null);
-        this.context = new Context(this.context, isStrict, isFunction);
+        var parent = this.context;
+        
+        this.context = new Context(parent, isFunction);
+        
+        if (parent.mode === "strict")
+            this.context.mode = "strict";
     }
     
     pushMaybeContext() {
@@ -367,80 +392,34 @@ export class Parser {
         var context = this.context,
             parent = context.parent;
         
-        if (context.strict !== true)
-            this.setStrict(false);
-        
         // If collapsing into parent context, copy invalid nodes into parent
-        if (collapse && parent && context.invalidNodes) {
+        if (collapse) {
 
-            if (!parent.invalidNodes) {
+            for (var i = 0; i < context.invalidNodes.length; ++i)
+                parent.invalidNodes.push(context.invalidNodes[i]);
             
-                parent.invalidNodes = context.invalidNodes;
-                
-            } else {
-                
-                for (var i = 0; i < context.invalidNodes.length; ++i)
-                    parent.invalidNodes.push(context.invalidNodes[i]);
-            }
-            
-            context.invalidNodes = null;
-        }
+        } else {
         
-        this.checkInvalidNodes();
+            this.checkInvalidNodes();
+        }
         
         this.context = this.context.parent;
     }
     
     setStrict(strict) {
     
-        var context = this.context,
-            parent = context.parent;
-        
-        if (context.strict === true)
-            return;
-        
-        context.strict = strict;
-        
-        var node = context.strictError;
-        if (!node) return;
-        
-        if (strict) {
-        
-            if (node.error)
-                this.fail(node.error, node);
-            
-        } else if (parent) {
-            
-            if (parent.strict === null && !parent.strictError)
-                parent.strictError = node;
-        }
-        
-        context.strictError = null;
+        this.context.mode = strict ? "strict" : "sloppy";
     }
     
     addStrictError(error, node) {
     
-        var c = this.context;
-        
-        if (error)
-            node.error = error;
-        
-        if (c.strict === true)
-            this.fail(node.error, node);
-        else if (c.strict === null && !c.strictError)
-            c.strictError = node;
+        this.addInvalidNode(error, node, true);
     }
     
     addInvalidNode(error, node, strict) {
     
-        var context = this.context,
-            list = context.invalidNodes,
-            item = { node, strict };
-        
         node.error = error;
-        
-        if (!list) context.invalidNodes = [item];
-        else list.push(item);
+        this.context.invalidNodes.push({ node, strict: !!strict });
     }
     
     // === Top Level ===
@@ -449,31 +428,32 @@ export class Parser {
     
         this.pushContext(false);
         
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             statements = this.StatementList(true, false);
         
         this.popContext();
         
-        return new AST.Script(statements, start, this.endOffset);
+        return new AST.Script(statements, start, this.nodeEnd());
     }
     
     Module() {
     
-        this.pushContext(false, true);
+        this.pushContext(false);
+        this.setStrict(true);
         
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             statements = this.StatementList(true, true);
         
         this.popContext();
         
-        return new AST.Module(statements, start, this.endOffset);
+        return new AST.Module(statements, start, this.nodeEnd());
     }
     
     // === Expressions ===
     
     Expression(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             expr = this.AssignmentExpression(noIn),
             list = null;
             
@@ -496,14 +476,14 @@ export class Parser {
         }
         
         if (list)
-            expr.end = this.endOffset;
+            expr.end = this.nodeEnd();
         
         return expr;
     }
     
     AssignmentExpression(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             left,
             lhs;
         
@@ -526,21 +506,21 @@ export class Parser {
             left,
             this.AssignmentExpression(noIn),
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     SpreadAssignment(noIn) {
     
         if (this.peek() === "...") {
         
-            var start = this.startOffset;
+            var start = this.nodeStart();
             
             this.read();
             
             return new AST.SpreadExpression(
                 this.AssignmentExpression(noIn), 
                 start, 
-                this.endOffset);
+                this.nodeEnd());
         }
         
         return this.AssignmentExpression(noIn);
@@ -548,7 +528,7 @@ export class Parser {
     
     YieldExpression(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             delegate = false,
             expr = null;
             
@@ -569,12 +549,12 @@ export class Parser {
             expr, 
             delegate, 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ConditionalExpression(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             left = this.BinaryExpression(noIn),
             middle,
             right;
@@ -587,7 +567,7 @@ export class Parser {
         this.read(":");
         right = this.AssignmentExpression(noIn);
         
-        return new AST.ConditionalExpression(left, middle, right, start, this.endOffset);
+        return new AST.ConditionalExpression(left, middle, right, start, this.nodeEnd());
     }
     
     BinaryExpression(noIn) {
@@ -597,11 +577,11 @@ export class Parser {
     
     PartialBinaryExpression(lhs, minPrec, noIn) {
     
-        var prec,
-            next, 
-            max, 
-            rhs,
-            op;
+        var prec = 0,
+            next = "", 
+            max = 0, 
+            op = "",
+            rhs;
         
         while (next = this.peek("div")) {
             
@@ -640,7 +620,7 @@ export class Parser {
     
     UnaryExpression() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             type = this.peek(),
             token,
             expr;
@@ -651,7 +631,7 @@ export class Parser {
             expr = this.MemberExpression(true);
             this.checkAssignTarget(expr, true);
             
-            return new AST.UpdateExpression(type, expr, true, start, this.endOffset);
+            return new AST.UpdateExpression(type, expr, true, start, this.nodeEnd());
         }
         
         if (this.peekAwait())
@@ -665,7 +645,7 @@ export class Parser {
             if (type === "delete" && expr.type === "Identifier")
                 this.addStrictError("Cannot delete unqualified property in strict mode", expr);
             
-            return new AST.UnaryExpression(type, expr, start, this.endOffset);
+            return new AST.UnaryExpression(type, expr, start, this.nodeEnd());
         }
         
         expr = this.MemberExpression(true);
@@ -678,7 +658,7 @@ export class Parser {
             this.read();
             this.checkAssignTarget(expr, true);
             
-            return new AST.UpdateExpression(type, expr, false, start, this.endOffset);
+            return new AST.UpdateExpression(type, expr, false, start, this.nodeEnd());
         }
         
         return expr;
@@ -686,7 +666,7 @@ export class Parser {
     
     MemberExpression(allowCall) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             type = this.peek(),
             arrowType = "",
             exit = false,
@@ -711,7 +691,7 @@ export class Parser {
                         this.IdentifierName(), 
                         false, 
                         start, 
-                        this.endOffset);
+                        this.nodeEnd());
                     
                     break;
                 
@@ -726,7 +706,7 @@ export class Parser {
                         prop, 
                         true, 
                         start, 
-                        this.endOffset);
+                        this.nodeEnd());
         
                     break;
                 
@@ -748,7 +728,7 @@ export class Parser {
                         expr, 
                         this.ArgumentList(), 
                         start, 
-                        this.endOffset);
+                        this.nodeEnd());
                     
                     if (arrowType) {
                     
@@ -766,13 +746,13 @@ export class Parser {
                     
                     break;
                 
-                case "Template":
+                case "TEMPLATE":
                 
                     expr = new AST.TaggedTemplateExpression(
                         expr,
                         this.TemplateExpression(),
                         start,
-                        this.endOffset);
+                        this.nodeEnd());
                     
                     break;
                 
@@ -791,7 +771,7 @@ export class Parser {
     
     NewExpression() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("new");
         
@@ -801,15 +781,15 @@ export class Parser {
         
         var args = this.peek("div") === "(" ? this.ArgumentList() : null;
         
-        return new AST.NewExpression(expr, args, start, this.endOffset);
+        return new AST.NewExpression(expr, args, start, this.nodeEnd());
     }
     
     SuperExpression() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         this.read("super");
         
-        return new AST.SuperExpression(start, this.endOffset);
+        return new AST.SuperExpression(start, this.nodeEnd());
     }
     
     ArgumentList() {
@@ -835,16 +815,16 @@ export class Parser {
     
         var token = this.peekToken(),
             type = token.type,
-            start = this.startOffset,
+            start = this.nodeStart(),
             next;
         
         switch (type) {
             
             case "function": return this.FunctionExpression();
             case "class": return this.ClassExpression();
-            case "Template": return this.TemplateExpression();
-            case "Number": return this.Number();
-            case "String": return this.String();
+            case "TEMPLATE": return this.TemplateExpression();
+            case "NUMBER": return this.Number();
+            case "STRING": return this.String();
             case "{": return this.ObjectLiteral();
             
             case "(": return this.peekAt(null, 1) === "for" ? 
@@ -855,7 +835,7 @@ export class Parser {
                 this.ArrayComprehension() :
                 this.ArrayLiteral();
             
-            case "Identifier":
+            case "IDENTIFIER":
                 
                 next = this.peekTokenAt("div", 1);
                 
@@ -869,7 +849,7 @@ export class Parser {
                     if (next.type === "function")
                         return this.FunctionExpression();
                     
-                    if (next.type === "Identifier" && isFunctionModifier(token.value)) {
+                    if (next.type === "IDENTIFIER" && isFunctionModifier(token.value)) {
                     
                         this.read();
                         this.pushContext(true);
@@ -879,7 +859,7 @@ export class Parser {
                 
                 return this.Identifier(true);
             
-            case "RegularExpression": return this.readToken();
+            case "REGEX": return this.RegularExpression();
             
             case "null":
                 this.read();
@@ -900,7 +880,8 @@ export class Parser {
     
     Identifier(isVar) {
     
-        var node = this.readToken("Identifier");
+        var token = this.readToken("IDENTIFIER"),
+            node = new AST.Identifier(token.value, "", token.start, token.end);
         
         if (isVar)
             node.context = "variable";
@@ -911,45 +892,54 @@ export class Parser {
     
     IdentifierName() {
     
-        return this.readToken("Identifier", "name");
+        var token = this.readToken("IDENTIFIER", "name");
+        return new AST.Identifier(token.value, "", token.start, token.end);
     }
     
     String() {
     
-        var token = this.readToken("String");
+        var token = this.readToken("STRING"),
+            node = new AST.String(token.value, token.start, token.end);
         
-        // Ocatal escapes are not allowed in strict mode
-        if (token.error)
-            this.addStrictError(null, token);
+        if (token.strictError)
+            this.addStrictError(token.strictError, node);
         
-        return token;
+        return node;
     }
     
     Number() {
     
-        var token = this.readToken("Number");
+        var token = this.readToken("NUMBER"),
+            node = new AST.Number(token.number, token.start, token.end);
         
-        // Legacy ocatals are not allowed in strict mode
-        if (token.error)
-            this.addStrictError(null, token);
+        if (token.strictError)
+            this.addStrictError(token.strictError, node);
         
-        return token;
+        return node;
     }
     
     Template() {
     
-        var token = this.readToken("Template", "template");
+        var token = this.readToken("TEMPLATE", "template"),
+            node = new AST.Template(token.value, token.templateEnd, token.start, token.end);
         
-        // Ocatal escapes are not allowed in strict mode
-        if (token.error)
-            this.addStrictError(null, token);
+        if (token.strictError)
+            this.addStrictError(token.strictError, node);
         
-        return token;
+        return node;
+    }
+    
+    RegularExpression() {
+    
+        var token = this.readToken("REGEX");
+        return new AST.RegularExpression(token.value, token.regexFlags, token.start, token.end);
     }
     
     BindingIdentifier() {
     
-        var node = this.readToken("Identifier", "name");
+        var token = this.readToken("IDENTIFIER"),
+            node = new AST.Identifier(token.value, "", token.start, token.end);
+        
         this.checkBindingIdentifier(node);
         return node;
     }
@@ -982,7 +972,7 @@ export class Parser {
     
     ParenExpression() {
 
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             expr = null,
             rest = null;
         
@@ -1023,12 +1013,12 @@ export class Parser {
         // Collapse this context into its parent
         this.popContext(true);
         
-        return new AST.ParenExpression(expr, start, this.endOffset);
+        return new AST.ParenExpression(expr, start, this.nodeEnd());
     }
     
     ObjectLiteral() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             list = [],
             nameSet = {},
             node,
@@ -1051,12 +1041,12 @@ export class Parser {
         
         this.read("}");
         
-        return new AST.ObjectLiteral(list, start, this.endOffset);
+        return new AST.ObjectLiteral(list, start, this.nodeEnd());
     }
     
     PropertyDefinition() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             node,
             name;
         
@@ -1075,9 +1065,9 @@ export class Parser {
                     null,
                     (this.read(), this.AssignmentExpression()),
                     start,
-                    this.endOffset);
+                    this.nodeEnd());
         
-                this.addInvalidNode("Invalid property definition in object literal", node, false);
+                this.addInvalidNode("Invalid property definition in object literal", node);
                 return node;
             
             case ",":
@@ -1090,7 +1080,7 @@ export class Parser {
                     this.Identifier(),
                     null,
                     start,
-                    this.endOffset);
+                    this.nodeEnd());
         }
             
         name = this.PropertyName();
@@ -1101,7 +1091,7 @@ export class Parser {
                 name,
                 (this.read(), this.AssignmentExpression()),
                 start,
-                this.endOffset);
+                this.nodeEnd());
         }
         
         return this.MethodDefinition(name);
@@ -1113,9 +1103,9 @@ export class Parser {
         
         switch (token.type) {
         
-            case "Identifier": return this.IdentifierName();
-            case "String": return this.String();
-            case "Number": return this.Number();
+            case "IDENTIFIER": return this.IdentifierName();
+            case "STRING": return this.String();
+            case "NUMBER": return this.Number();
             case "[": return this.ComputedPropertyName();
         }
         
@@ -1124,18 +1114,18 @@ export class Parser {
     
     ComputedPropertyName() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("[");
         var expr = this.AssignmentExpression();
         this.read("]");
         
-        return new AST.ComputedPropertyName(expr, start, this.endOffset);
+        return new AST.ComputedPropertyName(expr, start, this.nodeEnd());
     }
     
     MethodDefinition(name) {
     
-        var start = name ? name.start : this.startOffset,
+        var start = name ? name.start : this.nodeStart(),
             kind = "",
             val;
         
@@ -1180,12 +1170,12 @@ export class Parser {
             params,
             body,
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ArrayLiteral() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             list = [],
             comma = false,
             next,
@@ -1213,12 +1203,12 @@ export class Parser {
         
         this.read("]");
         
-        return new AST.ArrayLiteral(list, start, this.endOffset);
+        return new AST.ArrayLiteral(list, start, this.nodeEnd());
     }
     
     ArrayComprehension() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("[");
         
@@ -1227,12 +1217,12 @@ export class Parser {
         
         this.read("]");
         
-        return new AST.ArrayComprehension(list, expr, start, this.endOffset);
+        return new AST.ArrayComprehension(list, expr, start, this.nodeEnd());
     }
     
     GeneratorComprehension() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("(");
         
@@ -1241,7 +1231,7 @@ export class Parser {
         
         this.read(")");
         
-        return new AST.GeneratorComprehension(list, expr, start, this.endOffset);
+        return new AST.GeneratorComprehension(list, expr, start, this.nodeEnd());
     }
     
     ComprehensionQualifierList() {
@@ -1266,7 +1256,7 @@ export class Parser {
     
     ComprehensionFor() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("for");
         
@@ -1274,12 +1264,12 @@ export class Parser {
             this.BindingPattern(),
             (this.readKeyword("of"), this.AssignmentExpression()),
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ComprehensionIf() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             test;
             
         this.read("if");
@@ -1288,14 +1278,14 @@ export class Parser {
         test = this.AssignmentExpression();
         this.read(")");
         
-        return new AST.ComprehensionIf(test, start, this.endOffset);
+        return new AST.ComprehensionIf(test, start, this.nodeEnd());
     }
     
     TemplateExpression() {
         
         var atom = this.Template(),
             start = atom.start,
-            lit = [ atom ],
+            lit = [atom],
             sub = [];
         
         while (!atom.templateEnd) {
@@ -1308,7 +1298,7 @@ export class Parser {
             lit.push(atom = this.Template());
         }
         
-        return new AST.TemplateExpression(lit, sub, start, this.endOffset);
+        return new AST.TemplateExpression(lit, sub, start, this.nodeEnd());
     }
     
     // === Statements ===
@@ -1319,7 +1309,7 @@ export class Parser {
         
         switch (this.peek()) {
             
-            case "Identifier":
+            case "IDENTIFIER":
             
                 next = this.peekTokenAt("div", 1);
                 
@@ -1369,13 +1359,13 @@ export class Parser {
     
     Block() {
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("{");
         var list = this.StatementList(false, false);
         this.read("}");
         
-        return new AST.Block(list, start, this.endOffset);
+        return new AST.Block(list, start, this.nodeEnd());
     }
     
     Semicolon() {
@@ -1389,7 +1379,7 @@ export class Parser {
     
     LabelledStatement() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             label = this.Identifier();
         
         this.read(":");
@@ -1398,26 +1388,26 @@ export class Parser {
             label, 
             this.StatementWithLabel(label),
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ExpressionStatement() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             expr = this.Expression();
         
         this.Semicolon();
         
-        return new AST.ExpressionStatement(expr, start, this.endOffset);
+        return new AST.ExpressionStatement(expr, start, this.nodeEnd());
     }
     
     EmptyStatement() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.Semicolon();
         
-        return new AST.EmptyStatement(start, this.endOffset);
+        return new AST.EmptyStatement(start, this.nodeEnd());
     }
     
     VariableStatement() {
@@ -1425,14 +1415,14 @@ export class Parser {
         var node = this.VariableDeclaration(false);
         
         this.Semicolon();
-        node.end = this.endOffset;
+        node.end = this.nodeEnd();
         
         return node;
     }
     
     VariableDeclaration(noIn) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             token = this.peekToken(),
             kind = token.type,
             isConst = false,
@@ -1447,7 +1437,7 @@ export class Parser {
                 isConst = true;
                 break;
             
-            case "Identifier":
+            case "IDENTIFIER":
             
                 if (token.value === "let") {
                 
@@ -1469,12 +1459,12 @@ export class Parser {
             else break;
         }
         
-        return new AST.VariableDeclaration(kind, list, start, this.endOffset);
+        return new AST.VariableDeclaration(kind, list, start, this.nodeEnd());
     }
     
     VariableDeclarator(noIn, isConst) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             pattern = this.BindingPattern(),
             init = null;
         
@@ -1488,7 +1478,7 @@ export class Parser {
             this.fail("Missing const initializer", pattern);
         }
         
-        return new AST.VariableDeclarator(pattern, init, start, this.endOffset);
+        return new AST.VariableDeclarator(pattern, init, start, this.nodeEnd());
     }
     
     ReturnStatement() {
@@ -1496,30 +1486,33 @@ export class Parser {
         if (!this.context.isFunction)
             this.fail("Return statement outside of function");
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("return");
         var value = this.peekEnd() ? null : this.Expression();
         
         this.Semicolon();
         
-        return new AST.ReturnStatement(value, start, this.endOffset);
+        return new AST.ReturnStatement(value, start, this.nodeEnd());
     }
-    
+
+    // TODO: Separate out break and continue, so it's easier to follow the logic?
     BreakOrContinueStatement() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             token = this.readToken(),
             keyword = token.type,
-            labelSet = this.context.labelSet,
-            label,
-            name;
+            labelSet = this.context.labelSet;
         
-        label = this.peekEnd() ? null : this.Identifier();
-        name = mapKey(label && label.value);
+        var label = this.peekEnd() ? null : this.Identifier(),
+            name = mapKey(label && label.value);
         
         this.Semicolon();
         
+        var node = keyword === "break" ?
+            new AST.BreakStatement(label, start, this.nodeEnd()) :
+            new AST.ContinueStatement(label, start, this.nodeEnd());
+            
         if (label) {
         
             if (!labelSet[name])
@@ -1528,17 +1521,15 @@ export class Parser {
         } else {
         
             if (!labelSet[name] && !(keyword === "break" && this.context.switchDepth > 0))
-                this.fail("Invalid " + keyword + " statement", token);
+                this.fail("Invalid " + keyword + " statement", node);
         }
         
-        return keyword === "break" ?
-            new AST.BreakStatement(label, start, this.endOffset) :
-            new AST.ContinueStatement(label, start, this.endOffset);
+        return node;
     }
     
     ThrowStatement() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("throw");
         
@@ -1549,22 +1540,22 @@ export class Parser {
         
         this.Semicolon();
         
-        return new AST.ThrowStatement(expr, start, this.endOffset);
+        return new AST.ThrowStatement(expr, start, this.nodeEnd());
     }
     
     DebuggerStatement() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("debugger");
         this.Semicolon();
         
-        return new AST.DebuggerStatement(start, this.endOffset);
+        return new AST.DebuggerStatement(start, this.nodeEnd());
     }
     
     IfStatement() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("if");
         this.read("(");
@@ -1582,12 +1573,12 @@ export class Parser {
             elseBody = this.Statement();
         }
         
-        return new AST.IfStatement(test, body, elseBody, start, this.endOffset);
+        return new AST.IfStatement(test, body, elseBody, start, this.nodeEnd());
     }
     
     DoWhileStatement() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             body, 
             test;
         
@@ -1601,12 +1592,12 @@ export class Parser {
         
         this.read(")");
         
-        return new AST.DoWhileStatement(body, test, start, this.endOffset);
+        return new AST.DoWhileStatement(body, test, start, this.nodeEnd());
     }
     
     WhileStatement() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("while");
         this.read("(");
@@ -1615,12 +1606,12 @@ export class Parser {
             this.Expression(), 
             (this.read(")"), this.StatementWithLabel()), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ForStatement() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             init = null,
             test,
             step;
@@ -1639,7 +1630,7 @@ export class Parser {
                 init = this.VariableDeclaration(true);
                 break;
             
-            case "Identifier":
+            case "IDENTIFIER":
             
                 if (this.peekLet()) {
                 
@@ -1675,7 +1666,7 @@ export class Parser {
             step, 
             this.StatementWithLabel(), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ForInStatement(init, start) {
@@ -1691,7 +1682,7 @@ export class Parser {
             expr, 
             this.StatementWithLabel(), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ForOfStatement(init, start) {
@@ -1707,28 +1698,30 @@ export class Parser {
             expr, 
             this.StatementWithLabel(), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     }
     
     WithStatement() {
     
-        var start = this.startOffset,
-            token = this.readToken("with");
+        var start = this.nodeStart();
         
-        this.addStrictError("With statement is not allowed in strict mode", token);
-        
+        this.read("with");
         this.read("(");
         
-        return new AST.WithStatement(
+        var node = new AST.WithStatement(
             this.Expression(), 
             (this.read(")"), this.Statement()),
             start,
-            this.endOffset);
+            this.nodeEnd());
+            
+        this.addStrictError("With statement is not allowed in strict mode", node);
+        
+        return node;
     }
     
     SwitchStatement() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("switch");
         this.read("(");
@@ -1749,7 +1742,7 @@ export class Parser {
             if (node.test === null) {
             
                 if (hasDefault)
-                    this.fail("Switch statement cannot have more than one default");
+                    this.fail("Switch statement cannot have more than one default", node);
                 
                 hasDefault = true;
             }
@@ -1760,12 +1753,12 @@ export class Parser {
         this.context.switchDepth -= 1;
         this.read("}");
         
-        return new AST.SwitchStatement(head, cases, start, this.endOffset);
+        return new AST.SwitchStatement(head, cases, start, this.nodeEnd());
     }
     
     SwitchCase() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             expr = null, 
             list = [],
             type;
@@ -1790,12 +1783,12 @@ export class Parser {
             list.push(this.Statement());
         }
         
-        return new AST.SwitchCase(expr, list, start, this.endOffset);
+        return new AST.SwitchCase(expr, list, start, this.nodeEnd());
     }
     
     TryStatement() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("try");
         
@@ -1812,19 +1805,19 @@ export class Parser {
             fin = this.Block();
         }
         
-        return new AST.TryStatement(tryBlock, handler, fin, start, this.endOffset);
+        return new AST.TryStatement(tryBlock, handler, fin, start, this.nodeEnd());
     }
     
     CatchClause() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("catch");
         this.read("(");
         var param = this.BindingPattern();
         this.read(")");
         
-        return new AST.CatchClause(param, this.Block(), start, this.endOffset);
+        return new AST.CatchClause(param, this.Block(), start, this.nodeEnd());
     }
     
     // === Declarations ===
@@ -1842,23 +1835,25 @@ export class Parser {
             list.push(element = this.Declaration(isModule));
             
             // Check for directives
-            if (prologue && 
-                element.type === "ExpressionStatement" &&
-                element.expression.type === "String") {
-                
-                // Get the non-escaped literal text of the string
-                node = element.expression;
-                dir = this.input.slice(node.start + 1, node.end - 1);
-                
-                element.directive = dir;
-                
-                // Check for strict mode
-                if (dir === "use strict")
-                    this.setStrict(true);
+            if (prologue) {
             
-            } else {
-            
-                prologue = false;
+                if (element.type === "ExpressionStatement" &&
+                    element.expression.type === "String") {
+                
+                    // Get the non-escaped literal text of the string
+                    node = element.expression;
+                    dir = this.input.slice(node.start + 1, node.end - 1);
+                
+                    element.directive = dir;
+                
+                    // Check for strict mode
+                    if (dir === "use strict")
+                        this.setStrict(true);
+                        
+                } else {
+                
+                    prologue = false;
+                }
             }
         }
         
@@ -1885,7 +1880,7 @@ export class Parser {
                 
                 break;
             
-            case "Identifier":
+            case "IDENTIFIER":
             
                 if (this.peekLet())
                     return this.LexicalDeclaration();
@@ -1904,7 +1899,7 @@ export class Parser {
         var node = this.VariableDeclaration(false);
         
         this.Semicolon();
-        node.end = this.endOffset;
+        node.end = this.nodeEnd();
         
         return node;
     }
@@ -1913,14 +1908,13 @@ export class Parser {
     
     FunctionDeclaration() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             kind = "",
             tok;
         
         tok = this.peekToken();
         
-        // TODO: We are not checking newline constraints here.  Should we?
-        if (tok.type === "Identifier" && isFunctionModifier(tok.value)) {
+        if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
         
             this.read();
             kind = tok.value;
@@ -1950,19 +1944,19 @@ export class Parser {
             params,
             body,
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     FunctionExpression() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             ident = null,
             kind = "",
             tok;
         
         tok = this.peekToken();
         
-        if (tok.type === "Identifier" && isFunctionModifier(tok.value)) {
+        if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
         
             this.read();
             kind = tok.value;
@@ -1994,7 +1988,7 @@ export class Parser {
             params,
             body,
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     FormalParameters() {
@@ -2025,7 +2019,7 @@ export class Parser {
     
     FormalParameter() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             pattern = this.BindingPattern(),
             init = null;
         
@@ -2035,29 +2029,29 @@ export class Parser {
             init = this.AssignmentExpression();
         }
         
-        return new AST.FormalParameter(pattern, init, start, this.endOffset);
+        return new AST.FormalParameter(pattern, init, start, this.nodeEnd());
     }
     
     RestParameter() {
     
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("...");
         
-        return new AST.RestParameter(this.BindingIdentifier(), start, this.endOffset);
+        return new AST.RestParameter(this.BindingIdentifier(), start, this.nodeEnd());
     }
     
     FunctionBody() {
         
         this.context.functionBody = true;
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("{");
         var statements = this.StatementList(true, false);
         this.read("}");
         
-        return new AST.FunctionBody(statements, start, this.endOffset);
+        return new AST.FunctionBody(statements, start, this.nodeEnd());
     }
     
     ArrowFunctionHead(kind, formals, rest, start) {
@@ -2067,9 +2061,11 @@ export class Parser {
         this.context.functionType = kind;
         
         var params = this.transformFormals(formals, rest);
-        this.checkParameters(params);
         
-        return new AST.ArrowFunctionHead(params, start, this.endOffset);
+        // Perform validation on transformed formal parameters
+        this.checkArrowParameters(params);
+        
+        return new AST.ArrowFunctionHead(params, start, this.nodeEnd());
     }
     
     ArrowFunctionBody(head, noIn) {
@@ -2089,14 +2085,14 @@ export class Parser {
         
         this.popContext();
         
-        return new AST.ArrowFunction(kind, params, body, start, this.endOffset);
+        return new AST.ArrowFunction(kind, params, body, start, this.nodeEnd());
     }
     
     // === Modules ===
     
     ModuleDefinition() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             ident,
             target;
         
@@ -2114,7 +2110,7 @@ export class Parser {
                 ident,
                 target,
                 start,
-                this.endOffset);
+                this.nodeEnd());
             
         } else if (this.peekKeyword("from")) {
     
@@ -2126,19 +2122,19 @@ export class Parser {
                 ident,
                 target,
                 start,
-                this.endOffset);
+                this.nodeEnd());
         }
         
         return new AST.ModuleDeclaration(
             ident,
             this.ModuleBody(),
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ModuleDeclaration() {
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.readKeyword("module");
         
@@ -2146,14 +2142,15 @@ export class Parser {
             this.BindingIdentifier(),
             this.ModuleBody(),
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ModuleBody() {
     
-        this.pushContext(false, true);
+        this.pushContext(false);
+        this.setStrict(true);
         
-        var start = this.startOffset;
+        var start = this.nodeStart();
         
         this.read("{");
         var list = this.StatementList(true, true);
@@ -2161,17 +2158,17 @@ export class Parser {
         
         this.popContext();
         
-        return new AST.ModuleBody(list, start, this.endOffset);
+        return new AST.ModuleBody(list, start, this.nodeEnd());
     }
     
     ModuleSpecifier() {
     
-        return this.peek() === "String" ? this.String() : this.ModulePath();
+        return this.peek() === "STRING" ? this.String() : this.ModulePath();
     }
     
     ImportDeclaration() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             ident,
             from;
         
@@ -2179,21 +2176,21 @@ export class Parser {
         
         switch (this.peek()) {
         
-            case "Identifier":
+            case "IDENTIFIER":
             
                 ident = this.BindingIdentifier();
                 this.readKeyword("from");
                 from = this.ModuleSpecifier();
                 this.Semicolon();
                 
-                return new AST.ImportDefaultDeclaration(ident, from, start, this.endOffset);
+                return new AST.ImportDefaultDeclaration(ident, from, start, this.nodeEnd());
             
-            case "String":
+            case "STRING":
             
                 from = this.ModuleSpecifier();
                 this.Semicolon();
                 
-                return new AST.ImportDeclaration(null, from, start, this.endOffset);
+                return new AST.ImportDeclaration(null, from, start, this.nodeEnd());
         }
         
         var list = [];
@@ -2213,17 +2210,17 @@ export class Parser {
         from = this.ModuleSpecifier();
         this.Semicolon();
         
-        return new AST.ImportDeclaration(list, from, start, this.endOffset);
+        return new AST.ImportDeclaration(list, from, start, this.nodeEnd());
     }
     
     ImportSpecifier() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             hasLocal = false,
             local = null,
             remote;
         
-        if (this.peek() !== "Identifier") {
+        if (this.peek() !== "IDENTIFIER") {
         
             // Re-scan token as an identifier name
             this.unpeek();
@@ -2246,12 +2243,12 @@ export class Parser {
             this.checkBindingIdentifier(remote);
         }
         
-        return new AST.ImportSpecifier(remote, local, start, this.endOffset);
+        return new AST.ImportSpecifier(remote, local, start, this.nodeEnd());
     }
     
     ExportDeclaration() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             binding;
         
         this.read("export");
@@ -2275,7 +2272,7 @@ export class Parser {
                 binding = this.ClassDeclaration();
                 break;
             
-            case "Identifier":
+            case "IDENTIFIER":
             
                 if (this.peekLet()) {
                 
@@ -2303,12 +2300,12 @@ export class Parser {
                 break;
         }
         
-        return new AST.ExportDeclaration(binding, start, this.endOffset);
+        return new AST.ExportDeclaration(binding, start, this.nodeEnd());
     }
     
     ExportsList() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             list = null,
             from = null;
         
@@ -2346,12 +2343,12 @@ export class Parser {
             }
         }
         
-        return new AST.ExportsList(list, from, start, this.endOffset);
+        return new AST.ExportsList(list, from, start, this.nodeEnd());
     }
     
     ExportSpecifier() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             local = this.IdentifierName(),
             remote = null;
         
@@ -2361,12 +2358,12 @@ export class Parser {
             remote = this.IdentifierName();
         }
         
-        return new AST.ExportSpecifier(local, remote, start, this.endOffset);
+        return new AST.ExportSpecifier(local, remote, start, this.nodeEnd());
     }
     
     ModulePath() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             path = [];
         
         while (true) {
@@ -2377,14 +2374,14 @@ export class Parser {
             else break;
         }
         
-        return new AST.ModulePath(path, start, this.endOffset);
+        return new AST.ModulePath(path, start, this.nodeEnd());
     }
     
     // === Classes ===
     
     ClassDeclaration() {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             ident = null,
             base = null;
         
@@ -2403,18 +2400,18 @@ export class Parser {
             base,
             this.ClassBody(),
             start,
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ClassExpression() {
     
-        var start = this.startOffset, 
+        var start = this.nodeStart(), 
             ident = null,
             base = null;
         
         this.read("class");
         
-        if (this.peek() === "Identifier")
+        if (this.peek() === "IDENTIFIER")
             ident = this.BindingIdentifier();
         
         if (this.peek() === "extends") {
@@ -2428,14 +2425,15 @@ export class Parser {
             base, 
             this.ClassBody(), 
             start, 
-            this.endOffset);
+            this.nodeEnd());
     }
     
     ClassBody() {
     
-        this.pushContext(false, true);
+        this.pushContext(false);
+        this.setStrict(true);
         
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             nameSet = {}, 
             staticSet = {},
             list = [];
@@ -2449,12 +2447,12 @@ export class Parser {
         
         this.popContext();
         
-        return new AST.ClassBody(list, start, this.endOffset);
+        return new AST.ClassBody(list, start, this.nodeEnd());
     }
     
     ClassElement(nameSet, staticSet) {
     
-        var start = this.startOffset,
+        var start = this.nodeStart(),
             isStatic = false,
             flag = PROP_NORMAL,
             method,
@@ -2472,7 +2470,7 @@ export class Parser {
         method = this.MethodDefinition();
         this.checkClassElementName(method, nameSet);
         
-        return new AST.ClassElement(isStatic, method, start, this.endOffset);
+        return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
     }
     
 }
