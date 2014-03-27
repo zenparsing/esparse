@@ -1,5 +1,6 @@
-import { inspect } from "node:util";
 import { parseModule, parseScript } from "../main.js";
+
+var inspect = require("util").inspect;
 
 export function main(args) {
 

@@ -1,8 +1,8 @@
-module Path from "node:path";
-module FS from "node:fs";
-
-import { inspect } from "node:util";
 import { parseModule, parseScript } from "../src/main.js";
+
+var Path = require("path"),
+    FS = require("fs"),
+    inspect = require("util").inspect;
 
 var HOP = {}.hasOwnProperty,
     TEST_COMMENT = /\/\*\*[\s\S]+?\*\*\//g,

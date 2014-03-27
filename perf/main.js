@@ -1,9 +1,8 @@
-module Path from "node:path";
-module FS from "node:fs";
-
 import { Scanner, parseScript } from "../main.js";
 
-var Esprima = require("./parsers/esprima.js"),
+var Path = require("path"),
+    FS = require("fs"),
+    Esprima = require("./parsers/esprima.js"),
     EsprimaHarmony = require("./parsers/esprima-harmony.js"),
     Acorn = require("./parsers/acorn.js");
 

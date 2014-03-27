@@ -47,7 +47,7 @@ we build a list of ranges and output code for each target language:
 - C++:  We output two sorted arrays for whitespace and identifier characters.
   Each element in the array contains a 32 bit starting code point, a 
   16 bit range length, and a 16 bit flag field which is set to 1 if the range
-  is an IndentifierStart ranges.
+  is an IndentifierStart range.
   
   We also output a binary search algorithm which searches the array for a
   range which contains a given code point, and which has the appropriate
