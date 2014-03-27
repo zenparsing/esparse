@@ -7,6 +7,12 @@ export function main(args) {
         input = args[3],
         ast;
     
+    if (!input) {
+    
+        input = type;
+        type = "script";
+    }
+    
     switch (type) {
     
         case "module":
@@ -22,5 +28,7 @@ export function main(args) {
             return;
     }
     
+    console.log("\nGenerated AST:\n");
     console.log(inspect(ast, { colors: true, depth: 10 }));
+    console.log("");
 }

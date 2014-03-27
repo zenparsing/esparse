@@ -5,7 +5,7 @@
     <script src="../build/es6parse.js"></script>
     <script src="parsers/esprima.js"></script>
     <script src="parsers/acorn.js"></script>
-    <script src="input/jquery-1.9.1.js"></script>
+    <script src="_input/jquery-1.9.1.js"></script>
     <script>
     
     function runParser() {
@@ -13,11 +13,10 @@
         if (!parserInput)
             return;
         
+        var input = parserInput.toString();
+        
         console.log("parsing javascript...");
-        
-        for (var i = 0; i < 10; ++i)
-            es6parse.parseScript(parserInput.toString());
-        
+        es6parse.parseScript(input);
         console.log("finished");
     }
     

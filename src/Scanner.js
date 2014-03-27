@@ -48,7 +48,7 @@ function makeCharTable() {
     add("punctuator", "<>+-*%&|^!~=");
     add("dot", ".");
     add("slash", "/");
-    add("lbrace", "}");
+    add("rbrace", "}");
     add("zero", "0");
     add("string", "'\"");
     add("template", "`");
@@ -90,7 +90,7 @@ function binarySearch(array, val) {
 // Returns true if the character is a valid identifier part
 function isIdentifierPart(c) {
 
-    if (c > 123)
+    if (c > 127)
         return isIdentifierPartUnicode(c);
     
     return  c > 64 && c < 91 || 
@@ -144,7 +144,7 @@ function isPunctuatorNext(c) {
 // Returns true if the specified character is a valid numeric following character
 function isNumberFollow(c) {
 
-    if (c > 123)
+    if (c > 127)
         return isNumberFollowUnicode(c);
     
     return !(
@@ -160,7 +160,7 @@ function isNumberFollow(c) {
 // Returns true if the specified character is a valid numeric following character
 function isNumberFollowUnicode(c) {
 
-    return identifierStart.test(String.fromCharCode(c));
+    return !identifierStart.test(String.fromCharCode(c));
 }
 
 export class Scanner {
@@ -477,7 +477,7 @@ export class Scanner {
             
             case "identifier": return this.Identifier(context);
             
-            case "lbrace":
+            case "rbrace":
             
                 if (context === "template") return this.Template();
                 else return this.PunctuatorChar();

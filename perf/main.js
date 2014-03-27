@@ -1,7 +1,7 @@
 module Path from "node:path";
 module FS from "node:fs";
 
-import { Scanner, parseScript } from "../build/es6parse.js";
+import { Scanner, parseScript } from "../main.js";
 
 var Esprima = require("./parsers/esprima.js"),
     EsprimaHarmony = require("./parsers/esprima-harmony.js"),
@@ -136,45 +136,41 @@ var parsers = {
 
 
 export function main(args) {
+    
+    var libs = {};
+    Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
 
-    walkDirectory(Path.join(__dirname, "input"), path => {
+    var ts = +new Date,
+        lib = args[2] || "es6parse",
+        parser = parsers[lib],
+        size = 0;
+    
+    console.log(`\n>> Testing Parser Speed (${ lib })\n`);
+
+    walkDirectory(Path.join(__dirname, "_input"), path => {
 
         var input = FS.readFileSync(path, "utf8"),
-            name = Path.basename(path),
-            libs = {};
-    
-        Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
-    
-        console.log("[" + name + "]");
+            name = Path.basename(path);
+
+        console.log(`Parsing ${ name }`);
         
-        var ts = +new Date,
-            lib = args[2] || "es6parse",
-            parser = parsers[lib],
-            count = 50;
-    
-        if (lib === "chars")
-            return analyzeChars(input);
-        
-        if (lib === "reserved")
-            return analyzeReserved(input);
-            
         try {
     
-            for (var i = count; i--;)
-                parser(input = input + " ");
+            size += input.length;
+            parser(input);
             
         } catch (err) {
     
-            console.log(err);
+            console.log(`${ err.line }:${ err.column }`);
             throw err;
         }
-    
-        var ms = ((+new Date) - ts) / count;
-    
-        console.log("  " + lib + ": " + 
-            (ms / input.length * 1024 * 1024).toFixed(2) + " ms/MB, " +
-            (input.length * 1000 / ms / 1024 / 1024).toFixed(2) + " MB/sec");
         
     });
+    
+    var ms = ((+new Date) - ts);
+
+    console.log("\n>> Results: " + 
+        (ms / size * 1024 * 1024).toFixed(2) + " ms/MB, " +
+        (size * 1000 / ms / 1024 / 1024).toFixed(2) + " MB/sec\n");
     
 }
