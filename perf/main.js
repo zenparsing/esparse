@@ -133,7 +133,6 @@ var parsers = {
     "esprima-harmony": EsprimaHarmony.parse
 };
 
-
 export function main(args) {
     
     var libs = {};
