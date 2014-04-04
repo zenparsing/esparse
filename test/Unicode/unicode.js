@@ -56,9 +56,22 @@
     }]
 },
 
-// FIX
-/* \u0030abc; 
-"cannot use espace sequence to create invalid identifiers": {}
-*/
+/** \u{} **/
+"unicode escapes must have a valid hex value - 1": {},
+
+/** \u{hah} **/
+"unicode escapes must have a valid hex value - 2": {},
+
+/** \u{ **/
+"unicode escapes must have balanced braces": {},
+
+/** \u{12 } **/
+"unicode escapes cannot use space": {},
+
+/** \u0030abc; **/
+"cannot use escape sequence to create invalid identifiers": {},
+
+/** "\u{110000}" **/
+"unicode escapes cannot be greater than 0x10ffff": {}
 
 });

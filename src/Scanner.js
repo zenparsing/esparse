@@ -91,7 +91,7 @@ function binarySearch(array, val) {
 function isIdentifierPart(c) {
 
     if (c > 127)
-        return isIdentifierPartUnicode(c);
+        return identifierPart.test(String.fromCharCode(c));
     
     return  c > 64 && c < 91 || 
             c > 96 && c < 123 ||
@@ -99,12 +99,6 @@ function isIdentifierPart(c) {
             c === 36 ||
             c === 95 ||
             c === 92;
-}
-
-// Returns true if the character is a valid identifier part
-function isIdentifierPartUnicode(c) {
-
-    return identifierPart.test(String.fromCharCode(c));
 }
 
 // Returns true if the specified character is a newline
@@ -261,11 +255,8 @@ export class Scanner {
         return this.input.charAt(this.offset++);
     }
     
-    readIdentifierEscape() {
-    
-        if (this.readChar() !== "u")
-            return "";
-        
+    readUnicodeEscape() {
+  
         var hex = "";
         
         if (this.peekChar() === "{") {
@@ -273,18 +264,23 @@ export class Scanner {
             this.offset++;
             hex = this.readHex(0);
             
-            if (this.readChar() !== "}")
-                return "";
+            if (hex.length < 1 || this.readChar() !== "}")
+                return null;
         
         } else {
         
             hex = this.readHex(4);
         
             if (hex.length < 4)
-                return "";
+                return null;
         }
         
-        return String.fromCharCode(parseInt(hex, 16));
+        var val = parseInt(hex, 16);
+        
+        if (val > 1114111)
+            return null;
+        
+        return String.fromCharCode(val);
     }
     
     readOctalEscape() {
@@ -358,21 +354,7 @@ export class Scanner {
             
             case "u":
             
-                if (this.peekChar() === "{") {
-                
-                    this.offset++;
-                    esc = this.readHex(0);
-                    
-                    if (this.readChar() !== "}")
-                        return null;
-                    
-                } else {
-                
-                    esc = this.readHex(4);
-                    if (esc.length < 4) return null;
-                }
-                
-                return String.fromCharCode(parseInt(esc, 16));
+                return this.readUnicodeEscape();
             
             default: 
             
@@ -746,6 +728,7 @@ export class Scanner {
         if (!chr)
             return this.Error();
         
+        // TODO:  Early errors here
         if (isIdentifierPart(this.peekCode()))
             flags = this.Identifier("name");
         
@@ -864,27 +847,43 @@ export class Scanner {
     Identifier(context) {
     
         var start = this.offset,
+            isStart = true,
             id = "",
             code = 0,
             esc = "";
 
-        while (isIdentifierPart(code = this.peekCode())) {
+        while (true) {
+        
+            code = this.peekCode();
         
             if (code === 92 /* backslash */) {
             
                 id += this.input.slice(start, this.offset++);
-                esc = this.readIdentifierEscape();
+                
+                if (this.readChar() !== "u")
+                    return this.Error();
+                
+                esc = this.readUnicodeEscape();
                 
                 if (esc === null)
+                    return this.Error();
+
+                if (!(isStart ? identifierStart : identifierPart).test(esc))
                     return this.Error();
                 
                 id += esc;
                 start = this.offset;
                 
-            } else {
+            } else if (isStart || isIdentifierPart(code)) {
             
                 this.offset++;
+                
+            } else {
+            
+                break;
             }
+            
+            isStart = false;
         }
         
         id += this.input.slice(start, this.offset);
