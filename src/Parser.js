@@ -1159,8 +1159,11 @@ export class Parser {
         if (kind === "generator" || isFunctionModifier(kind))
             this.context.functionType = kind;
         
-        var params = this.FormalParameters(),
-            body = this.FunctionBody();
+        var params = kind === "get" || kind === "set" ?
+            this.AccessorParameters(kind) :
+            this.FormalParameters();
+        
+        var body = this.FunctionBody();
         
         this.checkParameters(params);
         this.popContext();
@@ -1992,6 +1995,20 @@ export class Parser {
             this.nodeEnd());
     }
     
+    AccessorParameters(kind) {
+    
+        var list = [];
+        
+        this.read("(");
+        
+        if (kind === "set")
+            list.push(this.FormalParameter(false));
+        
+        this.read(")");
+        
+        return list;
+    }
+    
     FormalParameters() {
     
         var list = [];
@@ -2010,7 +2027,7 @@ export class Parser {
                 break;
             }
             
-            list.push(this.FormalParameter());
+            list.push(this.FormalParameter(true));
         }
         
         this.read(")");
@@ -2018,13 +2035,13 @@ export class Parser {
         return list;
     }
     
-    FormalParameter() {
+    FormalParameter(allowDefault) {
     
         var start = this.nodeStart(),
             pattern = this.BindingPattern(),
             init = null;
         
-        if (this.peek() === "=") {
+        if (allowDefault && this.peek() === "=") {
         
             this.read("=");
             init = this.AssignmentExpression();

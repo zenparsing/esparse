@@ -178,7 +178,7 @@ function parseTestComments(text) {
 // Displays an object tree
 function displayTree(tree) {
 
-    console.log(inspect(tree, false, 10, true));
+    console.log(inspect(tree, false, 20, true));
 }
 
 function run() {

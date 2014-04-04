@@ -113,7 +113,7 @@ export class Validate {
     }
     
     // Checks function formal parameters for strict mode restrictions
-    checkParameters(params) {
+    checkParameters(params, kind) {
     
         var names = {}, 
             name,
