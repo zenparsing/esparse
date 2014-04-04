@@ -687,9 +687,11 @@ export class Scanner {
         
         var backslash = false, 
             inClass = false,
-            flags = null,
+            flags = "",
+            flagStart = 0,
             val = "", 
-            chr = "";
+            chr = "",
+            code = 0;
         
         while (chr = this.readChar()) {
         
@@ -728,9 +730,19 @@ export class Scanner {
         if (!chr)
             return this.Error();
         
-        // TODO:  Early errors here
-        if (isIdentifierPart(this.peekCode()))
-            flags = this.Identifier("name");
+        flagStart = this.offset;
+        
+        while (isIdentifierPart(code = this.peekCode())) {
+        
+            // Unicode escapes are not allowed in regular expression flags
+            if (code === 92)
+                return this.Error();
+            
+            this.offset++;
+        }
+        
+        if (this.offset > flagStart)
+            flags = this.input.slice(flagStart, this.offset);
         
         this.value = val;
         this.regexFlags = flags;
@@ -847,7 +859,7 @@ export class Scanner {
     Identifier(context) {
     
         var start = this.offset,
-            isStart = true,
+            startChar = true,
             id = "",
             code = 0,
             esc = "";
@@ -868,13 +880,13 @@ export class Scanner {
                 if (esc === null)
                     return this.Error();
 
-                if (!(isStart ? identifierStart : identifierPart).test(esc))
+                if (!(startChar ? identifierStart : identifierPart).test(esc))
                     return this.Error();
                 
                 id += esc;
                 start = this.offset;
                 
-            } else if (isStart || isIdentifierPart(code)) {
+            } else if (startChar || isIdentifierPart(code)) {
             
                 this.offset++;
                 
@@ -883,7 +895,7 @@ export class Scanner {
                 break;
             }
             
-            isStart = false;
+            startChar = false;
         }
         
         id += this.input.slice(start, this.offset);

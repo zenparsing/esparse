@@ -931,6 +931,7 @@ export class Parser {
     
     RegularExpression() {
     
+        // TODO:  Validate regular expression against RegExp grammar (21.2.1)
         var token = this.readToken("REGEX");
         return new AST.RegularExpression(token.value, token.regexFlags, token.start, token.end);
     }
