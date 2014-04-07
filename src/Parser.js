@@ -9,6 +9,11 @@ var PROP_NORMAL = 1,
     PROP_GET = 4,
     PROP_SET = 8;
 
+// Label type flags
+var LABEL_STATEMENT = 1,
+    LABEL_ITERATION = 2,
+    LABEL_SWITCH = 4;
+
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
 
@@ -642,8 +647,8 @@ export class Parser {
             this.read();
             expr = this.UnaryExpression();
             
-            if (type === "delete" && expr.type === "Identifier")
-                this.addStrictError("Cannot delete unqualified property in strict mode", expr);
+            if (type === "delete")
+                this.checkDelete(expr);
             
             return new AST.UnaryExpression(type, expr, start, this.nodeEnd());
         }
@@ -789,7 +794,12 @@ export class Parser {
         var start = this.nodeStart();
         this.read("super");
         
-        return new AST.SuperExpression(start, this.nodeEnd());
+        var node = new AST.SuperExpression(start, this.nodeEnd());
+        
+        if (!this.context.isFunction)
+            this.fail("Super keyword outside of function", node);
+        
+        return node;
     }
     
     ArgumentList() {
@@ -1226,14 +1236,18 @@ export class Parser {
     
     GeneratorComprehension() {
     
-        var start = this.nodeStart();
+        var start = this.nodeStart(),
+            fType = this.context.functionType;
         
+        // Generator comprehensions cannot contain contextual expresions like yield
+        this.context.functionType = "";
         this.read("(");
         
         var list = this.ComprehensionQualifierList(),
             expr = this.AssignmentExpression();
         
         this.read(")");
+        this.context.functionType = fType;
         
         return new AST.GeneratorComprehension(list, expr, start, this.nodeEnd());
     }
@@ -1498,6 +1512,31 @@ export class Parser {
         this.Semicolon();
         
         return new AST.ReturnStatement(value, start, this.nodeEnd());
+    }
+    
+    BreakStatement() {
+    
+        var start = this.nodeStart(),
+            lableSet = this.context.labelSet;
+        
+        this.read("break");
+        
+        var label = this.peekEnd() ? null : this.Identifier(),
+            name = mapKey(label && label.value);
+        
+        this.Semicolon();
+        
+        var node = new AST.BreakStatement(label, start, this.nodeEnd());
+        
+        if (label) {
+        
+            if (!labelSet[name])
+                this.fail("Invalid label", label);
+        
+        } else {
+            
+            // TODO
+        }
     }
 
     // TODO: Separate out break and continue, so it's easier to follow the logic?

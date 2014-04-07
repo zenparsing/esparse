@@ -142,4 +142,7 @@
 /** (class C extends A + B {}) **/
 "extends clause does not allow assignment expression in class expression": {},
 
+/** super() **/
+'super cannot appear outside of a function': {},
+
 })

@@ -901,7 +901,7 @@ export class Scanner {
         id += this.input.slice(start, this.offset);
         
         if (context !== "name" && reservedWord.test(id))
-            return id;
+            return esc ? this.Error() : id;
         
         this.value = id;
         
@@ -964,7 +964,9 @@ export class Scanner {
     
     Error() {
     
-        this.offset++;
+        if (this.start === this.offset)
+            this.offset++;
+        
         return "ILLEGAL";
     }
     

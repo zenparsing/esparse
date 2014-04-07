@@ -42,6 +42,15 @@ function isDuplicateName(type, flags, strict) {
     }
 }
 
+// Unwraps parens surrounding an expression
+function unwrapParens(node) {
+
+    // Remove any parenthesis surrounding the target
+    for (; node.type === "ParenExpression"; node = node.expression);
+    
+    return node;
+}
+
 export class Validate {
 
     // Checks an assignment target for strict mode restrictions
@@ -291,6 +300,14 @@ export class Validate {
                 parent.invalidNodes.push(item);
         }
         
+    }
+    
+    checkDelete(node) {
+    
+        node = unwrapParens(node);
+        
+        if (node.type === "Identifier")
+            this.addStrictError("Cannot delete unqualified property in strict mode", node);
     }
     
 }
