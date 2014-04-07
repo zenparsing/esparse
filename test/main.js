@@ -185,7 +185,7 @@ function run() {
 
     var currentGroup = null;
     
-    printMessage("\nStarting es6parse tests...");
+    printMessage("\nStarting esparse tests...");
     
     walkDirectory(__dirname, path => {
     

@@ -128,7 +128,7 @@ var parsers = {
     "native": nativeParse, 
     "scanner": scanOnly,
     "acorn": Acorn.parse,
-    "es6parse": parseScript,
+    "esparse": parseScript,
     "esprima": Esprima.parse,
     "esprima-harmony": EsprimaHarmony.parse
 };
@@ -139,7 +139,7 @@ export function main(args) {
     Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
 
     var ts = +new Date,
-        lib = args[2] || "es6parse",
+        lib = args[2] || "esparse",
         parser = parsers[lib],
         size = 0;
     

@@ -1,4 +1,4 @@
-/*=es6now=*/(function(fn, deps, name) { if (typeof exports !== 'undefined') fn.call(typeof global === 'object' ? global : this, require, exports); else if (typeof __MODULE === 'function') __MODULE(fn, deps); else if (typeof define === 'function' && define.amd) define(['require', 'exports'].concat(deps), fn); else if (typeof window !== 'undefined' && name) fn.call(window, null, window[name] = {}); else fn.call(window || this, null, {}); })(function(require, exports) { 'use strict'; function __load(p) { var e = require(p); return typeof e === 'object' ? e : { 'default': e }; } 
+/*=es6now=*/(function(fn, deps, name) { if (typeof exports !== 'undefined') fn.call(typeof global === 'object' ? global : this, require, exports); else if (typeof define === 'function' && define.amd) define(['require', 'exports'].concat(deps), fn); else if (typeof window !== 'undefined' && name) fn.call(window, null, window[name] = {}); else fn.call(window || this, null, {}); })(function(require, exports) { 'use strict'; function __load(p) { var e = require(p); return typeof e === 'object' ? e : { 'default': e }; } 
 
 var __this = this; this.es6now = {};
 
@@ -2072,7 +2072,7 @@ function binarySearch(array, val) {
 function isIdentifierPart(c) {
 
     if (c > 127)
-        return isIdentifierPartUnicode(c);
+        return identifierPart.test(String.fromCharCode(c));
     
     return  c > 64 && c < 91 || 
             c > 96 && c < 123 ||
@@ -2080,12 +2080,6 @@ function isIdentifierPart(c) {
             c === 36 ||
             c === 95 ||
             c === 92;
-}
-
-// Returns true if the character is a valid identifier part
-function isIdentifierPartUnicode(c) {
-
-    return identifierPart.test(String.fromCharCode(c));
 }
 
 // Returns true if the specified character is a newline
@@ -2242,11 +2236,8 @@ var Scanner = es6now.Class(function(__super) { return {
         return this.input.charAt(this.offset++);
     },
     
-    readIdentifierEscape: function() {
-    
-        if (this.readChar() !== "u")
-            return "";
-        
+    readUnicodeEscape: function() {
+  
         var hex = "";
         
         if (this.peekChar() === "{") {
@@ -2254,18 +2245,23 @@ var Scanner = es6now.Class(function(__super) { return {
             this.offset++;
             hex = this.readHex(0);
             
-            if (this.readChar() !== "}")
-                return "";
+            if (hex.length < 1 || this.readChar() !== "}")
+                return null;
         
         } else {
         
             hex = this.readHex(4);
         
             if (hex.length < 4)
-                return "";
+                return null;
         }
         
-        return String.fromCharCode(parseInt(hex, 16));
+        var val = parseInt(hex, 16);
+        
+        if (val > 1114111)
+            return null;
+        
+        return String.fromCharCode(val);
     },
     
     readOctalEscape: function() {
@@ -2339,21 +2335,7 @@ var Scanner = es6now.Class(function(__super) { return {
             
             case "u":
             
-                if (this.peekChar() === "{") {
-                
-                    this.offset++;
-                    esc = this.readHex(0);
-                    
-                    if (this.readChar() !== "}")
-                        return null;
-                    
-                } else {
-                
-                    esc = this.readHex(4);
-                    if (esc.length < 4) return null;
-                }
-                
-                return String.fromCharCode(parseInt(esc, 16));
+                return this.readUnicodeEscape();
             
             default: 
             
@@ -2686,9 +2668,11 @@ var Scanner = es6now.Class(function(__super) { return {
         
         var backslash = false, 
             inClass = false,
-            flags = null,
+            flags = "",
+            flagStart = 0,
             val = "", 
-            chr = "";
+            chr = "",
+            code = 0;
         
         while (chr = this.readChar()) {
         
@@ -2727,8 +2711,19 @@ var Scanner = es6now.Class(function(__super) { return {
         if (!chr)
             return this.Error();
         
-        if (isIdentifierPart(this.peekCode()))
-            flags = this.Identifier("name");
+        flagStart = this.offset;
+        
+        while (isIdentifierPart(code = this.peekCode())) {
+        
+            // Unicode escapes are not allowed in regular expression flags
+            if (code === 92)
+                return this.Error();
+            
+            this.offset++;
+        }
+        
+        if (this.offset > flagStart)
+            flags = this.input.slice(flagStart, this.offset);
         
         this.value = val;
         this.regexFlags = flags;
@@ -2845,33 +2840,49 @@ var Scanner = es6now.Class(function(__super) { return {
     Identifier: function(context) {
     
         var start = this.offset,
+            startChar = true,
             id = "",
             code = 0,
             esc = "";
 
-        while (isIdentifierPart(code = this.peekCode())) {
+        while (true) {
+        
+            code = this.peekCode();
         
             if (code === 92 /* backslash */) {
             
                 id += this.input.slice(start, this.offset++);
-                esc = this.readIdentifierEscape();
+                
+                if (this.readChar() !== "u")
+                    return this.Error();
+                
+                esc = this.readUnicodeEscape();
                 
                 if (esc === null)
+                    return this.Error();
+
+                if (!(startChar ? identifierStart : identifierPart).test(esc))
                     return this.Error();
                 
                 id += esc;
                 start = this.offset;
                 
-            } else {
+            } else if (startChar || isIdentifierPart(code)) {
             
                 this.offset++;
+                
+            } else {
+            
+                break;
             }
+            
+            startChar = false;
         }
         
         id += this.input.slice(start, this.offset);
         
         if (context !== "name" && reservedWord.test(id))
-            return id;
+            return esc ? this.Error() : id;
         
         this.value = id;
         
@@ -2934,7 +2945,9 @@ var Scanner = es6now.Class(function(__super) { return {
     
     Error: function() {
     
-        this.offset++;
+        if (this.start === this.offset)
+            this.offset++;
+        
         return "ILLEGAL";
     }
     
@@ -3133,7 +3146,34 @@ var Transform = es6now.Class(function(__super) { return {
 
 exports.Transform = Transform; return exports; }).call(this, {});
 
+var IntMap_ = (function(exports) {
+
+
+var IntMap = es6now.Class(function(__super) { return {
+
+    constructor: function IntMap() {
+    
+        this.obj = Object.create(null);
+    },
+    
+    get: function(key) {
+    
+        return this.obj[key] | 0;
+    },
+    
+    set: function(key, val) {
+    
+        return this.obj[key] = val | 0;
+    }
+    
+} });
+
+
+exports.IntMap = IntMap; return exports; }).call(this, {});
+
 var Validate_ = (function(exports) {
+
+var IntMap = IntMap_.IntMap;
 
 // Object literal property name flags
 var PROP_NORMAL = 1,
@@ -3150,12 +3190,6 @@ var strictReservedWord = new RegExp("^(?:" +
 function isStrictReserved(word) {
 
     return strictReservedWord.test(word);
-}
-
-// Encodes a string as a map key for use in regular object
-function mapKey(name) { 
-
-    return "." + (name || "");
 }
 
 // Returns true if the specified name is a restricted identifier in strict mode
@@ -3177,6 +3211,15 @@ function isDuplicateName(type, flags, strict) {
         case PROP_SET: return flags !== PROP_GET;
         default: return !!flags;
     }
+}
+
+// Unwraps parens surrounding an expression
+function unwrapParens(node) {
+
+    // Remove any parenthesis surrounding the target
+    for (; node.type === "ParenExpression"; node = node.expression);
+    
+    return node;
 }
 
 var Validate = es6now.Class(function(__super) { return {
@@ -3250,11 +3293,10 @@ var Validate = es6now.Class(function(__super) { return {
     },
     
     // Checks function formal parameters for strict mode restrictions
-    checkParameters: function(params) {
+    checkParameters: function(params, kind) {
     
-        var names = {}, 
+        var names = new IntMap, 
             name,
-            key,
             node,
             i;
         
@@ -3275,15 +3317,14 @@ var Validate = es6now.Class(function(__super) { return {
                 continue;
             
             name = node.pattern.value;
-            key = mapKey(name);
             
             if (isPoisonIdent(name))
                 this.addStrictError("Parameter name " + name + " is not allowed in strict mode", node);
             
-            if (names[key])
+            if (names.get(name))
                 this.addStrictError("Strict mode function may not have duplicate parameter names", node);
             
-            names[key] = 1;
+            names.set(name, 1);
         }
     },
     
@@ -3353,15 +3394,16 @@ var Validate = es6now.Class(function(__super) { return {
         }
 
         // Check for duplicate names
-        name = mapKey(node.name.value);
+        var name = node.name.value,
+            currentFlags = nameSet.get(name);
 
-        if (isDuplicateName(flag, nameSet[name], false))
+        if (isDuplicateName(flag, currentFlags, false))
             this.addInvalidNode("Duplicate property names in object literal not allowed", node);
-        else if (isDuplicateName(flag, nameSet[name], true))
+        else if (isDuplicateName(flag, currentFlags, true))
             this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
 
         // Set name flag
-        nameSet[name] |= flag;
+        nameSet.set(name, currentFlags | flag);
     },
     
     // Checks for duplicate class element names
@@ -3370,8 +3412,7 @@ var Validate = es6now.Class(function(__super) { return {
         if (node.name.type !== "Identifier")
             return;
         
-        var flag = PROP_NORMAL,
-            name;
+        var flag = PROP_NORMAL;
         
         switch (node.kind) {
 
@@ -3380,13 +3421,14 @@ var Validate = es6now.Class(function(__super) { return {
         }
 
         // Check for duplicate names
-        name = mapKey(node.name.value);
+        var name = node.name.value,
+            currentFlags = nameSet.get(name);
 
-        if (isDuplicateName(flag, nameSet[name], false))
+        if (isDuplicateName(flag, currentFlags, false))
             this.addInvalidNode("Duplicate method names in class not allowed", node);
 
         // Set name flag
-        nameSet[name] |= flag;
+        nameSet.set(name, currentFlags | flag);
     },
     
     checkInvalidNodes: function() {
@@ -3428,6 +3470,14 @@ var Validate = es6now.Class(function(__super) { return {
                 parent.invalidNodes.push(item);
         }
         
+    },
+    
+    checkDelete: function(node) {
+    
+        node = unwrapParens(node);
+        
+        if (node.type === "Identifier")
+            this.addStrictError("Cannot delete unqualified property in strict mode", node);
     }, constructor: function Validate() {}
     
 } });
@@ -3440,12 +3490,7 @@ var AST = AST_.AST;
 var Scanner = Scanner_.Scanner;
 var Transform = Transform_.Transform;
 var Validate = Validate_.Validate;
-
-// Object literal property name flags
-var PROP_NORMAL = 1,
-    PROP_DATA = 2,
-    PROP_GET = 4,
-    PROP_SET = 8;
+var IntMap = IntMap_.IntMap;
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -3533,6 +3578,9 @@ function isUnary(op) {
 // Returns true if the value is a function modifier keyword
 function isFunctionModifier(value) {
 
+    // TODO:  Here we just test a string value, but what if the identifier contains
+    // unicode escapes?
+    
     switch (value) {
     
         case "async": return true;
@@ -3540,9 +3588,6 @@ function isFunctionModifier(value) {
     
     return false;
 }
-
-// Encodes a string as a map key for use in regular object
-function mapKey(name) { return "." + (name || "") }
 
 // Copies token data
 function copyToken(from, to) {
@@ -3569,8 +3614,9 @@ var Context = es6now.Class(function(__super) { return {
         this.isFunction = isFunction;
         this.functionBody = false;
         this.functionType = "";
-        this.labelSet = {};
+        this.labelSet = new IntMap;
         this.switchDepth = 0;
+        this.loopDepth = 0;
         this.invalidNodes = [];
     }
 } });
@@ -3598,7 +3644,9 @@ var Parser = es6now.Class(function(__super) { return {
         var scanner = this.scanner,
             type = "";
         
-        do { type = scanner.next(context || ""); }
+        context = context || "";
+        
+        do { type = scanner.next(context); }
         while (type === "COMMENT");
         
         return scanner;
@@ -3689,6 +3737,10 @@ var Parser = es6now.Class(function(__super) { return {
     
     readKeyword: function(word) {
     
+        // TODO:  What if token has a unicode escape?  Does it still count as the keyword?
+        // Do we fail if the keyword has a unicode escape (this would mirror what happens
+        // with reserved words).
+        
         var token = this.readToken();
         
         if (token.type === word || token.type === "IDENTIFIER" && token.value === word)
@@ -3731,16 +3783,16 @@ var Parser = es6now.Class(function(__super) { return {
     
     peekYield: function() {
     
-        return this.peekKeyword("yield") && 
+        return this.context.functionBody &&
             this.context.functionType === "generator" && 
-            this.context.functionBody;
+            this.peekKeyword("yield");
     },
     
     peekAwait: function() {
     
-        return this.peekKeyword("await") && 
+        return this.context.functionBody && 
             this.context.functionType === "async" &&
-            this.context.functionBody;
+            this.peekKeyword("await");
     },
     
     peekFunctionModifier: function() {
@@ -3790,7 +3842,7 @@ var Parser = es6now.Class(function(__super) { return {
     fail: function(msg, node) {
     
         if (!node)
-            node = this.peek0;
+            node = this.peekToken();
         
         var pos = this.scanner.position(node.start),
             err = new SyntaxError(msg);
@@ -3858,6 +3910,11 @@ var Parser = es6now.Class(function(__super) { return {
     
         node.error = error;
         this.context.invalidNodes.push({ node: node, strict: !!strict });
+    },
+    
+    setLoopLabel: function(label) {
+    
+        this.context.labelSet.set(label, 2);
     },
     
     // === Top Level ===
@@ -4080,8 +4137,8 @@ var Parser = es6now.Class(function(__super) { return {
             this.read();
             expr = this.UnaryExpression();
             
-            if (type === "delete" && expr.type === "Identifier")
-                this.addStrictError("Cannot delete unqualified property in strict mode", expr);
+            if (type === "delete")
+                this.checkDelete(expr);
             
             return new AST.UnaryExpression(type, expr, start, this.nodeEnd());
         }
@@ -4227,7 +4284,12 @@ var Parser = es6now.Class(function(__super) { return {
         var start = this.nodeStart();
         this.read("super");
         
-        return new AST.SuperExpression(start, this.nodeEnd());
+        var node = new AST.SuperExpression(start, this.nodeEnd());
+        
+        if (!this.context.isFunction)
+            this.fail("Super keyword outside of function", node);
+        
+        return node;
     },
     
     ArgumentList: function() {
@@ -4369,6 +4431,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     RegularExpression: function() {
     
+        // TODO:  Validate regular expression against RegExp grammar (21.2.1)
         var token = this.readToken("REGEX");
         return new AST.RegularExpression(token.value, token.regexFlags, token.start, token.end);
     },
@@ -4457,8 +4520,8 @@ var Parser = es6now.Class(function(__super) { return {
     ObjectLiteral: function() {
     
         var start = this.nodeStart(),
+            nameSet = new IntMap,
             list = [],
-            nameSet = {},
             node,
             flag,
             key;
@@ -4596,8 +4659,11 @@ var Parser = es6now.Class(function(__super) { return {
         if (kind === "generator" || isFunctionModifier(kind))
             this.context.functionType = kind;
         
-        var params = this.FormalParameters(),
-            body = this.FunctionBody();
+        var params = kind === "get" || kind === "set" ?
+            this.AccessorParameters(kind) :
+            this.FormalParameters();
+        
+        var body = this.FunctionBody();
         
         this.checkParameters(params);
         this.popContext();
@@ -4660,14 +4726,18 @@ var Parser = es6now.Class(function(__super) { return {
     
     GeneratorComprehension: function() {
     
-        var start = this.nodeStart();
+        var start = this.nodeStart(),
+            fType = this.context.functionType;
         
+        // Generator comprehensions cannot contain contextual expresions like yield
+        this.context.functionType = "";
         this.read("(");
         
         var list = this.ComprehensionQualifierList(),
             expr = this.AssignmentExpression();
         
         this.read(")");
+        this.context.functionType = fType;
         
         return new AST.GeneratorComprehension(list, expr, start, this.nodeEnd());
     },
@@ -4741,7 +4811,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     // === Statements ===
     
-    Statement: function() {
+    Statement: function(label) {
     
         var next;
         
@@ -4763,36 +4833,20 @@ var Parser = es6now.Class(function(__super) { return {
             case ";": return this.EmptyStatement();
             case "var": return this.VariableStatement();
             case "return": return this.ReturnStatement();
-            case "break":
-            case "continue": return this.BreakOrContinueStatement();
+            case "break": return this.BreakStatement();
+            case "continue": return this.ContinueStatement();
             case "throw": return this.ThrowStatement();
             case "debugger": return this.DebuggerStatement();
             case "if": return this.IfStatement();
-            case "do": return this.DoWhileStatement();
-            case "while": return this.WhileStatement();
-            case "for": return this.ForStatement();
+            case "do": return this.DoWhileStatement(label);
+            case "while": return this.WhileStatement(label);
+            case "for": return this.ForStatement(label);
             case "with": return this.WithStatement();
             case "switch": return this.SwitchStatement();
             case "try": return this.TryStatement();
             
             default: return this.ExpressionStatement();
         }
-    },
-    
-    StatementWithLabel: function(label) {
-    
-        var name = mapKey(label && label.value),
-            labelSet = this.context.labelSet,
-            stmt;
-        
-        if (!labelSet[name]) labelSet[name] = 0;
-        else if (label) this.fail("Invalid label", label);
-        
-        labelSet[name] += 1;
-        stmt = this.Statement();
-        labelSet[name] -= 1;
-        
-        return stmt;
     },
     
     Block: function() {
@@ -4818,13 +4872,22 @@ var Parser = es6now.Class(function(__super) { return {
     LabelledStatement: function() {
     
         var start = this.nodeStart(),
-            label = this.Identifier();
+            label = this.Identifier(),
+            name = label.value,
+            labelSet = this.context.labelSet;
+        
+        if (labelSet.get(name) > 0)
+            this.fail("Invalid label", label);
         
         this.read(":");
         
+        labelSet.set(name, 1);
+        var statement = this.Statement(name);
+        labelSet.set(name, 0);
+        
         return new AST.LabelledStatement(
             label, 
-            this.StatementWithLabel(label),
+            statement,
             start,
             this.nodeEnd());
     },
@@ -4933,38 +4996,57 @@ var Parser = es6now.Class(function(__super) { return {
         
         return new AST.ReturnStatement(value, start, this.nodeEnd());
     },
-
-    // TODO: Separate out break and continue, so it's easier to follow the logic?
-    BreakOrContinueStatement: function() {
+    
+    BreakStatement: function() {
     
         var start = this.nodeStart(),
-            token = this.readToken(),
-            keyword = token.type,
-            labelSet = this.context.labelSet;
+            context = this.context,
+            labelSet = context.labelSet;
         
-        var label = this.peekEnd() ? null : this.Identifier(),
-            name = mapKey(label && label.value);
-        
+        this.read("break");
+        var label = this.peekEnd() ? null : this.Identifier();
         this.Semicolon();
         
-        var node = keyword === "break" ?
-            new AST.BreakStatement(label, start, this.nodeEnd()) :
-            new AST.ContinueStatement(label, start, this.nodeEnd());
-            
+        var node = new AST.BreakStatement(label, start, this.nodeEnd());
+        
         if (label) {
         
-            if (!labelSet[name])
+            if (labelSet.get(label.value) === 0)
                 this.fail("Invalid label", label);
+                
+        } else if (context.loopDepth === 0 && context.switchDepth === 0) {
         
-        } else {
-        
-            if (!labelSet[name] && !(keyword === "break" && this.context.switchDepth > 0))
-                this.fail("Invalid " + keyword + " statement", node);
+            this.fail("Break not contained within a switch or loop", node);
         }
         
         return node;
     },
     
+    ContinueStatement: function() {
+    
+        var start = this.nodeStart(),
+            context = this.context,
+            labelSet = context.labelSet;
+        
+        this.read("continue");
+        var label = this.peekEnd() ? null : this.Identifier();
+        this.Semicolon();
+        
+        var node = new AST.ContinueStatement(label, start, this.nodeEnd());
+        
+        if (label) {
+        
+            if (labelSet.get(label.value) !== 2)
+                this.fail("Invalid label", label);
+                
+        } else if (context.loopDepth === 0) {
+        
+            this.fail("Continue not contained within a loop", node);
+        }
+        
+        return node;
+    },
+
     ThrowStatement: function() {
     
         var start = this.nodeStart();
@@ -5014,14 +5096,20 @@ var Parser = es6now.Class(function(__super) { return {
         return new AST.IfStatement(test, body, elseBody, start, this.nodeEnd());
     },
     
-    DoWhileStatement: function() {
+    DoWhileStatement: function(label) {
     
         var start = this.nodeStart(),
             body, 
             test;
         
+        if (label) 
+            this.setLoopLabel(label);
+        
         this.read("do");
-        body = this.StatementWithLabel();
+        
+        this.context.loopDepth += 1;
+        body = this.Statement();
+        this.context.loopDepth -= 1;
         
         this.read("while");
         this.read("(");
@@ -5033,26 +5121,38 @@ var Parser = es6now.Class(function(__super) { return {
         return new AST.DoWhileStatement(body, test, start, this.nodeEnd());
     },
     
-    WhileStatement: function() {
+    WhileStatement: function(label) {
     
         var start = this.nodeStart();
         
+        if (label) 
+            this.setLoopLabel(label);
+        
         this.read("while");
         this.read("(");
+        var expr = this.Expression();
+        this.read(")");
+        
+        this.context.loopDepth += 1;
+        var statement = this.Statement();
+        this.context.loopDepth -= 1;
         
         return new AST.WhileStatement(
-            this.Expression(), 
-            (this.read(")"), this.StatementWithLabel()), 
+            expr, 
+            statement, 
             start, 
             this.nodeEnd());
     },
     
-    ForStatement: function() {
+    ForStatement: function(label) {
     
         var start = this.nodeStart(),
             init = null,
             test,
             step;
+        
+        if (label) 
+            this.setLoopLabel(label);
         
         this.read("for");
         this.read("(");
@@ -5098,11 +5198,15 @@ var Parser = es6now.Class(function(__super) { return {
         
         this.read(")");
         
+        this.context.loopDepth += 1;
+        var statement = this.Statement();
+        this.context.loopDepth -= 1;
+        
         return new AST.ForStatement(
             init, 
             test, 
             step, 
-            this.StatementWithLabel(), 
+            statement, 
             start, 
             this.nodeEnd());
     },
@@ -5115,10 +5219,14 @@ var Parser = es6now.Class(function(__super) { return {
         var expr = this.Expression();
         this.read(")");
         
+        this.context.loopDepth += 1;
+        var statement = this.Statement();
+        this.context.loopDepth -= 1;
+        
         return new AST.ForInStatement(
             init, 
             expr, 
-            this.StatementWithLabel(), 
+            statement, 
             start, 
             this.nodeEnd());
     },
@@ -5131,10 +5239,14 @@ var Parser = es6now.Class(function(__super) { return {
         var expr = this.AssignmentExpression();
         this.read(")");
         
+        this.context.loopDepth += 1;
+        var statement = this.Statement();
+        this.context.loopDepth -= 1;
+        
         return new AST.ForOfStatement(
             init, 
             expr, 
-            this.StatementWithLabel(), 
+            statement, 
             start, 
             this.nodeEnd());
     },
@@ -5281,9 +5393,7 @@ var Parser = es6now.Class(function(__super) { return {
                     // Get the non-escaped literal text of the string
                     node = element.expression;
                     dir = this.input.slice(node.start + 1, node.end - 1);
-                
-                    element.directive = dir;
-                
+
                     // Check for strict mode
                     if (dir === "use strict")
                         this.setStrict(true);
@@ -5429,6 +5539,20 @@ var Parser = es6now.Class(function(__super) { return {
             this.nodeEnd());
     },
     
+    AccessorParameters: function(kind) {
+    
+        var list = [];
+        
+        this.read("(");
+        
+        if (kind === "set")
+            list.push(this.FormalParameter(false));
+        
+        this.read(")");
+        
+        return list;
+    },
+    
     FormalParameters: function() {
     
         var list = [];
@@ -5447,7 +5571,7 @@ var Parser = es6now.Class(function(__super) { return {
                 break;
             }
             
-            list.push(this.FormalParameter());
+            list.push(this.FormalParameter(true));
         }
         
         this.read(")");
@@ -5455,13 +5579,13 @@ var Parser = es6now.Class(function(__super) { return {
         return list;
     },
     
-    FormalParameter: function() {
+    FormalParameter: function(allowDefault) {
     
         var start = this.nodeStart(),
             pattern = this.BindingPattern(),
             init = null;
         
-        if (this.peek() === "=") {
+        if (allowDefault && this.peek() === "=") {
         
             this.read("=");
             init = this.AssignmentExpression();
@@ -5872,8 +5996,8 @@ var Parser = es6now.Class(function(__super) { return {
         this.setStrict(true);
         
         var start = this.nodeStart(),
-            nameSet = {}, 
-            staticSet = {},
+            nameSet = new IntMap, 
+            staticSet = new IntMap,
             list = [];
         
         this.read("{");
@@ -5892,7 +6016,6 @@ var Parser = es6now.Class(function(__super) { return {
     
         var start = this.nodeStart(),
             isStatic = false,
-            flag = PROP_NORMAL,
             method,
             name;
         
@@ -5944,4 +6067,4 @@ exports.Parser = Parser; exports.Scanner = Scanner; exports.AST = AST; exports.p
 Object.keys(main).forEach(function(k) { exports[k] = main[k]; });
 
 
-}, [], "es6parse");
+}, [], "esparse");
