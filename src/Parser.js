@@ -128,6 +128,7 @@ class Context {
         this.functionType = "";
         this.labelSet = new IntMap;
         this.switchDepth = 0;
+        this.loopDepth = 0;
         this.invalidNodes = [];
     }
 }
@@ -421,6 +422,11 @@ export class Parser {
     
         node.error = error;
         this.context.invalidNodes.push({ node, strict: !!strict });
+    }
+    
+    setLoopLabel(label) {
+    
+        this.context.labelSet.set(label, 2);
     }
     
     // === Top Level ===
@@ -1317,7 +1323,7 @@ export class Parser {
     
     // === Statements ===
     
-    Statement() {
+    Statement(label) {
     
         var next;
         
@@ -1339,37 +1345,20 @@ export class Parser {
             case ";": return this.EmptyStatement();
             case "var": return this.VariableStatement();
             case "return": return this.ReturnStatement();
-            case "break":
-            case "continue": return this.BreakOrContinueStatement();
+            case "break": return this.BreakStatement();
+            case "continue": return this.ContinueStatement();
             case "throw": return this.ThrowStatement();
             case "debugger": return this.DebuggerStatement();
             case "if": return this.IfStatement();
-            case "do": return this.DoWhileStatement();
-            case "while": return this.WhileStatement();
-            case "for": return this.ForStatement();
+            case "do": return this.DoWhileStatement(label);
+            case "while": return this.WhileStatement(label);
+            case "for": return this.ForStatement(label);
             case "with": return this.WithStatement();
             case "switch": return this.SwitchStatement();
             case "try": return this.TryStatement();
             
             default: return this.ExpressionStatement();
         }
-    }
-    
-    StatementWithLabel(label) {
-    
-        var name = label && label.value || "",
-            labelSet = this.context.labelSet,
-            count = labelSet.get(name),
-            stmt;
-        
-        if (label && count > 0)
-            this.fail("Invalid label", label);
-        
-        labelSet.set(name, count + 1);
-        stmt = this.Statement();
-        labelSet.set(name, count);
-        
-        return stmt;
     }
     
     Block() {
@@ -1395,13 +1384,22 @@ export class Parser {
     LabelledStatement() {
     
         var start = this.nodeStart(),
-            label = this.Identifier();
+            label = this.Identifier(),
+            name = label.value,
+            labelSet = this.context.labelSet;
+        
+        if (labelSet.get(name) > 0)
+            this.fail("Invalid label", label);
         
         this.read(":");
         
+        labelSet.set(name, 1);
+        var statement = this.Statement(name);
+        labelSet.set(name, 0);
+        
         return new AST.LabelledStatement(
             label, 
-            this.StatementWithLabel(label),
+            statement,
             start,
             this.nodeEnd());
     }
@@ -1514,61 +1512,53 @@ export class Parser {
     BreakStatement() {
     
         var start = this.nodeStart(),
-            lableSet = this.context.labelSet;
+            context = this.context,
+            labelSet = context.labelSet;
         
         this.read("break");
-        
-        var label = this.peekEnd() ? null : this.Identifier(),
-            name = mapKey(label && label.value);
-        
+        var label = this.peekEnd() ? null : this.Identifier();
         this.Semicolon();
         
         var node = new AST.BreakStatement(label, start, this.nodeEnd());
         
         if (label) {
         
-            if (!labelSet[name])
+            if (labelSet.get(label.value) === 0)
                 this.fail("Invalid label", label);
+                
+        } else if (context.loopDepth === 0 && context.switchDepth === 0) {
         
-        } else {
-            
-            // TODO
-        }
-    }
-
-    // TODO: Separate out break and continue, so it's easier to follow the logic?
-    BreakOrContinueStatement() {
-    
-        var start = this.nodeStart(),
-            token = this.readToken(),
-            keyword = token.type,
-            labelSet = this.context.labelSet;
-        
-        var label = this.peekEnd() ? null : this.Identifier(),
-            name = label && label.value || "";
-        
-        this.Semicolon();
-        
-        var node = keyword === "break" ?
-            new AST.BreakStatement(label, start, this.nodeEnd()) :
-            new AST.ContinueStatement(label, start, this.nodeEnd());
-        
-        var count = labelSet.get(name);
-        
-        if (label) {
-        
-            if (count === 0)
-                this.fail("Invalid label", label);
-        
-        } else {
-        
-            if (count === 0 && !(keyword === "break" && this.context.switchDepth > 0))
-                this.fail("Invalid " + keyword + " statement", node);
+            this.fail("Break not contained within a switch or loop", node);
         }
         
         return node;
     }
     
+    ContinueStatement() {
+    
+        var start = this.nodeStart(),
+            context = this.context,
+            labelSet = context.labelSet;
+        
+        this.read("continue");
+        var label = this.peekEnd() ? null : this.Identifier();
+        this.Semicolon();
+        
+        var node = new AST.ContinueStatement(label, start, this.nodeEnd());
+        
+        if (label) {
+        
+            if (labelSet.get(label.value) !== 2)
+                this.fail("Invalid label", label);
+                
+        } else if (context.loopDepth === 0) {
+        
+            this.fail("Continue not contained within a loop", node);
+        }
+        
+        return node;
+    }
+
     ThrowStatement() {
     
         var start = this.nodeStart();
@@ -1618,14 +1608,20 @@ export class Parser {
         return new AST.IfStatement(test, body, elseBody, start, this.nodeEnd());
     }
     
-    DoWhileStatement() {
+    DoWhileStatement(label) {
     
         var start = this.nodeStart(),
             body, 
             test;
         
+        if (label) 
+            this.setLoopLabel(label);
+        
         this.read("do");
-        body = this.StatementWithLabel();
+        
+        this.context.loopDepth += 1;
+        body = this.Statement();
+        this.context.loopDepth -= 1;
         
         this.read("while");
         this.read("(");
@@ -1637,26 +1633,38 @@ export class Parser {
         return new AST.DoWhileStatement(body, test, start, this.nodeEnd());
     }
     
-    WhileStatement() {
+    WhileStatement(label) {
     
         var start = this.nodeStart();
         
+        if (label) 
+            this.setLoopLabel(label);
+        
         this.read("while");
         this.read("(");
+        var expr = this.Expression();
+        this.read(")");
+        
+        this.context.loopDepth += 1;
+        var statement = this.Statement();
+        this.context.loopDepth -= 1;
         
         return new AST.WhileStatement(
-            this.Expression(), 
-            (this.read(")"), this.StatementWithLabel()), 
+            expr, 
+            statement, 
             start, 
             this.nodeEnd());
     }
     
-    ForStatement() {
+    ForStatement(label) {
     
         var start = this.nodeStart(),
             init = null,
             test,
             step;
+        
+        if (label) 
+            this.setLoopLabel(label);
         
         this.read("for");
         this.read("(");
@@ -1702,11 +1710,15 @@ export class Parser {
         
         this.read(")");
         
+        this.context.loopDepth += 1;
+        var statement = this.Statement();
+        this.context.loopDepth -= 1;
+        
         return new AST.ForStatement(
             init, 
             test, 
             step, 
-            this.StatementWithLabel(), 
+            statement, 
             start, 
             this.nodeEnd());
     }
@@ -1719,10 +1731,14 @@ export class Parser {
         var expr = this.Expression();
         this.read(")");
         
+        this.context.loopDepth += 1;
+        var statement = this.Statement();
+        this.context.loopDepth -= 1;
+        
         return new AST.ForInStatement(
             init, 
             expr, 
-            this.StatementWithLabel(), 
+            statement, 
             start, 
             this.nodeEnd());
     }
@@ -1735,10 +1751,14 @@ export class Parser {
         var expr = this.AssignmentExpression();
         this.read(")");
         
+        this.context.loopDepth += 1;
+        var statement = this.Statement();
+        this.context.loopDepth -= 1;
+        
         return new AST.ForOfStatement(
             init, 
             expr, 
-            this.StatementWithLabel(), 
+            statement, 
             start, 
             this.nodeEnd());
     }
@@ -1885,9 +1905,7 @@ export class Parser {
                     // Get the non-escaped literal text of the string
                     node = element.expression;
                     dir = this.input.slice(node.start + 1, node.end - 1);
-                
-                    element.directive = dir;
-                
+
                     // Check for strict mode
                     if (dir === "use strict")
                         this.setStrict(true);

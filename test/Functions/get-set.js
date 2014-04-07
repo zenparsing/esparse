@@ -24,8 +24,7 @@
                   kind: 'get',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
                   params: [],
-                  body: { type: 'FunctionBody', start: 11, end: 13, statements: [] } } ] } },
-       directive: null } ] },
+                  body: { type: 'FunctionBody', start: 11, end: 13, statements: [] } } ] } } } ] },
 
 /** ({ set x(val) {} }); **/
 'object literal with setter': 
@@ -61,8 +60,7 @@
                           value: 'val',
                           context: 'declaration' },
                        initializer: null } ],
-                  body: { type: 'FunctionBody', start: 14, end: 16, statements: [] } } ] } },
-       directive: null } ] },
+                  body: { type: 'FunctionBody', start: 14, end: 16, statements: [] } } ] } } } ] },
 
 /** ({ get: 0, set: 0 }); **/
 'get and set are valid property names': 
@@ -96,8 +94,7 @@
                      end: 14,
                      value: 'set',
                      context: '' },
-                  expression: { type: 'Number', start: 16, end: 17, value: 0 } } ] } },
-       directive: null } ] },
+                  expression: { type: 'Number', start: 16, end: 17, value: 0 } } ] } } } ] },
 
 /** ({ set x({ y }) {} }); **/
 'setter can have a destructuring param': 
@@ -143,8 +140,7 @@
                                pattern: null,
                                initializer: null } ] },
                        initializer: null } ],
-                  body: { type: 'FunctionBody', start: 16, end: 18, statements: [] } } ] } },
-       directive: null } ] },
+                  body: { type: 'FunctionBody', start: 16, end: 18, statements: [] } } ] } } } ] },
 
 /** ({ get x(val) {} }); **/
 'getter cannot have any parameters': {},

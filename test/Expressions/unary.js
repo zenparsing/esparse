@@ -19,8 +19,7 @@
              start: 7,
              end: 8,
              value: 'x',
-             context: 'variable' } },
-       directive: null } ] },
+             context: 'variable' } } } ] },
 
 
 /** "use strict"; delete x **/

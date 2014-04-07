@@ -34,8 +34,7 @@
              start: 12,
              end: 13,
              value: 'x',
-             context: 'variable' } },
-       directive: null } ] },
+             context: 'variable' } } } ] },
 
 /** (for x of y x) **/
 'basic generator comprehension': 
@@ -71,8 +70,7 @@
              start: 12,
              end: 13,
              value: 'x',
-             context: 'variable' } },
-       directive: null } ] },
+             context: 'variable' } } } ] },
 
 /** function* g() { (for x of y yield x); } **/
 'generator comprehension cannot contain yield expression': {},

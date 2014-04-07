@@ -14,8 +14,7 @@
           start: 0,
           end: 6,
           value: 'abc',
-          flags: 'i' },
-       directive: null } ] },
+          flags: 'i' } } ] },
 
 /** /abc/ **/
 'a regular expression with no flags':
@@ -31,8 +30,7 @@
           start: 0,
           end: 5,
           value: 'abc',
-          flags: '' },
-       directive: null } ] },
+          flags: '' } } ] },
 
 /** /abc/000 **/
 'regular expression flags can start with a number':
@@ -48,8 +46,7 @@
           start: 0,
           end: 8,
           value: 'abc',
-          flags: '000' },
-       directive: null } ] },
+          flags: '000' } } ] },
 
 /** /abc/i\u0065 **/
 'regular expression flags cannot contain unicode escapes': {},
