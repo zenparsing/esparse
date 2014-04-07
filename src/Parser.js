@@ -2,17 +2,7 @@ import { AST } from "AST.js";
 import { Scanner } from "Scanner.js";
 import { Transform } from "Transform.js";
 import { Validate } from "Validate.js";
-
-// Object literal property name flags
-var PROP_NORMAL = 1,
-    PROP_DATA = 2,
-    PROP_GET = 4,
-    PROP_SET = 8;
-
-// Label type flags
-var LABEL_STATEMENT = 1,
-    LABEL_ITERATION = 2,
-    LABEL_SWITCH = 4;
+import { IntMap } from "IntMap.js";
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -100,6 +90,9 @@ function isUnary(op) {
 // Returns true if the value is a function modifier keyword
 function isFunctionModifier(value) {
 
+    // TODO:  Here we just test a string value, but what if the identifier contains
+    // unicode escapes?
+    
     switch (value) {
     
         case "async": return true;
@@ -107,9 +100,6 @@ function isFunctionModifier(value) {
     
     return false;
 }
-
-// Encodes a string as a map key for use in regular object
-function mapKey(name) { return "." + (name || "") }
 
 // Copies token data
 function copyToken(from, to) {
@@ -136,7 +126,7 @@ class Context {
         this.isFunction = isFunction;
         this.functionBody = false;
         this.functionType = "";
-        this.labelSet = {};
+        this.labelSet = new IntMap;
         this.switchDepth = 0;
         this.invalidNodes = [];
     }
@@ -165,7 +155,9 @@ export class Parser {
         var scanner = this.scanner,
             type = "";
         
-        do { type = scanner.next(context || ""); }
+        context = context || "";
+        
+        do { type = scanner.next(context); }
         while (type === "COMMENT")
         
         return scanner;
@@ -256,6 +248,10 @@ export class Parser {
     
     readKeyword(word) {
     
+        // TODO:  What if token has a unicode escape?  Does it still count as the keyword?
+        // Do we fail if the keyword has a unicode escape (this would mirror what happens
+        // with reserved words).
+        
         var token = this.readToken();
         
         if (token.type === word || token.type === "IDENTIFIER" && token.value === word)
@@ -298,16 +294,16 @@ export class Parser {
     
     peekYield() {
     
-        return this.peekKeyword("yield") && 
+        return this.context.functionBody &&
             this.context.functionType === "generator" && 
-            this.context.functionBody;
+            this.peekKeyword("yield");
     }
     
     peekAwait() {
     
-        return this.peekKeyword("await") && 
+        return this.context.functionBody && 
             this.context.functionType === "async" &&
-            this.context.functionBody;
+            this.peekKeyword("await");
     }
     
     peekFunctionModifier() {
@@ -357,7 +353,7 @@ export class Parser {
     fail(msg, node) {
     
         if (!node)
-            node = this.peek0;
+            node = this.peekToken();
         
         var pos = this.scanner.position(node.start),
             err = new SyntaxError(msg);
@@ -1030,8 +1026,8 @@ export class Parser {
     ObjectLiteral() {
     
         var start = this.nodeStart(),
+            nameSet = new IntMap,
             list = [],
-            nameSet = {},
             node,
             flag,
             key;
@@ -1361,16 +1357,17 @@ export class Parser {
     
     StatementWithLabel(label) {
     
-        var name = mapKey(label && label.value),
+        var name = label && label.value || "",
             labelSet = this.context.labelSet,
+            count = labelSet.get(name),
             stmt;
         
-        if (!labelSet[name]) labelSet[name] = 0;
-        else if (label) this.fail("Invalid label", label);
+        if (label && count > 0)
+            this.fail("Invalid label", label);
         
-        labelSet[name] += 1;
+        labelSet.set(name, count + 1);
         stmt = this.Statement();
-        labelSet[name] -= 1;
+        labelSet.set(name, count);
         
         return stmt;
     }
@@ -1548,22 +1545,24 @@ export class Parser {
             labelSet = this.context.labelSet;
         
         var label = this.peekEnd() ? null : this.Identifier(),
-            name = mapKey(label && label.value);
+            name = label && label.value || "";
         
         this.Semicolon();
         
         var node = keyword === "break" ?
             new AST.BreakStatement(label, start, this.nodeEnd()) :
             new AST.ContinueStatement(label, start, this.nodeEnd());
-            
+        
+        var count = labelSet.get(name);
+        
         if (label) {
         
-            if (!labelSet[name])
+            if (count === 0)
                 this.fail("Invalid label", label);
         
         } else {
         
-            if (!labelSet[name] && !(keyword === "break" && this.context.switchDepth > 0))
+            if (count === 0 && !(keyword === "break" && this.context.switchDepth > 0))
                 this.fail("Invalid " + keyword + " statement", node);
         }
         
@@ -2491,8 +2490,8 @@ export class Parser {
         this.setStrict(true);
         
         var start = this.nodeStart(),
-            nameSet = {}, 
-            staticSet = {},
+            nameSet = new IntMap, 
+            staticSet = new IntMap,
             list = [];
         
         this.read("{");
@@ -2511,7 +2510,6 @@ export class Parser {
     
         var start = this.nodeStart(),
             isStatic = false,
-            flag = PROP_NORMAL,
             method,
             name;
         

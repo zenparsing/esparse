@@ -1,3 +1,5 @@
+import { IntMap } from "IntMap.js";
+
 // Object literal property name flags
 var PROP_NORMAL = 1,
     PROP_DATA = 2,
@@ -13,12 +15,6 @@ var strictReservedWord = new RegExp("^(?:" +
 function isStrictReserved(word) {
 
     return strictReservedWord.test(word);
-}
-
-// Encodes a string as a map key for use in regular object
-function mapKey(name) { 
-
-    return "." + (name || "");
 }
 
 // Returns true if the specified name is a restricted identifier in strict mode
@@ -124,9 +120,8 @@ export class Validate {
     // Checks function formal parameters for strict mode restrictions
     checkParameters(params, kind) {
     
-        var names = {}, 
+        var names = new IntMap, 
             name,
-            key,
             node,
             i;
         
@@ -147,15 +142,14 @@ export class Validate {
                 continue;
             
             name = node.pattern.value;
-            key = mapKey(name);
             
             if (isPoisonIdent(name))
                 this.addStrictError("Parameter name " + name + " is not allowed in strict mode", node);
             
-            if (names[key])
+            if (names.get(name))
                 this.addStrictError("Strict mode function may not have duplicate parameter names", node);
             
-            names[key] = 1;
+            names.set(name, 1);
         }
     }
     
@@ -225,15 +219,16 @@ export class Validate {
         }
 
         // Check for duplicate names
-        name = mapKey(node.name.value);
+        var name = node.name.value,
+            currentFlags = nameSet.get(name);
 
-        if (isDuplicateName(flag, nameSet[name], false))
+        if (isDuplicateName(flag, currentFlags, false))
             this.addInvalidNode("Duplicate property names in object literal not allowed", node);
-        else if (isDuplicateName(flag, nameSet[name], true))
+        else if (isDuplicateName(flag, currentFlags, true))
             this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
 
         // Set name flag
-        nameSet[name] |= flag;
+        nameSet.set(name, currentFlags | flag);
     }
     
     // Checks for duplicate class element names
@@ -242,8 +237,7 @@ export class Validate {
         if (node.name.type !== "Identifier")
             return;
         
-        var flag = PROP_NORMAL,
-            name;
+        var flag = PROP_NORMAL;
         
         switch (node.kind) {
 
@@ -252,13 +246,14 @@ export class Validate {
         }
 
         // Check for duplicate names
-        name = mapKey(node.name.value);
+        var name = node.name.value,
+            currentFlags = nameSet.get(name);
 
-        if (isDuplicateName(flag, nameSet[name], false))
+        if (isDuplicateName(flag, currentFlags, false))
             this.addInvalidNode("Duplicate method names in class not allowed", node);
 
         // Set name flag
-        nameSet[name] |= flag;
+        nameSet.set(name, currentFlags | flag);
     }
     
     checkInvalidNodes() {
