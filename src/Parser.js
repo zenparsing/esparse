@@ -2211,45 +2211,55 @@ export class Parser {
     }
     
     ClassBody() {
-    
-        this.pushContext(false);
-        this.setStrict(true);
         
         var start = this.nodeStart(),
             nameSet = new IntMap, 
             staticSet = new IntMap,
-            list = [];
+            list = [],
+            node;
         
+        this.pushContext(false);
+        this.setStrict(true);
         this.read("{");
         
-        while (this.peekUntil("}", "name"))
-            list.push(this.ClassElement(nameSet, staticSet));
+        while (this.peekUntil("}", "name")) {
+        
+            list.push(node = this.ClassElement());
+            this.checkPropertyName(node.method, node.static ? staticSet : nameSet);
+        }
         
         this.read("}");
-        
         this.popContext();
         
         return new AST.ClassBody(list, start, this.nodeEnd());
     }
     
-    ClassElement(nameSet, staticSet) {
+    ClassElement() {
     
         var start = this.nodeStart(),
-            isStatic = false,
-            method,
-            name;
+            isStatic = false;
         
         // Check for static modifier
         if (this.peekToken("name").value === "static" &&
             this.peekAt("name", 1) !== "(") {
         
             isStatic = true;
-            nameSet = staticSet;
             this.read();
         }
         
-        method = this.MethodDefinition();
-        this.checkPropertyName(method, nameSet);
+        var method = this.MethodDefinition(),
+            name = method.name;
+        
+        if (isStatic) {
+        
+            if (name.type === "Identifier" && name.value === "prototype")
+                this.fail("Invalid prototype property in class definition", name);
+            
+        } else {
+        
+            if (name.type === "Identifier" && name.value === "constructor" && method.kind !== "")
+                this.fail("Invalid constructor property in class definition", name);
+        }
         
         return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
     }

@@ -183,6 +183,10 @@ export class Validate {
     // Checks for duplicate object literal property names
     checkPropertyName(node, nameSet) {
     
+        // TODO:  This is hot code.  Correctly detecting property name conflicts
+        // results in a significant performance degredation.  Investigate ways
+        // to make this more efficient.
+        
         var flag = PROP_NORMAL,
             currentFlags = 0,
             name = "";
