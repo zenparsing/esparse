@@ -23,27 +23,11 @@ function isPoisonIdent(name) {
     return name === "eval" || name === "arguments";
 }
 
-// Returns true if the specified name type is a duplicate for a given set of flags
-function isDuplicateName(type, flags, strict) {
-
-    if (!flags)
-        return false;
-    
-    switch (type) {
-    
-        case PROP_DATA: return strict || flags !== PROP_DATA;
-        case PROP_GET: return flags !== PROP_SET;
-        case PROP_SET: return flags !== PROP_GET;
-        default: return !!flags;
-    }
-}
-
 // Unwraps parens surrounding an expression
 function unwrapParens(node) {
 
     // Remove any parenthesis surrounding the target
     for (; node.type === "ParenExpression"; node = node.expression);
-    
     return node;
 }
 
@@ -199,15 +183,34 @@ export class Validate {
     // Checks for duplicate object literal property names
     checkPropertyName(node, nameSet) {
     
-        if (node.name.type !== "Identifier")
-            return;
-        
         var flag = PROP_NORMAL,
-            name;
+            currentFlags = 0,
+            name = "";
+        
+        switch (node.name.type) {
+        
+            case "ComputedPropertyName":
+                // If property name is computed, skip duplicate check
+                return;
+            
+            case "Number":
+                name = String(node.name.value);
+                break;
+            
+            default:
+                name = node.name.value;
+                break;
+        }
         
         switch (node.type) {
 
-            case "PropertyDefinition": flag = PROP_DATA; break;
+            case "PropertyDefinition":
+            
+                // Duplicates only allowed for "x: expr" form
+                if (node.expression)
+                    flag = PROP_DATA;
+                
+                break;
     
             case "MethodDefinition":
         
@@ -216,41 +219,39 @@ export class Validate {
                     case "get": flag = PROP_GET; break;
                     case "set": flag = PROP_SET; break;
                 }
+                
+                break;
         }
 
-        // Check for duplicate names
-        var name = node.name.value,
-            currentFlags = nameSet.get(name);
-
-        if (isDuplicateName(flag, currentFlags, false))
-            this.addInvalidNode("Duplicate property names in object literal not allowed", node);
-        else if (isDuplicateName(flag, currentFlags, true))
-            this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
-
-        // Set name flag
-        nameSet.set(name, currentFlags | flag);
-    }
-    
-    // Checks for duplicate class element names
-    checkClassElementName(node, nameSet) {
-    
-        if (node.name.type !== "Identifier")
-            return;
+        // If this name has already been added...
+        if (currentFlags = nameSet.get(name)) {
         
-        var flag = PROP_NORMAL;
-        
-        switch (node.kind) {
-
-            case "get": flag = PROP_GET; break;
-            case "set": flag = PROP_SET; break;
+            var duplicate = true;
+            
+            switch (flag) {
+    
+                case PROP_DATA:
+                    
+                    if (currentFlags === PROP_DATA) {
+                    
+                        this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
+                        duplicate = false;
+                    }
+                    
+                    break;
+                
+                case PROP_GET:
+                    if (currentFlags === PROP_SET) duplicate = false;
+                    break;
+                    
+                case PROP_SET:
+                    if (currentFlags === PROP_GET) duplicate = false;
+                    break;
+            }
+            
+            if (duplicate)
+                this.addInvalidNode("Duplicate property names in object literal not allowed", node);
         }
-
-        // Check for duplicate names
-        var name = node.name.value,
-            currentFlags = nameSet.get(name);
-
-        if (isDuplicateName(flag, currentFlags, false))
-            this.addInvalidNode("Duplicate method names in class not allowed", node);
 
         // Set name flag
         nameSet.set(name, currentFlags | flag);

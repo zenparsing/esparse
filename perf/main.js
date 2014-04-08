@@ -136,6 +136,7 @@ var parsers = {
 export function main(args) {
     
     var libs = {};
+    
     Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
 
     var ts = +new Date,

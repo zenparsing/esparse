@@ -345,7 +345,6 @@ export var AST = {
         this.start = start;
         this.end = end;
         this.expression = expr;
-        this.directive = null;
     },
 
     EmptyStatement(start, end) { 

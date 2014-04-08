@@ -12,9 +12,7 @@ var SKIP_KEYS = {
 
     "start": 1,
     "end": 1,
-    "newlineBefore": 1,
     "message": 1,
-    "directive": 1,
     "context": 1,
     "error": 1
 }

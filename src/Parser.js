@@ -2162,6 +2162,101 @@ export class Parser {
         return new AST.ArrowFunction(kind, params, body, start, this.nodeEnd());
     }
     
+    // === Classes ===
+    
+    ClassDeclaration() {
+    
+        var start = this.nodeStart(),
+            ident = null,
+            base = null;
+        
+        this.read("class");
+        
+        ident = this.BindingIdentifier();
+        
+        if (this.peek() === "extends") {
+        
+            this.read();
+            base = this.MemberExpression(true);
+        }
+        
+        return new AST.ClassDeclaration(
+            ident,
+            base,
+            this.ClassBody(),
+            start,
+            this.nodeEnd());
+    }
+    
+    ClassExpression() {
+    
+        var start = this.nodeStart(), 
+            ident = null,
+            base = null;
+        
+        this.read("class");
+        
+        if (this.peek() === "IDENTIFIER")
+            ident = this.BindingIdentifier();
+        
+        if (this.peek() === "extends") {
+        
+            this.read();
+            base = this.MemberExpression(true);
+        }
+        
+        return new AST.ClassExpression(
+            ident, 
+            base, 
+            this.ClassBody(), 
+            start, 
+            this.nodeEnd());
+    }
+    
+    ClassBody() {
+    
+        this.pushContext(false);
+        this.setStrict(true);
+        
+        var start = this.nodeStart(),
+            nameSet = new IntMap, 
+            staticSet = new IntMap,
+            list = [];
+        
+        this.read("{");
+        
+        while (this.peekUntil("}", "name"))
+            list.push(this.ClassElement(nameSet, staticSet));
+        
+        this.read("}");
+        
+        this.popContext();
+        
+        return new AST.ClassBody(list, start, this.nodeEnd());
+    }
+    
+    ClassElement(nameSet, staticSet) {
+    
+        var start = this.nodeStart(),
+            isStatic = false,
+            method,
+            name;
+        
+        // Check for static modifier
+        if (this.peekToken("name").value === "static" &&
+            this.peekAt("name", 1) !== "(") {
+        
+            isStatic = true;
+            nameSet = staticSet;
+            this.read();
+        }
+        
+        method = this.MethodDefinition();
+        this.checkPropertyName(method, nameSet);
+        
+        return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
+    }
+    
     // === Modules ===
     
     ModuleDefinition() {
@@ -2449,101 +2544,6 @@ export class Parser {
         }
         
         return new AST.ModulePath(path, start, this.nodeEnd());
-    }
-    
-    // === Classes ===
-    
-    ClassDeclaration() {
-    
-        var start = this.nodeStart(),
-            ident = null,
-            base = null;
-        
-        this.read("class");
-        
-        ident = this.BindingIdentifier();
-        
-        if (this.peek() === "extends") {
-        
-            this.read();
-            base = this.MemberExpression(true);
-        }
-        
-        return new AST.ClassDeclaration(
-            ident,
-            base,
-            this.ClassBody(),
-            start,
-            this.nodeEnd());
-    }
-    
-    ClassExpression() {
-    
-        var start = this.nodeStart(), 
-            ident = null,
-            base = null;
-        
-        this.read("class");
-        
-        if (this.peek() === "IDENTIFIER")
-            ident = this.BindingIdentifier();
-        
-        if (this.peek() === "extends") {
-        
-            this.read();
-            base = this.MemberExpression(true);
-        }
-        
-        return new AST.ClassExpression(
-            ident, 
-            base, 
-            this.ClassBody(), 
-            start, 
-            this.nodeEnd());
-    }
-    
-    ClassBody() {
-    
-        this.pushContext(false);
-        this.setStrict(true);
-        
-        var start = this.nodeStart(),
-            nameSet = new IntMap, 
-            staticSet = new IntMap,
-            list = [];
-        
-        this.read("{");
-        
-        while (this.peekUntil("}", "name"))
-            list.push(this.ClassElement(nameSet, staticSet));
-        
-        this.read("}");
-        
-        this.popContext();
-        
-        return new AST.ClassBody(list, start, this.nodeEnd());
-    }
-    
-    ClassElement(nameSet, staticSet) {
-    
-        var start = this.nodeStart(),
-            isStatic = false,
-            method,
-            name;
-        
-        // Check for static modifier
-        if (this.peekToken("name").value === "static" &&
-            this.peekAt("name", 1) !== "(") {
-        
-            isStatic = true;
-            nameSet = staticSet;
-            this.read();
-        }
-        
-        method = this.MethodDefinition();
-        this.checkClassElementName(method, nameSet);
-        
-        return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
     }
     
 }
