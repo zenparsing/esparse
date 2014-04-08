@@ -893,10 +893,7 @@ export class Parser {
     Identifier(isVar) {
     
         var token = this.readToken("IDENTIFIER"),
-            node = new AST.Identifier(token.value, "", token.start, token.end);
-        
-        if (isVar)
-            node.context = "variable";
+            node = new AST.Identifier(token.value, isVar ? "variable" : "", token.start, token.end);
         
         this.checkIdentifier(node);
         return node;
@@ -1074,7 +1071,7 @@ export class Parser {
                 this.unpeek();
             
                 node = new AST.PatternProperty(
-                    this.Identifier(),
+                    this.Identifier(true),
                     null,
                     (this.read(), this.AssignmentExpression()),
                     start,
@@ -1090,7 +1087,7 @@ export class Parser {
                 this.unpeek();
         
                 return new AST.PropertyDefinition(
-                    this.Identifier(),
+                    this.Identifier(true),
                     null,
                     start,
                     this.nodeEnd());

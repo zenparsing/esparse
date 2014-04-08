@@ -93,7 +93,7 @@
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 4,
-                  name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
+                  name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: 'variable' },
                   expression: null } ] } } } ] },
 
 /** ({ x: 1, x: 1 }) **/
@@ -221,5 +221,44 @@
                           context: 'declaration' },
                        initializer: null } ],
                   body: { type: 'FunctionBody', start: 26, end: 28, statements: [] } } ] } } } ] },
+
+/** ({ x = 1 }) **/
+'object pattern initializer not allowed': {},
+
+/** ({ delete }) **/
+'shorthand data property cannot be a reserved word': {},
+
+/** "use strict"; ({ package }); **/
+'shorthand data property cannot be a strict reserved word in strict mode': {},
+
+/** ({ package }) **/
+'shorthand data property with strict reserved word': 
+{ type: 'Script',
+  start: 0,
+  end: 13,
+  statements: 
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 13,
+       expression: 
+        { type: 'ParenExpression',
+          start: 0,
+          end: 13,
+          expression: 
+           { type: 'ObjectLiteral',
+             start: 1,
+             end: 12,
+             properties: 
+              [ { type: 'PropertyDefinition',
+                  start: 3,
+                  end: 10,
+                  name: 
+                   { type: 'Identifier',
+                     start: 3,
+                     end: 10,
+                     value: 'package',
+                     context: 'variable' },
+                  expression: null } ] } } } ] },
+
 
 };
