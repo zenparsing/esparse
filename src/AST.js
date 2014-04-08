@@ -581,6 +581,43 @@ export var AST = {
         this.body = body;
     },
 
+    ClassDeclaration(identifier, base, body, start, end) {
+    
+        this.type = "ClassDeclaration";
+        this.start = start;
+        this.end = end;
+        this.identifier = identifier;
+        this.base = base;
+        this.body = body;
+    },
+
+    ClassExpression(identifier, base, body, start, end) {
+    
+        this.type = "ClassExpression";
+        this.start = start;
+        this.end = end;
+        this.identifier = identifier;
+        this.base = base;
+        this.body = body;
+    },
+
+    ClassBody(elems, start, end) {
+    
+        this.type = "ClassBody";
+        this.start = start;
+        this.end = end;
+        this.elements = elems;
+    },
+
+    ClassElement(isStatic, method, start, end) {
+    
+        this.type = "ClassElement";
+        this.start = start;
+        this.end = end;
+        this.static = isStatic;
+        this.method = method;
+    },
+    
     ModuleDeclaration(identifier, body, start, end) {
     
         this.type = "ModuleDeclaration";
@@ -634,12 +671,12 @@ export var AST = {
         this.from = from;
     },
 
-    ImportSpecifier(remote, local, start, end) {
+    ImportSpecifier(imported, local, start, end) {
     
         this.type = "ImportSpecifier";
         this.start = start;
         this.end = end;
-        this.remote = remote;
+        this.imported = imported;
         this.local = local;
     },
 
@@ -660,13 +697,13 @@ export var AST = {
         this.from = from;
     },
 
-    ExportSpecifier(local, remote, start, end) {
+    ExportSpecifier(local, exported, start, end) {
     
         this.type = "ExportSpecifier";
         this.start = start;
         this.end = end;
         this.local = local;
-        this.remote = remote;
+        this.exported = exported;
     },
 
     ModulePath(list, start, end) {
@@ -675,43 +712,6 @@ export var AST = {
         this.start = start;
         this.end = end;
         this.elements = list;
-    },
-
-    ClassDeclaration(identifier, base, body, start, end) {
-    
-        this.type = "ClassDeclaration";
-        this.start = start;
-        this.end = end;
-        this.identifier = identifier;
-        this.base = base;
-        this.body = body;
-    },
-
-    ClassExpression(identifier, base, body, start, end) {
-    
-        this.type = "ClassExpression";
-        this.start = start;
-        this.end = end;
-        this.identifier = identifier;
-        this.base = base;
-        this.body = body;
-    },
-
-    ClassBody(elems, start, end) {
-    
-        this.type = "ClassBody";
-        this.start = start;
-        this.end = end;
-        this.elements = elems;
-    },
-
-    ClassElement(isStatic, method, start, end) {
-    
-        this.type = "ClassElement";
-        this.start = start;
-        this.end = end;
-        this.static = isStatic;
-        this.method = method;
     }
 
 };
