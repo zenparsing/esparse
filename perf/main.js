@@ -139,19 +139,22 @@ export function main(args) {
     
     Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
 
-    var ts = +new Date,
-        lib = args[2] || "esparse",
+    var lib = args[2] || "esparse",
         parser = parsers[lib],
-        size = 0;
+        size = 0,
+        ms = 0;
     
     console.log(`\n>> Testing Parser Speed (${ lib })\n`);
 
     walkDirectory(Path.join(__dirname, "_input"), path => {
 
         var input = FS.readFileSync(path, "utf8"),
-            name = Path.basename(path);
+            name = Path.basename(path),
+            ts;
 
         console.log(`Parsing ${ name }`);
+        
+        ts = +new Date;
         
         try {
     
@@ -164,9 +167,9 @@ export function main(args) {
             throw err;
         }
         
+        ms += ((+new Date) - ts);
+        
     });
-    
-    var ms = ((+new Date) - ts);
 
     console.log("\n>> Results: " + 
         (ms / size * 1024 * 1024).toFixed(2) + " ms/MB, " +
