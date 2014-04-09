@@ -36,16 +36,12 @@ export class Validate {
     // Checks an assignment target for strict mode restrictions
     checkAssignTarget(node, simple) {
     
-        // Remove any parenthesis surrounding the target
-        for (; node.type === "ParenExpression"; node = node.expression);
+        node = unwrapParens(node);
         
         switch (node.type) {
         
             case "Identifier":
             
-                // Mark identifier node as a variable
-                node.context = "variable";
-
                 if (isPoisonIdent(node.value))
                     this.addStrictError("Cannot modify " + node.value + " in strict mode", node);
         
@@ -108,15 +104,6 @@ export class Validate {
             name,
             node,
             i;
-        
-        // TODO: We need to check for duplicate names in some non-strict contexts
-        // as well (method definitions, arrow parameters, and maybe generator functions).
-        // How do these rules apply when parameters are patterns, though?
-        
-        // I think (the early errors portion of the spec is very hard to understand)
-        // that you have to force strict-like validation in the following cases:
-        // method definitions, functions and generators using new parameter list 
-        // features (patterns, initializers, or rest), and arrow functions.
         
         for (i = 0; i < params.length; ++i) {
         

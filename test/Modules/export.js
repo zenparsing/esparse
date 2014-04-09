@@ -12,7 +12,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 13,
-       binding: 
+       declaration: 
         { type: 'VariableDeclaration',
           start: 7,
           end: 12,
@@ -38,7 +38,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 13,
-       binding: 
+       declaration: 
         { type: 'ExportsList',
           start: 7,
           end: 12,
@@ -59,7 +59,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 16,
-       binding: 
+       declaration: 
         { type: 'ExportsList',
           start: 7,
           end: 15,
@@ -85,7 +85,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 18,
-       binding: 
+       declaration: 
         { type: 'ExportsList',
           start: 7,
           end: 17,
@@ -106,7 +106,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 24,
-       binding: 
+       declaration: 
         { type: 'ExportsList',
           start: 7,
           end: 23,
@@ -132,7 +132,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 27,
-       binding: 
+       declaration: 
         { type: 'ExportsList',
           start: 7,
           end: 26,
@@ -153,7 +153,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 18,
-       binding: 
+       declaration: 
         { type: 'ExportsList',
           start: 7,
           end: 17,

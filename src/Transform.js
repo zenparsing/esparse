@@ -149,6 +149,8 @@ export class Transform {
     // Transforms an expression into a pattern
     transformPattern(node, binding) {
 
+        var invalid = false;
+        
         switch (node.type) {
         
             case "Identifier":
@@ -158,8 +160,7 @@ export class Transform {
                 break;
             
             case "MemberExpression":
-            case "CallExpression":
-                if (binding) this.fail("Invalid left-hand-side in binding pattern", node);
+                if (binding) invalid = true;
                 break;
             
             case "ObjectLiteral":
@@ -173,9 +174,12 @@ export class Transform {
                 break;
                 
             default:
-                this.fail("Invalid expression in pattern", node);
+                invalid = true;
                 break;
         }
+        
+        if (invalid)
+            this.fail("Invalid expression in pattern", node);
         
         return node;
     }

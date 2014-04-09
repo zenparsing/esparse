@@ -12,8 +12,8 @@ export var AST = {
         this.type = "Identifier";
         this.start = start;
         this.end = end;
-        this.value = value;
-        this.context = context;
+        this.value = value; // <string> The string value of the identifier.
+        this.context = context; // <string> The context in which the identifier appears.  Possible values are: "", "variable", and "declaration".
     },
 
     Number(value, start, end) {
@@ -21,7 +21,7 @@ export var AST = {
         this.type = "Number";
         this.start = start;
         this.end = end;
-        this.value = value;
+        this.value = value; // <number> The mathmatical value of the number literal.
     },
 
     String(value, start, end) {
@@ -29,7 +29,7 @@ export var AST = {
         this.type = "String";
         this.start = start;
         this.end = end;
-        this.value = value;
+        this.value = value; // <string> The string value of the string literal.
     },
 
     Template(value, isEnd, start, end) {
@@ -37,8 +37,8 @@ export var AST = {
         this.type = "Template";
         this.start = start;
         this.end = end;
-        this.value = value;
-        this.templateEnd = isEnd;
+        this.value = value; // <string> The string value of the template fragment.
+        this.templateEnd = isEnd; // <boolean> True if this template fragment terminates the template literal.
     },
 
     RegularExpression(value, flags, start, end) {
@@ -46,8 +46,8 @@ export var AST = {
         this.type = "RegularExpression";
         this.start = start;
         this.end = end;
-        this.value = value;
-        this.flags = flags;
+        this.value = value; // <string> The raw value of the regular expression literal.
+        this.flags = flags; // <string> The set of flags for the regular expression literal.
     },
 
     Boolean(value, start, end) {
@@ -55,7 +55,7 @@ export var AST = {
         this.type = "Boolean";
         this.start = start;
         this.end = end;
-        this.value = value;
+        this.value = value; // <boolean> The value of the boolean literal.
     },
     
     Null(start, end) { 
@@ -70,7 +70,7 @@ export var AST = {
         this.type = "Script";
         this.start = start;
         this.end = end;
-        this.statements = statements;
+        this.statements = statements; // <Node[]> A list of statements.
     },
 
     Module(statements, start, end) {
@@ -78,7 +78,7 @@ export var AST = {
         this.type = "Module";
         this.start = start;
         this.end = end;
-        this.statements = statements;
+        this.statements = statements; // <Node[]> A list of statements.
     },
 
     ThisExpression(start, end) { 
@@ -100,7 +100,7 @@ export var AST = {
         this.type = "SequenceExpression";
         this.start = start;
         this.end = end;
-        this.expressions = list;
+        this.expressions = list; // <Node[]> A list of expressions.
     },
 
     AssignmentExpression(op, left, right, start, end) {
@@ -108,9 +108,9 @@ export var AST = {
         this.type = "AssignmentExpression";
         this.start = start;
         this.end = end;
-        this.operator = op;
-        this.left = left;
-        this.right = right;
+        this.operator = op; // <string> The assignment operator.
+        this.left = left; // <Node> The left-hand-side of the assignment operator.
+        this.right = right; // <Node> The right-hand-side of the assignment operator.
     },
 
     SpreadExpression(expr, start, end) {
@@ -118,7 +118,7 @@ export var AST = {
         this.type = "SpreadExpression";
         this.start = start;
         this.end = end;
-        this.expression = expr;
+        this.expression = expr; // <Node> The 
     },
 
     YieldExpression(expr, delegate, start, end) {
@@ -680,12 +680,12 @@ export var AST = {
         this.local = local;
     },
 
-    ExportDeclaration(binding, start, end) {
+    ExportDeclaration(declaration, start, end) {
     
         this.type = "ExportDeclaration";
         this.start = start;
         this.end = end;
-        this.binding = binding;
+        this.declaration = declaration;
     },
 
     ExportsList(list, from, start, end) {
