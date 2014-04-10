@@ -285,7 +285,7 @@
              context: 'variable' } } } ] },
 
 /** ({ x: f() }) = a; **/
-'call expressions are invalid assignment targets': {},
+'call expressions are valid assignment targets': {},
 
 /** ({ x: new f }) = a; **/
 'new expressions are invalid assignment targets': {},

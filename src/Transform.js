@@ -54,13 +54,17 @@ export class Transform {
         node.type = "ArrayPattern";
         
         var elems = node.elements,
+            rest = false,
             elem,
-            rest,
             i;
         
         for (i = 0; i < elems.length; ++i) {
         
             elem = elems[i];
+            
+            // Rest element must be last
+            if (rest)
+                this.fail("Invalid destructuring pattern", elem);
             
             if (!elem) 
                 continue;
@@ -77,6 +81,7 @@ export class Transform {
                     elem.end);
                 
                 // No trailing comma allowed after rest
+                // TODO: trailingComma is never assigned
                 if (rest && (node.trailingComma || i < elems.length - 1))
                     this.fail("Invalid destructuring pattern", elem);
             }
@@ -84,6 +89,8 @@ export class Transform {
             if (elem.rest) this.transformPattern(elem.pattern, binding);
             else this.transformPatternElement(elem, binding);
         }
+        
+        
     }
     
     transformObjectPattern(node, binding) {

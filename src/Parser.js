@@ -674,20 +674,22 @@ export class Parser {
     MemberExpression(allowCall) {
     
         var start = this.nodeStart(),
-            type = this.peek(),
+            token = this.peekToken(),
             arrowType = "",
             exit = false,
             prop,
             expr;
         
         expr = 
-            type === "new" ? this.NewExpression() :
-            type === "super" ? this.SuperExpression() :
+            token.type === "new" ? this.NewExpression() :
+            token.type === "super" ? this.SuperExpression() :
             this.PrimaryExpression();
         
-        while (!exit && (type = this.peek("div"))) {
+        while (!exit) { 
         
-            switch (type) {
+            token = this.peekToken("div");
+            
+            switch (token.type) {
             
                 case ".":
                 
@@ -725,8 +727,9 @@ export class Parser {
                         break;
                     }
                     
-                    if (expr.type === "Identifier" && isFunctionModifier(expr.value)) {
-                    
+                    if (expr.type === "Identifier" && 
+                        isFunctionModifier(expr.value)) {
+                
                         arrowType = expr.value;
                         this.pushMaybeContext();
                     }
@@ -739,7 +742,9 @@ export class Parser {
                     
                     if (arrowType) {
                     
-                        if (this.peek("div") === "=>") {
+                        token = this.peekToken("div");
+
+                        if (token.type === "=>" && !token.newlineBefore) {
                         
                             expr = this.ArrowFunctionHead(arrowType, expr, null, start);
                             exit = true;

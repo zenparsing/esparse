@@ -333,6 +333,11 @@ function f() {}
 "await not allowed in a non-async arrow": {},
 
 /** async (x, ...args, y) => null **/
-"rest parameter can only appear as the last formal parameter": {}
+"rest parameter can only appear as the last formal parameter": {},
+
+/** async ()
+=> 0 **/
+'newline restriction between right paren and arrow': {},
+
 
 };

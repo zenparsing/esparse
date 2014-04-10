@@ -12,8 +12,8 @@ export var AST = {
         this.type = "Identifier";
         this.start = start;
         this.end = end;
-        this.value = value; // <string> The string value of the identifier.
-        this.context = context; // <string> The context in which the identifier appears.  Possible values are: "", "variable", and "declaration".
+        this.value = value; // (string) The string value of the identifier
+        this.context = context; // (string) The context in which the identifier appears ("", "variable", "declaration")
     },
 
     Number(value, start, end) {
@@ -21,7 +21,7 @@ export var AST = {
         this.type = "Number";
         this.start = start;
         this.end = end;
-        this.value = value; // <number> The mathmatical value of the number literal.
+        this.value = value; // (number) The mathmatical value of the number literal
     },
 
     String(value, start, end) {
@@ -29,7 +29,7 @@ export var AST = {
         this.type = "String";
         this.start = start;
         this.end = end;
-        this.value = value; // <string> The string value of the string literal.
+        this.value = value; // (string) The value of the string literal
     },
 
     Template(value, isEnd, start, end) {
@@ -37,8 +37,8 @@ export var AST = {
         this.type = "Template";
         this.start = start;
         this.end = end;
-        this.value = value; // <string> The string value of the template fragment.
-        this.templateEnd = isEnd; // <boolean> True if this template fragment terminates the template literal.
+        this.value = value; // (string) The string value of the template fragment
+        this.templateEnd = isEnd; // (boolean) True if this template fragment terminates the template literal
     },
 
     RegularExpression(value, flags, start, end) {
@@ -46,8 +46,8 @@ export var AST = {
         this.type = "RegularExpression";
         this.start = start;
         this.end = end;
-        this.value = value; // <string> The raw value of the regular expression literal.
-        this.flags = flags; // <string> The set of flags for the regular expression literal.
+        this.value = value; // (string) The raw value of the regular expression literal
+        this.flags = flags; // (string) The set of flags for the regular expression literal
     },
 
     Boolean(value, start, end) {
@@ -55,7 +55,7 @@ export var AST = {
         this.type = "Boolean";
         this.start = start;
         this.end = end;
-        this.value = value; // <boolean> The value of the boolean literal.
+        this.value = value; // (boolean) The value of the boolean literal
     },
     
     Null(start, end) { 
@@ -70,7 +70,7 @@ export var AST = {
         this.type = "Script";
         this.start = start;
         this.end = end;
-        this.statements = statements; // <Node[]> A list of statements.
+        this.statements = statements; // [Node] A list of statements
     },
 
     Module(statements, start, end) {
@@ -78,7 +78,7 @@ export var AST = {
         this.type = "Module";
         this.start = start;
         this.end = end;
-        this.statements = statements; // <Node[]> A list of statements.
+        this.statements = statements; // [Node] A list of statements
     },
 
     ThisExpression(start, end) { 
@@ -100,7 +100,7 @@ export var AST = {
         this.type = "SequenceExpression";
         this.start = start;
         this.end = end;
-        this.expressions = list; // <Node[]> A list of expressions.
+        this.expressions = list; // [Node] A list of expressions
     },
 
     AssignmentExpression(op, left, right, start, end) {
@@ -108,9 +108,9 @@ export var AST = {
         this.type = "AssignmentExpression";
         this.start = start;
         this.end = end;
-        this.operator = op; // <string> The assignment operator.
-        this.left = left; // <Node> The left-hand-side of the assignment operator.
-        this.right = right; // <Node> The right-hand-side of the assignment operator.
+        this.operator = op; // (string) An assignment operator
+        this.left = left; // The left-hand-side of the assignment operator
+        this.right = right; // The right-hand-side of the assignment operator
     },
 
     SpreadExpression(expr, start, end) {
@@ -118,7 +118,7 @@ export var AST = {
         this.type = "SpreadExpression";
         this.start = start;
         this.end = end;
-        this.expression = expr; // <Node> The 
+        this.expression = expr; // An expression
     },
 
     YieldExpression(expr, delegate, start, end) {
@@ -126,8 +126,8 @@ export var AST = {
         this.type = "YieldExpression";
         this.start = start;
         this.end = end;
-        this.delegate = delegate;
-        this.expression = expr;
+        this.delegate = delegate; // (boolean) True if the yield expression is delegating
+        this.expression = expr; // An expression
     },
 
     ConditionalExpression(test, cons, alt, start, end) {
@@ -135,9 +135,9 @@ export var AST = {
         this.type = "ConditionalExpression";
         this.start = start;
         this.end = end;
-        this.test = test;
-        this.consequent = cons;
-        this.alternate = alt;
+        this.test = test; // A test expression
+        this.consequent = cons; // The expression evaluated if the test passes
+        this.alternate = alt; // The expression evaluated if the test fails
     },
 
     BinaryExpression(op, left, right, start, end) {
@@ -145,9 +145,9 @@ export var AST = {
         this.type = "BinaryExpression";
         this.start = start;
         this.end = end;
-        this.operator = op;
-        this.left = left;
-        this.right = right;
+        this.operator = op; // (string) A binary operator
+        this.left = left; // The left operand expression
+        this.right = right; // The right operand expression
     },
 
     UpdateExpression(op, expr, prefix, start, end) {
@@ -155,9 +155,9 @@ export var AST = {
         this.type = "UpdateExpression";
         this.start = start;
         this.end = end;
-        this.operator = op;
-        this.expression = expr;
-        this.prefix = prefix;
+        this.operator = op; // (string) An update operator
+        this.expression = expr; // An expression
+        this.prefix = prefix; // (boolean) True if the operator is a prefix
     },
 
     UnaryExpression(op, expr, start, end) {
@@ -165,8 +165,8 @@ export var AST = {
         this.type = "UnaryExpression";
         this.start = start;
         this.end = end;
-        this.operator = op;
-        this.expression = expr;
+        this.operator = op; // (string) A unary operator
+        this.expression = expr; // An expression
     },
 
     MemberExpression(obj, prop, computed, start, end) {
@@ -174,9 +174,9 @@ export var AST = {
         this.type = "MemberExpression";
         this.start = start;
         this.end = end;
-        this.object = obj;
-        this.property = prop;
-        this.computed = computed;
+        this.object = obj; // An expression evaulating to an object
+        this.property = prop; // An expression evaluating to a property name
+        this.computed = computed; // (boolean) True if the property name is computed
     },
 
     CallExpression(callee, args, start, end) {
@@ -184,8 +184,8 @@ export var AST = {
         this.type = "CallExpression";
         this.start = start;
         this.end = end;
-        this.callee = callee;
-        this.arguments = args;
+        this.callee = callee; // An expression
+        this.arguments = args; // [Node] A list of call arguments
     },
 
     TaggedTemplateExpression(tag, template, start, end) {
@@ -193,8 +193,8 @@ export var AST = {
         this.type = "TaggedTemplateExpression";
         this.start = start;
         this.end = end;
-        this.tag = tag;
-        this.template = template;
+        this.tag = tag; // The template tag
+        this.template = template; // <TemplateExpression> A template
     },
 
     NewExpression(callee, args, start, end) {
@@ -202,8 +202,8 @@ export var AST = {
         this.type = "NewExpression";
         this.start = start;
         this.end = end;
-        this.callee = callee;
-        this.arguments = args;
+        this.callee = callee; // An expression
+        this.arguments = args; // [Node] A list of call arguments
     },
 
     ParenExpression(expr, start, end) {
@@ -211,7 +211,7 @@ export var AST = {
         this.type = "ParenExpression";
         this.start = start;
         this.end = end;
-        this.expression = expr;
+        this.expression = expr; // An expression contained within parenthesis
     },
 
     ObjectLiteral(props, start, end) {
@@ -219,7 +219,7 @@ export var AST = {
         this.type = "ObjectLiteral";
         this.start = start;
         this.end = end;
-        this.properties = props;
+        this.properties = props; // [PropertyDefinition|MethodDefinition] A list of properties and methods defined in the object literal
     },
 
     ComputedPropertyName(expr, start, end) {
@@ -227,7 +227,7 @@ export var AST = {
         this.type = "ComputedPropertyName";
         this.start = start;
         this.end = end;
-        this.expression = expr;
+        this.expression = expr; // An expression
     },
 
     PropertyDefinition(name, expr, start, end) {
@@ -235,8 +235,8 @@ export var AST = {
         this.type = "PropertyDefinition";
         this.start = start;
         this.end = end;
-        this.name = name;
-        this.expression = expr;
+        this.name = name; // (String|Number|Identifier|ComputedPropertyName) The property name
+        this.expression = expr; // (Node?) An expression
     },
 
     PatternProperty(name, pattern, initializer, start, end) {
@@ -244,9 +244,9 @@ export var AST = {
         this.type = "PatternProperty";
         this.start = start;
         this.end = end;
-        this.name = name;
-        this.pattern = pattern;
-        this.initializer = initializer;
+        this.name = name; // The destructuring property name
+        this.pattern = pattern; // (Node?) A destructuring target pattern
+        this.initializer = initializer; // (Node?) A default initializer expression
     },
 
     PatternElement(pattern, initializer, rest, start, end) {

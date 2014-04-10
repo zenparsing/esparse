@@ -151,6 +151,8 @@ export class Validate {
             // A variable initializer is only allowed in for-in where 
             // variable type is "var" and it is not a pattern
             
+            // TODO: Is it now disallowed altogether?
+            
             var decl = init.declarations[0];
         
             if (decl.initializer && (
