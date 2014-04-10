@@ -238,7 +238,7 @@
              context: 'variable' } } } ] },
 
 /** ({ x: y.z }) = a **/
-'pattern can be a member expression':
+'assignment target can be a member expression':
 { type: 'Script',
   start: 0,
   end: 16,
@@ -285,7 +285,7 @@
              context: 'variable' } } } ] },
 
 /** ({ x: f() }) = a; **/
-'call expressions are valid assignment targets': {},
+'call expressions are invalid assignment targets': {},
 
 /** ({ x: new f }) = a; **/
 'new expressions are invalid assignment targets': {},

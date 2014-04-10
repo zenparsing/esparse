@@ -932,10 +932,10 @@ export class Parser {
         return node;
     }
     
-    Template() {
+    TemplatePart() {
     
         var token = this.readToken("TEMPLATE", "template"),
-            node = new AST.Template(token.value, token.templateEnd, token.start, token.end);
+            node = new AST.TemplatePart(token.value, token.templateEnd, token.start, token.end);
         
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -1305,7 +1305,7 @@ export class Parser {
     
     TemplateExpression() {
         
-        var atom = this.Template(),
+        var atom = this.TemplatePart(),
             start = atom.start,
             lit = [atom],
             sub = [];
@@ -1317,7 +1317,7 @@ export class Parser {
             // Discard any tokens that have been scanned using a different context
             this.unpeek();
             
-            lit.push(atom = this.Template());
+            lit.push(atom = this.TemplatePart());
         }
         
         return new AST.TemplateExpression(lit, sub, start, this.nodeEnd());
