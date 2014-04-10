@@ -16,9 +16,9 @@ The primary goal of this project is to implement an ECMAScript parser:
 - Whose performance is comparable to other modern ECMAScript parsers 
   which are written in JavaScript.
 
-AST compatibility with other parsers is not a project goal, because an 
-AST is a complex protocol which must be allowed to evolve as the language
-itself evolves.
+AST compatibility with other parsers is not a project goal.  However, it
+is expected that any future changes to the AST protocol will be backward
+compatible with previous versions.
 
 ## Roadmap ##
 
