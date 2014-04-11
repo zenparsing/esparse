@@ -3,49 +3,53 @@ import { AST } from "AST.js";
 export class Transform {
 
     // Transform an expression into a formal parameter list
-    transformFormals(expr, rest) {
+    transformFormals(expr) {
         
-        if (expr === null)
-            return rest ? [rest] : [];
+        if (!expr)
+            return [];
             
-        var params = [],
-            param,
+        var param,
             list,
             node,
+            expr,
             i;
         
         switch (expr.type) {
         
-            case "SequenceExpression":
-                list = expr.expressions;
-                break;
-            
-            case "CallExpression":
-                list = expr.arguments;
-                break;
-            
-            default:
-                list = [expr];
-                break;
-        }
-        
-        if (!rest && list.length > 0 && list[list.length - 1].type === "SpreadExpression") {
-        
-            node = list.pop();
-            rest = new AST.RestParameter(node.expression, node.start, node.end);
+            case "SequenceExpression": list = expr.expressions; break;
+            case "CallExpression": list = expr.arguments; break;
+            default: list = [expr]; break;
         }
     
         for (i = 0; i < list.length; ++i) {
         
             node = list[i];
-            params.push(param = new AST.FormalParameter(node, null, node.start, node.end));
-            this.transformPatternElement(param, true);
+            
+            if (i === list.length - 1 && node.type === "SpreadExpression") {
+            
+                expr = node.expression;
+                
+                // Rest parameters can only be identifiers
+                if (expr.type !== "Identifier")
+                    this.fail("Invalid rest parameter", expr);
+                
+                this.checkBindingIdentifier(expr);
+                
+                // Clear parser error for invalid spread expression
+                node.error = "";
+                
+                param = new AST.RestParameter(expr, node.start, node.end);
+                
+            } else {
+             
+                param = new AST.FormalParameter(node, null, node.start, node.end);
+                this.transformPatternElement(param, true);
+            }
+            
+            list[i] = param;
         }
         
-        if (rest)
-            params.push(rest);
-        
-        return params;
+        return list;
     }
     
     transformArrayPattern(node, binding) {

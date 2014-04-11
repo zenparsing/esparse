@@ -465,15 +465,7 @@ export class Parser {
             list = null;
             
         while (this.peek("div") === ",") {
-        
-            // If the next token after "," is "...", we might be
-            // trying to parse an arrow function formal parameter
-            // list with a trailing rest parameter.  Return the 
-            // expression up to, but not including ",".
-            
-            if (this.peekAt(null, 1) === "...")
-                break;
-            
+
             this.read();
             
             if (list === null)
@@ -488,49 +480,46 @@ export class Parser {
         return expr;
     }
     
-    AssignmentExpression(noIn) {
+    AssignmentExpression(noIn, allowSpread) {
     
         var start = this.nodeStart(),
-            left,
-            lhs;
+            node;
+        
+        if (this.peek() === "...") {
+        
+            this.read();
+            
+            node = new AST.SpreadExpression(
+                this.AssignmentExpression(noIn),
+                start,
+                this.nodeEnd());
+            
+            if (!allowSpread)
+                this.addInvalidNode("Invalid spread expression", node);
+            
+            return node;
+        }
         
         if (this.peekYield())
             return this.YieldExpression(noIn);
         
-        left = this.ConditionalExpression(noIn);
+        node = this.ConditionalExpression(noIn);
         
-        if (left.type === "ArrowFunctionHead")
-            return this.ArrowFunctionBody(left, noIn);
+        if (node.type === "ArrowFunctionHead")
+            return this.ArrowFunctionBody(node, noIn);
         
         // Check for assignment operator
         if (!isAssignment(this.peek("div")))
-            return left;
+            return node;
         
-        this.checkAssignTarget(left);
+        this.checkAssignTarget(node);
         
         return new AST.AssignmentExpression(
             this.read(),
-            left,
+            node,
             this.AssignmentExpression(noIn),
             start,
             this.nodeEnd());
-    }
-    
-    SpreadAssignment(noIn) {
-    
-        if (this.peek() === "...") {
-        
-            var start = this.nodeStart();
-            
-            this.read();
-            
-            return new AST.SpreadExpression(
-                this.AssignmentExpression(noIn), 
-                start, 
-                this.nodeEnd());
-        }
-        
-        return this.AssignmentExpression(noIn);
     }
     
     YieldExpression(noIn) {
@@ -746,7 +735,7 @@ export class Parser {
 
                         if (token.type === "=>" && !token.newlineBefore) {
                         
-                            expr = this.ArrowFunctionHead(arrowType, expr, null, start);
+                            expr = this.ArrowFunctionHead(arrowType, expr, start);
                             exit = true;
                         
                         } else {
@@ -820,7 +809,7 @@ export class Parser {
             if (list.length > 0)
                 this.read(",");
             
-            list.push(this.SpreadAssignment());
+            list.push(this.AssignmentExpression(false, true));
         }
         
         this.read(")");
@@ -859,7 +848,7 @@ export class Parser {
                 if (next.type === "=>") {
                 
                     this.pushContext(true);
-                    return this.ArrowFunctionHead("", this.BindingIdentifier(), null, start);
+                    return this.ArrowFunctionHead("", this.BindingIdentifier(), start);
                 
                 } else if (!next.newlineBefore) {
                 
@@ -870,7 +859,7 @@ export class Parser {
                     
                         this.read();
                         this.pushContext(true);
-                        return this.ArrowFunctionHead(token.value, this.BindingIdentifier(), null, start);
+                        return this.ArrowFunctionHead(token.value, this.BindingIdentifier(), start);
                     }
                 }
                 
@@ -1002,28 +991,16 @@ export class Parser {
             case ")":
                 break;
             
-            // An arrow function formal list with a single rest parameter
-            case "...":
-                rest = this.RestParameter();
-                break;
-            
             // Paren expression
             default:
                 expr = this.Expression();
                 break;
         }
         
-        // Look for a trailing rest formal parameter within an arrow formal list
-        if (!rest && this.peek() === "," && this.peekAt(null, 1) === "...") {
-        
-            this.read();
-            rest = this.RestParameter();
-        }
-        
         this.read(")");
         
-        if (expr === null || rest !== null || this.peek("div") === "=>")
-            return this.ArrowFunctionHead("", expr, rest, start);
+        if (expr === null || this.peek("div") === "=>")
+            return this.ArrowFunctionHead("", expr, start);
         
         // Collapse this context into its parent
         this.popContext(true);
@@ -1214,7 +1191,7 @@ export class Parser {
             
             } else {
             
-                list.push(next = this.SpreadAssignment());
+                list.push(next = this.AssignmentExpression(false, true));
                 comma = false;
             }
         }
@@ -2130,13 +2107,13 @@ export class Parser {
         return new AST.FunctionBody(statements, start, this.nodeEnd());
     }
     
-    ArrowFunctionHead(kind, formals, rest, start) {
+    ArrowFunctionHead(kind, formals, start) {
     
         // Context must have been pushed by caller
         this.context.isFunction = true;
         this.context.functionType = kind;
         
-        var params = this.transformFormals(formals, rest);
+        var params = this.transformFormals(formals);
         
         // Perform validation on transformed formal parameters
         this.checkArrowParameters(params);
