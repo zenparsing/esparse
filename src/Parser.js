@@ -369,6 +369,14 @@ export class Parser {
         throw err;
     }
     
+    unwrapParens(node) {
+
+        // Remove any parenthesis surrounding the target
+        for (; node.type === "ParenExpression"; node = node.expression);
+        return node;
+    }
+
+    
     // == Context Management ==
     
     pushContext(isFunction) {
@@ -512,7 +520,7 @@ export class Parser {
         if (!isAssignment(this.peek("div")))
             return node;
         
-        this.checkAssignTarget(node);
+        this.checkAssignmentTarget(this.unwrapParens(node), false);
         
         return new AST.AssignmentExpression(
             this.read(),
@@ -625,7 +633,7 @@ export class Parser {
         
             this.read();
             expr = this.MemberExpression(true);
-            this.checkAssignTarget(expr, true);
+            this.checkAssignmentTarget(this.unwrapParens(expr), true);
             
             return new AST.UpdateExpression(type, expr, true, start, this.nodeEnd());
         }
@@ -652,7 +660,7 @@ export class Parser {
         if (isIncrement(type) && !token.newlineBefore) {
         
             this.read();
-            this.checkAssignTarget(expr, true);
+            this.checkAssignmentTarget(this.unwrapParens(expr), true);
             
             return new AST.UpdateExpression(type, expr, false, start, this.nodeEnd());
         }
@@ -944,7 +952,7 @@ export class Parser {
         var token = this.readToken("IDENTIFIER"),
             node = new AST.Identifier(token.value, "", token.start, token.end);
         
-        this.checkBindingIdentifier(node);
+        this.checkBindingTarget(node);
         return node;
     }
     
@@ -963,14 +971,10 @@ export class Parser {
                 break;
             
             default:
-                node = this.BindingIdentifier();
-                break;
+                return this.BindingIdentifier();
         }
         
-        // Transform expressions to patterns
-        if (node.type !== "Identifier")
-            this.transformPattern(node, true);
-        
+        this.checkBindingTarget(node);
         return node;
     }
     
@@ -2398,7 +2402,7 @@ export class Parser {
             
         } else {
         
-            this.checkBindingIdentifier(remote);
+            this.checkBindingTarget(remote);
         }
         
         return new AST.ImportSpecifier(remote, local, start, this.nodeEnd());

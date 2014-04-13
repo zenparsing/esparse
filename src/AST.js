@@ -249,14 +249,21 @@ export var AST = {
         this.initializer = initializer; // (Node?) A default initializer expression
     },
 
-    PatternElement(pattern, initializer, rest, start, end) {
+    PatternElement(pattern, initializer, start, end) {
     
         this.type = "PatternElement";
         this.start = start;
         this.end = end;
         this.pattern = pattern;
         this.initializer = initializer;
-        this.rest = rest;
+    },
+    
+    PatternRestElement(target, start, end) {
+    
+        this.type = "PatternRestElement";
+        this.start = start;
+        this.end = end;
+        this.target = target;
     },
 
     MethodDefinition(kind, name, params, body, start, end) {

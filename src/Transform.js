@@ -1,5 +1,5 @@
 import { AST } from "AST.js";
-
+    
 export class Transform {
 
     // Transform an expression into a formal parameter list
@@ -11,8 +11,7 @@ export class Transform {
         var param,
             list,
             node,
-            expr,
-            i;
+            expr;
         
         switch (expr.type) {
         
@@ -21,7 +20,7 @@ export class Transform {
             default: list = [expr]; break;
         }
     
-        for (i = 0; i < list.length; ++i) {
+        for (var i = 0; i < list.length; ++i) {
         
             node = list[i];
             
@@ -33,7 +32,7 @@ export class Transform {
                 if (expr.type !== "Identifier")
                     this.fail("Invalid rest parameter", expr);
                 
-                this.checkBindingIdentifier(expr);
+                this.checkBindingTarget(expr);
                 
                 // Clear parser error for invalid spread expression
                 node.error = "";
@@ -54,83 +53,101 @@ export class Transform {
     
     transformArrayPattern(node, binding) {
     
-        // ArrayPattern and ArrayLiteral are isomorphic, so we simply change the type
+        // NOTE: ArrayPattern and ArrayLiteral are isomorphic
         node.type = "ArrayPattern";
         
         var elems = node.elements,
             rest = false,
-            elem,
-            i;
+            elem = null,
+            expr;
         
-        for (i = 0; i < elems.length; ++i) {
+        for (var i = 0; i < elems.length; ++i) {
         
             elem = elems[i];
+            if (!elem) continue;
             
-            // Rest element must be last
-            if (rest)
-                this.fail("Invalid destructuring pattern", elem);
-            
-            if (!elem) 
-                continue;
-            
-            if (elem.type !== "PatternElement") {
-            
-                rest = (elem.type === "SpreadExpression");
+            switch (elem.type) {
                 
-                elem = elems[i] = new AST.PatternElement(
-                    rest ? elem.expression : elem,
-                    null,
-                    rest,
-                    elem.start,
-                    elem.end);
+                case "SpreadExpression":
                 
-                // No trailing comma allowed after rest
-                // TODO: trailingComma is never assigned
-                if (rest && (node.trailingComma || i < elems.length - 1))
-                    this.fail("Invalid destructuring pattern", elem);
+                    // Pattern can only have one rest element
+                    if (rest)
+                        this.fail("Invalid destructuring pattern", elem);
+                    
+                    // Binding patterns can only have a rest element in the last position
+                    if (binding && i < elems.length - 1)
+                        this.fail("Invalid destructuring pattern", elem);
+                    
+                    expr = elem.expression;
+                    
+                    // Rest target cannot be a destructuring pattern
+                    switch (expr.type) {
+                    
+                        case "ObjectLiteral":
+                        case "ObjectPattern":
+                        case "ArrayLiteral":
+                        case "ArrayPattern": 
+                            this.fail("Invalid rest pattern", expr);
+                    }
+                    
+                    rest = true;
+                    elem = new AST.PatternRestElement(expr, elem.start, elem.end);
+                    this.checkPatternTarget(elem.target, binding);
+                    break;
+                
+                case "PatternRestElement":
+                    this.checkPatternTarget(elem.target, binding);
+                    break;
+                    
+                case "PatternElement":
+                    this.transformPatternElement(elem, binding);
+                    break;
+                
+                default:
+                    elem = new AST.PatternElement(elem, null, elem.start, elem.end);
+                    this.transformPatternElement(elem, binding);
+                    break;
+                    
             }
             
-            if (elem.rest) this.transformPattern(elem.pattern, binding);
-            else this.transformPatternElement(elem, binding);
+            elems[i] = elem;
         }
         
-        
+        // Binding patterns must have a non-empty pattern element in the
+        // last position
+        if (binding && !elem)
+            this.fail("Invalid destructuring pattern", node);
     }
     
     transformObjectPattern(node, binding) {
 
-        // ObjectPattern and ObjectLiteral are isomorphic, so we simply change the type
+        // NOTE: ObjectPattern and ObjectLiteral are isomorphic
         node.type = "ObjectPattern";
         
-        var props = node.properties, 
-            prop,
-            i;
+        var props = node.properties;
         
-        for (i = 0; i < props.length; ++i) {
+        for (var i = 0; i < props.length; ++i) {
         
-            prop = props[i];
+            var prop = props[i];
             
             // Clear the error flag
             prop.error = "";
             
             switch (prop.type) {
-            
-                case "PatternProperty":
-                
-                    break;
                     
                 case "PropertyDefinition":
                     
                     // Replace node
-                    prop = new AST.PatternProperty(
+                    props[i] = prop = new AST.PatternProperty(
                         prop.name,
                         prop.expression,
                         null,
                         prop.start,
                         prop.end);
                     
-                    props[i] = prop;
-                    
+                    break;
+                
+                case "PatternProperty":
                     break;
                 
                 default:
@@ -139,7 +156,7 @@ export class Transform {
             }
             
             if (prop.pattern) this.transformPatternElement(prop, binding);
-            else this.transformPattern(prop.name, binding);
+            else this.checkPatternTarget(prop.name, binding);
         }
     }
     
@@ -148,51 +165,13 @@ export class Transform {
         var node = elem.pattern;
         
         // Split assignment into pattern and initializer
-        if (node.type === "AssignmentExpression" && node.operator === "=") {
+        if (node && node.type === "AssignmentExpression" && node.operator === "=") {
         
-            elem.pattern = node.left;
             elem.initializer = node.right;
+            elem.pattern = node = node.left;
         }
         
-        this.transformPattern(elem.pattern, binding);
-    }
-    
-    // Transforms an expression into a pattern
-    transformPattern(node, binding) {
-
-        var invalid = false;
-        
-        switch (node.type) {
-        
-            case "Identifier":
-                if (binding) this.checkBindingIdentifier(node, true);
-                else this.checkAssignTarget(node);
-                
-                break;
-            
-            case "MemberExpression":
-                if (binding) invalid = true;
-                break;
-            
-            case "ObjectLiteral":
-            case "ObjectPattern":
-                this.transformObjectPattern(node, binding);
-                break;
-            
-            case "ArrayLiteral":
-            case "ArrayPattern":
-                this.transformArrayPattern(node, binding);
-                break;
-                
-            default:
-                invalid = true;
-                break;
-        }
-        
-        if (invalid)
-            this.fail("Invalid expression in pattern", node);
-        
-        return node;
+        this.checkPatternTarget(node, binding);
     }
     
 }

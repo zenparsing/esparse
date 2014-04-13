@@ -114,17 +114,15 @@
              start: 0,
              end: 6,
              elements: 
-              [ { type: 'PatternElement',
+              [ { type: 'PatternRestElement',
                   start: 1,
                   end: 5,
-                  pattern: 
+                  target: 
                    { type: 'Identifier',
                      start: 4,
                      end: 5,
                      value: 'a',
-                     context: 'variable' },
-                  initializer: null,
-                  rest: true } ] },
+                     context: 'variable' } } ] },
           right: { type: 'ArrayLiteral', start: 9, end: 11, elements: [] } } } ] },
 
 /** (...a) **/

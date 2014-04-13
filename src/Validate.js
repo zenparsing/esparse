@@ -33,11 +33,9 @@ function unwrapParens(node) {
 
 export class Validate {
 
-    // Checks an assignment target for strict mode restrictions
-    checkAssignTarget(node, simple) {
+    // Validates an assignment target
+    checkAssignmentTarget(node, simple) {
     
-        node = unwrapParens(node);
-        
         switch (node.type) {
         
             case "Identifier":
@@ -45,23 +43,69 @@ export class Validate {
                 if (isPoisonIdent(node.value))
                     this.addStrictError("Cannot modify " + node.value + " in strict mode", node);
         
-                break;
+                return;
             
             case "MemberExpression":
+                return;
+            
+            case "ObjectPattern":
+            case "ArrayPattern":
+                if (!simple) return;
                 break;
-                    
+            
             case "ObjectLiteral":
-            case "ArrayLiteral":
-            
-                if (!simple) {
+                if (!simple) { this.transformObjectPattern(node, false); return }
+                break;
                 
-                    this.transformPattern(node, false);
-                    break;
-                }
+            case "ArrayLiteral":
+                if (!simple) { this.transformArrayPattern(node, false); return }
+                break;
             
-            default:
-                this.fail("Invalid left-hand side in assignment", node);
         }
+        
+        this.fail("Invalid left-hand side in assignment", node);
+    }
+    
+    // Validates a binding target
+    checkBindingTarget(node) {
+    
+        var name, msg;
+        
+        switch (node.type) {
+        
+            case "Identifier":
+            
+                // Perform basic identifier validation
+                this.checkIdentifier(node);
+        
+                // Mark identifier node as a declaration
+                node.context = "declaration";
+            
+                name = node.value;
+        
+                if (isPoisonIdent(name))
+                    this.addStrictError("Binding cannot be created for '" + name + "' in strict mode", node);
+                
+                return;
+            
+            case "ArrayLiteral":
+            case "ArrayPattern":
+                this.transformArrayPattern(node, true);
+                return;
+            
+            case "ObjectLiteral":
+            case "ObjectPattern":
+                this.transformObjectPattern(node, true);
+                return;
+            
+        }
+        
+        this.fail("Invalid binding target", node);
+    }
+    
+    checkPatternTarget(node, binding) {
+    
+        return binding ? this.checkBindingTarget(node) : this.checkAssignmentTarget(node, false);
     }
     
     // Checks an identifier for strict mode reserved words
@@ -75,26 +119,6 @@ export class Validate {
             this.fail("yield cannot be an identifier inside of a generator function", node);
         else if (isStrictReserved(ident))
             this.addStrictError(ident + " cannot be used as an identifier in strict mode", node);
-    }
-    
-    // Checks a binding identifier for strict mode restrictions
-    checkBindingIdentifier(node, strict) {
-    
-        // Perform basic identifier check
-        this.checkIdentifier(node);
-        
-        // Mark identifier node as a declaration
-        node.context = "declaration";
-            
-        var name = node.value;
-        
-        if (isPoisonIdent(name)) {
-        
-            var msg = "Binding cannot be created for '" + name + "' in strict mode";
-            
-            if (strict) this.fail(msg, node);
-            else this.addStrictError(msg, node);
-        }
     }
     
     // Checks function formal parameters for strict mode restrictions
@@ -165,7 +189,8 @@ export class Validate {
             
         } else {
         
-            this.checkAssignTarget(init);
+            // TODO:  Unwrap parens here?
+            this.checkAssignmentTarget(this.unwrapParens(init));
         }
     }
     
@@ -293,7 +318,7 @@ export class Validate {
     
     checkDelete(node) {
     
-        node = unwrapParens(node);
+        node = this.unwrapParens(node);
         
         if (node.type === "Identifier")
             this.addStrictError("Cannot delete unqualified property in strict mode", node);
