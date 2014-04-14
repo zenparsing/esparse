@@ -1016,20 +1016,23 @@ export class Parser {
     
         var start = this.nodeStart(),
             nameSet = new IntMap,
+            comma = false,
             list = [],
-            node,
-            flag,
-            key;
+            node;
         
         this.read("{");
         
         while (this.peekUntil("}", "name")) {
         
-            if (list.length > 0)
+            if (list.length > 0) {
+            
                 this.read(",");
+                comma = true;
+            }
             
             if (this.peek("name") !== "}") {
             
+                comma = false;
                 list.push(node = this.PropertyDefinition());
                 this.checkPropertyName(node, nameSet);
             }
@@ -1117,59 +1120,6 @@ export class Parser {
         this.read("]");
         
         return new AST.ComputedPropertyName(expr, start, this.nodeEnd());
-    }
-    
-    MethodDefinition(name) {
-    
-        var start = name ? name.start : this.nodeStart(),
-            kind = "",
-            val;
-        
-        if (!name && this.peek("name") === "*") {
-        
-            this.read();
-            
-            kind = "generator";
-            name = this.PropertyName();
-        
-        } else {
-        
-            if (!name)
-                name = this.PropertyName();
-            
-            if (name.type === "Identifier" && this.peek("name") !== "(") {
-            
-                val = name.value;
-                
-                if (val === "get" || val === "set" || isFunctionModifier(val)) {
-                
-                    kind = name.value;
-                    name = this.PropertyName();
-                }
-            }
-        }
-        
-        this.pushContext(true);
-        
-        if (kind === "generator" || isFunctionModifier(kind))
-            this.context.functionType = kind;
-        
-        var params = kind === "get" || kind === "set" ?
-            this.AccessorParameters(kind) :
-            this.FormalParameters();
-        
-        var body = this.FunctionBody();
-        
-        this.checkParameters(params);
-        this.popContext();
-        
-        return new AST.MethodDefinition(
-            kind,
-            name,
-            params,
-            body,
-            start,
-            this.nodeEnd());
     }
     
     ArrayLiteral() {
@@ -2028,6 +1978,59 @@ export class Parser {
         return new AST.FunctionExpression(
             kind,
             ident,
+            params,
+            body,
+            start,
+            this.nodeEnd());
+    }
+    
+    MethodDefinition(name) {
+    
+        var start = name ? name.start : this.nodeStart(),
+            kind = "",
+            val;
+        
+        if (!name && this.peek("name") === "*") {
+        
+            this.read();
+            
+            kind = "generator";
+            name = this.PropertyName();
+        
+        } else {
+        
+            if (!name)
+                name = this.PropertyName();
+            
+            if (name.type === "Identifier" && this.peek("name") !== "(") {
+            
+                val = name.value;
+                
+                if (val === "get" || val === "set" || isFunctionModifier(val)) {
+                
+                    kind = name.value;
+                    name = this.PropertyName();
+                }
+            }
+        }
+        
+        this.pushContext(true);
+        
+        if (kind === "generator" || isFunctionModifier(kind))
+            this.context.functionType = kind;
+        
+        var params = kind === "get" || kind === "set" ?
+            this.AccessorParameters(kind) :
+            this.FormalParameters();
+        
+        var body = this.FunctionBody();
+        
+        this.checkParameters(params);
+        this.popContext();
+        
+        return new AST.MethodDefinition(
+            kind,
+            name,
             params,
             body,
             start,

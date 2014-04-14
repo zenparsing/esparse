@@ -113,6 +113,8 @@ export class Transform {
             elems[i] = elem;
         }
         
+        // TODO:  Currently, we are throwing out the last elision.  Why?
+        
         // Binding patterns must have a non-empty pattern element in the
         // last position
         if (binding && !elem)
