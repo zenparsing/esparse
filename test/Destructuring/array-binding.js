@@ -81,7 +81,25 @@
 
 /** var [] = x **/
 'empty patterns are not allowed':
-{},
+{ type: 'Script',
+  start: 0,
+  end: 10,
+  statements: 
+   [ { type: 'VariableDeclaration',
+       start: 0,
+       end: 10,
+       kind: 'var',
+       declarations: 
+        [ { type: 'VariableDeclarator',
+            start: 4,
+            end: 10,
+            pattern: { type: 'ArrayPattern', start: 4, end: 6, elements: [] },
+            initializer: 
+             { type: 'Identifier',
+               start: 9,
+               end: 10,
+               value: 'x',
+               context: 'variable' } } ] } ] },
 
 /** var [, a, , b] = x **/
 'elisions are allowed':

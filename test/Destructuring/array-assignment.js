@@ -287,49 +287,8 @@
              context: 'variable' } } } ] },
 
 /** [...a, b] = x **/
-'rest element can be in middle':
-{ type: 'Script',
-  start: 0,
-  end: 13,
-  statements: 
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 13,
-       expression: 
-        { type: 'AssignmentExpression',
-          start: 0,
-          end: 13,
-          operator: '=',
-          left: 
-           { type: 'ArrayPattern',
-             start: 0,
-             end: 9,
-             elements: 
-              [ { type: 'PatternRestElement',
-                  start: 1,
-                  end: 5,
-                  target: 
-                   { type: 'Identifier',
-                     start: 4,
-                     end: 5,
-                     value: 'a',
-                     context: 'variable' } },
-                { type: 'PatternElement',
-                  start: 7,
-                  end: 8,
-                  pattern: 
-                   { type: 'Identifier',
-                     start: 7,
-                     end: 8,
-                     value: 'b',
-                     context: 'variable' },
-                  initializer: null } ] },
-          right: 
-           { type: 'Identifier',
-             start: 12,
-             end: 13,
-             value: 'x',
-             context: 'variable' } } } ] },
+'rest element must be last':
+{},
 
 /** [...a.b] = x **/
 'rest target can be a member expression':

@@ -57,7 +57,6 @@ export class Transform {
         node.type = "ArrayPattern";
         
         var elems = node.elements,
-            rest = false,
             elem = null,
             expr;
         
@@ -70,12 +69,11 @@ export class Transform {
                 
                 case "SpreadExpression":
                 
-                    // Pattern can only have one rest element
-                    if (rest)
-                        this.fail("Invalid destructuring pattern", elem);
+                    // TODO:  Currently, we are ignoring the last comma, but commas
+                    // are not allowed after a rest element.
                     
-                    // Binding patterns can only have a rest element in the last position
-                    if (binding && i < elems.length - 1)
+                    // Rest element must be in the last position
+                    if (i < elems.length - 1)
                         this.fail("Invalid destructuring pattern", elem);
                     
                     expr = elem.expression;
@@ -90,7 +88,6 @@ export class Transform {
                             this.fail("Invalid rest pattern", expr);
                     }
                     
-                    rest = true;
                     elem = new AST.PatternRestElement(expr, elem.start, elem.end);
                     this.checkPatternTarget(elem.target, binding);
                     break;
@@ -113,12 +110,6 @@ export class Transform {
             elems[i] = elem;
         }
         
-        // TODO:  Currently, we are throwing out the last elision.  Why?
-        
-        // Binding patterns must have a non-empty pattern element in the
-        // last position
-        if (binding && !elem)
-            this.fail("Invalid destructuring pattern", node);
     }
     
     transformObjectPattern(node, binding) {
