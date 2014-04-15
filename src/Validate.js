@@ -173,25 +173,15 @@ export class Validate {
             // For-in/of may only have one variable declaration
             if (init.declarations.length !== 1)
                 this.fail("for-" + type + " statement may not have more than one variable declaration", init);
-        
-            // A variable initializer is only allowed in for-in where 
-            // variable type is "var" and it is not a pattern
-            
-            // TODO: Is it now disallowed altogether?
             
             var decl = init.declarations[0];
-        
-            if (decl.initializer && (
-                type === "of" ||
-                init.kind !== "var" ||
-                decl.pattern.type !== "Identifier")) {
             
+            // Initializers are not allowed in for in and for of
+            if (decl.initializer)
                 this.fail("Invalid initializer in for-" + type + " statement", init);
-            }
             
         } else {
         
-            // TODO:  Unwrap parens here?
             this.checkAssignmentTarget(this.unwrapParens(init));
         }
     }
@@ -284,10 +274,9 @@ export class Validate {
             list = context.invalidNodes,
             item,
             node,
-            error,
-            i;
+            error;
         
-        for (i = 0; i < list.length; ++i) {
+        for (var i = 0; i < list.length; ++i) {
         
             item = list[i];
             node = item.node;

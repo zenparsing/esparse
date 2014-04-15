@@ -1414,8 +1414,11 @@ export class Parser {
             pattern = this.BindingPattern(),
             init = null;
         
-        if (pattern.type !== "Identifier" || this.peek() === "=") {
+        if ((!noIn && pattern.type !== "Identifier") || this.peek() === "=") {
         
+            // NOTE: Patterns must have initializers when not in declaration
+            // section of a for statement
+            
             this.read("=");
             init = this.AssignmentExpression(noIn);
             

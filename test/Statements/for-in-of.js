@@ -1,25 +1,139 @@
-[
+({
 
 /** for (x in y); **/
-{   type: "Script",
-    statements: [
-    
-    {   type: "ForInStatement",
-    
-        left:
-        {   type: "Identifier",
-            value: "x"
-        },
-        
-        right:
-        {   type: "Identifier",
-            value: "y"
-        },
-        
-        body:
-        {   type: "EmptyStatement"
-        }
-    }]
-},
+'for-in':
+{ type: 'Script',
+  start: 0,
+  end: 13,
+  statements: 
+   [ { type: 'ForInStatement',
+       start: 0,
+       end: 13,
+       left: 
+        { type: 'Identifier',
+          start: 5,
+          end: 6,
+          value: 'x',
+          context: 'variable' },
+       right: 
+        { type: 'Identifier',
+          start: 10,
+          end: 11,
+          value: 'y',
+          context: 'variable' },
+       body: { type: 'EmptyStatement', start: 12, end: 13 } } ] },
 
-];
+/** for (var x in y); **/
+'for-in with var declaration':
+{ type: 'Script',
+  start: 0,
+  end: 17,
+  statements: 
+   [ { type: 'ForInStatement',
+       start: 0,
+       end: 17,
+       left: 
+        { type: 'VariableDeclaration',
+          start: 5,
+          end: 10,
+          kind: 'var',
+          declarations: 
+           [ { type: 'VariableDeclarator',
+               start: 9,
+               end: 10,
+               pattern: 
+                { type: 'Identifier',
+                  start: 9,
+                  end: 10,
+                  value: 'x',
+                  context: 'declaration' },
+               initializer: null } ] },
+       right: 
+        { type: 'Identifier',
+          start: 14,
+          end: 15,
+          value: 'y',
+          context: 'variable' },
+       body: { type: 'EmptyStatement', start: 16, end: 17 } } ] },
+
+/** for (let x in y); **/
+'for-in with let declaration':
+{ type: 'Script',
+  start: 0,
+  end: 17,
+  statements: 
+   [ { type: 'ForInStatement',
+       start: 0,
+       end: 17,
+       left: 
+        { type: 'VariableDeclaration',
+          start: 5,
+          end: 10,
+          kind: 'let',
+          declarations: 
+           [ { type: 'VariableDeclarator',
+               start: 9,
+               end: 10,
+               pattern: 
+                { type: 'Identifier',
+                  start: 9,
+                  end: 10,
+                  value: 'x',
+                  context: 'declaration' },
+               initializer: null } ] },
+       right: 
+        { type: 'Identifier',
+          start: 14,
+          end: 15,
+          value: 'y',
+          context: 'variable' },
+       body: { type: 'EmptyStatement', start: 16, end: 17 } } ] },
+
+/** for (let {x} in y); **/
+'for-in with pattern variable declarator':
+{ type: 'Script',
+  start: 0,
+  end: 19,
+  statements: 
+   [ { type: 'ForInStatement',
+       start: 0,
+       end: 19,
+       left: 
+        { type: 'VariableDeclaration',
+          start: 5,
+          end: 12,
+          kind: 'let',
+          declarations: 
+           [ { type: 'VariableDeclarator',
+               start: 9,
+               end: 12,
+               pattern: 
+                { type: 'ObjectPattern',
+                  start: 9,
+                  end: 12,
+                  properties: 
+                   [ { type: 'PatternProperty',
+                       start: 10,
+                       end: 11,
+                       name: 
+                        { type: 'Identifier',
+                          start: 10,
+                          end: 11,
+                          value: 'x',
+                          context: 'declaration' },
+                       pattern: null,
+                       initializer: null } ] },
+               initializer: null } ] },
+       right: 
+        { type: 'Identifier',
+          start: 16,
+          end: 17,
+          value: 'y',
+          context: 'variable' },
+       body: { type: 'EmptyStatement', start: 18, end: 19 } } ] },
+
+/** for (var i = 0 in x); **/
+'initializers in for-in not allowed':
+{},
+
+});

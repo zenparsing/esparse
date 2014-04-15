@@ -36,6 +36,10 @@
                value: 'x',
                context: 'variable' } } ] } ] },
 
+/** var [a]; **/
+'pattern must have an initializer':
+{},
+
 /** var ([a]) = x; **/
 'parens are not unwrapped':
 {},
