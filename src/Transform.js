@@ -57,20 +57,23 @@ export class Transform {
         node.type = "ArrayPattern";
         
         var elems = node.elements,
-            elem = null,
+            elem,
             expr;
         
         for (var i = 0; i < elems.length; ++i) {
         
             elem = elems[i];
-            if (!elem) continue;
+            
+            // Skip holes in pattern
+            if (!elem) 
+                continue;
             
             switch (elem.type) {
                 
                 case "SpreadExpression":
                 
                     // TODO:  Currently, we are ignoring the last comma, but commas
-                    // are not allowed after a rest element.
+                    // are not allowed after a rest element.  Should they be?
                     
                     // Rest element must be in the last position
                     if (i < elems.length - 1)
@@ -89,11 +92,11 @@ export class Transform {
                     }
                     
                     elem = new AST.PatternRestElement(expr, elem.start, elem.end);
-                    this.checkPatternTarget(elem.target, binding);
+                    this.checkPatternTarget(elem.pattern, binding);
                     break;
                 
                 case "PatternRestElement":
-                    this.checkPatternTarget(elem.target, binding);
+                    this.checkPatternTarget(elem.pattern, binding);
                     break;
                     
                 case "PatternElement":
@@ -144,7 +147,6 @@ export class Transform {
                     break;
                 
                 default:
-                
                     this.fail("Invalid pattern", prop);
             }
             

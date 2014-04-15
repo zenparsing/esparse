@@ -258,12 +258,12 @@ export var AST = {
         this.initializer = initializer;
     },
     
-    PatternRestElement(target, start, end) {
+    PatternRestElement(pattern, start, end) {
     
         this.type = "PatternRestElement";
         this.start = start;
         this.end = end;
-        this.target = target;
+        this.pattern = pattern;
     },
 
     MethodDefinition(kind, name, params, body, start, end) {

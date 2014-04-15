@@ -117,7 +117,7 @@
               [ { type: 'PatternRestElement',
                   start: 1,
                   end: 5,
-                  target: 
+                  pattern: 
                    { type: 'Identifier',
                      start: 4,
                      end: 5,

@@ -189,7 +189,7 @@
               [ { type: 'PatternRestElement',
                   start: 1,
                   end: 5,
-                  target: 
+                  pattern: 
                    { type: 'Identifier',
                      start: 4,
                      end: 5,
@@ -312,7 +312,7 @@
               [ { type: 'PatternRestElement',
                   start: 1,
                   end: 7,
-                  target: 
+                  pattern: 
                    { type: 'MemberExpression',
                      start: 4,
                      end: 7,

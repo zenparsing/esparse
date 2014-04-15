@@ -160,7 +160,9 @@ export class Validate {
     // Performs validation on transformed arrow formal parameters
     checkArrowParameters(params) {
     
+        params = this.transformFormals(params);
         this.checkParameters(params);
+        return params;
     }
     
     // Performs validation on the init portion of a for-in or for-of statement

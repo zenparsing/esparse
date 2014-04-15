@@ -2120,10 +2120,8 @@ export class Parser {
         this.context.isFunction = true;
         this.context.functionType = kind;
         
-        var params = this.transformFormals(formals);
-        
-        // Perform validation on transformed formal parameters
-        this.checkArrowParameters(params);
+        // Transform and validate formal parameters
+        var params = this.checkArrowParameters(formals);
         
         return new AST.ArrowFunctionHead(params, start, this.nodeEnd());
     }
