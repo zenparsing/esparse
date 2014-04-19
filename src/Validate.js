@@ -103,6 +103,7 @@ export class Validate {
         this.fail("Invalid binding target", node);
     }
     
+    // Validates a target in a binding or assignment pattern
     checkPatternTarget(node, binding) {
     
         return binding ? this.checkBindingTarget(node) : this.checkAssignmentTarget(node, false);
@@ -126,10 +127,9 @@ export class Validate {
     
         var names = new IntMap, 
             name,
-            node,
-            i;
+            node;
         
-        for (i = 0; i < params.length; ++i) {
+        for (var i = 0; i < params.length; ++i) {
         
             node = params[i];
             
@@ -189,26 +189,23 @@ export class Validate {
     // Checks for duplicate object literal property names
     checkPropertyName(node, nameSet) {
     
-        // TODO:  This is hot code.  Correctly detecting property name conflicts
-        // results in a significant performance degredation.  Investigate ways
-        // to make this more efficient.
-        
         var flag = PROP_NORMAL,
             currentFlags = 0,
             name = "";
         
         switch (node.name.type) {
         
+            case "Identifier":
+            case "String":
+                name = node.name.value;
+                break;
+                
             case "ComputedPropertyName":
                 // If property name is computed, skip duplicate check
                 return;
             
-            case "Number":
-                name = String(node.name.value);
-                break;
-            
             default:
-                name = node.name.value;
+                name = String(node.name.value);
                 break;
         }
         
@@ -286,7 +283,7 @@ export class Validate {
             if (!error)
                 continue;
             
-            // Throw if item is not a strict-mode error, or
+            // Throw if item is not a strict-mode-only error, or
             // if the current context is strict
             if (!item.strict || context.mode === "strict")
                 this.fail(error, node);
@@ -295,7 +292,7 @@ export class Validate {
             if (context.mode === "sloppy")
                 continue;
             
-            // NOTE:  If parent context is sloppy, then we ignore.
+            // NOTE:  If the parent context is sloppy, then we ignore.
             // If the parent context is strict, then this context would
             // also be known to be strict and therefore handled above.
             

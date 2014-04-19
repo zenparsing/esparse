@@ -1,13 +1,24 @@
+/*
+
+NOTE:  For auto-documentation purposes, the following conventions must be followed:
+
+1)  The last parameters to each constructor function must always be "start"
+    and "end", in that order.
+
+2)  With the exception of "start" and "end", the order of constructor parameters
+    must be identical to the order of property assignments within the constructor.
+
+*/
 export var AST = {
     
     Node(type, start, end) {
 
-        this.type = type;
+        this.type = type; // (string) The node type
         this.start = start;
         this.end = end;
     },
     
-    Identifier(value, context, start, end) {
+    Identifier(value, context, start, end) { 
 
         this.type = "Identifier";
         this.start = start;
@@ -16,6 +27,7 @@ export var AST = {
         this.context = context; // (string) The context in which the identifier appears ("", "variable", "declaration")
     },
 
+    // A number literal
     Number(value, start, end) {
     
         this.type = "Number";
@@ -24,6 +36,7 @@ export var AST = {
         this.value = value; // (number) The mathmatical value of the number literal
     },
 
+    // A string literal
     String(value, start, end) {
 
         this.type = "String";
@@ -194,7 +207,7 @@ export var AST = {
         this.start = start;
         this.end = end;
         this.tag = tag; // The template tag
-        this.template = template; // <TemplateExpression> A template
+        this.template = template; // (TemplateExpression) A template
     },
 
     NewExpression(callee, args, start, end) {
@@ -239,6 +252,14 @@ export var AST = {
         this.expression = expr; // (Node?) An expression
     },
 
+    ObjectPattern(props, start, end) {
+        
+        this.type = "ObjectPattern";
+        this.start = start;
+        this.end = end;
+        this.properties = props; // [PatternProperty] A list of destructuring pattern properties
+    },
+    
     PatternProperty(name, pattern, initializer, start, end) {
     
         this.type = "PatternProperty";
@@ -249,13 +270,21 @@ export var AST = {
         this.initializer = initializer; // (Node?) A default initializer expression
     },
 
+    ArrayPattern(elements, start, end) {
+    
+        this.type = "ArrayPattern";
+        this.start = start;
+        this.end = end;
+        this.elements = elements; // [PatternElement|PatternRestElement] A list of of destructuring pattern elements
+    },
+    
     PatternElement(pattern, initializer, start, end) {
     
         this.type = "PatternElement";
         this.start = start;
         this.end = end;
-        this.pattern = pattern;
-        this.initializer = initializer;
+        this.pattern = pattern; // A destructuring target pattern
+        this.initializer = initializer; // (Node?) A default initializer expression
     },
     
     PatternRestElement(pattern, start, end) {
@@ -263,7 +292,7 @@ export var AST = {
         this.type = "PatternRestElement";
         this.start = start;
         this.end = end;
-        this.pattern = pattern;
+        this.pattern = pattern; // A destructuring target
     },
 
     MethodDefinition(kind, name, params, body, start, end) {
@@ -271,10 +300,10 @@ export var AST = {
         this.type = "MethodDefinition";
         this.start = start;
         this.end = end;
-        this.kind = kind;
-        this.name = name;
-        this.params = params;
-        this.body = body;
+        this.kind = kind; // (string) The type of method
+        this.name = name; // The method name
+        this.params = params; // [FormalParameter] A list of formal parameters
+        this.body = body; // (FunctionBody) The function body
     },
 
     ArrayLiteral(elements, start, end) {
@@ -282,7 +311,7 @@ export var AST = {
         this.type = "ArrayLiteral";
         this.start = start;
         this.end = end;
-        this.elements = elements;
+        this.elements = elements; // [Node|null]
     },
 
     ArrayComprehension(qualifiers, expr, start, end) {
