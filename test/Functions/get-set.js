@@ -84,7 +84,7 @@
                   start: 3,
                   end: 9,
                   name: { type: 'Identifier', start: 3, end: 6, value: 'get', context: '' },
-                  expression: { type: 'Number', start: 8, end: 9, value: 0 } },
+                  expression: { type: 'NumberLiteral', start: 8, end: 9, value: 0 } },
                 { type: 'PropertyDefinition',
                   start: 11,
                   end: 17,
@@ -94,7 +94,7 @@
                      end: 14,
                      value: 'set',
                      context: '' },
-                  expression: { type: 'Number', start: 16, end: 17, value: 0 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 16, end: 17, value: 0 } } ] } } } ] },
 
 /** ({ set x({ y }) {} }); **/
 'setter can have a destructuring param': 

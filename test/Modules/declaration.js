@@ -26,7 +26,7 @@
             value: "x"
         },
         from: {
-            type: "String",
+            type: "StringLiteral",
             value: "x.js"
         }
     }]

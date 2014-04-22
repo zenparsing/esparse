@@ -196,7 +196,7 @@ export class Validate {
         switch (node.name.type) {
         
             case "Identifier":
-            case "String":
+            case "StringLiteral":
                 name = node.name.value;
                 break;
                 

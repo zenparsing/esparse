@@ -15,14 +15,14 @@
             right:
             {   type: "ArrayLiteral",
                 elements: [
-                {   type: "Number",
+                {   type: "NumberLiteral",
                     value: 1
                 },
-                {   type: "Number",
+                {   type: "NumberLiteral",
                     value: 2
                 },
                 null,
-                {   type: "Number",
+                {   type: "NumberLiteral",
                     value: 3
                 }]
             }

@@ -75,7 +75,7 @@
                 {   type: "YieldExpression",
                     delegate: false,
                     expression:
-                    {   type: "Number",
+                    {   type: "NumberLiteral",
                         value: 1
                     }
                 }

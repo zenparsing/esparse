@@ -837,8 +837,8 @@ export class Parser {
             case "function": return this.FunctionExpression();
             case "class": return this.ClassExpression();
             case "TEMPLATE": return this.TemplateExpression();
-            case "NUMBER": return this.Number();
-            case "STRING": return this.String();
+            case "NUMBER": return this.NumberLiteral();
+            case "STRING": return this.StringLiteral();
             case "{": return this.ObjectLiteral();
             
             case "(": return this.peekAt(null, 1) === "for" ? 
@@ -877,12 +877,12 @@ export class Parser {
             
             case "null":
                 this.read();
-                return new AST.Null(token.start, token.end);
+                return new AST.NullLiteral(token.start, token.end);
             
             case "true":
             case "false":
                 this.read();
-                return new AST.Boolean(type === "true", token.start, token.end);
+                return new AST.BooleanLiteral(type === "true", token.start, token.end);
             
             case "this":
                 this.read();
@@ -907,10 +907,10 @@ export class Parser {
         return new AST.Identifier(token.value, "", token.start, token.end);
     }
     
-    String() {
+    StringLiteral() {
     
         var token = this.readToken("STRING"),
-            node = new AST.String(token.value, token.start, token.end);
+            node = new AST.StringLiteral(token.value, token.start, token.end);
         
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -918,10 +918,10 @@ export class Parser {
         return node;
     }
     
-    Number() {
+    NumberLiteral() {
     
         var token = this.readToken("NUMBER"),
-            node = new AST.Number(token.number, token.start, token.end);
+            node = new AST.NumberLiteral(token.number, token.start, token.end);
         
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -1103,8 +1103,8 @@ export class Parser {
         switch (token.type) {
         
             case "IDENTIFIER": return this.IdentifierName();
-            case "STRING": return this.String();
-            case "NUMBER": return this.Number();
+            case "STRING": return this.StringLiteral();
+            case "NUMBER": return this.NumberLiteral();
             case "[": return this.ComputedPropertyName();
         }
         
@@ -1836,7 +1836,7 @@ export class Parser {
             if (prologue) {
             
                 if (element.type === "ExpressionStatement" &&
-                    element.expression.type === "String") {
+                    element.expression.type === "StringLiteral") {
                 
                     // Get the non-escaped literal text of the string
                     node = element.expression;
@@ -2329,7 +2329,7 @@ export class Parser {
     
     ModuleSpecifier() {
     
-        return this.peek() === "STRING" ? this.String() : this.ModulePath();
+        return this.peek() === "STRING" ? this.StringLiteral() : this.ModulePath();
     }
     
     ImportDeclaration() {

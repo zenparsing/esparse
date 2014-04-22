@@ -106,7 +106,7 @@
    [ { type: 'WhileStatement',
        start: 0,
        end: 22,
-       test: { type: 'Boolean', start: 7, end: 11, value: true },
+       test: { type: 'BooleanLiteral', start: 7, end: 11, value: true },
        body: 
         { type: 'Block',
           start: 13,
@@ -122,7 +122,7 @@
    [ { type: 'WhileStatement',
        start: 0,
        end: 25,
-       test: { type: 'Boolean', start: 7, end: 11, value: true },
+       test: { type: 'BooleanLiteral', start: 7, end: 11, value: true },
        body: 
         { type: 'Block',
           start: 13,

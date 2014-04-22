@@ -22,7 +22,7 @@
                   start: 3,
                   end: 7,
                   name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
-                  expression: { type: 'Number', start: 6, end: 7, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 6, end: 7, value: 1 } } ] } } } ] },
 
 /** ({ "x": 1 }) **/
 'string-named data properties':
@@ -45,8 +45,8 @@
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 9,
-                  name: { type: 'String', start: 3, end: 6, value: 'x' },
-                  expression: { type: 'Number', start: 8, end: 9, value: 1 } } ] } } } ] },
+                  name: { type: 'StringLiteral', start: 3, end: 6, value: 'x' },
+                  expression: { type: 'NumberLiteral', start: 8, end: 9, value: 1 } } ] } } } ] },
 
 /** ({ 1: 1 }) **/
 'number-named data properties':
@@ -69,8 +69,8 @@
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 7,
-                  name: { type: 'Number', start: 3, end: 4, value: 1 },
-                  expression: { type: 'Number', start: 6, end: 7, value: 1 } } ] } } } ] },
+                  name: { type: 'NumberLiteral', start: 3, end: 4, value: 1 },
+                  expression: { type: 'NumberLiteral', start: 6, end: 7, value: 1 } } ] } } } ] },
 
 /** ({ x }); **/
 'data property without initializer': 
@@ -118,12 +118,12 @@
                   start: 3,
                   end: 7,
                   name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
-                  expression: { type: 'Number', start: 6, end: 7, value: 1 } },
+                  expression: { type: 'NumberLiteral', start: 6, end: 7, value: 1 } },
                 { type: 'PropertyDefinition',
                   start: 9,
                   end: 13,
                   name: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
-                  expression: { type: 'Number', start: 12, end: 13, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 12, end: 13, value: 1 } } ] } } } ] },
 
 /** "use strict"; ({ package: 0 }); **/
 'strict mode keywords are allowed as property names': 
@@ -134,7 +134,7 @@
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
-       expression: { type: 'String', start: 0, end: 12, value: 'use strict' } },
+       expression: { type: 'StringLiteral', start: 0, end: 12, value: 'use strict' } },
      { type: 'ExpressionStatement',
        start: 14,
        end: 31,
@@ -156,7 +156,7 @@
                      end: 24,
                      value: 'package',
                      context: '' },
-                  expression: { type: 'Number', start: 26, end: 27, value: 0 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 26, end: 27, value: 0 } } ] } } } ] },
 
 /** "use strict"; ({ x: 1, x: 1 }); **/
 'duplicate data properties not allowed in strict mode': {},

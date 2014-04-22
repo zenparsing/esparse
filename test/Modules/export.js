@@ -142,7 +142,7 @@
                end: 15,
                local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
                exported: { type: 'Identifier', start: 14, end: 15, value: 'y', context: '' } } ],
-          from: { type: 'String', start: 23, end: 26, value: 'x' } } } ] },
+          from: { type: 'StringLiteral', start: 23, end: 26, value: 'x' } } } ] },
 
 /*** export * from "x"; ***/
 'exporting everything from an external module': 
@@ -158,7 +158,7 @@
           start: 7,
           end: 17,
           specifiers: null,
-          from: { type: 'String', start: 14, end: 17, value: 'x' } } } ] },
+          from: { type: 'StringLiteral', start: 14, end: 17, value: 'x' } } } ] },
 
 /*** export *; ***/
 'exporting everything must include a specifier': {},

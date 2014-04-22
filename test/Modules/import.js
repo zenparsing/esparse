@@ -23,7 +23,7 @@
                value: 'x',
                context: 'declaration' },
             local: null } ],
-       from: { type: 'String', start: 18, end: 21, value: 'x' } } ] },
+       from: { type: 'StringLiteral', start: 18, end: 21, value: 'x' } } ] },
 
 /*** import { x } from y; ***/
 'import from a lexical module': 
@@ -71,7 +71,7 @@
                end: 15,
                value: 'y',
                context: 'declaration' } } ],
-       from: { type: 'String', start: 23, end: 26, value: 'x' } } ] },
+       from: { type: 'StringLiteral', start: 23, end: 26, value: 'x' } } ] },
 
 /*** import {} from "x"; ***/
 'empty import specifier set': 
@@ -83,7 +83,7 @@
        start: 0,
        end: 19,
        specifiers: [],
-       from: { type: 'String', start: 15, end: 18, value: 'x' } } ] },
+       from: { type: 'StringLiteral', start: 15, end: 18, value: 'x' } } ] },
 
 /*** import { default as y } from "x"; ***/
 'import a keyword-named binding': 
@@ -110,7 +110,7 @@
                end: 21,
                value: 'y',
                context: 'declaration' } } ],
-       from: { type: 'String', start: 29, end: 32, value: 'x' } } ] },
+       from: { type: 'StringLiteral', start: 29, end: 32, value: 'x' } } ] },
 
 /*** import { default } from "x"; ***/
 'importing of non-identifier bindings is not allowed': {},
@@ -125,6 +125,6 @@
        start: 0,
        end: 11,
        specifiers: null,
-       from: { type: 'String', start: 7, end: 10, value: 'x' } } ] },
+       from: { type: 'StringLiteral', start: 7, end: 10, value: 'x' } } ] },
 
 })

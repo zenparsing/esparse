@@ -31,7 +31,7 @@
                         end: 5,
                         value: 'x',
                         context: 'variable' } },
-                  expression: { type: 'Number', start: 8, end: 9, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 8, end: 9, value: 1 } } ] } } } ] },
 
 /** ({ [x]() {} }) **/
 'computed method names':
@@ -173,7 +173,7 @@
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
-       expression: { type: 'String', start: 0, end: 12, value: 'use strict' } },
+       expression: { type: 'StringLiteral', start: 0, end: 12, value: 'use strict' } },
      { type: 'ExpressionStatement',
        start: 14,
        end: 34,
@@ -199,7 +199,7 @@
                         end: 19,
                         value: 'x',
                         context: 'variable' } },
-                  expression: { type: 'Number', start: 22, end: 23, value: 1 } },
+                  expression: { type: 'NumberLiteral', start: 22, end: 23, value: 1 } },
                 { type: 'PropertyDefinition',
                   start: 25,
                   end: 31,
@@ -213,6 +213,6 @@
                         end: 27,
                         value: 'x',
                         context: 'variable' } },
-                  expression: { type: 'Number', start: 30, end: 31, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 30, end: 31, value: 1 } } ] } } } ] },
 
 };

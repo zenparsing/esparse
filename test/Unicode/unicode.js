@@ -9,7 +9,7 @@
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 11,
-       expression: { type: 'String', start: 0, end: 10, value: 'abµcd' } } ] },
+       expression: { type: 'StringLiteral', start: 0, end: 10, value: 'abµcd' } } ] },
 
 /** "ab\u01BBcd"; **/
 'unicode escape in string': 
@@ -20,7 +20,7 @@
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
-       expression: { type: 'String', start: 0, end: 12, value: 'abƻcd' } } ] },
+       expression: { type: 'StringLiteral', start: 0, end: 12, value: 'abƻcd' } } ] },
 
 /** \u{64}efg; **/
 "extended unicode escapes": {

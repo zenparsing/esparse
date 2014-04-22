@@ -19,10 +19,10 @@ function parseTypes() {
 
     var text = FS.readFileSync(abs("../src/AST.js"), "utf8"),
         names = [],
-        params,
+        props,
         item;
 
-    text.match(/\n[ \t]+[A-Z]\w*(?=\([^)]*\)[ ]*\{)|\n[ \t]+this\.[^\n]*/g).forEach(function(value) {
+    text.match(/\n[ \t]+[A-Z]\w*(?:\([^)]*\))(?=[ ]*\{)|\n[ \t]+this\.[^\n]*/g).forEach(function(value) {
 
         value = value.trim();
     
@@ -33,7 +33,7 @@ function parseTypes() {
                 type = match[2] || "",
                 desc = match[3] || "";
         
-            if (!params)
+            if (!props)
                 throw new Error("Oops - a property assign came before a type name!");
         
             switch (key) {
@@ -44,14 +44,21 @@ function parseTypes() {
                     break;
                 
                 default:
-                    params.push(new Property(key, type, desc));
+                    props.push(new Property(key, type, desc));
             }
     
         } else {
     
-            item = { name: value, parameters: params = [] };
+            var name = value.slice(0, value.indexOf("("));
             
-            if (value !== "Node")
+            item = { 
+            
+                name: name, 
+                signature: value,
+                properties: props = []
+            };
+            
+            if (name !== "Node")
                 names.push(item);
         }
     
@@ -64,17 +71,19 @@ function parseTypes() {
     
     names.forEach(function(item) {
     
-        var params = item.parameters;
+        var props = item.properties;
         
-        params.push(startProperty);
-        params.push(endProperty);
+        props.push(startProperty);
+        props.push(endProperty);
     });
     
     names.unshift({ 
     
         name: "Node", 
         
-        parameters: [
+        signature: "Node(type, start, end)",
+        
+        properties: [
             new Property("type", "(string)", "The node type"),
             startProperty,
             endProperty,
@@ -148,25 +157,23 @@ function generateHTML(names, headerLevel) {
     
     names.forEach(function(type) {
     
-        var params = type.parameters;
+        var props = type.properties;
         
         writer
         
-        .write("<div class='ast-node'>")
+        .write("<div>")
         .indent()
         
         .write(
             "<h" + headerLevel + ">" +
-            writer.escape(type.name) + "(" +
-                params.map(function(item) { return writer.escape(item.name) }).join(", ") +
-            ")" +
+            writer.escape(type.signature) + 
             "</h" + headerLevel + ">"
         )
         
         .write("<dl>")
         .indent()
         
-        .forEach(params, function(param) {
+        .forEach(props, function(param) {
         
             if (type.name !== "Node" && (param.name === "start" || param.name === "end"))
                 return;

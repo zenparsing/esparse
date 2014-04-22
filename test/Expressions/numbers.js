@@ -6,7 +6,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 42
         }
     }]
@@ -18,7 +18,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 42.42
         }
     }]
@@ -30,7 +30,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: .42
         }
     }]
@@ -42,7 +42,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 0.42
         }
     }]
@@ -54,7 +54,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 42e10
         }
     }]
@@ -66,7 +66,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 42e+10
         }
     }]
@@ -78,7 +78,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 42e-10
         }
     }]
@@ -90,7 +90,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 42E10
         }
     }]
@@ -102,7 +102,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 42.42e10
         }
     }]
@@ -114,7 +114,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 0x42
         }
     }]
@@ -126,7 +126,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 0x42
         }
     }]
@@ -138,7 +138,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 10
         }
     }]
@@ -150,7 +150,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 10
         }
     }]
@@ -162,7 +162,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 511
         }
     }]
@@ -174,7 +174,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 511
         }
     }]
@@ -186,7 +186,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 0999
         }
     }]
@@ -198,7 +198,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "Number",
+        {   type: "NumberLiteral",
             value: 511
         }
     }]

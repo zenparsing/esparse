@@ -13,11 +13,11 @@
             {   type: "BinaryExpression",
                 operator: "+",
                 left:
-                {   type: "Number",
+                {   type: "NumberLiteral",
                     value: 4
                 },
                 right:
-                {   type: "Number",
+                {   type: "NumberLiteral",
                     value: 5
                 }
             },
@@ -25,7 +25,7 @@
             right:
             {   type: "ParenExpression",
                 expression:
-                {   type: "Number",
+                {   type: "NumberLiteral",
                     value: 6
                 }
             }
@@ -41,14 +41,14 @@
         {   type: "BinaryExpression",
             operator: "+",
             left:
-            {   type: "Number",
+            {   type: "NumberLiteral",
                 value: 1
             },
             right:
             {   type: "UnaryExpression",
                 operator: "-",
                 expression:                
-                {   type: "Number",
+                {   type: "NumberLiteral",
                     value: 1
                 }
             }

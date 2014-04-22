@@ -92,7 +92,7 @@ function f() {}
                 {   type: "UnaryExpression",
                     operator: "await",
                     expression:
-                    {   type: "Number",
+                    {   type: "NumberLiteral",
                         value: 0
                     }
                 }
@@ -123,7 +123,7 @@ function f() {}
                     {   type: "UnaryExpression",
                         operator: "await",
                         expression: 
-                        {   type: "Number",
+                        {   type: "NumberLiteral",
                             value: 0
                         }
                     }
@@ -154,7 +154,7 @@ function f() {}
                 {   type: "UnaryExpression",
                     operator: "await",
                     expression: 
-                    {   type: "Number",
+                    {   type: "NumberLiteral",
                         value: 0
                     }
                 }
@@ -224,7 +224,7 @@ function f() {}
                     {   type: "UnaryExpression",
                         operator: "await",
                         expression: 
-                        {   type: "Number",
+                        {   type: "NumberLiteral",
                             value: 0
                         }
                     }
@@ -257,7 +257,7 @@ function f() {}
             {   type: "UnaryExpression",
                 operator: "await",
                 expression: 
-                {   type: "Number",
+                {   type: "NumberLiteral",
                     value: 0
                 }
             }
@@ -323,7 +323,7 @@ function f() {}
             }],
             
             body: 
-            {   type: "Null"
+            {   type: "NullLiteral"
             }
         }
     }]

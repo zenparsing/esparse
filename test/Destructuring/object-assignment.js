@@ -115,7 +115,7 @@
                         value: 'x',
                         context: 'variable' },
                      pattern: null,
-                     initializer: { type: 'Number', start: 7, end: 10, value: 123 },
+                     initializer: { type: 'NumberLiteral', start: 7, end: 10, value: 123 },
                      error: '' } ] },
              right: 
               { type: 'Identifier',
@@ -190,7 +190,7 @@
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
-       expression: { type: 'String', start: 0, end: 12, value: 'use strict' } },
+       expression: { type: 'StringLiteral', start: 0, end: 12, value: 'use strict' } },
      { type: 'ExpressionStatement',
        start: 14,
        end: 35,

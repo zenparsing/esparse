@@ -6,7 +6,7 @@
     
     {   type: "ExpressionStatement",
         expression:
-        {   type: "String",
+        {   type: "StringLiteral",
             value: "hello"
         }
     }]
@@ -18,7 +18,7 @@
     
     {   type: "ExpressionStatement",
         expression: 
-        {   type: "String",
+        {   type: "StringLiteral",
             value: "world"
         }
     }]
@@ -30,7 +30,7 @@
     
     {   type: "ExpressionStatement",
         expression: 
-        {   type: "String",
+        {   type: "StringLiteral",
             value: "\r"
         }
     }]
@@ -42,7 +42,7 @@
     
     {   type: "ExpressionStatement",
         expression: 
-        {   type: "String",
+        {   type: "StringLiteral",
             value: "\n"
         }
     }]
@@ -54,7 +54,7 @@
     
     {   type: "ExpressionStatement",
         expression: 
-        {   type: "String",
+        {   type: "StringLiteral",
             value: "\t"
         }
     }]
@@ -67,7 +67,7 @@ continuation"; **/
     
     {   type: "ExpressionStatement",
         expression: 
-        {   type: "String",
+        {   type: "StringLiteral",
             value: "linecontinuation"
         }
     }]
@@ -79,7 +79,7 @@ continuation"; **/
     
     {   type: "ExpressionStatement",
         expression: 
-        {   type: "String",
+        {   type: "StringLiteral",
             value: "A"
         }
     }]

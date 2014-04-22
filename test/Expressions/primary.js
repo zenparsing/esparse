@@ -6,7 +6,7 @@
     statements: [
     {   type: "ExpressionStatement",
         expression: {
-            type: "Null"
+            type: "NullLiteral"
         }
     }]
 },
@@ -28,7 +28,7 @@
     statements: [
     {   type: "ExpressionStatement",
         expression: {
-            type: "Boolean",
+            type: "BooleanLiteral",
             value: true
         }
     }]
@@ -40,7 +40,7 @@
     statements: [
     {   type: "ExpressionStatement",
         expression: {
-            type: "Boolean",
+            type: "BooleanLiteral",
             value: false
         }
     }]

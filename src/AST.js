@@ -28,18 +28,18 @@ export var AST = {
     },
 
     // A number literal
-    Number(value, start, end) {
+    NumberLiteral(value, start, end) {
     
-        this.type = "Number";
+        this.type = "NumberLiteral";
         this.start = start;
         this.end = end;
         this.value = value; // (number) The mathmatical value of the number literal
     },
 
     // A string literal
-    String(value, start, end) {
+    StringLiteral(value, start, end) {
 
-        this.type = "String";
+        this.type = "StringLiteral";
         this.start = start;
         this.end = end;
         this.value = value; // (string) The value of the string literal
@@ -63,17 +63,17 @@ export var AST = {
         this.flags = flags; // (string) The set of flags for the regular expression literal
     },
 
-    Boolean(value, start, end) {
+    BooleanLiteral(value, start, end) {
     
-        this.type = "Boolean";
+        this.type = "BooleanLiteral";
         this.start = start;
         this.end = end;
         this.value = value; // (boolean) The value of the boolean literal
     },
     
-    Null(start, end) { 
+    NullLiteral(start, end) { 
 
-        this.type = "Null";
+        this.type = "NullLiteral";
         this.start = start;
         this.end = end;
     },
@@ -248,7 +248,7 @@ export var AST = {
         this.type = "PropertyDefinition";
         this.start = start;
         this.end = end;
-        this.name = name; // (String|Number|Identifier|ComputedPropertyName) The property name
+        this.name = name; // (StringLiteral|NumberLiteral|Identifier|ComputedPropertyName) The property name
         this.expression = expr; // (Node?) An expression
     },
 
