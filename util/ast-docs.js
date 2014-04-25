@@ -149,11 +149,27 @@ function HtmlWriter(indentSize) {
     this.escape = htmlText;
 }
 
-function generateHTML(names, headerLevel) {
+function generateHTML(names) {
 
-    headerLevel = String(headerLevel || 2);
-    
     var writer = new HtmlWriter(4);
+    
+    writer
+    
+    .write("<div>")
+    .write("<ul>")
+    .indent()
+    
+    .forEach(names, function(type) {
+    
+        writer.write(
+            "<li><a href='#AST-" + writer.escape(type.name) + "'>" +  
+            writer.escape(type.name) +
+            "</a></li>");
+    })
+    
+    .dedent()
+    .write("</ul>")
+    .write("</div>");
     
     names.forEach(function(type) {
     
@@ -165,10 +181,9 @@ function generateHTML(names, headerLevel) {
         .indent()
         
         .write(
-            "<h" + headerLevel + ">" +
+            "<h3><a name='AST-" + writer.escape(type.name) + "'>" + 
             writer.escape(type.signature) + 
-            "</h" + headerLevel + ">"
-        )
+            "</a></h3>")
         
         .write("<dl>")
         .indent()
@@ -201,4 +216,10 @@ function generateHTML(names, headerLevel) {
     return String(writer);
 }
 
-FS.writeFileSync(abs("ast-nodes.html"), generateHTML(parseTypes(), 3), { encoding: "utf8" });
+function updateDocs(html) {
+
+    var path = abs("ast-api.html");
+    FS.writeFileSync(path, html, { encoding: "utf8" });
+}
+
+updateDocs(generateHTML(parseTypes()));

@@ -46,6 +46,13 @@
     }]
 },
 
+// TODO: Support surrogate pairs in identifiers
+/* 𝒢;
+"non-bmp identifier characters": {
+    type: "blah"
+},
+**/
+
 /** \u{} **/
 'unicode escapes must have a valid hex value - 1': {},
 
