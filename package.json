@@ -3,8 +3,14 @@
     "version": "0.0.1",
     "main": "build/esparse.js",
     "scripts": {
-    
+
         "test": "es6now test",
         "build": "es6now - src/main.js build/esparse.js -b -r -g esparse"
+    },
+    "devDependencies": {
+
+        "es6now": "^0.5.2",
+        "regenerate": "^0.6.1",
+        "unicode-6.3.0": "^0.1.3"
     }
 }
