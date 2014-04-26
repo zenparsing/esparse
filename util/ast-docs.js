@@ -181,9 +181,9 @@ function generateHTML(names) {
         .indent()
         
         .write(
-            "<h3><a name='AST-" + writer.escape(type.name) + "'>" + 
+            "<h3 id='AST-" + writer.escape(type.name) + "'>" + 
             writer.escape(type.signature) + 
-            "</a></h3>")
+            "</h3>")
         
         .write("<dl>")
         .indent()
