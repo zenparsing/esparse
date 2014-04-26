@@ -52,6 +52,10 @@ a minimal and transparent ES6-to-ES5 transpiler.
 
         es6now test
     
+    Or using npm:
+    
+        npm test
+    
     This will execute the test runner located at `test/main.js`.
 
 4.  Start hacking the source code and have fun!
@@ -69,4 +73,8 @@ the test suite.
 Run the following command from the project root to translate and bundle 
 the library into a single ES5-compatible script:
 
-    es6now - src/main.js build/es6now.js -b -r -g esparse
+    es6now - src/main.js build/esparse.js -b -r -g esparse
+
+Or using npm:
+
+    npm run build

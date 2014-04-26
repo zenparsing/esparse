@@ -587,7 +587,8 @@ this.es6now.Class = Class;
 (function() {
 
 var global = this, 
-    arraySlice = Array.prototype.slice;
+    arraySlice = Array.prototype.slice,
+    toString = Object.prototype.toString;
 
 // === Symbols ===
 
@@ -605,6 +606,7 @@ function fakeSymbol() {
 // catch up with the ES6 specification.
 
 this.Symbol = fakeSymbol;
+
 Symbol.iterator = Symbol("iterator");
 
 this.es6now.iterator = function(obj) {
@@ -785,7 +787,7 @@ addMethods(String.prototype, {
     
         var string = String(this);
         
-        if (this == null || Object.toString.call(search) == "[object RegExp]")
+        if (this == null || toString.call(search) == "[object RegExp]")
             throw TypeError();
             
         var stringLength = this.length,
@@ -804,7 +806,7 @@ addMethods(String.prototype, {
     
     endsWith: function(search) {
     
-        if (this == null || Object.toString.call(search) == '[object RegExp]')
+        if (this == null || toString.call(search) == '[object RegExp]')
             throw TypeError();
         
         var stringLength = this.length,
@@ -960,6 +962,47 @@ function isPromise(x) {
     return !!x && $$isPromise in Object(x);
 }
 
+function promiseDefer(ctor) {
+
+    var d = {};
+
+    d.promise = new ctor((function(resolve, reject) {
+        d.resolve = resolve;
+        d.reject = reject;
+    }));
+
+    return d;
+}
+
+function promiseChain(promise, onResolve, onReject) {
+
+    if (typeof onResolve !== "function") onResolve = (function(x) { return x; });
+    if (typeof onReject !== "function") onReject = (function(e) { throw e });
+
+    var deferred = promiseDefer(promise.constructor);
+    
+    if (typeof promise[$status] !== "string")
+        throw new TypeError("Promise method called on a non-promise");
+
+    switch (promise[$status]) {
+
+        case "pending":
+            promise[$onResolve].push([deferred, onResolve]);
+            promise[$onReject].push([deferred, onReject]);
+            break;
+
+        case "resolved":
+            promiseReact(deferred, onResolve, promise[$value]);
+            break;
+    
+        case "rejected":
+            promiseReact(deferred, onReject, promise[$value]);
+            break;
+    }
+
+    return deferred.promise;
+}
+
 function promiseResolve(promise, x) {
     
     promiseDone(promise, "resolved", x, promise[$onResolve]);
@@ -989,7 +1032,7 @@ function promiseUnwrap(deferred, x) {
         throw new TypeError("Promise cannot wrap itself");
     
     if (isPromise(x))
-        x.chain(deferred.resolve, deferred.reject);
+        promiseChain(x, deferred.resolve, deferred.reject);
     else
         deferred.resolve(x);
 }
@@ -999,7 +1042,7 @@ function promiseReact(deferred, handler, x) {
     enqueueMicrotask((function($) {
     
         try { promiseUnwrap(deferred, handler(x)) } 
-        catch(e) { deferred.reject(e) }
+        catch(e) { try { deferred.reject(e) } catch (e) { } }
     }));
 }
 
@@ -1023,51 +1066,14 @@ var Promise = es6now.Class(function(__super) { return {
     
     chain: function(onResolve, onReject) {
     
-        if (typeof onResolve !== "function") onResolve = (function(x) { return x; });
-        if (typeof onReject !== "function") onReject = (function(e) { throw e });
-
-        var deferred = this.constructor.defer();
-
-        switch (this[$status]) {
-
-            case undefined:
-                throw new TypeError("Promise method called on a non-promise");
-        
-            case "pending":
-                this[$onResolve].push([deferred, onResolve]);
-                this[$onReject].push([deferred, onReject]);
-                break;
-    
-            case "resolved":
-                promiseReact(deferred, onResolve, this[$value]);
-                break;
-        
-            case "rejected":
-                promiseReact(deferred, onReject, this[$value]);
-                break;
-        }
-
-        return deferred.promise;
+        return promiseChain(this, onResolve, onReject);
     },
     
     then: function(onResolve, onReject) {
 
         if (typeof onResolve !== "function") onResolve = (function(x) { return x; });
         
-        /*
-        
-        return this.chain(x => {
-        
-            if (isPromise(x))
-                return x.then(onResolve, onReject);
-            
-            return onResolve(x);
-            
-        }, onReject);
-        
-        */
-        
-        return this.chain((function(x) {
+        return promiseChain(this, (function(x) {
     
             if (x && typeof x === "object") {
             
@@ -1083,6 +1089,11 @@ var Promise = es6now.Class(function(__super) { return {
         
     },
     
+    catch: function(onReject) {
+    
+        return this.then(void 0, onReject);
+    },
+    
     __static_0: { isPromise: function(x) {
         
         return isPromise(x);
@@ -1090,59 +1101,62 @@ var Promise = es6now.Class(function(__super) { return {
     
     __static_1: { defer: function() {
     
-        var d = {};
-
-        d.promise = new this((function(resolve, reject) {
-            d.resolve = resolve;
-            d.reject = reject;
-        }));
-
-        return d;
+        return promiseDefer(this);
     } },
     
-    __static_2: { resolve: function(x) { 
+    __static_2: { accept: function(x) {
     
-        var d = this.defer();
+        var d = promiseDefer(this);
         d.resolve(x);
         return d.promise;
     } },
     
-    __static_3: { reject: function(x) { 
+    __static_3: { resolve: function(x) { 
     
-        var d = this.defer();
-        d.reject(x);
+        if (isPromise(x))
+            return x;
+            
+        var d = promiseDefer(this);
+        d.resolve(x);
         return d.promise;
     } },
     
-    __static_4: { cast: function(x) {
-
-        if (x instanceof this)
-            return x;
-
-        var deferred = this.defer();
-        promiseUnwrap(deferred, x);
-        return deferred.promise;
+    __static_4: { reject: function(x) { 
+    
+        var d = promiseDefer(this);
+        d.reject(x);
+        return d.promise;
     } },
 
     __static_5: { all: function(values) {
 
-        var deferred = this.defer(),
-            count = 0,
-            resolutions;
+        // TODO: We should be getting an iterator from values
         
-        for (var i = 0; i < values.length; ++i) {
+        var deferred = promiseDefer(this),
+            count = values.length,
+            resolutions = [];
+            
+        try {
         
-            count += 1;
-            this.cast(values[i]).then(onResolve(i), onReject);
-        }
+            if (!Array.isArray(values))
+                throw new Error("Invalid argument");
         
-        resolutions = new Array(count);
-    
-        if (count === 0) 
-            deferred.resolve(resolutions);
+            var count = values.length;
+        
+            if (count === 0) {
+        
+                deferred.resolve(resolutions);
+            
+            } else {
+        
+                for (var i = 0; i < values.length; ++i)
+                    this.resolve(values[i]).then(onResolve(i), deferred.reject);
+            }
+            
+        } catch(x) { deferred.reject(x) }
         
         return deferred.promise;
-    
+        
         function onResolve(i) {
     
             return (function(x) {
@@ -1153,15 +1167,25 @@ var Promise = es6now.Class(function(__super) { return {
                     deferred.resolve(resolutions);
             });
         }
+    } },
+    
+    __static_6: { race: function(values) {
+    
+        // TODO: We should be getting an iterator from values
         
-        function onReject(r) {
+        var deferred = promiseDefer(this);
         
-            if (count > 0) { 
+        try {
         
-                count = 0; 
-                deferred.reject(r);
-            }
-        }
+            if (!Array.isArray(values))
+                throw new Error("Invalid argument");
+            
+            for (var i = 0; i < values.length; ++i)
+                this.resolve(values[i]).then(deferred.resolve, deferred.reject);
+        
+        } catch(x) { deferred.reject(x) }
+        
+        return deferred.promise;
     } }
     
 } });
@@ -1198,10 +1222,7 @@ this.es6now.async = function(iterable) {
                 done = result.done;
             
             if (Promise.isPromise(value)) {
-            
-                // Recursively unwrap the result value?
-                // value = value.chain(function unwrap(x) { return Promise.isPromise(x) ? x.chain(unwrap) : x });
-                
+
                 if (done) value.chain(resolver.resolve, resolver.reject);
                 else      value.chain((function(x) { return resume(x, false); }), (function(x) { return resume(x, true); }));
             
@@ -1224,47 +1245,60 @@ this.es6now.async = function(iterable) {
 
 var AST_ = (function(exports) {
 
+/*
+
+NOTE:  For auto-documentation purposes, the following conventions must be followed:
+
+1)  The last parameters to each constructor function must always be "start"
+    and "end", in that order.
+
+2)  With the exception of "start" and "end", the order of constructor parameters
+    must be identical to the order of property assignments within the constructor.
+
+*/
 var AST = {
     
     Node: function(type, start, end) {
 
-        this.type = type;
+        this.type = type; // (string) The node type
         this.start = start;
         this.end = end;
     },
     
-    Identifier: function(value, context, start, end) {
+    Identifier: function(value, context, start, end) { 
 
         this.type = "Identifier";
         this.start = start;
         this.end = end;
-        this.value = value;
-        this.context = context;
+        this.value = value; // (string) The string value of the identifier
+        this.context = context; // (string) The context in which the identifier appears ("", "variable", "declaration")
     },
 
-    Number: function(value, start, end) {
+    // A number literal
+    NumberLiteral: function(value, start, end) {
     
-        this.type = "Number";
+        this.type = "NumberLiteral";
         this.start = start;
         this.end = end;
-        this.value = value;
+        this.value = value; // (number) The mathmatical value of the number literal
     },
 
-    String: function(value, start, end) {
+    // A string literal
+    StringLiteral: function(value, start, end) {
 
-        this.type = "String";
+        this.type = "StringLiteral";
         this.start = start;
         this.end = end;
-        this.value = value;
+        this.value = value; // (string) The value of the string literal
     },
 
-    Template: function(value, isEnd, start, end) {
+    TemplatePart: function(value, isEnd, start, end) {
     
-        this.type = "Template";
+        this.type = "TemplatePart";
         this.start = start;
         this.end = end;
-        this.value = value;
-        this.templateEnd = isEnd;
+        this.value = value; // (string) The string value of the template fragment
+        this.templateEnd = isEnd; // (boolean) True if this template fragment terminates the template literal
     },
 
     RegularExpression: function(value, flags, start, end) {
@@ -1272,21 +1306,21 @@ var AST = {
         this.type = "RegularExpression";
         this.start = start;
         this.end = end;
-        this.value = value;
-        this.flags = flags;
+        this.value = value; // (string) The raw value of the regular expression literal
+        this.flags = flags; // (string) The set of flags for the regular expression literal
     },
 
-    Boolean: function(value, start, end) {
+    BooleanLiteral: function(value, start, end) {
     
-        this.type = "Boolean";
+        this.type = "BooleanLiteral";
         this.start = start;
         this.end = end;
-        this.value = value;
+        this.value = value; // (boolean) The value of the boolean literal
     },
     
-    Null: function(start, end) { 
+    NullLiteral: function(start, end) { 
 
-        this.type = "Null";
+        this.type = "NullLiteral";
         this.start = start;
         this.end = end;
     },
@@ -1296,7 +1330,7 @@ var AST = {
         this.type = "Script";
         this.start = start;
         this.end = end;
-        this.statements = statements;
+        this.statements = statements; // [Node] A list of statements
     },
 
     Module: function(statements, start, end) {
@@ -1304,7 +1338,7 @@ var AST = {
         this.type = "Module";
         this.start = start;
         this.end = end;
-        this.statements = statements;
+        this.statements = statements; // [Node] A list of statements
     },
 
     ThisExpression: function(start, end) { 
@@ -1326,7 +1360,7 @@ var AST = {
         this.type = "SequenceExpression";
         this.start = start;
         this.end = end;
-        this.expressions = list;
+        this.expressions = list; // [Node] A list of expressions
     },
 
     AssignmentExpression: function(op, left, right, start, end) {
@@ -1334,9 +1368,9 @@ var AST = {
         this.type = "AssignmentExpression";
         this.start = start;
         this.end = end;
-        this.operator = op;
-        this.left = left;
-        this.right = right;
+        this.operator = op; // (string) An assignment operator
+        this.left = left; // The left-hand-side of the assignment operator
+        this.right = right; // The right-hand-side of the assignment operator
     },
 
     SpreadExpression: function(expr, start, end) {
@@ -1344,7 +1378,7 @@ var AST = {
         this.type = "SpreadExpression";
         this.start = start;
         this.end = end;
-        this.expression = expr;
+        this.expression = expr; // An expression
     },
 
     YieldExpression: function(expr, delegate, start, end) {
@@ -1352,8 +1386,8 @@ var AST = {
         this.type = "YieldExpression";
         this.start = start;
         this.end = end;
-        this.delegate = delegate;
-        this.expression = expr;
+        this.delegate = delegate; // (boolean) True if the yield expression is delegating
+        this.expression = expr; // An expression
     },
 
     ConditionalExpression: function(test, cons, alt, start, end) {
@@ -1361,9 +1395,9 @@ var AST = {
         this.type = "ConditionalExpression";
         this.start = start;
         this.end = end;
-        this.test = test;
-        this.consequent = cons;
-        this.alternate = alt;
+        this.test = test; // A test expression
+        this.consequent = cons; // The expression evaluated if the test passes
+        this.alternate = alt; // The expression evaluated if the test fails
     },
 
     BinaryExpression: function(op, left, right, start, end) {
@@ -1371,9 +1405,9 @@ var AST = {
         this.type = "BinaryExpression";
         this.start = start;
         this.end = end;
-        this.operator = op;
-        this.left = left;
-        this.right = right;
+        this.operator = op; // (string) A binary operator
+        this.left = left; // The left operand expression
+        this.right = right; // The right operand expression
     },
 
     UpdateExpression: function(op, expr, prefix, start, end) {
@@ -1381,9 +1415,9 @@ var AST = {
         this.type = "UpdateExpression";
         this.start = start;
         this.end = end;
-        this.operator = op;
-        this.expression = expr;
-        this.prefix = prefix;
+        this.operator = op; // (string) An update operator
+        this.expression = expr; // An expression
+        this.prefix = prefix; // (boolean) True if the operator is a prefix
     },
 
     UnaryExpression: function(op, expr, start, end) {
@@ -1391,8 +1425,8 @@ var AST = {
         this.type = "UnaryExpression";
         this.start = start;
         this.end = end;
-        this.operator = op;
-        this.expression = expr;
+        this.operator = op; // (string) A unary operator
+        this.expression = expr; // An expression
     },
 
     MemberExpression: function(obj, prop, computed, start, end) {
@@ -1400,9 +1434,9 @@ var AST = {
         this.type = "MemberExpression";
         this.start = start;
         this.end = end;
-        this.object = obj;
-        this.property = prop;
-        this.computed = computed;
+        this.object = obj; // An expression evaulating to an object
+        this.property = prop; // An expression evaluating to a property name
+        this.computed = computed; // (boolean) True if the property name is computed
     },
 
     CallExpression: function(callee, args, start, end) {
@@ -1410,8 +1444,8 @@ var AST = {
         this.type = "CallExpression";
         this.start = start;
         this.end = end;
-        this.callee = callee;
-        this.arguments = args;
+        this.callee = callee; // An expression
+        this.arguments = args; // [Node] A list of call arguments
     },
 
     TaggedTemplateExpression: function(tag, template, start, end) {
@@ -1419,8 +1453,8 @@ var AST = {
         this.type = "TaggedTemplateExpression";
         this.start = start;
         this.end = end;
-        this.tag = tag;
-        this.template = template;
+        this.tag = tag; // The template tag
+        this.template = template; // (TemplateExpression) A template
     },
 
     NewExpression: function(callee, args, start, end) {
@@ -1428,8 +1462,8 @@ var AST = {
         this.type = "NewExpression";
         this.start = start;
         this.end = end;
-        this.callee = callee;
-        this.arguments = args;
+        this.callee = callee; // An expression
+        this.arguments = args; // [Node] A list of call arguments
     },
 
     ParenExpression: function(expr, start, end) {
@@ -1437,7 +1471,7 @@ var AST = {
         this.type = "ParenExpression";
         this.start = start;
         this.end = end;
-        this.expression = expr;
+        this.expression = expr; // An expression contained within parenthesis
     },
 
     ObjectLiteral: function(props, start, end) {
@@ -1445,7 +1479,7 @@ var AST = {
         this.type = "ObjectLiteral";
         this.start = start;
         this.end = end;
-        this.properties = props;
+        this.properties = props; // [PropertyDefinition|MethodDefinition] A list of properties and methods defined in the object literal
     },
 
     ComputedPropertyName: function(expr, start, end) {
@@ -1453,7 +1487,7 @@ var AST = {
         this.type = "ComputedPropertyName";
         this.start = start;
         this.end = end;
-        this.expression = expr;
+        this.expression = expr; // An expression
     },
 
     PropertyDefinition: function(name, expr, start, end) {
@@ -1461,28 +1495,51 @@ var AST = {
         this.type = "PropertyDefinition";
         this.start = start;
         this.end = end;
-        this.name = name;
-        this.expression = expr;
+        this.name = name; // (StringLiteral|NumberLiteral|Identifier|ComputedPropertyName) The property name
+        this.expression = expr; // (Node?) An expression
     },
 
+    ObjectPattern: function(props, start, end) {
+        
+        this.type = "ObjectPattern";
+        this.start = start;
+        this.end = end;
+        this.properties = props; // [PatternProperty] A list of destructuring pattern properties
+    },
+    
     PatternProperty: function(name, pattern, initializer, start, end) {
     
         this.type = "PatternProperty";
         this.start = start;
         this.end = end;
-        this.name = name;
-        this.pattern = pattern;
-        this.initializer = initializer;
+        this.name = name; // The destructuring property name
+        this.pattern = pattern; // (Node?) A destructuring target pattern
+        this.initializer = initializer; // (Node?) A default initializer expression
     },
 
-    PatternElement: function(pattern, initializer, rest, start, end) {
+    ArrayPattern: function(elements, start, end) {
+    
+        this.type = "ArrayPattern";
+        this.start = start;
+        this.end = end;
+        this.elements = elements; // [PatternElement|PatternRestElement] A list of of destructuring pattern elements
+    },
+    
+    PatternElement: function(pattern, initializer, start, end) {
     
         this.type = "PatternElement";
         this.start = start;
         this.end = end;
-        this.pattern = pattern;
-        this.initializer = initializer;
-        this.rest = rest;
+        this.pattern = pattern; // A destructuring target pattern
+        this.initializer = initializer; // (Node?) A default initializer expression
+    },
+    
+    PatternRestElement: function(pattern, start, end) {
+    
+        this.type = "PatternRestElement";
+        this.start = start;
+        this.end = end;
+        this.pattern = pattern; // A destructuring target
     },
 
     MethodDefinition: function(kind, name, params, body, start, end) {
@@ -1490,10 +1547,10 @@ var AST = {
         this.type = "MethodDefinition";
         this.start = start;
         this.end = end;
-        this.kind = kind;
-        this.name = name;
-        this.params = params;
-        this.body = body;
+        this.kind = kind; // (string) The type of method
+        this.name = name; // The method name
+        this.params = params; // [FormalParameter] A list of formal parameters
+        this.body = body; // (FunctionBody) The function body
     },
 
     ArrayLiteral: function(elements, start, end) {
@@ -1501,7 +1558,7 @@ var AST = {
         this.type = "ArrayLiteral";
         this.start = start;
         this.end = end;
-        this.elements = elements;
+        this.elements = elements; // [Node|null]
     },
 
     ArrayComprehension: function(qualifiers, expr, start, end) {
@@ -1571,7 +1628,6 @@ var AST = {
         this.start = start;
         this.end = end;
         this.expression = expr;
-        this.directive = null;
     },
 
     EmptyStatement: function(start, end) { 
@@ -1808,6 +1864,43 @@ var AST = {
         this.body = body;
     },
 
+    ClassDeclaration: function(identifier, base, body, start, end) {
+    
+        this.type = "ClassDeclaration";
+        this.start = start;
+        this.end = end;
+        this.identifier = identifier;
+        this.base = base;
+        this.body = body;
+    },
+
+    ClassExpression: function(identifier, base, body, start, end) {
+    
+        this.type = "ClassExpression";
+        this.start = start;
+        this.end = end;
+        this.identifier = identifier;
+        this.base = base;
+        this.body = body;
+    },
+
+    ClassBody: function(elems, start, end) {
+    
+        this.type = "ClassBody";
+        this.start = start;
+        this.end = end;
+        this.elements = elems;
+    },
+
+    ClassElement: function(isStatic, method, start, end) {
+    
+        this.type = "ClassElement";
+        this.start = start;
+        this.end = end;
+        this.static = isStatic;
+        this.method = method;
+    },
+    
     ModuleDeclaration: function(identifier, body, start, end) {
     
         this.type = "ModuleDeclaration";
@@ -1861,21 +1954,21 @@ var AST = {
         this.from = from;
     },
 
-    ImportSpecifier: function(remote, local, start, end) {
+    ImportSpecifier: function(imported, local, start, end) {
     
         this.type = "ImportSpecifier";
         this.start = start;
         this.end = end;
-        this.remote = remote;
+        this.imported = imported;
         this.local = local;
     },
 
-    ExportDeclaration: function(binding, start, end) {
+    ExportDeclaration: function(declaration, start, end) {
     
         this.type = "ExportDeclaration";
         this.start = start;
         this.end = end;
-        this.binding = binding;
+        this.declaration = declaration;
     },
 
     ExportsList: function(list, from, start, end) {
@@ -1887,13 +1980,13 @@ var AST = {
         this.from = from;
     },
 
-    ExportSpecifier: function(local, remote, start, end) {
+    ExportSpecifier: function(local, exported, start, end) {
     
         this.type = "ExportSpecifier";
         this.start = start;
         this.end = end;
         this.local = local;
-        this.remote = remote;
+        this.exported = exported;
     },
 
     ModulePath: function(list, start, end) {
@@ -1902,43 +1995,6 @@ var AST = {
         this.start = start;
         this.end = end;
         this.elements = list;
-    },
-
-    ClassDeclaration: function(identifier, base, body, start, end) {
-    
-        this.type = "ClassDeclaration";
-        this.start = start;
-        this.end = end;
-        this.identifier = identifier;
-        this.base = base;
-        this.body = body;
-    },
-
-    ClassExpression: function(identifier, base, body, start, end) {
-    
-        this.type = "ClassExpression";
-        this.start = start;
-        this.end = end;
-        this.identifier = identifier;
-        this.base = base;
-        this.body = body;
-    },
-
-    ClassBody: function(elems, start, end) {
-    
-        this.type = "ClassBody";
-        this.start = start;
-        this.end = end;
-        this.elements = elems;
-    },
-
-    ClassElement: function(isStatic, method, start, end) {
-    
-        this.type = "ClassElement";
-        this.start = start;
-        this.end = end;
-        this.static = isStatic;
-        this.method = method;
     }
 
 };
@@ -2959,136 +3015,159 @@ exports.Scanner = Scanner; return exports; }).call(this, {});
 var Transform_ = (function(exports) {
 
 var AST = AST_.AST;
-
+    
 var Transform = es6now.Class(function(__super) { return {
 
     // Transform an expression into a formal parameter list
-    transformFormals: function(expr, rest) {
+    transformFormals: function(expr) {
         
-        if (expr === null)
-            return rest ? [rest] : [];
+        if (!expr)
+            return [];
             
-        var params = [],
-            param,
+        var param,
             list,
             node,
-            i;
+            expr;
         
         switch (expr.type) {
         
-            case "SequenceExpression":
-                list = expr.expressions;
-                break;
-            
-            case "CallExpression":
-                list = expr.arguments;
-                break;
-            
-            default:
-                list = [expr];
-                break;
-        }
-        
-        if (!rest && list.length > 0 && list[list.length - 1].type === "SpreadExpression") {
-        
-            node = list.pop();
-            rest = new AST.RestParameter(node.expression, node.start, node.end);
+            case "SequenceExpression": list = expr.expressions; break;
+            case "CallExpression": list = expr.arguments; break;
+            default: list = [expr]; break;
         }
     
-        for (i = 0; i < list.length; ++i) {
+        for (var i = 0; i < list.length; ++i) {
         
             node = list[i];
-            params.push(param = new AST.FormalParameter(node, null, node.start, node.end));
-            this.transformPatternElement(param, true);
+            
+            if (i === list.length - 1 && node.type === "SpreadExpression") {
+            
+                expr = node.expression;
+                
+                // Rest parameters can only be identifiers
+                if (expr.type !== "Identifier")
+                    this.fail("Invalid rest parameter", expr);
+                
+                this.checkBindingTarget(expr);
+                
+                // Clear parser error for invalid spread expression
+                node.error = "";
+                
+                param = new AST.RestParameter(expr, node.start, node.end);
+                
+            } else {
+             
+                param = new AST.FormalParameter(node, null, node.start, node.end);
+                this.transformPatternElement(param, true);
+            }
+            
+            list[i] = param;
         }
         
-        if (rest)
-            params.push(rest);
-        
-        return params;
+        return list;
     },
     
     transformArrayPattern: function(node, binding) {
     
-        // ArrayPattern and ArrayLiteral are isomorphic, so we simply change the type
+        // NOTE: ArrayPattern and ArrayLiteral are isomorphic
         node.type = "ArrayPattern";
         
         var elems = node.elements,
             elem,
-            rest,
-            i;
+            expr;
         
-        for (i = 0; i < elems.length; ++i) {
+        for (var i = 0; i < elems.length; ++i) {
         
             elem = elems[i];
             
+            // Skip holes in pattern
             if (!elem) 
                 continue;
             
-            if (elem.type !== "PatternElement") {
-            
-                rest = (elem.type === "SpreadExpression");
+            switch (elem.type) {
                 
-                elem = elems[i] = new AST.PatternElement(
-                    rest ? elem.expression : elem,
-                    null,
-                    rest,
-                    elem.start,
-                    elem.end);
+                case "SpreadExpression":
                 
-                // No trailing comma allowed after rest
-                if (rest && (node.trailingComma || i < elems.length - 1))
-                    this.fail("Invalid destructuring pattern", elem);
+                    // TODO:  Currently, we are ignoring the last comma, but commas
+                    // are not allowed after a rest element.  Should they be?
+                    
+                    // Rest element must be in the last position
+                    if (i < elems.length - 1)
+                        this.fail("Invalid destructuring pattern", elem);
+                    
+                    expr = elem.expression;
+                    
+                    // Rest target cannot be a destructuring pattern
+                    switch (expr.type) {
+                    
+                        case "ObjectLiteral":
+                        case "ObjectPattern":
+                        case "ArrayLiteral":
+                        case "ArrayPattern": 
+                            this.fail("Invalid rest pattern", expr);
+                    }
+                    
+                    elem = new AST.PatternRestElement(expr, elem.start, elem.end);
+                    this.checkPatternTarget(elem.pattern, binding);
+                    break;
+                
+                case "PatternRestElement":
+                    this.checkPatternTarget(elem.pattern, binding);
+                    break;
+                    
+                case "PatternElement":
+                    this.transformPatternElement(elem, binding);
+                    break;
+                
+                default:
+                    elem = new AST.PatternElement(elem, null, elem.start, elem.end);
+                    this.transformPatternElement(elem, binding);
+                    break;
+                    
             }
             
-            if (elem.rest) this.transformPattern(elem.pattern, binding);
-            else this.transformPatternElement(elem, binding);
+            elems[i] = elem;
         }
+        
     },
     
     transformObjectPattern: function(node, binding) {
 
-        // ObjectPattern and ObjectLiteral are isomorphic, so we simply change the type
+        // NOTE: ObjectPattern and ObjectLiteral are isomorphic
         node.type = "ObjectPattern";
         
-        var props = node.properties, 
-            prop,
-            i;
+        var props = node.properties;
         
-        for (i = 0; i < props.length; ++i) {
+        for (var i = 0; i < props.length; ++i) {
         
-            prop = props[i];
+            var prop = props[i];
             
             // Clear the error flag
             prop.error = "";
             
             switch (prop.type) {
-            
-                case "PatternProperty":
-                
-                    break;
                     
                 case "PropertyDefinition":
                     
                     // Replace node
-                    prop = new AST.PatternProperty(
+                    props[i] = prop = new AST.PatternProperty(
                         prop.name,
                         prop.expression,
                         null,
                         prop.start,
                         prop.end);
                     
-                    props[i] = prop;
-                    
+                    break;
+                
+                case "PatternProperty":
                     break;
                 
                 default:
-                
                     this.fail("Invalid pattern", prop);
             }
             
             if (prop.pattern) this.transformPatternElement(prop, binding);
-            else this.transformPattern(prop.name, binding);
+            else this.checkPatternTarget(prop.name, binding);
         }
     },
     
@@ -3097,47 +3176,13 @@ var Transform = es6now.Class(function(__super) { return {
         var node = elem.pattern;
         
         // Split assignment into pattern and initializer
-        if (node.type === "AssignmentExpression" && node.operator === "=") {
+        if (node && node.type === "AssignmentExpression" && node.operator === "=") {
         
-            elem.pattern = node.left;
             elem.initializer = node.right;
+            elem.pattern = node = node.left;
         }
         
-        this.transformPattern(elem.pattern, binding);
-    },
-    
-    // Transforms an expression into a pattern
-    transformPattern: function(node, binding) {
-
-        switch (node.type) {
-        
-            case "Identifier":
-                if (binding) this.checkBindingIdentifier(node, true);
-                else this.checkAssignTarget(node);
-                
-                break;
-            
-            case "MemberExpression":
-            case "CallExpression":
-                if (binding) this.fail("Invalid left-hand-side in binding pattern", node);
-                break;
-            
-            case "ObjectLiteral":
-            case "ObjectPattern":
-                this.transformObjectPattern(node, binding);
-                break;
-            
-            case "ArrayLiteral":
-            case "ArrayPattern":
-                this.transformArrayPattern(node, binding);
-                break;
-                
-            default:
-                this.fail("Invalid expression in pattern", node);
-                break;
-        }
-        
-        return node;
+        this.checkPatternTarget(node, binding);
     }, constructor: function Transform() {}
     
 } });
@@ -3198,65 +3243,90 @@ function isPoisonIdent(name) {
     return name === "eval" || name === "arguments";
 }
 
-// Returns true if the specified name type is a duplicate for a given set of flags
-function isDuplicateName(type, flags, strict) {
-
-    if (!flags)
-        return false;
-    
-    switch (type) {
-    
-        case PROP_DATA: return strict || flags !== PROP_DATA;
-        case PROP_GET: return flags !== PROP_SET;
-        case PROP_SET: return flags !== PROP_GET;
-        default: return !!flags;
-    }
-}
-
 // Unwraps parens surrounding an expression
 function unwrapParens(node) {
 
     // Remove any parenthesis surrounding the target
     for (; node.type === "ParenExpression"; node = node.expression);
-    
     return node;
 }
 
 var Validate = es6now.Class(function(__super) { return {
 
-    // Checks an assignment target for strict mode restrictions
-    checkAssignTarget: function(node, simple) {
+    // Validates an assignment target
+    checkAssignmentTarget: function(node, simple) {
     
-        // Remove any parenthesis surrounding the target
-        for (; node.type === "ParenExpression"; node = node.expression);
+        switch (node.type) {
+        
+            case "Identifier":
+            
+                if (isPoisonIdent(node.value))
+                    this.addStrictError("Cannot modify " + node.value + " in strict mode", node);
+        
+                return;
+            
+            case "MemberExpression":
+                return;
+            
+            case "ObjectPattern":
+            case "ArrayPattern":
+                if (!simple) return;
+                break;
+            
+            case "ObjectLiteral":
+                if (!simple) { this.transformObjectPattern(node, false); return }
+                break;
+                
+            case "ArrayLiteral":
+                if (!simple) { this.transformArrayPattern(node, false); return }
+                break;
+            
+        }
+        
+        this.fail("Invalid left-hand side in assignment", node);
+    },
+    
+    // Validates a binding target
+    checkBindingTarget: function(node) {
+    
+        var name, msg;
         
         switch (node.type) {
         
             case "Identifier":
             
-                // Mark identifier node as a variable
-                node.context = "variable";
-
-                if (isPoisonIdent(node.value))
-                    this.addStrictError("Cannot modify " + node.value + " in strict mode", node);
+                // Perform basic identifier validation
+                this.checkIdentifier(node);
         
-                break;
+                // Mark identifier node as a declaration
+                node.context = "declaration";
             
-            case "MemberExpression":
-                break;
-                    
-            case "ObjectLiteral":
-            case "ArrayLiteral":
-            
-                if (!simple) {
+                name = node.value;
+        
+                if (isPoisonIdent(name))
+                    this.addStrictError("Binding cannot be created for '" + name + "' in strict mode", node);
                 
-                    this.transformPattern(node, false);
-                    break;
-                }
+                return;
             
-            default:
-                this.fail("Invalid left-hand side in assignment", node);
+            case "ArrayLiteral":
+            case "ArrayPattern":
+                this.transformArrayPattern(node, true);
+                return;
+            
+            case "ObjectLiteral":
+            case "ObjectPattern":
+                this.transformObjectPattern(node, true);
+                return;
+            
         }
+        
+        this.fail("Invalid binding target", node);
+    },
+    
+    // Validates a target in a binding or assignment pattern
+    checkPatternTarget: function(node, binding) {
+    
+        return binding ? this.checkBindingTarget(node) : this.checkAssignmentTarget(node, false);
     },
     
     // Checks an identifier for strict mode reserved words
@@ -3272,44 +3342,14 @@ var Validate = es6now.Class(function(__super) { return {
             this.addStrictError(ident + " cannot be used as an identifier in strict mode", node);
     },
     
-    // Checks a binding identifier for strict mode restrictions
-    checkBindingIdentifier: function(node, strict) {
-    
-        // Perform basic identifier check
-        this.checkIdentifier(node);
-        
-        // Mark identifier node as a declaration
-        node.context = "declaration";
-            
-        var name = node.value;
-        
-        if (isPoisonIdent(name)) {
-        
-            var msg = "Binding cannot be created for '" + name + "' in strict mode";
-            
-            if (strict) this.fail(msg, node);
-            else this.addStrictError(msg, node);
-        }
-    },
-    
     // Checks function formal parameters for strict mode restrictions
     checkParameters: function(params, kind) {
     
         var names = new IntMap, 
             name,
-            node,
-            i;
+            node;
         
-        // TODO: We need to check for duplicate names in some non-strict contexts
-        // as well (method definitions, arrow parameters, and maybe generator functions).
-        // How do these rules apply when parameters are patterns, though?
-        
-        // I think (the early errors portion of the spec is very hard to understand)
-        // that you have to force strict-like validation in the following cases:
-        // method definitions, functions and generators using new parameter list 
-        // features (patterns, initializers, or rest), and arrow functions.
-        
-        for (i = 0; i < params.length; ++i) {
+        for (var i = 0; i < params.length; ++i) {
         
             node = params[i];
             
@@ -3340,7 +3380,9 @@ var Validate = es6now.Class(function(__super) { return {
     // Performs validation on transformed arrow formal parameters
     checkArrowParameters: function(params) {
     
+        params = this.transformFormals(params);
         this.checkParameters(params);
+        return params;
     },
     
     // Performs validation on the init portion of a for-in or for-of statement
@@ -3351,38 +3393,51 @@ var Validate = es6now.Class(function(__super) { return {
             // For-in/of may only have one variable declaration
             if (init.declarations.length !== 1)
                 this.fail("for-" + type + " statement may not have more than one variable declaration", init);
-        
-            // A variable initializer is only allowed in for-in where 
-            // variable type is "var" and it is not a pattern
             
             var decl = init.declarations[0];
-        
-            if (decl.initializer && (
-                type === "of" ||
-                init.kind !== "var" ||
-                decl.pattern.type !== "Identifier")) {
             
+            // Initializers are not allowed in for in and for of
+            if (decl.initializer)
                 this.fail("Invalid initializer in for-" + type + " statement", init);
-            }
             
         } else {
         
-            this.checkAssignTarget(init);
+            this.checkAssignmentTarget(this.unwrapParens(init));
         }
     },
     
     // Checks for duplicate object literal property names
     checkPropertyName: function(node, nameSet) {
     
-        if (node.name.type !== "Identifier")
-            return;
-        
         var flag = PROP_NORMAL,
-            name;
+            currentFlags = 0,
+            name = "";
+        
+        switch (node.name.type) {
+        
+            case "Identifier":
+            case "StringLiteral":
+                name = node.name.value;
+                break;
+                
+            case "ComputedPropertyName":
+                // If property name is computed, skip duplicate check
+                return;
+            
+            default:
+                name = String(node.name.value);
+                break;
+        }
         
         switch (node.type) {
 
-            case "PropertyDefinition": flag = PROP_DATA; break;
+            case "PropertyDefinition":
+            
+                // Duplicates only allowed for "x: expr" form
+                if (node.expression)
+                    flag = PROP_DATA;
+                
+                break;
     
             case "MethodDefinition":
         
@@ -3391,41 +3446,39 @@ var Validate = es6now.Class(function(__super) { return {
                     case "get": flag = PROP_GET; break;
                     case "set": flag = PROP_SET; break;
                 }
+                
+                break;
         }
 
-        // Check for duplicate names
-        var name = node.name.value,
-            currentFlags = nameSet.get(name);
-
-        if (isDuplicateName(flag, currentFlags, false))
-            this.addInvalidNode("Duplicate property names in object literal not allowed", node);
-        else if (isDuplicateName(flag, currentFlags, true))
-            this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
-
-        // Set name flag
-        nameSet.set(name, currentFlags | flag);
-    },
-    
-    // Checks for duplicate class element names
-    checkClassElementName: function(node, nameSet) {
-    
-        if (node.name.type !== "Identifier")
-            return;
+        // If this name has already been added...
+        if (currentFlags = nameSet.get(name)) {
         
-        var flag = PROP_NORMAL;
-        
-        switch (node.kind) {
-
-            case "get": flag = PROP_GET; break;
-            case "set": flag = PROP_SET; break;
+            var duplicate = true;
+            
+            switch (flag) {
+    
+                case PROP_DATA:
+                    
+                    if (currentFlags === PROP_DATA) {
+                    
+                        this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
+                        duplicate = false;
+                    }
+                    
+                    break;
+                
+                case PROP_GET:
+                    if (currentFlags === PROP_SET) duplicate = false;
+                    break;
+                    
+                case PROP_SET:
+                    if (currentFlags === PROP_GET) duplicate = false;
+                    break;
+            }
+            
+            if (duplicate)
+                this.addInvalidNode("Duplicate property names in object literal not allowed", node);
         }
-
-        // Check for duplicate names
-        var name = node.name.value,
-            currentFlags = nameSet.get(name);
-
-        if (isDuplicateName(flag, currentFlags, false))
-            this.addInvalidNode("Duplicate method names in class not allowed", node);
 
         // Set name flag
         nameSet.set(name, currentFlags | flag);
@@ -3438,10 +3491,9 @@ var Validate = es6now.Class(function(__super) { return {
             list = context.invalidNodes,
             item,
             node,
-            error,
-            i;
+            error;
         
-        for (i = 0; i < list.length; ++i) {
+        for (var i = 0; i < list.length; ++i) {
         
             item = list[i];
             node = item.node;
@@ -3451,7 +3503,7 @@ var Validate = es6now.Class(function(__super) { return {
             if (!error)
                 continue;
             
-            // Throw if item is not a strict-mode error, or
+            // Throw if item is not a strict-mode-only error, or
             // if the current context is strict
             if (!item.strict || context.mode === "strict")
                 this.fail(error, node);
@@ -3460,7 +3512,7 @@ var Validate = es6now.Class(function(__super) { return {
             if (context.mode === "sloppy")
                 continue;
             
-            // NOTE:  If parent context is sloppy, then we ignore.
+            // NOTE:  If the parent context is sloppy, then we ignore.
             // If the parent context is strict, then this context would
             // also be known to be strict and therefore handled above.
             
@@ -3474,13 +3526,14 @@ var Validate = es6now.Class(function(__super) { return {
     
     checkDelete: function(node) {
     
-        node = unwrapParens(node);
+        node = this.unwrapParens(node);
         
         if (node.type === "Identifier")
             this.addStrictError("Cannot delete unqualified property in strict mode", node);
     }, constructor: function Validate() {}
     
 } });
+
 
 exports.Validate = Validate; return exports; }).call(this, {});
 
@@ -3857,6 +3910,14 @@ var Parser = es6now.Class(function(__super) { return {
         throw err;
     },
     
+    unwrapParens: function(node) {
+
+        // Remove any parenthesis surrounding the target
+        for (; node.type === "ParenExpression"; node = node.expression);
+        return node;
+    },
+
+    
     // == Context Management ==
     
     pushContext: function(isFunction) {
@@ -3953,15 +4014,7 @@ var Parser = es6now.Class(function(__super) { return {
             list = null;
             
         while (this.peek("div") === ",") {
-        
-            // If the next token after "," is "...", we might be
-            // trying to parse an arrow function formal parameter
-            // list with a trailing rest parameter.  Return the 
-            // expression up to, but not including ",".
-            
-            if (this.peekAt(null, 1) === "...")
-                break;
-            
+
             this.read();
             
             if (list === null)
@@ -3976,49 +4029,46 @@ var Parser = es6now.Class(function(__super) { return {
         return expr;
     },
     
-    AssignmentExpression: function(noIn) {
+    AssignmentExpression: function(noIn, allowSpread) {
     
         var start = this.nodeStart(),
-            left,
-            lhs;
+            node;
+        
+        if (this.peek() === "...") {
+        
+            this.read();
+            
+            node = new AST.SpreadExpression(
+                this.AssignmentExpression(noIn),
+                start,
+                this.nodeEnd());
+            
+            if (!allowSpread)
+                this.addInvalidNode("Invalid spread expression", node);
+            
+            return node;
+        }
         
         if (this.peekYield())
             return this.YieldExpression(noIn);
         
-        left = this.ConditionalExpression(noIn);
+        node = this.ConditionalExpression(noIn);
         
-        if (left.type === "ArrowFunctionHead")
-            return this.ArrowFunctionBody(left, noIn);
+        if (node.type === "ArrowFunctionHead")
+            return this.ArrowFunctionBody(node, noIn);
         
         // Check for assignment operator
         if (!isAssignment(this.peek("div")))
-            return left;
+            return node;
         
-        this.checkAssignTarget(left);
+        this.checkAssignmentTarget(this.unwrapParens(node), false);
         
         return new AST.AssignmentExpression(
             this.read(),
-            left,
+            node,
             this.AssignmentExpression(noIn),
             start,
             this.nodeEnd());
-    },
-    
-    SpreadAssignment: function(noIn) {
-    
-        if (this.peek() === "...") {
-        
-            var start = this.nodeStart();
-            
-            this.read();
-            
-            return new AST.SpreadExpression(
-                this.AssignmentExpression(noIn), 
-                start, 
-                this.nodeEnd());
-        }
-        
-        return this.AssignmentExpression(noIn);
     },
     
     YieldExpression: function(noIn) {
@@ -4124,7 +4174,7 @@ var Parser = es6now.Class(function(__super) { return {
         
             this.read();
             expr = this.MemberExpression(true);
-            this.checkAssignTarget(expr, true);
+            this.checkAssignmentTarget(this.unwrapParens(expr), true);
             
             return new AST.UpdateExpression(type, expr, true, start, this.nodeEnd());
         }
@@ -4151,7 +4201,7 @@ var Parser = es6now.Class(function(__super) { return {
         if (isIncrement(type) && !token.newlineBefore) {
         
             this.read();
-            this.checkAssignTarget(expr, true);
+            this.checkAssignmentTarget(this.unwrapParens(expr), true);
             
             return new AST.UpdateExpression(type, expr, false, start, this.nodeEnd());
         }
@@ -4162,20 +4212,22 @@ var Parser = es6now.Class(function(__super) { return {
     MemberExpression: function(allowCall) {
     
         var start = this.nodeStart(),
-            type = this.peek(),
+            token = this.peekToken(),
             arrowType = "",
             exit = false,
             prop,
             expr;
         
         expr = 
-            type === "new" ? this.NewExpression() :
-            type === "super" ? this.SuperExpression() :
+            token.type === "new" ? this.NewExpression() :
+            token.type === "super" ? this.SuperExpression() :
             this.PrimaryExpression();
         
-        while (!exit && (type = this.peek("div"))) {
+        while (!exit) { 
         
-            switch (type) {
+            token = this.peekToken("div");
+            
+            switch (token.type) {
             
                 case ".":
                 
@@ -4213,8 +4265,9 @@ var Parser = es6now.Class(function(__super) { return {
                         break;
                     }
                     
-                    if (expr.type === "Identifier" && isFunctionModifier(expr.value)) {
-                    
+                    if (expr.type === "Identifier" && 
+                        isFunctionModifier(expr.value)) {
+                
                         arrowType = expr.value;
                         this.pushMaybeContext();
                     }
@@ -4227,9 +4280,11 @@ var Parser = es6now.Class(function(__super) { return {
                     
                     if (arrowType) {
                     
-                        if (this.peek("div") === "=>") {
+                        token = this.peekToken("div");
+
+                        if (token.type === "=>" && !token.newlineBefore) {
                         
-                            expr = this.ArrowFunctionHead(arrowType, expr, null, start);
+                            expr = this.ArrowFunctionHead(arrowType, expr, start);
                             exit = true;
                         
                         } else {
@@ -4303,7 +4358,7 @@ var Parser = es6now.Class(function(__super) { return {
             if (list.length > 0)
                 this.read(",");
             
-            list.push(this.SpreadAssignment());
+            list.push(this.AssignmentExpression(false, true));
         }
         
         this.read(")");
@@ -4323,8 +4378,8 @@ var Parser = es6now.Class(function(__super) { return {
             case "function": return this.FunctionExpression();
             case "class": return this.ClassExpression();
             case "TEMPLATE": return this.TemplateExpression();
-            case "NUMBER": return this.Number();
-            case "STRING": return this.String();
+            case "NUMBER": return this.NumberLiteral();
+            case "STRING": return this.StringLiteral();
             case "{": return this.ObjectLiteral();
             
             case "(": return this.peekAt(null, 1) === "for" ? 
@@ -4342,7 +4397,7 @@ var Parser = es6now.Class(function(__super) { return {
                 if (next.type === "=>") {
                 
                     this.pushContext(true);
-                    return this.ArrowFunctionHead("", this.BindingIdentifier(), null, start);
+                    return this.ArrowFunctionHead("", this.BindingIdentifier(), start);
                 
                 } else if (!next.newlineBefore) {
                 
@@ -4353,7 +4408,7 @@ var Parser = es6now.Class(function(__super) { return {
                     
                         this.read();
                         this.pushContext(true);
-                        return this.ArrowFunctionHead(token.value, this.BindingIdentifier(), null, start);
+                        return this.ArrowFunctionHead(token.value, this.BindingIdentifier(), start);
                     }
                 }
                 
@@ -4363,12 +4418,12 @@ var Parser = es6now.Class(function(__super) { return {
             
             case "null":
                 this.read();
-                return new AST.Null(token.start, token.end);
+                return new AST.NullLiteral(token.start, token.end);
             
             case "true":
             case "false":
                 this.read();
-                return new AST.Boolean(type === "true", token.start, token.end);
+                return new AST.BooleanLiteral(type === "true", token.start, token.end);
             
             case "this":
                 this.read();
@@ -4381,10 +4436,7 @@ var Parser = es6now.Class(function(__super) { return {
     Identifier: function(isVar) {
     
         var token = this.readToken("IDENTIFIER"),
-            node = new AST.Identifier(token.value, "", token.start, token.end);
-        
-        if (isVar)
-            node.context = "variable";
+            node = new AST.Identifier(token.value, isVar ? "variable" : "", token.start, token.end);
         
         this.checkIdentifier(node);
         return node;
@@ -4396,10 +4448,10 @@ var Parser = es6now.Class(function(__super) { return {
         return new AST.Identifier(token.value, "", token.start, token.end);
     },
     
-    String: function() {
+    StringLiteral: function() {
     
         var token = this.readToken("STRING"),
-            node = new AST.String(token.value, token.start, token.end);
+            node = new AST.StringLiteral(token.value, token.start, token.end);
         
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -4407,10 +4459,10 @@ var Parser = es6now.Class(function(__super) { return {
         return node;
     },
     
-    Number: function() {
+    NumberLiteral: function() {
     
         var token = this.readToken("NUMBER"),
-            node = new AST.Number(token.number, token.start, token.end);
+            node = new AST.NumberLiteral(token.number, token.start, token.end);
         
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -4418,10 +4470,10 @@ var Parser = es6now.Class(function(__super) { return {
         return node;
     },
     
-    Template: function() {
+    TemplatePart: function() {
     
         var token = this.readToken("TEMPLATE", "template"),
-            node = new AST.Template(token.value, token.templateEnd, token.start, token.end);
+            node = new AST.TemplatePart(token.value, token.templateEnd, token.start, token.end);
         
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -4441,7 +4493,7 @@ var Parser = es6now.Class(function(__super) { return {
         var token = this.readToken("IDENTIFIER"),
             node = new AST.Identifier(token.value, "", token.start, token.end);
         
-        this.checkBindingIdentifier(node);
+        this.checkBindingTarget(node);
         return node;
     },
     
@@ -4460,14 +4512,10 @@ var Parser = es6now.Class(function(__super) { return {
                 break;
             
             default:
-                node = this.BindingIdentifier();
-                break;
+                return this.BindingIdentifier();
         }
         
-        // Transform expressions to patterns
-        if (node.type !== "Identifier")
-            this.transformPattern(node, true);
-        
+        this.checkBindingTarget(node);
         return node;
     },
     
@@ -4488,28 +4536,16 @@ var Parser = es6now.Class(function(__super) { return {
             case ")":
                 break;
             
-            // An arrow function formal list with a single rest parameter
-            case "...":
-                rest = this.RestParameter();
-                break;
-            
             // Paren expression
             default:
                 expr = this.Expression();
                 break;
         }
         
-        // Look for a trailing rest formal parameter within an arrow formal list
-        if (!rest && this.peek() === "," && this.peekAt(null, 1) === "...") {
-        
-            this.read();
-            rest = this.RestParameter();
-        }
-        
         this.read(")");
         
-        if (expr === null || rest !== null || this.peek("div") === "=>")
-            return this.ArrowFunctionHead("", expr, rest, start);
+        if (expr === null || this.peek("div") === "=>")
+            return this.ArrowFunctionHead("", expr, start);
         
         // Collapse this context into its parent
         this.popContext(true);
@@ -4521,20 +4557,23 @@ var Parser = es6now.Class(function(__super) { return {
     
         var start = this.nodeStart(),
             nameSet = new IntMap,
+            comma = false,
             list = [],
-            node,
-            flag,
-            key;
+            node;
         
         this.read("{");
         
         while (this.peekUntil("}", "name")) {
         
-            if (list.length > 0)
+            if (list.length > 0) {
+            
                 this.read(",");
+                comma = true;
+            }
             
             if (this.peek("name") !== "}") {
             
+                comma = false;
                 list.push(node = this.PropertyDefinition());
                 this.checkPropertyName(node, nameSet);
             }
@@ -4562,7 +4601,7 @@ var Parser = es6now.Class(function(__super) { return {
                 this.unpeek();
             
                 node = new AST.PatternProperty(
-                    this.Identifier(),
+                    this.Identifier(true),
                     null,
                     (this.read(), this.AssignmentExpression()),
                     start,
@@ -4578,7 +4617,7 @@ var Parser = es6now.Class(function(__super) { return {
                 this.unpeek();
         
                 return new AST.PropertyDefinition(
-                    this.Identifier(),
+                    this.Identifier(true),
                     null,
                     start,
                     this.nodeEnd());
@@ -4605,8 +4644,8 @@ var Parser = es6now.Class(function(__super) { return {
         switch (token.type) {
         
             case "IDENTIFIER": return this.IdentifierName();
-            case "STRING": return this.String();
-            case "NUMBER": return this.Number();
+            case "STRING": return this.StringLiteral();
+            case "NUMBER": return this.NumberLiteral();
             case "[": return this.ComputedPropertyName();
         }
         
@@ -4622,59 +4661,6 @@ var Parser = es6now.Class(function(__super) { return {
         this.read("]");
         
         return new AST.ComputedPropertyName(expr, start, this.nodeEnd());
-    },
-    
-    MethodDefinition: function(name) {
-    
-        var start = name ? name.start : this.nodeStart(),
-            kind = "",
-            val;
-        
-        if (!name && this.peek("name") === "*") {
-        
-            this.read();
-            
-            kind = "generator";
-            name = this.PropertyName();
-        
-        } else {
-        
-            if (!name)
-                name = this.PropertyName();
-            
-            if (name.type === "Identifier" && this.peek("name") !== "(") {
-            
-                val = name.value;
-                
-                if (val === "get" || val === "set" || isFunctionModifier(val)) {
-                
-                    kind = name.value;
-                    name = this.PropertyName();
-                }
-            }
-        }
-        
-        this.pushContext(true);
-        
-        if (kind === "generator" || isFunctionModifier(kind))
-            this.context.functionType = kind;
-        
-        var params = kind === "get" || kind === "set" ?
-            this.AccessorParameters(kind) :
-            this.FormalParameters();
-        
-        var body = this.FunctionBody();
-        
-        this.checkParameters(params);
-        this.popContext();
-        
-        return new AST.MethodDefinition(
-            kind,
-            name,
-            params,
-            body,
-            start,
-            this.nodeEnd());
     },
     
     ArrayLiteral: function() {
@@ -4700,7 +4686,7 @@ var Parser = es6now.Class(function(__super) { return {
             
             } else {
             
-                list.push(next = this.SpreadAssignment());
+                list.push(next = this.AssignmentExpression(false, true));
                 comma = false;
             }
         }
@@ -4791,7 +4777,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     TemplateExpression: function() {
         
-        var atom = this.Template(),
+        var atom = this.TemplatePart(),
             start = atom.start,
             lit = [atom],
             sub = [];
@@ -4803,7 +4789,7 @@ var Parser = es6now.Class(function(__super) { return {
             // Discard any tokens that have been scanned using a different context
             this.unpeek();
             
-            lit.push(atom = this.Template());
+            lit.push(atom = this.TemplatePart());
         }
         
         return new AST.TemplateExpression(lit, sub, start, this.nodeEnd());
@@ -4969,8 +4955,11 @@ var Parser = es6now.Class(function(__super) { return {
             pattern = this.BindingPattern(),
             init = null;
         
-        if (pattern.type !== "Identifier" || this.peek() === "=") {
+        if ((!noIn && pattern.type !== "Identifier") || this.peek() === "=") {
         
+            // NOTE: Patterns must have initializers when not in declaration
+            // section of a for statement
+            
             this.read("=");
             init = this.AssignmentExpression(noIn);
             
@@ -5388,7 +5377,7 @@ var Parser = es6now.Class(function(__super) { return {
             if (prologue) {
             
                 if (element.type === "ExpressionStatement" &&
-                    element.expression.type === "String") {
+                    element.expression.type === "StringLiteral") {
                 
                     // Get the non-escaped literal text of the string
                     node = element.expression;
@@ -5539,6 +5528,59 @@ var Parser = es6now.Class(function(__super) { return {
             this.nodeEnd());
     },
     
+    MethodDefinition: function(name) {
+    
+        var start = name ? name.start : this.nodeStart(),
+            kind = "",
+            val;
+        
+        if (!name && this.peek("name") === "*") {
+        
+            this.read();
+            
+            kind = "generator";
+            name = this.PropertyName();
+        
+        } else {
+        
+            if (!name)
+                name = this.PropertyName();
+            
+            if (name.type === "Identifier" && this.peek("name") !== "(") {
+            
+                val = name.value;
+                
+                if (val === "get" || val === "set" || isFunctionModifier(val)) {
+                
+                    kind = name.value;
+                    name = this.PropertyName();
+                }
+            }
+        }
+        
+        this.pushContext(true);
+        
+        if (kind === "generator" || isFunctionModifier(kind))
+            this.context.functionType = kind;
+        
+        var params = kind === "get" || kind === "set" ?
+            this.AccessorParameters(kind) :
+            this.FormalParameters();
+        
+        var body = this.FunctionBody();
+        
+        this.checkParameters(params);
+        this.popContext();
+        
+        return new AST.MethodDefinition(
+            kind,
+            name,
+            params,
+            body,
+            start,
+            this.nodeEnd());
+    },
+    
     AccessorParameters: function(kind) {
     
         var list = [];
@@ -5616,16 +5658,14 @@ var Parser = es6now.Class(function(__super) { return {
         return new AST.FunctionBody(statements, start, this.nodeEnd());
     },
     
-    ArrowFunctionHead: function(kind, formals, rest, start) {
+    ArrowFunctionHead: function(kind, formals, start) {
     
         // Context must have been pushed by caller
         this.context.isFunction = true;
         this.context.functionType = kind;
         
-        var params = this.transformFormals(formals, rest);
-        
-        // Perform validation on transformed formal parameters
-        this.checkArrowParameters(params);
+        // Transform and validate formal parameters
+        var params = this.checkArrowParameters(formals);
         
         return new AST.ArrowFunctionHead(params, start, this.nodeEnd());
     },
@@ -5648,6 +5688,111 @@ var Parser = es6now.Class(function(__super) { return {
         this.popContext();
         
         return new AST.ArrowFunction(kind, params, body, start, this.nodeEnd());
+    },
+    
+    // === Classes ===
+    
+    ClassDeclaration: function() {
+    
+        var start = this.nodeStart(),
+            ident = null,
+            base = null;
+        
+        this.read("class");
+        
+        ident = this.BindingIdentifier();
+        
+        if (this.peek() === "extends") {
+        
+            this.read();
+            base = this.MemberExpression(true);
+        }
+        
+        return new AST.ClassDeclaration(
+            ident,
+            base,
+            this.ClassBody(),
+            start,
+            this.nodeEnd());
+    },
+    
+    ClassExpression: function() {
+    
+        var start = this.nodeStart(), 
+            ident = null,
+            base = null;
+        
+        this.read("class");
+        
+        if (this.peek() === "IDENTIFIER")
+            ident = this.BindingIdentifier();
+        
+        if (this.peek() === "extends") {
+        
+            this.read();
+            base = this.MemberExpression(true);
+        }
+        
+        return new AST.ClassExpression(
+            ident, 
+            base, 
+            this.ClassBody(), 
+            start, 
+            this.nodeEnd());
+    },
+    
+    ClassBody: function() {
+        
+        var start = this.nodeStart(),
+            nameSet = new IntMap, 
+            staticSet = new IntMap,
+            list = [],
+            node;
+        
+        this.pushContext(false);
+        this.setStrict(true);
+        this.read("{");
+        
+        while (this.peekUntil("}", "name")) {
+        
+            list.push(node = this.ClassElement());
+            this.checkPropertyName(node.method, node.static ? staticSet : nameSet);
+        }
+        
+        this.read("}");
+        this.popContext();
+        
+        return new AST.ClassBody(list, start, this.nodeEnd());
+    },
+    
+    ClassElement: function() {
+    
+        var start = this.nodeStart(),
+            isStatic = false;
+        
+        // Check for static modifier
+        if (this.peekToken("name").value === "static" &&
+            this.peekAt("name", 1) !== "(") {
+        
+            isStatic = true;
+            this.read();
+        }
+        
+        var method = this.MethodDefinition(),
+            name = method.name;
+        
+        if (isStatic) {
+        
+            if (name.type === "Identifier" && name.value === "prototype")
+                this.fail("Invalid prototype property in class definition", name);
+            
+        } else {
+        
+            if (name.type === "Identifier" && name.value === "constructor" && method.kind !== "")
+                this.fail("Invalid constructor property in class definition", name);
+        }
+        
+        return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
     },
     
     // === Modules ===
@@ -5725,7 +5870,7 @@ var Parser = es6now.Class(function(__super) { return {
     
     ModuleSpecifier: function() {
     
-        return this.peek() === "STRING" ? this.String() : this.ModulePath();
+        return this.peek() === "STRING" ? this.StringLiteral() : this.ModulePath();
     },
     
     ImportDeclaration: function() {
@@ -5802,7 +5947,7 @@ var Parser = es6now.Class(function(__super) { return {
             
         } else {
         
-            this.checkBindingIdentifier(remote);
+            this.checkBindingTarget(remote);
         }
         
         return new AST.ImportSpecifier(remote, local, start, this.nodeEnd());
@@ -5937,101 +6082,6 @@ var Parser = es6now.Class(function(__super) { return {
         }
         
         return new AST.ModulePath(path, start, this.nodeEnd());
-    },
-    
-    // === Classes ===
-    
-    ClassDeclaration: function() {
-    
-        var start = this.nodeStart(),
-            ident = null,
-            base = null;
-        
-        this.read("class");
-        
-        ident = this.BindingIdentifier();
-        
-        if (this.peek() === "extends") {
-        
-            this.read();
-            base = this.MemberExpression(true);
-        }
-        
-        return new AST.ClassDeclaration(
-            ident,
-            base,
-            this.ClassBody(),
-            start,
-            this.nodeEnd());
-    },
-    
-    ClassExpression: function() {
-    
-        var start = this.nodeStart(), 
-            ident = null,
-            base = null;
-        
-        this.read("class");
-        
-        if (this.peek() === "IDENTIFIER")
-            ident = this.BindingIdentifier();
-        
-        if (this.peek() === "extends") {
-        
-            this.read();
-            base = this.MemberExpression(true);
-        }
-        
-        return new AST.ClassExpression(
-            ident, 
-            base, 
-            this.ClassBody(), 
-            start, 
-            this.nodeEnd());
-    },
-    
-    ClassBody: function() {
-    
-        this.pushContext(false);
-        this.setStrict(true);
-        
-        var start = this.nodeStart(),
-            nameSet = new IntMap, 
-            staticSet = new IntMap,
-            list = [];
-        
-        this.read("{");
-        
-        while (this.peekUntil("}", "name"))
-            list.push(this.ClassElement(nameSet, staticSet));
-        
-        this.read("}");
-        
-        this.popContext();
-        
-        return new AST.ClassBody(list, start, this.nodeEnd());
-    },
-    
-    ClassElement: function(nameSet, staticSet) {
-    
-        var start = this.nodeStart(),
-            isStatic = false,
-            method,
-            name;
-        
-        // Check for static modifier
-        if (this.peekToken("name").value === "static" &&
-            this.peekAt("name", 1) !== "(") {
-        
-            isStatic = true;
-            nameSet = staticSet;
-            this.read();
-        }
-        
-        method = this.MethodDefinition();
-        this.checkClassElementName(method, nameSet);
-        
-        return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
     }
     
 } });
