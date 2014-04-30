@@ -1,15 +1,15 @@
-import { AST } from "AST.js";
 import { Parser } from "Parser.js";
-import { Scanner } from "Scanner.js";
+import { AST } from "AST.js";
 
-export { Parser, Scanner, AST };
+function parse(input, options) {
 
-export function parseModule(input, options) {
-
-    return new Parser(input, options).Module();
+    return new Parser().parse(input, options);
 }
 
-export function parseScript(input, options) {
+export { 
 
-    return new Parser(input, options).Script();
-}
+    AST, 
+    Parser, 
+    parse, 
+    parse as default
+};

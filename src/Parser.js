@@ -133,11 +133,27 @@ class Context {
     }
 }
 
+class Options {
+
+    constructor(obj) {
+    
+        this.obj = obj || {};
+    }
+    
+    get(key, def) {
+    
+        var v = this.obj[key];
+        return v === void 0 ? def : v;
+    }
+}
+
 export class Parser {
 
-    constructor(input, offset) {
-
-        var scanner = new Scanner(input, offset);
+    parse(input, options) {
+    
+        options = new Options(options);
+        
+        var scanner = new Scanner(input);
         
         this.scanner = scanner;
         this.input = input;
@@ -149,6 +165,16 @@ export class Parser {
         
         this.context = new Context(null, false);
         this.setStrict(false);
+        
+        return options.get("module") ? this.Module() : this.Script();
+    }
+    
+    position(offset) {
+    
+        if (!this.scanner)
+            throw new Error("Parser not initialized");
+        
+        return this.scanner.position(offset);
     }
     
     nextToken(context) {

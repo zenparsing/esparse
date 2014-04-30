@@ -1,4 +1,4 @@
-import { parseModule, parseScript } from "../main.js";
+import { parse } from "../main.js";
 
 var inspect = require("util").inspect;
 
@@ -17,11 +17,11 @@ export function main(args) {
     switch (type) {
     
         case "module":
-            ast = parseModule(input);
+            ast = parse(input, { module: true });
             break;
         
         case "script":
-            ast = parseScript(input);
+            ast = parse(input, { module: false });
             break;
         
         default:

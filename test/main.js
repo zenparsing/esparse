@@ -1,4 +1,5 @@
-import { parseModule, parseScript } from "../src/main.js";
+module esparse from "../src/main.js";
+import parse from "../src/main.js";
 
 var Path = require("path"),
     FS = require("fs"),
@@ -17,7 +18,7 @@ var SKIP_KEYS = {
     "error": 1
 }
 
-var testCount = 0;
+var testsPassed = 0;
 
 // Returns true if the argument is an object
 function isObject(obj) {
@@ -142,6 +143,11 @@ function printHeader(msg) {
 function printResult(msg, pass) {
 
     console.log(msg + " " + (pass ? Style.green("OK") : Style.bold(Style.red("FAIL"))));
+    
+    if (!pass)
+        throw "stop";
+    
+    testsPassed++;
 }
 
 // Read a javascript or json file
@@ -179,11 +185,21 @@ function displayTree(tree) {
     console.log(inspect(tree, false, 20, true));
 }
 
+function testExports() {
+    
+    printHeader("Exports");
+    
+    // Test the default export is "parse"
+    printResult("the default export is `parse`", esparse.parse === parse);
+}
+
 function run() {
 
     var currentGroup = null;
     
     printMessage("\nStarting esparse tests...");
+    
+    testExports();
     
     walkDirectory(__dirname, path => {
     
@@ -213,7 +229,7 @@ function run() {
             
             try { 
             
-                tree = (program.module ? parseModule : parseScript)(program.source);
+                tree = parse(program.source, { module: program.module });
             
             } catch (err) {
                 
@@ -224,8 +240,6 @@ function run() {
             }
             
             pass = astLike(tree, outputs[keys[i]]);
-            
-            testCount++;
             printResult(name + " - " + keys[i], pass);
             
             if (!pass) {
@@ -241,7 +255,7 @@ function run() {
 try { 
 
     run();
-    printMessage("\nSuccessfully completed " + testCount + " tests - looks good to me!");
+    printMessage("\nSuccessfully completed " + testsPassed + " tests - looks good to me!");
 
 } catch (err) { 
 

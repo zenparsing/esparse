@@ -1,4 +1,4 @@
-import { Scanner, parseScript } from "../main.js";
+import { Scanner, parse } from "../main.js";
 
 var Path = require("path"),
     FS = require("fs"),
@@ -128,7 +128,7 @@ var parsers = {
     "native": nativeParse, 
     "scanner": scanOnly,
     "acorn": Acorn.parse,
-    "esparse": parseScript,
+    "esparse": parse,
     "esprima": Esprima.parse,
     "esprima-harmony": EsprimaHarmony.parse
 };

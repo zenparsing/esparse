@@ -159,10 +159,10 @@ function isNumberFollowUnicode(c) {
 
 export class Scanner {
 
-    constructor(input, offset) {
+    constructor(input) {
 
         this.input = input || "";
-        this.offset = offset | 0;
+        this.offset = 0;
         this.length = this.input.length;
         this.lines = [-1];
         this.lastLineBreak = -1;
