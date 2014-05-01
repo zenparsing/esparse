@@ -58,12 +58,12 @@ var UNICODE_VERSION = "6.3.0";
 
 var JS_OUT_PATH = absPath("unicode.js");
 
-// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-identifier-names-static-semantics-early-errors
 var identifierStart = regenerate(
     getData("properties/ID_Start"),
     "$",
     "_"
 );
+
 var identifierPart = regenerate(
     getData("properties/ID_Continue"),
     "$",
@@ -72,7 +72,6 @@ var identifierPart = regenerate(
     0x200D
 );
 
-// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-white-space
 var whiteSpace = regenerate(
     getData("categories/Zs"),
     0x0009, // U+0009 <TAB> [\t]

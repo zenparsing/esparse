@@ -1,2 +1,3 @@
-# Installed npm modules
+.DS_Store
+_*
 node_modules
