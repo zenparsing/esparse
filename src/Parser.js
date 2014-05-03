@@ -879,17 +879,18 @@ export class Parser {
                 
                 next = this.peekTokenAt("div", 1);
                 
-                if (next.type === "=>" && !next.newlineBefore) {
+                if (!next.newlineBefore) {
                 
-                    this.pushContext(true);
-                    return this.ArrowFunctionHead("", this.BindingIdentifier(), start);
+                    if (next.type === "=>") {
                 
-                } else if (!next.newlineBefore) {
+                        this.pushContext(true);
+                        return this.ArrowFunctionHead("", this.BindingIdentifier(), start);
                 
-                    if (next.type === "function")
+                    } else if (next.type === "function") {
+                    
                         return this.FunctionExpression();
                     
-                    if (next.type === "IDENTIFIER" && isFunctionModifier(token.value)) {
+                    } else if (next.type === "IDENTIFIER" && isFunctionModifier(token.value)) {
                     
                         this.read();
                         this.pushContext(true);
@@ -1031,7 +1032,7 @@ export class Parser {
         
         var next = this.peekToken("div");
         
-        if (expr === null || next.type === "=>" && !next.newlineBefore)
+        if (!next.newlineBefore && (next.type === "=>" || expr === null))
             return this.ArrowFunctionHead("", expr, start);
         
         // Collapse this context into its parent

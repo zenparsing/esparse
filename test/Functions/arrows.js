@@ -250,5 +250,9 @@
 => x **/
 'new line restriction before arrow (2)': {},
 
+/** ()
+=> x **/
+'new line restriction before arrow (3)': {},
+
 
 };
