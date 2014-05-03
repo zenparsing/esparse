@@ -879,7 +879,7 @@ export class Parser {
                 
                 next = this.peekTokenAt("div", 1);
                 
-                if (next.type === "=>") {
+                if (next.type === "=>" && !next.newlineBefore) {
                 
                     this.pushContext(true);
                     return this.ArrowFunctionHead("", this.BindingIdentifier(), start);
@@ -1029,7 +1029,9 @@ export class Parser {
         
         this.read(")");
         
-        if (expr === null || this.peek("div") === "=>")
+        var next = this.peekToken("div");
+        
+        if (expr === null || next.type === "=>" && !next.newlineBefore)
             return this.ArrowFunctionHead("", expr, start);
         
         // Collapse this context into its parent

@@ -242,5 +242,13 @@
 /** x || x => x **/
 'arrow has correct precedence': {},
 
+/** x
+=> x **/
+'new line restriction before arrow (1)': {},
+
+/** (x)
+=> x **/
+'new line restriction before arrow (2)': {},
+
 
 };
