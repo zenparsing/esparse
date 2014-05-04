@@ -169,12 +169,12 @@ export class Parser {
         return options.get("module") ? this.Module() : this.Script();
     }
     
-    position(offset) {
+    location(offset) {
     
         if (!this.scanner)
             throw new Error("Parser not initialized");
         
-        return this.scanner.position(offset);
+        return this.scanner.location(offset);
     }
     
     nextToken(context) {
@@ -382,12 +382,12 @@ export class Parser {
         if (!node)
             node = this.peekToken();
         
-        var pos = this.scanner.position(node.start),
+        var loc = this.scanner.location(node.start),
             err = new SyntaxError(msg);
         
-        err.line = pos.line;
-        err.column = pos.column;
-        err.lineOffset = pos.lineOffset;
+        err.line = loc.line;
+        err.column = loc.column;
+        err.lineOffset = loc.lineOffset;
         err.startOffset = node.start;
         err.endOffset = node.end;
         err.sourceText = this.input;

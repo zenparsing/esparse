@@ -205,19 +205,9 @@ export class Scanner {
         return this.type;
     }
     
-    raw(token) {
+    location(offset) {
     
-        return this.input.slice(token.start, token.end);
-    }
-    
-    lineNumber(offset) {
-    
-        return binarySearch(this.lines, offset);
-    }
-    
-    position(offset) {
-    
-        var line = this.lineNumber(offset),
+        var line = binarySearch(this.lines, offset),
             pos = this.lines[line - 1],
             column = offset - pos;
         
