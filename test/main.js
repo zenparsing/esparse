@@ -18,7 +18,8 @@ var SKIP_KEYS = {
     "error": 1
 }
 
-var testsPassed = 0;
+var testsPassed = 0, 
+    testsFailed = 0;
 
 // Returns true if the argument is an object
 function isObject(obj) {
@@ -144,10 +145,8 @@ function printResult(msg, pass) {
 
     console.log(msg + " " + (pass ? Style.green("OK") : Style.bold(Style.red("FAIL"))));
     
-    if (!pass)
-        throw "stop";
-    
-    testsPassed++;
+    if (pass) testsPassed++;
+    else testsFailed++;
 }
 
 // Read a javascript or json file
@@ -191,6 +190,9 @@ function testExports() {
     
     // Test the default export is "parse"
     printResult("the default export is `parse`", esparse.parse === parse);
+    
+    if (testsFailed > 0)
+        throw "stop";
 }
 
 function run() {
