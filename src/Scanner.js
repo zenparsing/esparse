@@ -267,10 +267,18 @@ export class Scanner {
         
         var val = parseInt(hex, 16);
         
-        if (val > 1114111)
+        if (val > 0x10ffff)
             return null;
         
-        return String.fromCharCode(val);
+        if (val <= 0xffff)
+            return String.fromCharCode(val);
+        
+        // NOTE: If value is greater than 0xffff, then it must be encoded
+        // as 2 UTF-16 code units in a surrogate pair.
+        
+        val -= 0x10000;
+        
+        return String.fromCharCode((val >> 10) + 0xd800, (val % 0x400) + 0xdc00);
     }
     
     readOctalEscape() {
