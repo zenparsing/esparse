@@ -46,7 +46,6 @@
     }]
 },
 
-// TODO: Support non-BMP unicode escapes
 /** "\u{2f804}" **/
 'non-bmp unicode escapes': 
 { type: 'Script',
@@ -58,16 +57,40 @@
        end: 11,
        expression: { type: 'StringLiteral', start: 0, end: 11, value: '\ud87e\udc04' } } ] },
 
-// TODO: Support surrogate pairs in identifiers
-
-/*\u{1D4A2} 
+/** \u{1D4A2} **/
 'non-bmp unicode escapes in identifiers':
-null,
-**/
+{ type: 'Script',
+  start: 0,
+  end: 9,
+  statements: 
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 9,
+       expression: 
+        { type: 'Identifier',
+          start: 0,
+          end: 9,
+          value: '𝒢',
+          context: 'variable' } } ] },
 
-/* 𝒢;
-'non-bmp identifier characters': null,
-**/
+/** 𝒢; **/
+'non-bmp identifier characters': 
+{ type: 'Script',
+  start: 0,
+  end: 3,
+  statements: 
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 3,
+       expression: 
+        { type: 'Identifier',
+          start: 0,
+          end: 2,
+          value: '𝒢',
+          context: 'variable' } } ] },
+
+/** 9𝒢; **/
+'number cannot be followed by a non-BMP identifier start character': {},
 
 /** \u{} **/
 'unicode escapes must have a valid hex value - 1': {},
