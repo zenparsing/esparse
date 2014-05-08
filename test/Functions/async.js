@@ -339,5 +339,36 @@ function f() {}
 => 0 **/
 'newline restriction between right paren and arrow': {},
 
+/** (async x => 0) **/
+'no newline restriction before async keyword in arrow': 
+{ type: 'Script',
+  start: 0,
+  end: 14,
+  statements: 
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 14,
+       expression: 
+        { type: 'ParenExpression',
+          start: 0,
+          end: 14,
+          expression: 
+           { type: 'ArrowFunction',
+             start: 1,
+             end: 13,
+             kind: 'async',
+             params: 
+              [ { type: 'FormalParameter',
+                  start: 7,
+                  end: 8,
+                  pattern: 
+                   { type: 'Identifier',
+                     start: 7,
+                     end: 8,
+                     value: 'x',
+                     context: 'declaration' },
+                  initializer: null } ],
+             body: { type: 'NumberLiteral', start: 12, end: 13, value: 0 } } } } ] },
+
 
 };

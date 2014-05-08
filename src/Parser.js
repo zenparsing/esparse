@@ -856,7 +856,8 @@ export class Parser {
         var token = this.peekToken(),
             type = token.type,
             start = this.nodeStart(),
-            next;
+            next,
+            value;
         
         switch (type) {
             
@@ -877,6 +878,7 @@ export class Parser {
             
             case "IDENTIFIER":
                 
+                value = token.value;
                 next = this.peekTokenAt("div", 1);
                 
                 if (!next.newlineBefore) {
@@ -890,11 +892,11 @@ export class Parser {
                     
                         return this.FunctionExpression();
                     
-                    } else if (next.type === "IDENTIFIER" && isFunctionModifier(token.value)) {
+                    } else if (next.type === "IDENTIFIER" && isFunctionModifier(value)) {
                     
                         this.read();
                         this.pushContext(true);
-                        return this.ArrowFunctionHead(token.value, this.BindingIdentifier(), start);
+                        return this.ArrowFunctionHead(value, this.BindingIdentifier(), start);
                     }
                 }
                 
