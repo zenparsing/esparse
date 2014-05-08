@@ -1053,13 +1053,12 @@ export class Parser {
         
         while (this.peekUntil("}", "name")) {
         
-            if (list.length > 0) {
+            if (!comma && node) {
             
                 this.read(",");
                 comma = true;
-            }
-            
-            if (this.peek("name") !== "}") {
+
+            } else {
             
                 comma = false;
                 list.push(node = this.PropertyDefinition());
@@ -1154,9 +1153,8 @@ export class Parser {
     ArrayLiteral() {
     
         var start = this.nodeStart(),
-            list = [],
             comma = false,
-            next,
+            list = [],
             type;
         
         this.read("[");
@@ -1174,7 +1172,7 @@ export class Parser {
             
             } else {
             
-                list.push(next = this.AssignmentExpression(false, true));
+                list.push(this.AssignmentExpression(false, true));
                 comma = false;
             }
         }

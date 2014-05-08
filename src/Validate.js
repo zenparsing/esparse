@@ -232,7 +232,7 @@ export class Validate {
 
         // If this name has already been added...
         if (currentFlags = nameSet.get(name)) {
-        
+            
             var duplicate = true;
             
             switch (flag) {
