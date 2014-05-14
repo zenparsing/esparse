@@ -23,13 +23,25 @@
        expression: { type: 'StringLiteral', start: 0, end: 12, value: 'abƻcd' } } ] },
 
 /** \u{64}efg; **/
-"extended unicode escapes": {
+"extended unicode escapes - 1": {
     type: "Script",
     statements: [
     {   type: "ExpressionStatement",
         expression: {
             type: "Identifier",
             value: "defg"
+        }
+    }]
+},
+
+/** gfe\u{64}; **/
+"extended unicode escapes - 2": {
+    type: "Script",
+    statements: [
+    {   type: "ExpressionStatement",
+        expression: {
+            type: "Identifier",
+            value: "gfed"
         }
     }]
 },

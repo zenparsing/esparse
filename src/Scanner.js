@@ -912,7 +912,7 @@ export class Scanner {
         
             if (code === 92) {
             
-                val += this.input.slice(start, this.offset++);
+                val += this.input.slice(start, this.offset);
                 esc = this.readIdentifierEscape(false);
                 
                 if (esc === null)

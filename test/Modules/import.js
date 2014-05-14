@@ -85,6 +85,28 @@
        specifiers: [],
        from: { type: 'StringLiteral', start: 15, end: 18, value: 'x' } } ] },
 
+/*** import { x, } from "x"; ***/
+'import list may end with a comma':
+{ type: 'Module',
+  start: 0,
+  end: 23,
+  statements: 
+   [ { type: 'ImportDeclaration',
+       start: 0,
+       end: 23,
+       specifiers: 
+        [ { type: 'ImportSpecifier',
+            start: 9,
+            end: 10,
+            imported: 
+             { type: 'Identifier',
+               start: 9,
+               end: 10,
+               value: 'x',
+               context: 'declaration' },
+            local: null } ],
+       from: { type: 'StringLiteral', start: 19, end: 22, value: 'x' } } ] },
+
 /*** import { default as y } from "x"; ***/
 'import a keyword-named binding': 
 { type: 'Module',
