@@ -1311,9 +1311,6 @@ export class Parser {
                 if (next.type === ":")
                     return this.LabelledStatement();
                 
-                if (next.type === "function" && !next.newlineBefore)
-                    return this.FunctionDeclaration();
-                
                 return this.ExpressionStatement();
             
             case "{": return this.Block();
@@ -1922,6 +1919,9 @@ export class Parser {
             
                 if (this.peekLet())
                     return this.LexicalDeclaration();
+                
+                if (this.peekFunctionModifier())
+                    return this.FunctionDeclaration();
                 
                 if (this.peekModule())
                     return this.ModuleDefinition();
