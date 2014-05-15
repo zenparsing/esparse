@@ -101,6 +101,12 @@ function isFunctionModifier(value) {
     return false;
 }
 
+// Returns true if the specified identifier token has unicode escapes
+function tokenHasEscapes(token) {
+
+    return token.end - token.start !== token.value.length;
+}
+
 // Copies token data
 function copyToken(from, to) {
 
@@ -281,7 +287,10 @@ export class Parser {
         
         var token = this.readToken();
         
-        if (token.type === word || token.type === "IDENTIFIER" && token.value === word)
+        if (token.type === word)
+            return token;
+        
+        if (token.type === "IDENTIFIER" && token.value === word && !tokenHasEscapes(token))
             return token;
         
         this.unexpected(token);
@@ -290,7 +299,11 @@ export class Parser {
     peekKeyword(word) {
     
         var token = this.peekToken();
-        return token.type === "IDENTIFIER" && token.value === word;
+        
+        if (token.type === word)
+            return true;
+        
+        return token.type === "IDENTIFIER" && token.value === word && !tokenHasEscapes(token);
     }
     
     peekLet() {

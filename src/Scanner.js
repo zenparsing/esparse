@@ -940,10 +940,10 @@ export class Scanner {
         
         val += this.input.slice(start, this.offset);
         
+        this.value = val;
+        
         if (context !== "name" && reservedWord.test(val))
             return esc ? this.Error() : val;
-        
-        this.value = val;
         
         return "IDENTIFIER";
     }
