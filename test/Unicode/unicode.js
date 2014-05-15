@@ -128,8 +128,8 @@
 /** l\u0065t x = 1; **/
 'contextual keywords cannot contain unicode escapes - 1': {},
 
-/* a\u0073ync function af() {} *
+/** a\u0073ync function af() {} **/
 'contextual keywords cannot contain unicode escapes - 2': {},
-*/
+
 
 });

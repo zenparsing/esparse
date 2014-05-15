@@ -90,9 +90,6 @@ function isUnary(op) {
 // Returns true if the value is a function modifier keyword
 function isFunctionModifier(value) {
 
-    // TODO:  Here we just test a string value, but what if the identifier contains
-    // unicode escapes?
-    
     switch (value) {
     
         case "async": return true;
@@ -101,10 +98,24 @@ function isFunctionModifier(value) {
     return false;
 }
 
-// Returns true if the specified identifier token has unicode escapes
-function tokenHasEscapes(token) {
+// Returns the value of the specified token, if it is an identifier and does not
+// contain any unicode escapes
+function keywordFromToken(token) {
 
-    return token.end - token.start !== token.value.length;
+    if (token.type === "IDENTIFIER" && token.end - token.start === token.value.length)
+        return token.value;
+    
+    return "";
+}
+
+// Returns the value of the specified node, if it is an Identifier and does not
+// contain any unicode escapes
+function keywordFromNode(node) {
+
+    if (node.type === "Identifier" && node.end - node.start === node.value.length)
+        return node.value;
+    
+    return "";
 }
 
 // Copies token data
@@ -287,10 +298,7 @@ export class Parser {
         
         var token = this.readToken();
         
-        if (token.type === word)
-            return token;
-        
-        if (token.type === "IDENTIFIER" && token.value === word && !tokenHasEscapes(token))
+        if (token.type === word || keywordFromToken(token) === word)
             return token;
         
         this.unexpected(token);
@@ -299,11 +307,7 @@ export class Parser {
     peekKeyword(word) {
     
         var token = this.peekToken();
-        
-        if (token.type === word)
-            return true;
-        
-        return token.type === "IDENTIFIER" && token.value === word && !tokenHasEscapes(token);
+        return token.type === word || keywordFromToken(token) === word;
     }
     
     peekLet() {
@@ -350,7 +354,7 @@ export class Parser {
     
         var token = this.peekToken();
         
-        if (!(token.type === "IDENTIFIER" && isFunctionModifier(token.value)))
+        if (!isFunctionModifier(keywordFromToken(token)))
             return false;
         
         token = this.peekTokenAt("div", 1);
@@ -763,8 +767,7 @@ export class Parser {
                         break;
                     }
                     
-                    if (expr.type === "Identifier" && 
-                        isFunctionModifier(expr.value)) {
+                    if (isFunctionModifier(keywordFromNode(expr))) {
                 
                         arrowType = expr.value;
                         this.pushMaybeContext();
@@ -891,7 +894,7 @@ export class Parser {
             
             case "IDENTIFIER":
                 
-                value = token.value;
+                value = keywordFromToken(token);
                 next = this.peekTokenAt("div", 1);
                 
                 if (!next.newlineBefore) {
@@ -1952,7 +1955,7 @@ export class Parser {
         
         tok = this.peekToken();
         
-        if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
+        if (isFunctionModifier(keywordFromToken(tok))) {
         
             this.read();
             kind = tok.value;
@@ -1994,7 +1997,7 @@ export class Parser {
         
         tok = this.peekToken();
         
-        if (tok.type === "IDENTIFIER" && isFunctionModifier(tok.value)) {
+        if (isFunctionModifier(keywordFromToken(tok))) {
         
             this.read();
             kind = tok.value;
@@ -2047,9 +2050,9 @@ export class Parser {
             if (!name)
                 name = this.PropertyName();
             
-            if (name.type === "Identifier" && this.peek("name") !== "(") {
+            val = keywordFromNode(name);
             
-                val = name.value;
+            if (this.peek("name") !== "(") {
                 
                 if (val === "get" || val === "set" || isFunctionModifier(val)) {
                 
