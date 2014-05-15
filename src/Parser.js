@@ -292,10 +292,6 @@ export class Parser {
     
     readKeyword(word) {
     
-        // TODO:  What if token has a unicode escape?  Does it still count as the keyword?
-        // Do we fail if the keyword has a unicode escape (this would mirror what happens
-        // with reserved words).
-        
         var token = this.readToken();
         
         if (token.type === word || keywordFromToken(token) === word)
