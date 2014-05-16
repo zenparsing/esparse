@@ -1,7 +1,8 @@
 module Unicode from "Unicode.js";
 
 var identifierEscape = /\\u([0-9a-fA-F]{4})/g,
-    newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
+    newlineSequence = /\r\n?|[\n\u2028\u2029]/g,
+    crNewline = /\r\n?/g;
 
 // === Reserved Words ===
 var reservedWord = new RegExp("^(?:" +
@@ -185,6 +186,12 @@ export class Scanner {
         return { line, column, lineOffset: pos + 1 };
     }
     
+    rawValue(start, end) {
+    
+        // Line endings are normalized to <LF>
+        return this.input.slice(start, end).replace(crNewline, "\n");
+    }
+    
     addLineBreak(offset) {
     
         if (offset > this.lastLineBreak)
@@ -285,7 +292,7 @@ export class Scanner {
         return val;
     }
     
-    readStringEscape() {
+    readStringEscape(continuationChar) {
     
         this.offset++;
         
@@ -308,14 +315,14 @@ export class Scanner {
                 if (this.peekChar() === "\n")
                     this.offset++;
                 
-                return "";
+                return continuationChar;
             
             case "\n":
             case "\u2028":
             case "\u2029":
             
                 this.addLineBreak(this.offset - 1);
-                return "";
+                return continuationChar;
 
             case "0":
             case "1":
@@ -626,9 +633,9 @@ export class Scanner {
             
             if (chr === "\\") {
             
-                esc = this.readStringEscape();
+                esc = this.readStringEscape("\n");
                 
-                if (!esc) 
+                if (esc === null) 
                     return this.Error();
                 
                 val += esc;
@@ -667,7 +674,7 @@ export class Scanner {
             
             if (chr === "\\") {
             
-                esc = this.readStringEscape();
+                esc = this.readStringEscape("");
                 
                 if (esc === null)
                     return this.Error();
@@ -981,7 +988,7 @@ export class Scanner {
             pattern.lastIndex = this.offset;
             
             m = pattern.exec(this.input);
-            if (!m) return this.Error();
+            if (!m) return this.Error(msg);
             
             this.offset = m.index + m[0].length;
             
@@ -1002,7 +1009,7 @@ export class Scanner {
         return "EOF";
     }
     
-    Error() {
+    Error(msg) {
     
         if (this.start === this.offset)
             this.offset++;

@@ -56,12 +56,13 @@ export var AST = {
         this.value = value; // (string) The value of the string literal
     },
 
-    TemplatePart(value, isEnd, start, end) {
+    TemplatePart(value, raw, isEnd, start, end) {
     
         this.type = "TemplatePart";
         this.start = start;
         this.end = end;
         this.value = value; // (string) The string value of the template fragment
+        this.raw = raw;
         this.templateEnd = isEnd; // (boolean) True if this template fragment terminates the template literal
     },
 

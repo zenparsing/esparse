@@ -973,7 +973,15 @@ export class Parser {
     TemplatePart() {
     
         var token = this.readToken("TEMPLATE", "template"),
-            node = new AST.TemplatePart(token.value, token.templateEnd, token.start, token.end);
+            end = token.templateEnd,
+            node;
+        
+        node = new AST.TemplatePart(
+            token.value, 
+            this.scanner.rawValue(token.start + 1, token.end - (end ? 1 : 2)), 
+            end, 
+            token.start, 
+            token.end);
         
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -985,7 +993,12 @@ export class Parser {
     
         // TODO:  Validate regular expression against RegExp grammar (21.2.1)
         var token = this.readToken("REGEX");
-        return new AST.RegularExpression(token.value, token.regexFlags, token.start, token.end);
+        
+        return new AST.RegularExpression(
+            token.value, 
+            token.regexFlags, 
+            token.start, 
+            token.end);
     }
     
     BindingIdentifier() {
