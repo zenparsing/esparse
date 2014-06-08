@@ -46,7 +46,7 @@ export function isWhitespace(code) {
     return binarySearch(WHITESPACE, code) === 1;
 }
 
-export function length(code) {
+export function codePointLength(code) {
 
     return code > 0xffff ? 2 : 1;
 }
@@ -68,7 +68,7 @@ export function codePointAt(str, offset) {
     return a;
 }
 
-export function toString(code) {
+export function codePointString(code) {
 
     if (code > 0x10ffff)
         return "";

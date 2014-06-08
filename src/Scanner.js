@@ -1,4 +1,13 @@
-module Unicode from "Unicode.js";
+import { 
+
+    isIdentifierStart, 
+    isIdentifierPart, 
+    isWhitespace, 
+    codePointLength, 
+    codePointAt, 
+    codePointString
+    
+} from "Unicode.js";
 
 var identifierEscape = /\\u([0-9a-fA-F]{4})/g,
     newlineSequence = /\r\n?|[\n\u2028\u2029]/g,
@@ -210,7 +219,7 @@ export class Scanner {
     
     peekCodePoint() {
     
-        return Unicode.codePointAt(this.input, this.offset);
+        return codePointAt(this.input, this.offset);
     }
     
     peekCode() {
@@ -254,7 +263,7 @@ export class Scanner {
     readUnicodeEscape() {
 
         var cp = this.readUnicodeEscapeValue(),
-            val = Unicode.toString(cp);
+            val = codePointString(cp);
         
         return val === "" ? null : val;
     }
@@ -270,16 +279,16 @@ export class Scanner {
         
         if (startChar) {
         
-            if (!Unicode.isIdentifierStart(cp))
+            if (!isIdentifierStart(cp))
                 return null;
             
         } else {
         
-            if (!Unicode.isIdentifierPart(cp))
+            if (!isIdentifierPart(cp))
                 return null;
         }
         
-        return Unicode.toString(cp);
+        return codePointString(cp);
     }
     
     readOctalEscape() {
@@ -414,7 +423,7 @@ export class Scanner {
         var c = this.peekCode();
         
         if (c > 127)
-            return !Unicode.isIdentifierStart(this.peekCodePoint());
+            return !isIdentifierStart(this.peekCodePoint());
     
         return !(
             c > 64 && c < 91 || 
@@ -455,7 +464,7 @@ export class Scanner {
             var cp = this.peekCodePoint();
             
             // Unicode whitespace
-            if (Unicode.isWhitespace(cp))
+            if (isWhitespace(cp))
                 return this.UnicodeWhitespace(cp);
         }
         
@@ -528,11 +537,11 @@ export class Scanner {
         var cp = this.peekCodePoint();
         
         // Unicode whitespace
-        if (Unicode.isWhitespace(cp))
+        if (isWhitespace(cp))
             return this.UnicodeWhitespace(cp);
         
         // Unicode identifier chars
-        if (Unicode.isIdentifierStart(cp))
+        if (isIdentifierStart(cp))
             return this.Identifier(context, cp);
         
         return this.Error();
@@ -558,11 +567,11 @@ export class Scanner {
     
     UnicodeWhitespace(cp) {
     
-        this.offset += Unicode.length(cp);
+        this.offset += codePointLength(cp);
         
         // General unicode whitespace
-        while (Unicode.isWhitespace(cp = this.peekCodePoint()))
-            this.offset += Unicode.length(cp);
+        while (isWhitespace(cp = this.peekCodePoint()))
+            this.offset += codePointLength(cp);
         
         return "";
     }
@@ -757,8 +766,8 @@ export class Scanner {
             
             } else if (code > 127) {
             
-                if (Unicode.isIdentifierPart(code = this.peekCodePoint()))
-                    this.offset += Unicode.length(code);
+                if (isIdentifierPart(code = this.peekCodePoint()))
+                    this.offset += codePointLength(code);
                 else
                     break;
             
@@ -904,7 +913,7 @@ export class Scanner {
 
         } else if (code > 127) {
 
-            this.offset += Unicode.length(code);
+            this.offset += codePointLength(code);
             
         } else {
         
@@ -930,8 +939,8 @@ export class Scanner {
             
             } else if (code > 127) {
             
-                if (Unicode.isIdentifierPart(code = this.peekCodePoint()))
-                    this.offset += Unicode.length(code);
+                if (isIdentifierPart(code = this.peekCodePoint()))
+                    this.offset += codePointLength(code);
                 else
                     break;
             
