@@ -242,7 +242,7 @@
            { type: 'ArrayPattern',
              start: 0,
              end: 5,
-             elements: [ null, null ] },
+             elements: [ null, null, null ] },
           right: 
            { type: 'Identifier',
              start: 8,

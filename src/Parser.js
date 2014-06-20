@@ -1191,16 +1191,19 @@ export class Parser {
             if (type === ",") {
             
                 this.read();
-                
-                if (comma)
-                    list.push(null);
-                
                 comma = true;
+                list.push(null);
             
             } else {
             
                 list.push(this.AssignmentExpression(false, true));
                 comma = false;
+                
+                if (this.peek() !== "]") {
+                
+                    this.read(",");
+                    comma = true;   
+                }
             }
         }
         

@@ -124,7 +124,8 @@
                start: 4,
                end: 14,
                elements: 
-                [ { type: 'PatternElement',
+                [ null,
+                  { type: 'PatternElement',
                     start: 7,
                     end: 8,
                     pattern: 
