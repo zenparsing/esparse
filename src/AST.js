@@ -1,17 +1,5 @@
 /*
 
-NOTE:  For auto-documentation purposes, the following conventions must be followed:
-
-1)  The last parameters to each constructor function must always be "start"
-    and "end", in that order.
-
-2)  With the exception of "start" and "end", the order of constructor parameters
-    must be identical to the order of property assignments within the constructor.
-
-*/
-
-/*
-
 NOTE: We forego using classes and class-based inheritance for the following reasons:
 
 1)  super() is currently slow when using ES6 transpilers.
@@ -24,7 +12,7 @@ export var AST = {
     
     Node(type, start, end) {
 
-        this.type = type; // (string) The node type
+        this.type = type;
         this.start = start;
         this.end = end;
     },
@@ -34,8 +22,8 @@ export var AST = {
         this.type = "Identifier";
         this.start = start;
         this.end = end;
-        this.value = value; // (string) The string value of the identifier
-        this.context = context; // (string) The context in which the identifier appears ("", "variable", "declaration")
+        this.value = value;
+        this.context = context;
     },
 
     // A number literal
@@ -44,7 +32,7 @@ export var AST = {
         this.type = "NumberLiteral";
         this.start = start;
         this.end = end;
-        this.value = value; // (number) The mathmatical value of the number literal
+        this.value = value;
     },
 
     // A string literal
@@ -53,7 +41,7 @@ export var AST = {
         this.type = "StringLiteral";
         this.start = start;
         this.end = end;
-        this.value = value; // (string) The value of the string literal
+        this.value = value;
     },
 
     TemplatePart(value, raw, isEnd, start, end) {
@@ -61,9 +49,9 @@ export var AST = {
         this.type = "TemplatePart";
         this.start = start;
         this.end = end;
-        this.value = value; // (string) The string value of the template fragment
+        this.value = value;
         this.raw = raw;
-        this.templateEnd = isEnd; // (boolean) True if this template fragment terminates the template literal
+        this.templateEnd = isEnd;
     },
 
     RegularExpression(value, flags, start, end) {
@@ -71,8 +59,8 @@ export var AST = {
         this.type = "RegularExpression";
         this.start = start;
         this.end = end;
-        this.value = value; // (string) The raw value of the regular expression literal
-        this.flags = flags; // (string) The set of flags for the regular expression literal
+        this.value = value;
+        this.flags = flags;
     },
 
     BooleanLiteral(value, start, end) {
@@ -80,7 +68,7 @@ export var AST = {
         this.type = "BooleanLiteral";
         this.start = start;
         this.end = end;
-        this.value = value; // (boolean) The value of the boolean literal
+        this.value = value;
     },
     
     NullLiteral(start, end) { 
@@ -95,7 +83,7 @@ export var AST = {
         this.type = "Script";
         this.start = start;
         this.end = end;
-        this.statements = statements; // [Node] A list of statements
+        this.statements = statements;
     },
 
     Module(statements, start, end) {
@@ -103,7 +91,7 @@ export var AST = {
         this.type = "Module";
         this.start = start;
         this.end = end;
-        this.statements = statements; // [Node] A list of statements
+        this.statements = statements;
     },
 
     ThisExpression(start, end) { 
@@ -125,7 +113,7 @@ export var AST = {
         this.type = "SequenceExpression";
         this.start = start;
         this.end = end;
-        this.expressions = list; // [Node] A list of expressions
+        this.expressions = list;
     },
 
     AssignmentExpression(op, left, right, start, end) {
@@ -133,9 +121,9 @@ export var AST = {
         this.type = "AssignmentExpression";
         this.start = start;
         this.end = end;
-        this.operator = op; // (string) An assignment operator
-        this.left = left; // The left-hand-side of the assignment operator
-        this.right = right; // The right-hand-side of the assignment operator
+        this.operator = op;
+        this.left = left;
+        this.right = right;
     },
 
     SpreadExpression(expr, start, end) {
@@ -143,7 +131,7 @@ export var AST = {
         this.type = "SpreadExpression";
         this.start = start;
         this.end = end;
-        this.expression = expr; // An expression
+        this.expression = expr;
     },
 
     YieldExpression(expr, delegate, start, end) {
@@ -151,8 +139,8 @@ export var AST = {
         this.type = "YieldExpression";
         this.start = start;
         this.end = end;
-        this.delegate = delegate; // (boolean) True if the yield expression is delegating
-        this.expression = expr; // An expression
+        this.delegate = delegate;
+        this.expression = expr;
     },
 
     ConditionalExpression(test, cons, alt, start, end) {
@@ -160,9 +148,9 @@ export var AST = {
         this.type = "ConditionalExpression";
         this.start = start;
         this.end = end;
-        this.test = test; // A test expression
-        this.consequent = cons; // The expression evaluated if the test passes
-        this.alternate = alt; // The expression evaluated if the test fails
+        this.test = test;
+        this.consequent = cons;
+        this.alternate = alt;
     },
 
     BinaryExpression(op, left, right, start, end) {
@@ -170,9 +158,9 @@ export var AST = {
         this.type = "BinaryExpression";
         this.start = start;
         this.end = end;
-        this.operator = op; // (string) A binary operator
-        this.left = left; // The left operand expression
-        this.right = right; // The right operand expression
+        this.operator = op;
+        this.left = left;
+        this.right = right;
     },
 
     UpdateExpression(op, expr, prefix, start, end) {
@@ -180,9 +168,9 @@ export var AST = {
         this.type = "UpdateExpression";
         this.start = start;
         this.end = end;
-        this.operator = op; // (string) An update operator
-        this.expression = expr; // An expression
-        this.prefix = prefix; // (boolean) True if the operator is a prefix
+        this.operator = op;
+        this.expression = expr
+        this.prefix = prefix;
     },
 
     UnaryExpression(op, expr, start, end) {
@@ -190,8 +178,8 @@ export var AST = {
         this.type = "UnaryExpression";
         this.start = start;
         this.end = end;
-        this.operator = op; // (string) A unary operator
-        this.expression = expr; // An expression
+        this.operator = op;
+        this.expression = expr
     },
 
     MemberExpression(obj, prop, computed, start, end) {
@@ -199,9 +187,9 @@ export var AST = {
         this.type = "MemberExpression";
         this.start = start;
         this.end = end;
-        this.object = obj; // An expression evaulating to an object
-        this.property = prop; // An expression evaluating to a property name
-        this.computed = computed; // (boolean) True if the property name is computed
+        this.object = obj
+        this.property = prop
+        this.computed = computed;
     },
 
     CallExpression(callee, args, start, end) {
@@ -209,8 +197,8 @@ export var AST = {
         this.type = "CallExpression";
         this.start = start;
         this.end = end;
-        this.callee = callee; // An expression
-        this.arguments = args; // [Node] A list of call arguments
+        this.callee = callee
+        this.arguments = args;
     },
 
     TaggedTemplateExpression(tag, template, start, end) {
@@ -218,8 +206,8 @@ export var AST = {
         this.type = "TaggedTemplateExpression";
         this.start = start;
         this.end = end;
-        this.tag = tag; // The template tag
-        this.template = template; // (TemplateExpression) A template
+        this.tag = tag
+        this.template = template;
     },
 
     NewExpression(callee, args, start, end) {
@@ -227,8 +215,8 @@ export var AST = {
         this.type = "NewExpression";
         this.start = start;
         this.end = end;
-        this.callee = callee; // An expression
-        this.arguments = args; // [Node] A list of call arguments
+        this.callee = callee;
+        this.arguments = args;
     },
 
     ParenExpression(expr, start, end) {
@@ -236,7 +224,7 @@ export var AST = {
         this.type = "ParenExpression";
         this.start = start;
         this.end = end;
-        this.expression = expr; // An expression contained within parenthesis
+        this.expression = expr;
     },
 
     ObjectLiteral(props, comma, start, end) {
@@ -244,7 +232,7 @@ export var AST = {
         this.type = "ObjectLiteral";
         this.start = start;
         this.end = end;
-        this.properties = props; // [PropertyDefinition|MethodDefinition] A list of properties and methods defined in the object literal
+        this.properties = props;
         this.trailingComma = comma;
     },
 
@@ -253,7 +241,7 @@ export var AST = {
         this.type = "ComputedPropertyName";
         this.start = start;
         this.end = end;
-        this.expression = expr; // An expression
+        this.expression = expr;
     },
 
     PropertyDefinition(name, expr, start, end) {
@@ -261,8 +249,8 @@ export var AST = {
         this.type = "PropertyDefinition";
         this.start = start;
         this.end = end;
-        this.name = name; // (StringLiteral|NumberLiteral|Identifier|ComputedPropertyName) The property name
-        this.expression = expr; // (Node?) An expression
+        this.name = name;
+        this.expression = expr;
     },
 
     ObjectPattern(props, comma, start, end) {
@@ -270,7 +258,7 @@ export var AST = {
         this.type = "ObjectPattern";
         this.start = start;
         this.end = end;
-        this.properties = props; // [PatternProperty] A list of destructuring pattern properties
+        this.properties = props;
         this.trailingComma = comma;
     },
     
@@ -279,9 +267,9 @@ export var AST = {
         this.type = "PatternProperty";
         this.start = start;
         this.end = end;
-        this.name = name; // The destructuring property name
-        this.pattern = pattern; // (Node?) A destructuring target pattern
-        this.initializer = initializer; // (Node?) A default initializer expression
+        this.name = name;
+        this.pattern = pattern;
+        this.initializer = initializer;
     },
 
     ArrayPattern(elements, comma, start, end) {
@@ -289,7 +277,7 @@ export var AST = {
         this.type = "ArrayPattern";
         this.start = start;
         this.end = end;
-        this.elements = elements; // [PatternElement|PatternRestElement] A list of of destructuring pattern elements
+        this.elements = elements;
         this.trailingComma = comma;
     },
     
@@ -298,8 +286,8 @@ export var AST = {
         this.type = "PatternElement";
         this.start = start;
         this.end = end;
-        this.pattern = pattern; // A destructuring target pattern
-        this.initializer = initializer; // (Node?) A default initializer expression
+        this.pattern = pattern;
+        this.initializer = initializer;
     },
     
     PatternRestElement(pattern, start, end) {
@@ -307,7 +295,7 @@ export var AST = {
         this.type = "PatternRestElement";
         this.start = start;
         this.end = end;
-        this.pattern = pattern; // A destructuring target
+        this.pattern = pattern;
     },
 
     MethodDefinition(kind, name, params, body, start, end) {
@@ -315,10 +303,10 @@ export var AST = {
         this.type = "MethodDefinition";
         this.start = start;
         this.end = end;
-        this.kind = kind; // (string) The type of method
-        this.name = name; // The method name
-        this.params = params; // [FormalParameter] A list of formal parameters
-        this.body = body; // (FunctionBody) The function body
+        this.kind = kind;
+        this.name = name;
+        this.params = params;
+        this.body = body;
     },
 
     ArrayLiteral(elements, comma, start, end) {
@@ -326,7 +314,7 @@ export var AST = {
         this.type = "ArrayLiteral";
         this.start = start;
         this.end = end;
-        this.elements = elements; // [Node|null]
+        this.elements = elements;
         this.trailingComma = comma;
     },
 
