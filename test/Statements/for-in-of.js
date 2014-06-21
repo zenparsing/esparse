@@ -122,7 +122,8 @@
                           value: 'x',
                           context: 'declaration' },
                        pattern: null,
-                       initializer: null } ] },
+                       initializer: null } ],
+                  trailingComma: false },
                initializer: null } ] },
        right: 
         { type: 'Identifier',

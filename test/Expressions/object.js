@@ -22,7 +22,8 @@
                   start: 3,
                   end: 7,
                   name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
-                  expression: { type: 'NumberLiteral', start: 6, end: 7, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 6, end: 7, value: 1 } } ],
+             trailingComma: false } } } ] },
 
 /** ({ "x": 1 }) **/
 'string-named data properties':
@@ -46,7 +47,8 @@
                   start: 3,
                   end: 9,
                   name: { type: 'StringLiteral', start: 3, end: 6, value: 'x' },
-                  expression: { type: 'NumberLiteral', start: 8, end: 9, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 8, end: 9, value: 1 } } ],
+             trailingComma: false } } } ] },
 
 /** ({ 1: 1 }) **/
 'number-named data properties':
@@ -70,7 +72,33 @@
                   start: 3,
                   end: 7,
                   name: { type: 'NumberLiteral', start: 3, end: 4, value: 1 },
-                  expression: { type: 'NumberLiteral', start: 6, end: 7, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 6, end: 7, value: 1 } } ],
+             trailingComma: false } } } ] },
+
+/** ({ x: 1, }); **/
+'trailing comma':
+{ type: 'Script',
+  start: 0,
+  end: 12,
+  statements: 
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 12,
+       expression: 
+        { type: 'ParenExpression',
+          start: 0,
+          end: 11,
+          expression: 
+           { type: 'ObjectLiteral',
+             start: 1,
+             end: 10,
+             properties: 
+              [ { type: 'PropertyDefinition',
+                  start: 3,
+                  end: 7,
+                  name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
+                  expression: { type: 'NumberLiteral', start: 6, end: 7, value: 1 } } ],
+             trailingComma: true } } } ] },
 
 /** ({ x }); **/
 'data property without initializer': 
@@ -93,8 +121,14 @@
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 4,
-                  name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: 'variable' },
-                  expression: null } ] } } } ] },
+                  name: 
+                   { type: 'Identifier',
+                     start: 3,
+                     end: 4,
+                     value: 'x',
+                     context: 'variable' },
+                  expression: null } ],
+             trailingComma: false } } } ] },
 
 /** ({ x: 1, x: 1 }) **/
 'duplicate data properties allowed in sloppy mode':
@@ -123,7 +157,9 @@
                   start: 9,
                   end: 13,
                   name: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
-                  expression: { type: 'NumberLiteral', start: 12, end: 13, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 12, end: 13, value: 1 },
+                  error: 'Duplicate data property names in object literal not allowed in strict mode' } ],
+             trailingComma: false } } } ] },
 
 /** "use strict"; ({ package: 0 }); **/
 'strict mode keywords are allowed as property names': 
@@ -156,7 +192,8 @@
                      end: 24,
                      value: 'package',
                      context: '' },
-                  expression: { type: 'NumberLiteral', start: 26, end: 27, value: 0 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 26, end: 27, value: 0 } } ],
+             trailingComma: false } } } ] },
 
 /** "use strict"; ({ x: 1, x: 1 }); **/
 'duplicate data properties not allowed in strict mode': {},
@@ -220,7 +257,8 @@
                           value: 'val',
                           context: 'declaration' },
                        initializer: null } ],
-                  body: { type: 'FunctionBody', start: 26, end: 28, statements: [] } } ] } } } ] },
+                  body: { type: 'FunctionBody', start: 26, end: 28, statements: [] } } ],
+             trailingComma: false } } } ] },
 
 /** ({ x = 1 }) **/
 'object pattern initializer not allowed': {},
@@ -257,8 +295,10 @@
                      start: 3,
                      end: 10,
                      value: 'package',
-                     context: 'variable' },
-                  expression: null } ] } } } ] },
+                     context: 'variable',
+                     error: 'package cannot be used as an identifier in strict mode' },
+                  expression: null } ],
+             trailingComma: false } } } ] },
 
 
 };

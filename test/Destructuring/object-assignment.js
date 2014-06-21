@@ -33,7 +33,8 @@
                         end: 7,
                         value: 'x',
                         context: 'variable' },
-                     initializer: null } ] },
+                     initializer: null } ],
+                trailingComma: false },
              right: 
               { type: 'Identifier',
                 start: 12,
@@ -74,7 +75,8 @@
                         value: 'x',
                         context: 'variable' },
                      pattern: null,
-                     initializer: null } ] },
+                     initializer: null } ],
+                trailingComma: false },
              right: 
               { type: 'Identifier',
                 start: 9,
@@ -116,7 +118,8 @@
                         context: 'variable' },
                      pattern: null,
                      initializer: { type: 'NumberLiteral', start: 7, end: 10, value: 123 },
-                     error: '' } ] },
+                     error: '' } ],
+                trailingComma: false },
              right: 
               { type: 'Identifier',
                 start: 15,
@@ -161,7 +164,8 @@
                            end: 8,
                            value: 'x',
                            context: 'variable' },
-                        initializer: null } ] } } },
+                        initializer: null } ],
+                   trailingComma: false } } },
           right: 
            { type: 'Identifier',
              start: 15,
@@ -229,7 +233,8 @@
                         end: 27,
                         value: 'b',
                         context: 'variable' },
-                     initializer: null } ] } },
+                     initializer: null } ],
+                trailingComma: false } },
           right: 
            { type: 'Identifier',
              start: 33,
@@ -276,7 +281,8 @@
                            context: 'variable' },
                         property: { type: 'Identifier', start: 8, end: 9, value: 'z', context: '' },
                         computed: false },
-                     initializer: null } ] } },
+                     initializer: null } ],
+                trailingComma: false } },
           right: 
            { type: 'Identifier',
              start: 15,

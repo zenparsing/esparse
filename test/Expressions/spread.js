@@ -93,7 +93,8 @@
                   start: 4,
                   end: 5,
                   value: 'a',
-                  context: 'variable' } } ] } } ] },
+                  context: 'variable' } } ],
+          trailingComma: false } } ] },
 
 /** [...a] = [] **/
 'spread in array assignment pattern':
@@ -122,8 +123,14 @@
                      start: 4,
                      end: 5,
                      value: 'a',
-                     context: 'variable' } } ] },
-          right: { type: 'ArrayLiteral', start: 9, end: 11, elements: [] } } } ] },
+                     context: 'variable' } } ],
+             trailingComma: false },
+          right: 
+           { type: 'ArrayLiteral',
+             start: 9,
+             end: 11,
+             elements: [],
+             trailingComma: false } } } ] },
 
 /** (...a) **/
 'spread expressions are not allowed outside of arrays or function calls':

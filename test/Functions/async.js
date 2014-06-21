@@ -170,31 +170,31 @@ function f() {}
 "empty await not allowed": {},
 
 /** ({ async f() {} }); **/
-"async object methods": {
-    type: "Script",
-    statements: [
-    {   type: "ExpressionStatement",
-        expression:
-        {   type: "ParenExpression",
-            expression:
-            {   type: "ObjectLiteral",
-                properties: [
-                {   type: "MethodDefinition",
-                    kind: "async",
-                    name:
-                    {   type: "Identifier",
-                        value: "f"
-                    },
-                    params: [],
-                    body: 
-                    {   type: "FunctionBody",
-                        statements: []
-                    }
-                }]
-            }
-        }
-    }]
-},
+"async object methods":
+{ type: 'Script',
+  start: 0,
+  end: 19,
+  statements: 
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 19,
+       expression: 
+        { type: 'ParenExpression',
+          start: 0,
+          end: 18,
+          expression: 
+           { type: 'ObjectLiteral',
+             start: 1,
+             end: 17,
+             properties: 
+              [ { type: 'MethodDefinition',
+                  start: 3,
+                  end: 15,
+                  kind: 'async',
+                  name: { type: 'Identifier', start: 9, end: 10, value: 'f', context: '' },
+                  params: [],
+                  body: { type: 'FunctionBody', start: 13, end: 15, statements: [] } } ],
+             trailingComma: false } } } ] },
 
 /** async x => { await 0 } **/
 "async arrows with function body": 

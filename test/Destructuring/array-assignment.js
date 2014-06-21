@@ -28,7 +28,8 @@
                      end: 2,
                      value: 'a',
                      context: 'variable' },
-                  initializer: null } ] },
+                  initializer: null } ],
+              trailingComma: false },
           right: 
            { type: 'Identifier',
              start: 6,
@@ -69,7 +70,8 @@
                      start: 5,
                      end: 6,
                      value: 'b',
-                     context: 'variable' } } ] },
+                     context: 'variable' } } ],
+              trailingComma: false },
           right: 
            { type: 'Identifier',
              start: 10,
@@ -113,13 +115,15 @@
                              end: 3,
                              value: 'a',
                              context: 'variable' },
-                          initializer: null } ] },
+                          initializer: null } ],
+                     trailingComma: false },
                   initializer: 
                    { type: 'Identifier',
                      start: 7,
                      end: 8,
                      value: 'b',
-                     context: 'variable' } } ] },
+                     context: 'variable' } } ],
+             trailingComma: false },
           right: 
            { type: 'Identifier',
              start: 12,
@@ -149,6 +153,7 @@
               { type: 'ArrayPattern',
                 start: 1,
                 end: 4,
+                trailingComma: false,
                 elements: 
                  [ { type: 'PatternElement',
                      start: 2,
@@ -185,6 +190,7 @@
            { type: 'ArrayPattern',
              start: 0,
              end: 6,
+             trailingComma: false,
              elements: 
               [ { type: 'PatternRestElement',
                   start: 1,
@@ -216,7 +222,7 @@
           start: 0,
           end: 6,
           operator: '=',
-          left: { type: 'ArrayPattern', start: 0, end: 2, elements: [] },
+          left: { type: 'ArrayPattern', start: 0, end: 2, elements: [], trailingComma: false },
           right: 
            { type: 'Identifier',
              start: 5,
@@ -242,7 +248,8 @@
            { type: 'ArrayPattern',
              start: 0,
              end: 5,
-             elements: [ null, null, null ] },
+             elements: [ null, null, null ],
+             trailingComma: true },
           right: 
            { type: 'Identifier',
              start: 8,
@@ -278,7 +285,8 @@
                      end: 2,
                      value: 'a',
                      context: 'variable' },
-                  initializer: null } ] },
+                  initializer: null } ],
+             trailingComma: true },
           right: 
            { type: 'Identifier',
              start: 7,
@@ -323,7 +331,8 @@
                         value: 'a',
                         context: 'variable' },
                      property: { type: 'Identifier', start: 6, end: 7, value: 'b', context: '' },
-                     computed: false } } ] },
+                     computed: false } } ],
+             trailingComma: false },
           right: 
            { type: 'Identifier',
              start: 11,
@@ -367,8 +376,10 @@
                              end: 3,
                              value: 'a',
                              context: 'variable' },
-                          initializer: null } ] },
-                  initializer: null } ] },
+                          initializer: null } ],
+                     trailingComma: false },
+                  initializer: null } ],
+             trailingComma: false },
           right: 
            { type: 'Identifier',
              start: 8,
@@ -390,6 +401,10 @@
 
 /** [...a = b] = x **/
 'rest element target cannot have an initializer':
+{},
+
+/** [...a,] = x **/
+'comma cannot appear after rest element':
 {},
 
 /** ++[a]; **/

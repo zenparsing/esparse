@@ -239,12 +239,13 @@ export var AST = {
         this.expression = expr; // An expression contained within parenthesis
     },
 
-    ObjectLiteral(props, start, end) {
+    ObjectLiteral(props, comma, start, end) {
     
         this.type = "ObjectLiteral";
         this.start = start;
         this.end = end;
         this.properties = props; // [PropertyDefinition|MethodDefinition] A list of properties and methods defined in the object literal
+        this.trailingComma = comma;
     },
 
     ComputedPropertyName(expr, start, end) {
@@ -264,12 +265,13 @@ export var AST = {
         this.expression = expr; // (Node?) An expression
     },
 
-    ObjectPattern(props, start, end) {
+    ObjectPattern(props, comma, start, end) {
         
         this.type = "ObjectPattern";
         this.start = start;
         this.end = end;
         this.properties = props; // [PatternProperty] A list of destructuring pattern properties
+        this.trailingComma = comma;
     },
     
     PatternProperty(name, pattern, initializer, start, end) {
@@ -282,12 +284,13 @@ export var AST = {
         this.initializer = initializer; // (Node?) A default initializer expression
     },
 
-    ArrayPattern(elements, start, end) {
+    ArrayPattern(elements, comma, start, end) {
     
         this.type = "ArrayPattern";
         this.start = start;
         this.end = end;
         this.elements = elements; // [PatternElement|PatternRestElement] A list of of destructuring pattern elements
+        this.trailingComma = comma;
     },
     
     PatternElement(pattern, initializer, start, end) {
@@ -318,12 +321,13 @@ export var AST = {
         this.body = body; // (FunctionBody) The function body
     },
 
-    ArrayLiteral(elements, start, end) {
+    ArrayLiteral(elements, comma, start, end) {
     
         this.type = "ArrayLiteral";
         this.start = start;
         this.end = end;
         this.elements = elements; // [Node|null]
+        this.trailingComma = comma;
     },
 
     ArrayComprehension(qualifiers, expr, start, end) {

@@ -28,7 +28,8 @@
                        end: 6,
                        value: 'a',
                        context: 'declaration' },
-                    initializer: null } ] },
+                    initializer: null } ],
+               trailingComma: false },
             initializer: 
              { type: 'Identifier',
                start: 10,
@@ -71,7 +72,8 @@
                        start: 8,
                        end: 9,
                        value: 'a',
-                       context: 'declaration' } } ] },
+                       context: 'declaration' } } ],
+               trailingComma: false },
             initializer: 
              { type: 'Identifier',
                start: 13,
@@ -83,8 +85,12 @@
 'rest element must occur in last position':
 {},
 
+/** var [...a,] = x; **/
+'rest element cannot be followed by a comma':
+{},
+
 /** var [] = x **/
-'empty patterns are not allowed':
+'empty patterns are allowed':
 { type: 'Script',
   start: 0,
   end: 10,
@@ -97,7 +103,12 @@
         [ { type: 'VariableDeclarator',
             start: 4,
             end: 10,
-            pattern: { type: 'ArrayPattern', start: 4, end: 6, elements: [] },
+            pattern: 
+             { type: 'ArrayPattern',
+               start: 4,
+               end: 6,
+               elements: [],
+               trailingComma: false },
             initializer: 
              { type: 'Identifier',
                start: 9,
@@ -145,7 +156,8 @@
                        end: 13,
                        value: 'b',
                        context: 'declaration' },
-                    initializer: null } ] },
+                    initializer: null } ],
+               trailingComma: false },
             initializer: 
              { type: 'Identifier',
                start: 17,

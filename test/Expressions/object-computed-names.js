@@ -31,7 +31,8 @@
                         end: 5,
                         value: 'x',
                         context: 'variable' } },
-                  expression: { type: 'NumberLiteral', start: 8, end: 9, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 8, end: 9, value: 1 } } ],
+             trailingComma: false } } } ] },
 
 /** ({ [x]() {} }) **/
 'computed method names':
@@ -66,7 +67,8 @@
                         value: 'x',
                         context: 'variable' } },
                   params: [],
-                  body: { type: 'FunctionBody', start: 9, end: 11, statements: [] } } ] } } } ] },
+                  body: { type: 'FunctionBody', start: 9, end: 11, statements: [] } } ],
+             trailingComma: false } } } ] },
 
 /** ({ get [x]() {}, set [x](value) {} }) **/
 'computed accessors':
@@ -127,7 +129,9 @@
                           value: 'value',
                           context: 'declaration' },
                        initializer: null } ],
-                  body: { type: 'FunctionBody', start: 32, end: 34, statements: [] } } ] } } } ] },
+                  body: { type: 'FunctionBody', start: 32, end: 34, statements: [] } } ],
+             trailingComma: false } } } ] }
+,
 
 /** ({ *[x]() {} }) **/
 'computed generators':
@@ -162,7 +166,8 @@
                         value: 'x',
                         context: 'variable' } },
                   params: [],
-                  body: { type: 'FunctionBody', start: 10, end: 12, statements: [] } } ] } } } ] },
+                  body: { type: 'FunctionBody', start: 10, end: 12, statements: [] } } ],
+             trailingComma: false } } } ] },
 
 /** "use strict"; ({ [x]: 1, [x]: 1 }) **/
 'computed names are not checked for duplicate keys':
@@ -213,6 +218,7 @@
                         end: 27,
                         value: 'x',
                         context: 'variable' } },
-                  expression: { type: 'NumberLiteral', start: 30, end: 31, value: 1 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 30, end: 31, value: 1 } } ],
+             trailingComma: false } } } ] },
 
 };

@@ -72,11 +72,9 @@ export class Transform {
                 
                 case "SpreadExpression":
                 
-                    // TODO:  Currently, we are ignoring the last comma, but commas
-                    // are not allowed after a rest element.  Should they be?
-                    
-                    // Rest element must be in the last position
-                    if (i < elems.length - 1)
+                    // Rest element must be in the last position and cannot be followed
+                    // by a comma
+                    if (i < elems.length - 1 || node.trailingComma)
                         this.fail("Invalid destructuring pattern", elem);
                     
                     expr = elem.expression;

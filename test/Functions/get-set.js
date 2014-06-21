@@ -24,7 +24,8 @@
                   kind: 'get',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
                   params: [],
-                  body: { type: 'FunctionBody', start: 11, end: 13, statements: [] } } ] } } } ] },
+                  body: { type: 'FunctionBody', start: 11, end: 13, statements: [] } } ],
+             trailingComma: false } } } ] },
 
 /** ({ set x(val) {} }); **/
 'object literal with setter': 
@@ -60,7 +61,8 @@
                           value: 'val',
                           context: 'declaration' },
                        initializer: null } ],
-                  body: { type: 'FunctionBody', start: 14, end: 16, statements: [] } } ] } } } ] },
+                  body: { type: 'FunctionBody', start: 14, end: 16, statements: [] } } ],
+             trailingComma: false } } } ] },
 
 /** ({ get: 0, set: 0 }); **/
 'get and set are valid property names': 
@@ -94,7 +96,8 @@
                      end: 14,
                      value: 'set',
                      context: '' },
-                  expression: { type: 'NumberLiteral', start: 16, end: 17, value: 0 } } ] } } } ] },
+                  expression: { type: 'NumberLiteral', start: 16, end: 17, value: 0 } } ],
+             trailingComma: false } } } ] },
 
 /** ({ set x({ y }) {} }); **/
 'setter can have a destructuring param': 
@@ -138,9 +141,11 @@
                                   value: 'y',
                                   context: 'declaration' },
                                pattern: null,
-                               initializer: null } ] },
+                               initializer: null } ],
+                          trailingComma: false },
                        initializer: null } ],
-                  body: { type: 'FunctionBody', start: 16, end: 18, statements: [] } } ] } } } ] },
+                  body: { type: 'FunctionBody', start: 16, end: 18, statements: [] } } ],
+             trailingComma: false } } } ] },
 
 /** ({ get x(val) {} }); **/
 'getter cannot have any parameters': {},

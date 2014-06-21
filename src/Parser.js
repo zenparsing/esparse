@@ -1095,7 +1095,7 @@ export class Parser {
         
         this.read("}");
         
-        return new AST.ObjectLiteral(list, start, this.nodeEnd());
+        return new AST.ObjectLiteral(list, comma, start, this.nodeEnd());
     }
     
     PropertyDefinition() {
@@ -1209,7 +1209,7 @@ export class Parser {
         
         this.read("]");
         
-        return new AST.ArrayLiteral(list, start, this.nodeEnd());
+        return new AST.ArrayLiteral(list, comma, start, this.nodeEnd());
     }
     
     ArrayComprehension() {
