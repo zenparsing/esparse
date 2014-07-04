@@ -26,7 +26,6 @@ export var AST = {
         this.context = context;
     },
 
-    // A number literal
     NumberLiteral(value, start, end) {
     
         this.type = "NumberLiteral";
@@ -35,7 +34,6 @@ export var AST = {
         this.value = value;
     },
 
-    // A string literal
     StringLiteral(value, start, end) {
 
         this.type = "StringLiteral";

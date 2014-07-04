@@ -11,32 +11,17 @@ export class IntMap {
 
     constructor() {
     
-        this.list = [];
+        this.obj = {};
     }
     
     get(key) {
     
-        var i = this.searchList(key);
-        return i >= 0 ? this.list[i][1] : 0;
+        return this.obj["$" + key] | 0;
     }
     
     set(key, val) {
     
-        var i = this.searchList(key);
-        
-        if (i >= 0) this.list[i][1] = val;
-        else this.list.push([ key, val ]);
-    }
-    
-    searchList(key) {
-    
-        var list = this.list;
-
-        for (var i = 0; i < list.length; ++i)
-            if (list[i][0] === key)
-                return i;
-    
-        return -1;
+        this.obj["$" + key] = val | 0;
     }
     
 }
