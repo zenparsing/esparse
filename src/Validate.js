@@ -1,10 +1,5 @@
 import { IntMap } from "IntMap.js";
 
-// Object literal property name flags
-var PROP_NORMAL = 1,
-    PROP_DATA = 2,
-    PROP_GET = 4,
-    PROP_SET = 8;
 
 // Identifiers which are reserved in strict mode    
 var strictReservedWord = new RegExp("^(?:" +
@@ -184,84 +179,6 @@ export class Validate {
         
             this.checkAssignmentTarget(this.unwrapParens(init));
         }
-    }
-    
-    // Checks for duplicate object literal property names
-    checkPropertyName(node, nameSet) {
-    
-        var flag = PROP_NORMAL,
-            currentFlags = 0,
-            name = "";
-        
-        switch (node.name.type) {
-        
-            case "Identifier":
-            case "StringLiteral":
-                name = node.name.value;
-                break;
-                
-            case "ComputedPropertyName":
-                // If property name is computed, skip duplicate check
-                return;
-            
-            default:
-                name = String(node.name.value);
-                break;
-        }
-        
-        switch (node.type) {
-
-            case "PropertyDefinition":
-            
-                // Duplicates only allowed for "x: expr" form
-                if (node.expression)
-                    flag = PROP_DATA;
-                
-                break;
-    
-            case "MethodDefinition":
-        
-                switch (node.kind) {
-
-                    case "get": flag = PROP_GET; break;
-                    case "set": flag = PROP_SET; break;
-                }
-                
-                break;
-        }
-
-        // If this name has already been added...
-        if (currentFlags = nameSet.get(name)) {
-            
-            var duplicate = true;
-            
-            switch (flag) {
-    
-                case PROP_DATA:
-                    
-                    if (currentFlags === PROP_DATA) {
-                    
-                        this.addStrictError("Duplicate data property names in object literal not allowed in strict mode", node);
-                        duplicate = false;
-                    }
-                    
-                    break;
-                
-                case PROP_GET:
-                    if (currentFlags === PROP_SET) duplicate = false;
-                    break;
-                    
-                case PROP_SET:
-                    if (currentFlags === PROP_GET) duplicate = false;
-                    break;
-            }
-            
-            if (duplicate)
-                this.addInvalidNode("Duplicate property names in object literal not allowed", node);
-        }
-
-        // Set name flag
-        nameSet.set(name, currentFlags | flag);
     }
     
     checkInvalidNodes() {

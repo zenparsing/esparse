@@ -1071,7 +1071,6 @@ export class Parser {
     ObjectLiteral() {
     
         var start = this.nodeStart(),
-            nameSet = new IntMap,
             comma = false,
             list = [],
             node;
@@ -1089,7 +1088,6 @@ export class Parser {
             
                 comma = false;
                 list.push(node = this.PropertyDefinition());
-                this.checkPropertyName(node, nameSet);
             }
         }
         
@@ -2260,8 +2258,6 @@ export class Parser {
     ClassBody() {
         
         var start = this.nodeStart(),
-            nameSet = new IntMap, 
-            staticSet = new IntMap,
             list = [],
             node;
         
@@ -2269,11 +2265,8 @@ export class Parser {
         this.setStrict(true);
         this.read("{");
         
-        while (this.peekUntil("}", "name")) {
-        
+        while (this.peekUntil("}", "name"))
             list.push(node = this.ClassElement());
-            this.checkPropertyName(node.method, node.static ? staticSet : nameSet);
-        }
         
         this.read("}");
         this.popContext();

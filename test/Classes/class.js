@@ -158,10 +158,96 @@
 'super cannot appear outside of a function': {},
 
 /** class C { a() {} a() {} } **/
-'duplicate methods are not allowed': {},
+'duplicate methods are allowed': 
+{ type: 'Script',
+  start: 0,
+  end: 25,
+  statements: 
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 25,
+       identifier: 
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body: 
+        { type: 'ClassBody',
+          start: 8,
+          end: 25,
+          elements: 
+           [ { type: 'ClassElement',
+               start: 10,
+               end: 16,
+               static: false,
+               method: 
+                { type: 'MethodDefinition',
+                  start: 10,
+                  end: 16,
+                  kind: '',
+                  name: { type: 'Identifier', start: 10, end: 11, value: 'a', context: '' },
+                  params: [],
+                  body: { type: 'FunctionBody', start: 14, end: 16, statements: [] } } },
+             { type: 'ClassElement',
+               start: 17,
+               end: 23,
+               static: false,
+               method: 
+                { type: 'MethodDefinition',
+                  start: 17,
+                  end: 23,
+                  kind: '',
+                  name: { type: 'Identifier', start: 17, end: 18, value: 'a', context: '' },
+                  params: [],
+                  body: { type: 'FunctionBody', start: 21, end: 23, statements: [] } } } ] } } ] },
 
 /** class C { static a() {} static a() {} } **/
-'duplicate static methods are not allowed': {},
+'duplicate static methods are allowed': 
+{ type: 'Script',
+  start: 0,
+  end: 39,
+  statements: 
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 39,
+       identifier: 
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body: 
+        { type: 'ClassBody',
+          start: 8,
+          end: 39,
+          elements: 
+           [ { type: 'ClassElement',
+               start: 10,
+               end: 23,
+               static: true,
+               method: 
+                { type: 'MethodDefinition',
+                  start: 17,
+                  end: 23,
+                  kind: '',
+                  name: { type: 'Identifier', start: 17, end: 18, value: 'a', context: '' },
+                  params: [],
+                  body: { type: 'FunctionBody', start: 21, end: 23, statements: [] } } },
+             { type: 'ClassElement',
+               start: 24,
+               end: 37,
+               static: true,
+               method: 
+                { type: 'MethodDefinition',
+                  start: 31,
+                  end: 37,
+                  kind: '',
+                  name: { type: 'Identifier', start: 31, end: 32, value: 'a', context: '' },
+                  params: [],
+                  body: { type: 'FunctionBody', start: 35, end: 37, statements: [] } } } ] } } ] },
 
 /** class C { a() {} static a() {} } **/
 'static and instance methods may have the same name':
