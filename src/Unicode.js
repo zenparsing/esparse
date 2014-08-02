@@ -1,4 +1,4 @@
-import { IDENTIFIER, WHITESPACE } from "UnicodeData.js";
+import { IDENTIFIER, WHITESPACE } from "./UnicodeData.js";
 
 function binarySearch(table, val) {
 
@@ -7,27 +7,27 @@ function binarySearch(table, val) {
         mid = 0,
         test = 0,
         offset = 0;
-    
+
     while (left <= right) {
-        
+
         mid = (left + right) >> 1;
         offset = mid * 3;
         test = table[offset];
-        
+
         if (val < test) {
-        
+
             right = mid - 1;
-        
+
         } else if (val === test || val <= test + table[offset + 1]) {
-        
+
             return table[offset + 2];
-            
+
         } else {
-        
-            left = mid + 1; 
+
+            left = mid + 1;
         }
     }
-    
+
     return 0;
 }
 
@@ -54,17 +54,17 @@ export function codePointLength(code) {
 export function codePointAt(str, offset) {
 
     var a = str.charCodeAt(offset);
-        
-    if (a >= 0xd800 && 
-        a <= 0xdbff && 
+
+    if (a >= 0xd800 &&
+        a <= 0xdbff &&
         str.length > offset + 1) {
-    
+
         var b = str.charCodeAt(offset + 1);
-        
+
         if (b >= 0xdc00 && b <= 0xdfff)
             return (a - 0xd800) * 0x400 + b - 0xdc00 + 0x10000;
     }
-    
+
     return a;
 }
 
@@ -72,17 +72,17 @@ export function codePointString(code) {
 
     if (code > 0x10ffff)
         return "";
-    
+
     if (code <= 0xffff)
         return String.fromCharCode(code);
-    
+
     // If value is greater than 0xffff, then it must be encoded
     // as 2 UTF-16 code units in a surrogate pair.
-    
+
     code -= 0x10000;
-    
+
     return String.fromCharCode(
-        (code >> 10) + 0xd800, 
+        (code >> 10) + 0xd800,
         (code % 0x400) + 0xdc00);
 }
 
