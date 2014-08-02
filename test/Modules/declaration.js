@@ -16,22 +16,6 @@
     }]
 },
 
-/** module x from "x.js"; **/
-"module from": { 
-    type: "Script",
-    statements: [
-    {   type: "ModuleImport",
-        identifier: {
-            type: "Identifier",
-            value: "x"
-        },
-        from: {
-            type: "StringLiteral",
-            value: "x.js"
-        }
-    }]
-},
-
 /** module A = B.C; **/
 "module alias": {
     type: "Script",

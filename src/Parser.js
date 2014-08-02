@@ -2328,17 +2328,6 @@ export class Parser {
                 start,
                 this.nodeEnd());
 
-        } else if (this.peekKeyword("from")) {
-
-            this.read();
-            target = this.ModuleSpecifier();
-            this.Semicolon();
-
-            return new AST.ModuleImport(
-                ident,
-                target,
-                start,
-                this.nodeEnd());
         }
 
         return new AST.ModuleDeclaration(
@@ -2391,6 +2380,17 @@ export class Parser {
         this.read("import");
 
         switch (this.peek()) {
+
+            case "*":
+
+                this.read();
+                this.readKeyword("as");
+                ident = this.BindingIdentifier();
+                this.readKeyword("from");
+                from = this.ModuleSpecifier();
+                this.Semicolon();
+
+                return new AST.ModuleImport(ident, from, start, this.nodeEnd());
 
             case "IDENTIFIER":
 

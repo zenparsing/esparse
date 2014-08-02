@@ -4,19 +4,19 @@
 'import not allowed in non-module': {},
 
 /*** import { x } from "x"; ***/
-'import from a url': 
+'import from a url':
 { type: 'Module',
   start: 0,
   end: 22,
-  statements: 
+  statements:
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 22,
-       specifiers: 
+       specifiers:
         [ { type: 'ImportSpecifier',
             start: 9,
             end: 10,
-            imported: 
+            imported:
              { type: 'Identifier',
                start: 9,
                end: 10,
@@ -26,46 +26,46 @@
        from: { type: 'StringLiteral', start: 18, end: 21, value: 'x' } } ] },
 
 /*** import { x } from y; ***/
-'import from a lexical module': 
+'import from a lexical module':
 { type: 'Module',
   start: 0,
   end: 20,
-  statements: 
+  statements:
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 20,
-       specifiers: 
+       specifiers:
         [ { type: 'ImportSpecifier',
             start: 9,
             end: 10,
-            imported: 
+            imported:
              { type: 'Identifier',
                start: 9,
                end: 10,
                value: 'x',
                context: 'declaration' },
             local: null } ],
-       from: 
+       from:
         { type: 'ModulePath',
           start: 18,
           end: 19,
           elements: [ { type: 'Identifier', start: 18, end: 19, value: 'y', context: '' } ] } } ] },
 
 /*** import { x as y } from "x"; ***/
-'renaming imported bindings': 
+'renaming imported bindings':
 { type: 'Module',
   start: 0,
   end: 27,
-  statements: 
+  statements:
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 27,
-       specifiers: 
+       specifiers:
         [ { type: 'ImportSpecifier',
             start: 9,
             end: 15,
             imported: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
-            local: 
+            local:
              { type: 'Identifier',
                start: 14,
                end: 15,
@@ -74,11 +74,11 @@
        from: { type: 'StringLiteral', start: 23, end: 26, value: 'x' } } ] },
 
 /*** import {} from "x"; ***/
-'empty import specifier set': 
+'empty import specifier set':
 { type: 'Module',
   start: 0,
   end: 19,
-  statements: 
+  statements:
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 19,
@@ -90,15 +90,15 @@
 { type: 'Module',
   start: 0,
   end: 23,
-  statements: 
+  statements:
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 23,
-       specifiers: 
+       specifiers:
         [ { type: 'ImportSpecifier',
             start: 9,
             end: 10,
-            imported: 
+            imported:
              { type: 'Identifier',
                start: 9,
                end: 10,
@@ -108,25 +108,25 @@
        from: { type: 'StringLiteral', start: 19, end: 22, value: 'x' } } ] },
 
 /*** import { default as y } from "x"; ***/
-'import a keyword-named binding': 
+'import a keyword-named binding':
 { type: 'Module',
   start: 0,
   end: 33,
-  statements: 
+  statements:
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 33,
-       specifiers: 
+       specifiers:
         [ { type: 'ImportSpecifier',
             start: 9,
             end: 21,
-            imported: 
+            imported:
              { type: 'Identifier',
                start: 9,
                end: 16,
                value: 'default',
                context: '' },
-            local: 
+            local:
              { type: 'Identifier',
                start: 20,
                end: 21,
@@ -142,11 +142,28 @@
 { type: 'Module',
   start: 0,
   end: 11,
-  statements: 
+  statements:
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 11,
        specifiers: null,
        from: { type: 'StringLiteral', start: 7, end: 10, value: 'x' } } ] },
+
+/*** import * as x from "x.js"; ***/
+"importing the module namespace":
+{ type: 'Module',
+  start: 0,
+  end: 26,
+  statements:
+   [ { type: 'ModuleImport',
+       start: 0,
+       end: 26,
+       identifier:
+        { type: 'Identifier',
+          start: 12,
+          end: 13,
+          value: 'x',
+          context: 'declaration' },
+       from: { type: 'StringLiteral', start: 19, end: 25, value: 'x.js' } } ] },
 
 })
