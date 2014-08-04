@@ -321,17 +321,6 @@ export class Parser {
         return false;
     }
 
-    peekModule() {
-
-        if (this.peekKeyword("module")) {
-
-            var token = this.peekTokenAt("div", 1);
-            return (!token.newlineBefore && token.type === "IDENTIFIER");
-        }
-
-        return false;
-    }
-
     peekYield() {
 
         return this.context.functionBody &&
@@ -1936,9 +1925,6 @@ export class Parser {
                 if (this.peekFunctionModifier())
                     return this.FunctionDeclaration();
 
-                if (this.peekModule())
-                    return this.ModuleDefinition();
-
                 break;
         }
 
@@ -2306,66 +2292,6 @@ export class Parser {
 
     // === Modules ===
 
-    ModuleDefinition() {
-
-        var start = this.nodeStart(),
-            ident,
-            target;
-
-        this.readKeyword("module");
-
-        ident = this.BindingIdentifier();
-
-        if (this.peek() === "=") {
-
-            this.read();
-            target = this.ModulePath();
-            this.Semicolon();
-
-            return new AST.ModuleAlias(
-                ident,
-                target,
-                start,
-                this.nodeEnd());
-
-        }
-
-        return new AST.ModuleDeclaration(
-            ident,
-            this.ModuleBody(),
-            start,
-            this.nodeEnd());
-    }
-
-    ModuleDeclaration() {
-
-        var start = this.nodeStart();
-
-        this.readKeyword("module");
-
-        return new AST.ModuleDeclaration(
-            this.BindingIdentifier(),
-            this.ModuleBody(),
-            start,
-            this.nodeEnd());
-    }
-
-    ModuleBody() {
-
-        this.pushContext(false);
-        this.setStrict(true);
-
-        var start = this.nodeStart();
-
-        this.read("{");
-        var list = this.StatementList(true, true);
-        this.read("}");
-
-        this.popContext();
-
-        return new AST.ModuleBody(list, start, this.nodeEnd());
-    }
-
     ModuleSpecifier() {
 
         return this.peek() === "STRING" ? this.StringLiteral() : this.ModulePath();
@@ -2500,12 +2426,6 @@ export class Parser {
                 if (this.peekFunctionModifier()) {
 
                     binding = this.FunctionDeclaration();
-                    break;
-                }
-
-                if (this.peekModule()) {
-
-                    binding = this.ModuleDeclaration();
                     break;
                 }
 
