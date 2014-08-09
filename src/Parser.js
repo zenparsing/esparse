@@ -431,15 +431,10 @@ export class Parser {
             parent = context.parent;
 
         // If collapsing into parent context, copy invalid nodes into parent
-        if (collapse) {
-
-            for (var i = 0; i < context.invalidNodes.length; ++i)
-                parent.invalidNodes.push(context.invalidNodes[i]);
-
-        } else {
-
+        if (collapse)
+            context.invalidNodes.forEach(node => parent.invalidNodes.push(node));
+        else
             this.checkInvalidNodes();
-        }
 
         this.context = this.context.parent;
     }
