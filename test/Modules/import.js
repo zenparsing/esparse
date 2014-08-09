@@ -25,32 +25,6 @@
             local: null } ],
        from: { type: 'StringLiteral', start: 18, end: 21, value: 'x' } } ] },
 
-/*** import { x } from y; ***/
-'import from a lexical module':
-{ type: 'Module',
-  start: 0,
-  end: 20,
-  statements:
-   [ { type: 'ImportDeclaration',
-       start: 0,
-       end: 20,
-       specifiers:
-        [ { type: 'ImportSpecifier',
-            start: 9,
-            end: 10,
-            imported:
-             { type: 'Identifier',
-               start: 9,
-               end: 10,
-               value: 'x',
-               context: 'declaration' },
-            local: null } ],
-       from:
-        { type: 'ModulePath',
-          start: 18,
-          end: 19,
-          elements: [ { type: 'Identifier', start: 18, end: 19, value: 'y', context: '' } ] } } ] },
-
 /*** import { x as y } from "x"; ***/
 'renaming imported bindings':
 { type: 'Module',

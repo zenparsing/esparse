@@ -2292,11 +2292,6 @@ export class Parser {
 
     // === Modules ===
 
-    ModuleSpecifier() {
-
-        return this.peek() === "STRING" ? this.StringLiteral() : this.ModulePath();
-    }
-
     ImportDeclaration() {
 
         var start = this.nodeStart(),
@@ -2313,7 +2308,7 @@ export class Parser {
                 this.readKeyword("as");
                 ident = this.BindingIdentifier();
                 this.readKeyword("from");
-                from = this.ModuleSpecifier();
+                from = this.StringLiteral();
                 this.Semicolon();
 
                 return new AST.ModuleImport(ident, from, start, this.nodeEnd());
@@ -2322,14 +2317,14 @@ export class Parser {
 
                 ident = this.BindingIdentifier();
                 this.readKeyword("from");
-                from = this.ModuleSpecifier();
+                from = this.StringLiteral();
                 this.Semicolon();
 
                 return new AST.ImportDefaultDeclaration(ident, from, start, this.nodeEnd());
 
             case "STRING":
 
-                from = this.ModuleSpecifier();
+                from = this.StringLiteral();
                 this.Semicolon();
 
                 return new AST.ImportDeclaration(null, from, start, this.nodeEnd());
@@ -2349,7 +2344,7 @@ export class Parser {
 
         this.read("}");
         this.readKeyword("from");
-        from = this.ModuleSpecifier();
+        from = this.StringLiteral();
         this.Semicolon();
 
         return new AST.ImportDeclaration(list, from, start, this.nodeEnd());
@@ -2449,7 +2444,7 @@ export class Parser {
 
             this.read();
             this.readKeyword("from");
-            from = this.ModuleSpecifier();
+            from = this.StringLiteral();
 
         } else {
 
@@ -2470,7 +2465,7 @@ export class Parser {
             if (this.peekKeyword("from")) {
 
                 this.read();
-                from = this.ModuleSpecifier();
+                from = this.StringLiteral();
 
             } else {
 
@@ -2495,22 +2490,6 @@ export class Parser {
         }
 
         return new AST.ExportSpecifier(local, remote, start, this.nodeEnd());
-    }
-
-    ModulePath() {
-
-        var start = this.nodeStart(),
-            path = [];
-
-        while (true) {
-
-            path.push(this.Identifier());
-
-            if (this.peek() === ".") this.read();
-            else break;
-        }
-
-        return new AST.ModulePath(path, start, this.nodeEnd());
     }
 
 }

@@ -9,15 +9,15 @@ NOTE: We forego using classes and class-based inheritance for the following reas
 */
 
 export var AST = {
-    
+
     Node(type, start, end) {
 
         this.type = type;
         this.start = start;
         this.end = end;
     },
-    
-    Identifier(value, context, start, end) { 
+
+    Identifier(value, context, start, end) {
 
         this.type = "Identifier";
         this.start = start;
@@ -27,7 +27,7 @@ export var AST = {
     },
 
     NumberLiteral(value, start, end) {
-    
+
         this.type = "NumberLiteral";
         this.start = start;
         this.end = end;
@@ -43,7 +43,7 @@ export var AST = {
     },
 
     TemplatePart(value, raw, isEnd, start, end) {
-    
+
         this.type = "TemplatePart";
         this.start = start;
         this.end = end;
@@ -53,7 +53,7 @@ export var AST = {
     },
 
     RegularExpression(value, flags, start, end) {
-    
+
         this.type = "RegularExpression";
         this.start = start;
         this.end = end;
@@ -62,14 +62,14 @@ export var AST = {
     },
 
     BooleanLiteral(value, start, end) {
-    
+
         this.type = "BooleanLiteral";
         this.start = start;
         this.end = end;
         this.value = value;
     },
-    
-    NullLiteral(start, end) { 
+
+    NullLiteral(start, end) {
 
         this.type = "NullLiteral";
         this.start = start;
@@ -77,7 +77,7 @@ export var AST = {
     },
 
     Script(statements, start, end) {
-    
+
         this.type = "Script";
         this.start = start;
         this.end = end;
@@ -92,14 +92,14 @@ export var AST = {
         this.statements = statements;
     },
 
-    ThisExpression(start, end) { 
+    ThisExpression(start, end) {
 
         this.type = "ThisExpression";
         this.start = start;
         this.end = end;
     },
 
-    SuperExpression(start, end) { 
+    SuperExpression(start, end) {
 
         this.type = "SuperExpression";
         this.start = start;
@@ -115,7 +115,7 @@ export var AST = {
     },
 
     AssignmentExpression(op, left, right, start, end) {
-    
+
         this.type = "AssignmentExpression";
         this.start = start;
         this.end = end;
@@ -125,7 +125,7 @@ export var AST = {
     },
 
     SpreadExpression(expr, start, end) {
-    
+
         this.type = "SpreadExpression";
         this.start = start;
         this.end = end;
@@ -133,7 +133,7 @@ export var AST = {
     },
 
     YieldExpression(expr, delegate, start, end) {
-    
+
         this.type = "YieldExpression";
         this.start = start;
         this.end = end;
@@ -142,7 +142,7 @@ export var AST = {
     },
 
     ConditionalExpression(test, cons, alt, start, end) {
-    
+
         this.type = "ConditionalExpression";
         this.start = start;
         this.end = end;
@@ -152,7 +152,7 @@ export var AST = {
     },
 
     BinaryExpression(op, left, right, start, end) {
-    
+
         this.type = "BinaryExpression";
         this.start = start;
         this.end = end;
@@ -162,7 +162,7 @@ export var AST = {
     },
 
     UpdateExpression(op, expr, prefix, start, end) {
-    
+
         this.type = "UpdateExpression";
         this.start = start;
         this.end = end;
@@ -172,7 +172,7 @@ export var AST = {
     },
 
     UnaryExpression(op, expr, start, end) {
-    
+
         this.type = "UnaryExpression";
         this.start = start;
         this.end = end;
@@ -181,7 +181,7 @@ export var AST = {
     },
 
     MemberExpression(obj, prop, computed, start, end) {
-    
+
         this.type = "MemberExpression";
         this.start = start;
         this.end = end;
@@ -191,7 +191,7 @@ export var AST = {
     },
 
     CallExpression(callee, args, start, end) {
-    
+
         this.type = "CallExpression";
         this.start = start;
         this.end = end;
@@ -200,7 +200,7 @@ export var AST = {
     },
 
     TaggedTemplateExpression(tag, template, start, end) {
-    
+
         this.type = "TaggedTemplateExpression";
         this.start = start;
         this.end = end;
@@ -209,7 +209,7 @@ export var AST = {
     },
 
     NewExpression(callee, args, start, end) {
-    
+
         this.type = "NewExpression";
         this.start = start;
         this.end = end;
@@ -218,7 +218,7 @@ export var AST = {
     },
 
     ParenExpression(expr, start, end) {
-    
+
         this.type = "ParenExpression";
         this.start = start;
         this.end = end;
@@ -226,7 +226,7 @@ export var AST = {
     },
 
     ObjectLiteral(props, comma, start, end) {
-    
+
         this.type = "ObjectLiteral";
         this.start = start;
         this.end = end;
@@ -235,7 +235,7 @@ export var AST = {
     },
 
     ComputedPropertyName(expr, start, end) {
-    
+
         this.type = "ComputedPropertyName";
         this.start = start;
         this.end = end;
@@ -243,7 +243,7 @@ export var AST = {
     },
 
     PropertyDefinition(name, expr, start, end) {
-    
+
         this.type = "PropertyDefinition";
         this.start = start;
         this.end = end;
@@ -252,16 +252,16 @@ export var AST = {
     },
 
     ObjectPattern(props, comma, start, end) {
-        
+
         this.type = "ObjectPattern";
         this.start = start;
         this.end = end;
         this.properties = props;
         this.trailingComma = comma;
     },
-    
+
     PatternProperty(name, pattern, initializer, start, end) {
-    
+
         this.type = "PatternProperty";
         this.start = start;
         this.end = end;
@@ -271,25 +271,25 @@ export var AST = {
     },
 
     ArrayPattern(elements, comma, start, end) {
-    
+
         this.type = "ArrayPattern";
         this.start = start;
         this.end = end;
         this.elements = elements;
         this.trailingComma = comma;
     },
-    
+
     PatternElement(pattern, initializer, start, end) {
-    
+
         this.type = "PatternElement";
         this.start = start;
         this.end = end;
         this.pattern = pattern;
         this.initializer = initializer;
     },
-    
+
     PatternRestElement(pattern, start, end) {
-    
+
         this.type = "PatternRestElement";
         this.start = start;
         this.end = end;
@@ -297,7 +297,7 @@ export var AST = {
     },
 
     MethodDefinition(kind, name, params, body, start, end) {
-    
+
         this.type = "MethodDefinition";
         this.start = start;
         this.end = end;
@@ -308,7 +308,7 @@ export var AST = {
     },
 
     ArrayLiteral(elements, comma, start, end) {
-    
+
         this.type = "ArrayLiteral";
         this.start = start;
         this.end = end;
@@ -317,7 +317,7 @@ export var AST = {
     },
 
     ArrayComprehension(qualifiers, expr, start, end) {
-    
+
         this.type = "ArrayComprehension";
         this.start = start;
         this.end = end;
@@ -326,7 +326,7 @@ export var AST = {
     },
 
     GeneratorComprehension(qualifiers, expr, start, end) {
-    
+
         this.type = "GeneratorComprehension";
         this.start = start;
         this.end = end;
@@ -335,7 +335,7 @@ export var AST = {
     },
 
     ComprehensionFor(left, right, start, end) {
-    
+
         this.type = "ComprehensionFor";
         this.start = start;
         this.end = end;
@@ -344,7 +344,7 @@ export var AST = {
     },
 
     ComprehensionIf(test, start, end) {
-    
+
         this.type = "ComprehensionIf";
         this.start = start;
         this.end = end;
@@ -352,7 +352,7 @@ export var AST = {
     },
 
     TemplateExpression(lits, subs, start, end) {
-    
+
         this.type = "TemplateExpression";
         this.start = start;
         this.end = end;
@@ -361,7 +361,7 @@ export var AST = {
     },
 
     Block(statements, start, end) {
-    
+
         this.type = "Block";
         this.start = start;
         this.end = end;
@@ -369,7 +369,7 @@ export var AST = {
     },
 
     LabelledStatement(label, statement, start, end) {
-    
+
         this.type = "LabelledStatement";
         this.start = start;
         this.end = end;
@@ -378,14 +378,14 @@ export var AST = {
     },
 
     ExpressionStatement(expr, start, end) {
-    
+
         this.type = "ExpressionStatement";
         this.start = start;
         this.end = end;
         this.expression = expr;
     },
 
-    EmptyStatement(start, end) { 
+    EmptyStatement(start, end) {
 
         this.type = "EmptyStatement";
         this.start = start;
@@ -393,7 +393,7 @@ export var AST = {
     },
 
     VariableDeclaration(kind, list, start, end) {
-    
+
         this.type = "VariableDeclaration";
         this.start = start;
         this.end = end;
@@ -402,7 +402,7 @@ export var AST = {
     },
 
     VariableDeclarator(pattern, initializer, start, end) {
-    
+
         this.type = "VariableDeclarator";
         this.start = start;
         this.end = end;
@@ -411,7 +411,7 @@ export var AST = {
     },
 
     ReturnStatement(arg, start, end) {
-    
+
         this.type = "ReturnStatement";
         this.start = start;
         this.end = end;
@@ -419,7 +419,7 @@ export var AST = {
     },
 
     BreakStatement(label, start, end) {
-    
+
         this.type = "BreakStatement";
         this.start = start;
         this.end = end;
@@ -427,7 +427,7 @@ export var AST = {
     },
 
     ContinueStatement(label, start, end) {
-    
+
         this.type = "ContinueStatement";
         this.start = start;
         this.end = end;
@@ -435,7 +435,7 @@ export var AST = {
     },
 
     ThrowStatement(expr, start, end) {
-    
+
         this.type = "ThrowStatement";
         this.start = start;
         this.end = end;
@@ -443,14 +443,14 @@ export var AST = {
     },
 
     DebuggerStatement(start, end) {
-    
+
         this.type = "DebuggerStatement";
         this.start = start;
         this.end = end;
     },
 
     IfStatement(test, cons, alt, start, end) {
-    
+
         this.type = "IfStatement";
         this.start = start;
         this.end = end;
@@ -460,7 +460,7 @@ export var AST = {
     },
 
     DoWhileStatement(body, test, start, end) {
-    
+
         this.type = "DoWhileStatement";
         this.start = start;
         this.end = end;
@@ -469,7 +469,7 @@ export var AST = {
     },
 
     WhileStatement(test, body, start, end) {
-    
+
         this.type = "WhileStatement";
         this.start = start;
         this.end = end;
@@ -478,7 +478,7 @@ export var AST = {
     },
 
     ForStatement(initializer, test, update, body, start, end) {
-    
+
         this.type = "ForStatement";
         this.start = start;
         this.end = end;
@@ -489,7 +489,7 @@ export var AST = {
     },
 
     ForInStatement(left, right, body, start, end) {
-    
+
         this.type = "ForInStatement";
         this.start = start;
         this.end = end;
@@ -499,7 +499,7 @@ export var AST = {
     },
 
     ForOfStatement(left, right, body, start, end) {
-    
+
         this.type = "ForOfStatement";
         this.start = start;
         this.end = end;
@@ -509,7 +509,7 @@ export var AST = {
     },
 
     WithStatement(object, body, start, end) {
-    
+
         this.type = "WithStatement";
         this.start = start;
         this.end = end;
@@ -518,7 +518,7 @@ export var AST = {
     },
 
     SwitchStatement(desc, cases, start, end) {
-    
+
         this.type = "SwitchStatement";
         this.start = start;
         this.end = end;
@@ -527,7 +527,7 @@ export var AST = {
     },
 
     SwitchCase(test, cons, start, end) {
-    
+
         this.type = "SwitchCase";
         this.start = start;
         this.end = end;
@@ -536,7 +536,7 @@ export var AST = {
     },
 
     TryStatement(block, handler, fin, start, end) {
-    
+
         this.type = "TryStatement";
         this.start = start;
         this.end = end;
@@ -546,7 +546,7 @@ export var AST = {
     },
 
     CatchClause(param, body, start, end) {
-    
+
         this.type = "CatchClause";
         this.start = start;
         this.end = end;
@@ -555,7 +555,7 @@ export var AST = {
     },
 
     FunctionDeclaration(kind, identifier, params, body, start, end) {
-    
+
         this.type = "FunctionDeclaration";
         this.start = start;
         this.end = end;
@@ -566,7 +566,7 @@ export var AST = {
     },
 
     FunctionExpression(kind, identifier, params, body, start, end) {
-    
+
         this.type = "FunctionExpression";
         this.start = start;
         this.end = end;
@@ -577,7 +577,7 @@ export var AST = {
     },
 
     FormalParameter(pattern, initializer, start, end) {
-    
+
         this.type = "FormalParameter";
         this.start = start;
         this.end = end;
@@ -586,7 +586,7 @@ export var AST = {
     },
 
     RestParameter(identifier, start, end) {
-    
+
         this.type = "RestParameter";
         this.start = start;
         this.end = end;
@@ -594,7 +594,7 @@ export var AST = {
     },
 
     FunctionBody(statements, start, end) {
-    
+
         this.type = "FunctionBody";
         this.start = start;
         this.end = end;
@@ -602,7 +602,7 @@ export var AST = {
     },
 
     ArrowFunctionHead(params, start, end) {
-    
+
         this.type = "ArrowFunctionHead";
         this.start = start;
         this.end = end;
@@ -610,7 +610,7 @@ export var AST = {
     },
 
     ArrowFunction(kind, params, body, start, end) {
-    
+
         this.type = "ArrowFunction";
         this.start = start;
         this.end = end;
@@ -620,7 +620,7 @@ export var AST = {
     },
 
     ClassDeclaration(identifier, base, body, start, end) {
-    
+
         this.type = "ClassDeclaration";
         this.start = start;
         this.end = end;
@@ -630,7 +630,7 @@ export var AST = {
     },
 
     ClassExpression(identifier, base, body, start, end) {
-    
+
         this.type = "ClassExpression";
         this.start = start;
         this.end = end;
@@ -640,7 +640,7 @@ export var AST = {
     },
 
     ClassBody(elems, start, end) {
-    
+
         this.type = "ClassBody";
         this.start = start;
         this.end = end;
@@ -648,16 +648,16 @@ export var AST = {
     },
 
     ClassElement(isStatic, method, start, end) {
-    
+
         this.type = "ClassElement";
         this.start = start;
         this.end = end;
         this.static = isStatic;
         this.method = method;
     },
-    
+
     ModuleDeclaration(identifier, body, start, end) {
-    
+
         this.type = "ModuleDeclaration";
         this.start = start;
         this.end = end;
@@ -666,7 +666,7 @@ export var AST = {
     },
 
     ModuleBody(statements, start, end) {
-    
+
         this.type = "ModuleBody";
         this.start = start;
         this.end = end;
@@ -674,7 +674,7 @@ export var AST = {
     },
 
     ModuleImport(identifier, from, start, end) {
-    
+
         this.type = "ModuleImport";
         this.start = start;
         this.end = end;
@@ -683,7 +683,7 @@ export var AST = {
     },
 
     ModuleAlias(identifier, path, start, end) {
-    
+
         this.type = "ModuleAlias";
         this.start = start;
         this.end = end;
@@ -692,7 +692,7 @@ export var AST = {
     },
 
     ImportDefaultDeclaration(ident, from, start, end) {
-    
+
         this.type = "ImportDefaultDeclaration";
         this.start = start;
         this.end = end;
@@ -701,7 +701,7 @@ export var AST = {
     },
 
     ImportDeclaration(specifiers, from, start, end) {
-    
+
         this.type = "ImportDeclaration";
         this.start = start;
         this.end = end;
@@ -710,7 +710,7 @@ export var AST = {
     },
 
     ImportSpecifier(imported, local, start, end) {
-    
+
         this.type = "ImportSpecifier";
         this.start = start;
         this.end = end;
@@ -719,7 +719,7 @@ export var AST = {
     },
 
     ExportDeclaration(declaration, start, end) {
-    
+
         this.type = "ExportDeclaration";
         this.start = start;
         this.end = end;
@@ -727,7 +727,7 @@ export var AST = {
     },
 
     ExportsList(list, from, start, end) {
-    
+
         this.type = "ExportsList";
         this.start = start;
         this.end = end;
@@ -736,20 +736,12 @@ export var AST = {
     },
 
     ExportSpecifier(local, exported, start, end) {
-    
+
         this.type = "ExportSpecifier";
         this.start = start;
         this.end = end;
         this.local = local;
         this.exported = exported;
-    },
-
-    ModulePath(list, start, end) {
-    
-        this.type = "ModulePath";
-        this.start = start;
-        this.end = end;
-        this.elements = list;
     }
 
 };
@@ -762,23 +754,23 @@ function isNode(x) {
 class NodeBase {
 
     children() {
-    
+
         var list = [];
-        
+
         Object.keys(this).forEach(k => {
-        
+
             // Don't iterate over backlinks to parent node
             if (k === "parent")
                 return;
-            
+
             var value = this[k];
-            
+
             if (Array.isArray(value))
                 value.forEach(x => { if (isNode(x)) list.push(x) });
             else if (isNode(value))
                 list.push(value);
         });
-        
+
         return list;
     }
 }
