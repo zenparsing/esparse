@@ -1,16 +1,6 @@
 import { IntMap } from "./IntMap.js";
+import { isStrictReservedWord } from "./Scanner.js";
 
-
-// Identifiers which are reserved in strict mode
-var strictReservedWord = new RegExp("^(?:" +
-    "implements|private|public|interface|package|let|protected|static|yield" +
-")$");
-
-// Returns true if the identifier is a reserved word in strict mode
-function isStrictReserved(word) {
-
-    return strictReservedWord.test(word);
-}
 
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
@@ -113,7 +103,7 @@ export class Validate {
 
         if (ident === "yield" && this.context.functionType === "generator")
             this.fail("yield cannot be an identifier inside of a generator function", node);
-        else if (isStrictReserved(ident))
+        else if (isStrictReservedWord(ident))
             this.addStrictError(ident + " cannot be used as an identifier in strict mode", node);
     }
 

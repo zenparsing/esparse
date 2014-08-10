@@ -1,4 +1,6 @@
 import { AST } from "./AST.js";
+import { isReservedWord } from "./Scanner.js";
+
 
 export class Transform {
 
@@ -165,6 +167,16 @@ export class Transform {
         }
 
         this.checkPatternTarget(node, binding);
+    }
+
+    transformIdentifier(node) {
+
+        var value = node.value;
+
+        if (isReservedWord(value))
+            this.fail("Unexpected token " + value, node);
+
+        this.checkIdentifier(node);
     }
 
 }

@@ -21,6 +21,10 @@ var reservedWord = new RegExp("^(?:" +
     "var|void|while|with" +
 ")$");
 
+var strictReservedWord = new RegExp("^(?:" +
+    "implements|private|public|interface|package|let|protected|static|yield" +
+")$");
+
 // === Punctuators ===
 var multiCharPunctuator = new RegExp("^(?:" +
     "--|[+]{2}|" +
@@ -136,6 +140,18 @@ function isPunctuatorNext(c) {
     }
 
     return false;
+}
+
+// Returns true if the specified string is a reserved word
+export function isReservedWord(word) {
+
+    return reservedWord.test(word);
+}
+
+// Returns true if the specified string is a strict mode reserved word
+export function isStrictReservedWord(word) {
+
+    return strictReservedWord.test(word);
 }
 
 export class Scanner {
@@ -958,7 +974,7 @@ export class Scanner {
 
         this.value = val;
 
-        if (context !== "name" && reservedWord.test(val))
+        if (context !== "name" && isReservedWord(val))
             return esc ? this.Error() : val;
 
         return "IDENTIFIER";

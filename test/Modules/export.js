@@ -4,24 +4,24 @@
 'export not allowed outside of module': {},
 
 /*** export var x; ***/
-'export a var': 
+'export a var':
 { type: 'Module',
   start: 0,
   end: 13,
-  statements: 
+  statements:
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 13,
-       declaration: 
+       declaration:
         { type: 'VariableDeclaration',
           start: 7,
           end: 12,
           kind: 'var',
-          declarations: 
+          declarations:
            [ { type: 'VariableDeclarator',
                start: 11,
                end: 12,
-               pattern: 
+               pattern:
                 { type: 'Identifier',
                   start: 11,
                   end: 12,
@@ -30,19 +30,19 @@
                initializer: null } ] } } ] },
 
 /*** export { x }; ***/
-'export an identifier': 
+'export an identifier':
 { type: 'Module',
   start: 0,
   end: 13,
-  statements: 
+  statements:
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 13,
-       declaration: 
+       declaration:
         { type: 'ExportsList',
           start: 7,
           end: 12,
-          specifiers: 
+          specifiers:
            [ { type: 'ExportSpecifier',
                start: 9,
                end: 10,
@@ -55,15 +55,15 @@
 { type: 'Module',
   start: 0,
   end: 16,
-  statements: 
+  statements:
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 16,
-       declaration: 
+       declaration:
         { type: 'ExportsList',
           start: 7,
           end: 15,
-          specifiers: 
+          specifiers:
            [ { type: 'ExportSpecifier',
                start: 9,
                end: 10,
@@ -77,19 +77,19 @@
           from: null } } ] },
 
 /*** export { x as y }; ***/
-'export and rename identifier': 
+'export and rename identifier':
 { type: 'Module',
   start: 0,
   end: 18,
-  statements: 
+  statements:
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 18,
-       declaration: 
+       declaration:
         { type: 'ExportsList',
           start: 7,
           end: 17,
-          specifiers: 
+          specifiers:
            [ { type: 'ExportSpecifier',
                start: 9,
                end: 15,
@@ -98,24 +98,24 @@
           from: null } } ] },
 
 /*** export { x as default }; ***/
-'exporting a default binding': 
+'exporting a default binding':
 { type: 'Module',
   start: 0,
   end: 24,
-  statements: 
+  statements:
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 24,
-       declaration: 
+       declaration:
         { type: 'ExportsList',
           start: 7,
           end: 23,
-          specifiers: 
+          specifiers:
            [ { type: 'ExportSpecifier',
                start: 9,
                end: 21,
                local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
-               exported: 
+               exported:
                 { type: 'Identifier',
                   start: 14,
                   end: 21,
@@ -124,19 +124,19 @@
           from: null } } ] },
 
 /*** export { x as y } from "x"; ***/
-'exporting a named set from an external module': 
+'exporting a named set from an external module':
 { type: 'Module',
   start: 0,
   end: 27,
-  statements: 
+  statements:
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 27,
-       declaration: 
+       declaration:
         { type: 'ExportsList',
           start: 7,
           end: 26,
-          specifiers: 
+          specifiers:
            [ { type: 'ExportSpecifier',
                start: 9,
                end: 15,
@@ -145,15 +145,15 @@
           from: { type: 'StringLiteral', start: 23, end: 26, value: 'x' } } } ] },
 
 /*** export * from "x"; ***/
-'exporting everything from an external module': 
+'exporting everything from an external module':
 { type: 'Module',
   start: 0,
   end: 18,
-  statements: 
+  statements:
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 18,
-       declaration: 
+       declaration:
         { type: 'ExportsList',
           start: 7,
           end: 17,
@@ -162,5 +162,32 @@
 
 /*** export *; ***/
 'exporting everything must include a specifier': {},
+
+/*** export { if }; ***/
+'local export does not allow identifier names': {},
+
+/*** export { implements }; ***/
+'local export does not allow strict reserved words': {},
+
+/*** export { if } from "x"; ***/
+'export from should allow identifier names':
+{ type: 'Module',
+  start: 0,
+  end: 23,
+  statements:
+   [ { type: 'ExportDeclaration',
+       start: 0,
+       end: 23,
+       declaration:
+        { type: 'ExportsList',
+          start: 7,
+          end: 22,
+          specifiers:
+           [ { type: 'ExportSpecifier',
+               start: 9,
+               end: 11,
+               local: { type: 'Identifier', start: 9, end: 11, value: 'if', context: '' },
+               exported: null } ],
+          from: { type: 'StringLiteral', start: 19, end: 22, value: 'x' } } } ] },
 
 })

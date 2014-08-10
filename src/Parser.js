@@ -2447,7 +2447,7 @@ export class Parser {
 
             this.read("{");
 
-            while (this.peekUntil("}")) {
+            while (this.peekUntil("}", "name")) {
 
                 list.push(this.ExportSpecifier());
 
@@ -2464,10 +2464,10 @@ export class Parser {
 
             } else {
 
-                // TODO: Make sure that export specifiers do
-                // not reference reserved words!
+                // Transform identifier names to identifiers
+                list.forEach(node => this.transformIdentifier(node.local));
             }
-        }
+       }
 
         return new AST.ExportsList(list, from, start, this.nodeEnd());
     }
