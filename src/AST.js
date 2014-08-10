@@ -3,7 +3,7 @@
 NOTE: We forego using classes and class-based inheritance for the following reasons:
 
 1)  super() is currently slow when using ES6 transpilers.
-2)  Using object literal methods allows us to easily iterated over all AST nodes
+2)  Using object literal methods allows us to easily iterate over all AST nodes
     from within this module.
 
 */
