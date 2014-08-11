@@ -316,41 +316,6 @@ export var AST = {
         this.trailingComma = comma;
     },
 
-    ArrayComprehension(qualifiers, expr, start, end) {
-
-        this.type = "ArrayComprehension";
-        this.start = start;
-        this.end = end;
-        this.qualifiers = qualifiers;
-        this.expression = expr;
-    },
-
-    GeneratorComprehension(qualifiers, expr, start, end) {
-
-        this.type = "GeneratorComprehension";
-        this.start = start;
-        this.end = end;
-        this.qualifiers = qualifiers;
-        this.expression = expr;
-    },
-
-    ComprehensionFor(left, right, start, end) {
-
-        this.type = "ComprehensionFor";
-        this.start = start;
-        this.end = end;
-        this.left = left;
-        this.right = right;
-    },
-
-    ComprehensionIf(test, start, end) {
-
-        this.type = "ComprehensionIf";
-        this.start = start;
-        this.end = end;
-        this.test = test;
-    },
-
     TemplateExpression(lits, subs, start, end) {
 
         this.type = "TemplateExpression";

@@ -190,8 +190,8 @@ export class Validate {
             if (!error)
                 continue;
 
-            // Throw if item is not a strict-mode-only error, or
-            // if the current context is strict
+            // Throw if item is not a strict-mode-only error, or if the current
+            // context is strict
             if (!item.strict || context.mode === "strict")
                 this.fail(error, node);
 
@@ -199,9 +199,9 @@ export class Validate {
             if (context.mode === "sloppy")
                 continue;
 
-            // NOTE:  If the parent context is sloppy, then we ignore.
-            // If the parent context is strict, then this context would
-            // also be known to be strict and therefore handled above.
+            // If the parent context is sloppy, then we ignore. If the parent context
+            // is strict, then this context would also be known to be strict and
+            // therefore handled above.
 
             // If parent mode has not been determined, add error to
             // parent context

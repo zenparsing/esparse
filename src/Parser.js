@@ -863,14 +863,8 @@ export class Parser {
             case "NUMBER": return this.NumberLiteral();
             case "STRING": return this.StringLiteral();
             case "{": return this.ObjectLiteral();
-
-            case "(": return this.peekAt(null, 1) === "for" ?
-                this.GeneratorComprehension() :
-                this.ParenExpression();
-
-            case "[": return this.peekAt(null, 1) === "for" ?
-                this.ArrayComprehension() :
-                this.ArrayLiteral();
+            case "(": return this.ParenExpression();
+            case "[": return this.ArrayLiteral();
 
             case "IDENTIFIER":
 
@@ -1192,85 +1186,6 @@ export class Parser {
         this.read("]");
 
         return new AST.ArrayLiteral(list, comma, start, this.nodeEnd());
-    }
-
-    ArrayComprehension() {
-
-        var start = this.nodeStart();
-
-        this.read("[");
-
-        var list = this.ComprehensionQualifierList(),
-            expr = this.AssignmentExpression();
-
-        this.read("]");
-
-        return new AST.ArrayComprehension(list, expr, start, this.nodeEnd());
-    }
-
-    GeneratorComprehension() {
-
-        var start = this.nodeStart(),
-            fType = this.context.functionType;
-
-        // Generator comprehensions cannot contain contextual expresions like yield
-        this.context.functionType = "";
-        this.read("(");
-
-        var list = this.ComprehensionQualifierList(),
-            expr = this.AssignmentExpression();
-
-        this.read(")");
-        this.context.functionType = fType;
-
-        return new AST.GeneratorComprehension(list, expr, start, this.nodeEnd());
-    }
-
-    ComprehensionQualifierList() {
-
-        var list = [],
-            done = false;
-
-        list.push(this.ComprehensionFor());
-
-        while (!done) {
-
-            switch (this.peek()) {
-
-                case "for": list.push(this.ComprehensionFor()); break;
-                case "if": list.push(this.ComprehensionIf()); break;
-                default: done = true; break;
-            }
-        }
-
-        return list;
-    }
-
-    ComprehensionFor() {
-
-        var start = this.nodeStart();
-
-        this.read("for");
-
-        return new AST.ComprehensionFor(
-            this.BindingPattern(),
-            (this.readKeyword("of"), this.AssignmentExpression()),
-            start,
-            this.nodeEnd());
-    }
-
-    ComprehensionIf() {
-
-        var start = this.nodeStart(),
-            test;
-
-        this.read("if");
-
-        this.read("(");
-        test = this.AssignmentExpression();
-        this.read(")");
-
-        return new AST.ComprehensionIf(test, start, this.nodeEnd());
     }
 
     TemplateExpression() {
