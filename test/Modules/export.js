@@ -190,4 +190,121 @@
                exported: null } ],
           from: { type: 'StringLiteral', start: 19, end: 22, value: 'x' } } } ] },
 
+/*** export default class C {} ***/
+'export default class declaration':
+{ type: 'Module',
+  start: 0,
+  end: 25,
+  statements:
+   [ { type: 'ExportDeclaration',
+       start: 0,
+       end: 25,
+       declaration:
+        { type: 'DefaultExport',
+          binding:
+           { type: 'ClassDeclaration',
+             start: 15,
+             end: 25,
+             identifier:
+              { type: 'Identifier',
+                start: 21,
+                end: 22,
+                value: 'C',
+                context: 'declaration' },
+             base: null,
+             body: { type: 'ClassBody', start: 23, end: 25, elements: [] } },
+          start: 7,
+          end: 25 } } ] },
+
+/*** export default class {}; ***/
+'export default class expression':
+{ type: 'Module',
+  start: 0,
+  end: 24,
+  statements:
+   [ { type: 'ExportDeclaration',
+       start: 0,
+       end: 24,
+       declaration:
+        { type: 'DefaultExport',
+          binding:
+           { type: 'ClassExpression',
+             start: 15,
+             end: 23,
+             identifier: null,
+             base: null,
+             body: { type: 'ClassBody', start: 21, end: 23, elements: [] } },
+          start: 7,
+          end: 24 } } ] },
+
+/*** export default function F() {} ***/
+'export default function declaration':
+{ type: 'Module',
+  start: 0,
+  end: 30,
+  statements:
+   [ { type: 'ExportDeclaration',
+       start: 0,
+       end: 30,
+       declaration:
+        { type: 'DefaultExport',
+          binding:
+           { type: 'FunctionDeclaration',
+             start: 15,
+             end: 30,
+             kind: '',
+             identifier:
+              { type: 'Identifier',
+                start: 24,
+                end: 25,
+                value: 'F',
+                context: 'declaration' },
+             params: [],
+             body: { type: 'FunctionBody', start: 28, end: 30, statements: [] } },
+          start: 7,
+          end: 30 } } ] },
+
+/*** export default function() {}; ***/
+'export default function expression':
+{ type: 'Module',
+  start: 0,
+  end: 29,
+  statements:
+   [ { type: 'ExportDeclaration',
+       start: 0,
+       end: 29,
+       declaration:
+        { type: 'DefaultExport',
+          binding:
+           { type: 'FunctionExpression',
+             start: 15,
+             end: 28,
+             kind: '',
+             identifier: null,
+             params: [],
+             body: { type: 'FunctionBody', start: 26, end: 28, statements: [] } },
+          start: 7,
+          end: 29 } } ] },
+
+/*** export default 1 + 1; ***/
+'export default assignment expression':
+{ type: 'Module',
+  start: 0,
+  end: 21,
+  statements:
+   [ { type: 'ExportDeclaration',
+       start: 0,
+       end: 21,
+       declaration:
+        { type: 'DefaultExport',
+          binding:
+           { type: 'BinaryExpression',
+             start: 15,
+             end: 20,
+             operator: '+',
+             left: { type: 'NumberLiteral', start: 15, end: 16, value: 1 },
+             right: { type: 'NumberLiteral', start: 19, end: 20, value: 1 } },
+          start: 7,
+          end: 21 } } ] },
+
 })

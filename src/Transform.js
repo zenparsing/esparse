@@ -179,5 +179,29 @@ export class Transform {
         this.checkIdentifier(node);
     }
 
+    transformDefaultExport(node) {
+
+        var toType = null;
+
+        switch (node.type) {
+
+            case "ClassExpression":
+                if (node.identifier) toType = "ClassDeclaration";
+                break;
+
+            case "FunctionExpression":
+                if (node.identifier) toType = "FunctionDeclaration";
+                break;
+        }
+
+        if (toType) {
+
+            node.type = toType;
+            return true;
+        }
+
+        return false;
+    }
+
 }
 

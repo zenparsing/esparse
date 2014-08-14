@@ -2296,7 +2296,7 @@ export class Parser {
     ExportDeclaration() {
 
         var start = this.nodeStart(),
-            binding;
+            decl;
 
         this.read("export");
 
@@ -2304,44 +2304,74 @@ export class Parser {
 
             case "var":
             case "const":
-
-                binding = this.VariableDeclaration(false);
+                decl = this.VariableDeclaration(false);
                 this.Semicolon();
                 break;
 
             case "function":
-
-                binding = this.FunctionDeclaration();
+                decl = this.FunctionDeclaration();
                 break;
 
             case "class":
+                decl = this.ClassDeclaration();
+                break;
 
-                binding = this.ClassDeclaration();
+            case "default":
+                decl = this.DefaultExport();
                 break;
 
             case "IDENTIFIER":
 
                 if (this.peekLet()) {
 
-                    binding = this.VariableDeclaration(false);
+                    decl = this.VariableDeclaration(false);
                     this.Semicolon();
                     break;
                 }
 
                 if (this.peekFunctionModifier()) {
 
-                    binding = this.FunctionDeclaration();
+                    decl = this.FunctionDeclaration();
                     break;
                 }
 
             default:
-
-                binding = this.ExportsList();
+                decl = this.ExportsList();
                 this.Semicolon();
                 break;
         }
 
-        return new AST.ExportDeclaration(binding, start, this.nodeEnd());
+        return new AST.ExportDeclaration(decl, start, this.nodeEnd());
+    }
+
+    DefaultExport() {
+
+        var start = this.nodeStart(),
+            binding;
+
+        this.read("default");
+
+        switch (this.peek()) {
+
+            case "class":
+                binding = this.ClassExpression();
+                break;
+
+            case "function":
+                binding = this.FunctionExpression();
+                break;
+
+            default:
+                binding = this.AssignmentExpression();
+                break;
+        }
+
+        var isDecl = this.transformDefaultExport(binding);
+
+        if (!isDecl)
+            this.Semicolon();
+
+        return new AST.DefaultExport(binding, start, this.nodeEnd());
     }
 
     ExportsList() {

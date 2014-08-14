@@ -691,6 +691,14 @@ export var AST = {
         this.declaration = declaration;
     },
 
+    DefaultExport(binding, start, end) {
+
+        this.type = "DefaultExport";
+        this.binding = binding;
+        this.start = start;
+        this.end = end;
+    },
+
     ExportsList(list, from, start, end) {
 
         this.type = "ExportsList";
