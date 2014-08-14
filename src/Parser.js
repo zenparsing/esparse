@@ -2361,6 +2361,14 @@ export class Parser {
                 binding = this.FunctionExpression();
                 break;
 
+            case "IDENTIFIER":
+
+                if (this.peekFunctionModifier()) {
+
+                    binding = this.FunctionExpression();
+                    break;
+                }
+
             default:
                 binding = this.AssignmentExpression();
                 break;

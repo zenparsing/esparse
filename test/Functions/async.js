@@ -1,21 +1,21 @@
 {
 
 /** async function f() {} **/
-"async declaration": {   
+"async declaration": {
     type: "Script",
     statements: [
-    
+
     {   type: "FunctionDeclaration",
         kind: "async",
-        
-        identifier: 
+
+        identifier:
         {   type: "Identifier",
             value: "f"
         },
-        
+
         params: [],
-        
-        body: 
+
+        body:
         {   type: "FunctionBody",
             statements: []
         }
@@ -41,7 +41,7 @@ function f() {}
             value: "f"
         },
         params: [],
-        body: 
+        body:
         {   type: "FunctionBody",
             statements: []
         }
@@ -49,17 +49,17 @@ function f() {}
 },
 
 /** (async function f() {}); **/
-"async expression": {   
+"async expression": {
     type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "ParenExpression",
             expression:
             {   type: "FunctionExpression",
                 kind: "async",
-                identifier: 
+                identifier:
                 {   type: "Identifier",
                     value: "f"
                 },
@@ -122,7 +122,7 @@ function f() {}
                     expression:
                     {   type: "UnaryExpression",
                         operator: "await",
-                        expression: 
+                        expression:
                         {   type: "NumberLiteral",
                             value: 0
                         }
@@ -134,7 +134,7 @@ function f() {}
 },
 
 
-/** async function f() { await 
+/** async function f() { await
 0; } **/
 "empty await expression with newline": {
     type: "Script",
@@ -153,7 +153,7 @@ function f() {}
                 expression:
                 {   type: "UnaryExpression",
                     operator: "await",
-                    expression: 
+                    expression:
                     {   type: "NumberLiteral",
                         value: 0
                     }
@@ -174,19 +174,19 @@ function f() {}
 { type: 'Script',
   start: 0,
   end: 19,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 19,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 18,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 17,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 15,
@@ -197,13 +197,13 @@ function f() {}
              trailingComma: false } } } ] },
 
 /** async x => { await 0 } **/
-"async arrows with function body": 
+"async arrows with function body":
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
-        
+
         {   type: "ArrowFunction",
             kind: "async",
             params: [
@@ -214,16 +214,16 @@ function f() {}
                 },
                 initializer: null
             }],
-            
-            body: 
+
+            body:
             {   type: "FunctionBody",
                 statements: [
-                    
+
                 {   type: "ExpressionStatement",
                     expression:
                     {   type: "UnaryExpression",
                         operator: "await",
-                        expression: 
+                        expression:
                         {   type: "NumberLiteral",
                             value: 0
                         }
@@ -235,13 +235,13 @@ function f() {}
 },
 
 /** async x => await 0 **/
-"async arrows with expression body": 
+"async arrows with expression body":
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
-        
+
         {   type: "ArrowFunction",
             kind: "async",
             params: [
@@ -252,11 +252,11 @@ function f() {}
                 },
                 initializer: null
             }],
-            
-            body: 
+
+            body:
             {   type: "UnaryExpression",
                 operator: "await",
-                expression: 
+                expression:
                 {   type: "NumberLiteral",
                     value: 0
                 }
@@ -266,13 +266,13 @@ function f() {}
 },
 
 /** async x => f(await g) **/
-"async arrows with expression body and nested await": 
+"async arrows with expression body and nested await":
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
-        
+
         {   type: "ArrowFunction",
             kind: "async",
             params: [
@@ -283,8 +283,8 @@ function f() {}
                 },
                 initializer: null
             }],
-            
-            body: 
+
+            body:
             {   type: "CallExpression",
                 callee:
                 {   type: "Identifier",
@@ -304,13 +304,13 @@ function f() {}
 },
 
 /** async (x) => null **/
-"async arrow with parenthesized argument list": 
+"async arrow with parenthesized argument list":
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
-        
+
         {   type: "ArrowFunction",
             kind: "async",
             params: [
@@ -321,8 +321,8 @@ function f() {}
                 },
                 initializer: null
             }],
-            
-            body: 
+
+            body:
             {   type: "NullLiteral"
             }
         }
@@ -340,28 +340,28 @@ function f() {}
 'newline restriction between right paren and arrow': {},
 
 /** (async x => 0) **/
-'no newline restriction before async keyword in arrow': 
+'no newline restriction before async keyword in arrow':
 { type: 'Script',
   start: 0,
   end: 14,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 14,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 14,
-          expression: 
+          expression:
            { type: 'ArrowFunction',
              start: 1,
              end: 13,
              kind: 'async',
-             params: 
+             params:
               [ { type: 'FormalParameter',
                   start: 7,
                   end: 8,
-                  pattern: 
+                  pattern:
                    { type: 'Identifier',
                      start: 7,
                      end: 8,
@@ -370,5 +370,26 @@ function f() {}
                   initializer: null } ],
              body: { type: 'NumberLiteral', start: 12, end: 13, value: 0 } } } } ] },
 
+/*** export default async function() {} ***/
+'export default async function':
+{ type: 'Module',
+  start: 0,
+  end: 34,
+  statements:
+   [ { type: 'ExportDeclaration',
+       start: 0,
+       end: 34,
+       declaration:
+        { type: 'DefaultExport',
+          binding:
+           { type: 'FunctionExpression',
+             start: 15,
+             end: 34,
+             kind: 'async',
+             identifier: null,
+             params: [],
+             body: { type: 'FunctionBody', start: 32, end: 34, statements: [] } },
+          start: 7,
+          end: 34 } } ] },
 
 };
