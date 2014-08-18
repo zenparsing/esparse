@@ -1,6 +1,6 @@
 {
     "name": "esparse",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "ECMAScript 6 Parser",
     "homepage": "https://github.com/zenparsing/esparse"
 }
