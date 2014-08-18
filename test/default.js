@@ -1,5 +1,5 @@
-import * as esparse from "../src/main.js";
-import parse from "../src/main.js";
+import * as esparse from "../src/";
+import parse from "../src/";
 
 var Path = require("path"),
     FS = require("fs"),

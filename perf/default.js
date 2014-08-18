@@ -1,4 +1,4 @@
-import { Scanner, parse } from "../main.js";
+import { Scanner, parse } from "../src/";
 
 var Path = require("path"),
     FS = require("fs"),
@@ -29,13 +29,13 @@ function walkDirectory(dir, fn) {
     .map(name => Path.resolve(dir, name))
     .map(path => ({ path: path, stat: statPath(path) }))
     .forEach(entry => {
-    
+
         if (!entry.stat)
             return;
-        
+
         if (entry.stat.isDirectory())
             return walkDirectory(entry.path, fn);
-        
+
         if (entry.stat.isFile())
             fn(entry.path);
     });
@@ -45,21 +45,21 @@ function analyzeChars(string) {
 
     var a = string.split(""),
         occ = {};
-    
+
     a.forEach(c => {
-        
+
         if (occ[c] === void 0)
             occ[c] = 1;
         else
             occ[c]++;
     });
-    
+
     Object
     .keys(occ)
     .sort((a, b) => occ[b] - occ[a])
     .map(k => ({ chr: k, num: occ[k] }))
     .filter((obj, i) => {
-    
+
         console.log(`${ JSON.stringify(obj.chr) } (${ obj.chr.charCodeAt(0) }): ${obj.num}`);
         return i < 100;
     });
@@ -70,38 +70,38 @@ function analyzeReserved(string) {
     var scanner = new Scanner(string),
         words = Object.create(null),
         word;
-    
+
     reservedWord
     .toString()
     .replace(/^[^a-z]+|[^a-z]+$/ig, "")
     .split("|")
     .forEach(word => words[word] = 0);
-    
+
     while (scanner.next("div") !== "EOF") {
-    
+
         word = scanner.type;
-        
+
         if (reservedWord.test(word)) {
-        
+
             if (!(word in words))
                 words[word] = 0;
-            
+
             words[word] += 1;
         }
     }
-    
+
     var freq = Object.keys(words)
     .sort((a, b) => words[b] - words[a])
     .map(k => ({ word: k, num: words[k] }));
-    
+
     freq.filter((obj, i) => {
-    
+
         console.log(`${obj.word}: ${obj.num}`);
         return i < 100;
     });
-    
+
     var cases = freq.map(obj => `case "${obj.word}":`).join(" ");
-    
+
     console.log(cases);
 }
 
@@ -117,15 +117,15 @@ function dryLoop(src) {
 }
 
 function scanOnly(src) {
-    
+
     var scanner = new Scanner(src);
     while (scanner.next("div") !== "EOF");
 }
 
-var parsers = { 
+var parsers = {
 
     "dry-loop": dryLoop,
-    "native": nativeParse, 
+    "native": nativeParse,
     "scanner": scanOnly,
     "acorn": Acorn.parse,
     "esparse": parse,
@@ -134,16 +134,16 @@ var parsers = {
 };
 
 export function main(args) {
-    
+
     var libs = {};
-    
+
     Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
 
     var lib = args[2] || "esparse",
         parser = parsers[lib],
         size = 0,
         ms = 0;
-    
+
     console.log(`\n>> Testing Parser Speed (${ lib })\n`);
 
     walkDirectory(Path.join(__dirname, "_input"), path => {
@@ -153,26 +153,26 @@ export function main(args) {
             ts;
 
         console.log(`Parsing ${ name }`);
-        
+
         ts = +new Date;
-        
+
         try {
-    
+
             size += input.length;
             parser(input);
-            
+
         } catch (err) {
-    
+
             console.log(`${ err.line }:${ err.column }`);
             throw err;
         }
-        
+
         ms += ((+new Date) - ts);
-        
+
     });
 
-    console.log("\n>> Results: " + 
+    console.log("\n>> Results: " +
         (ms / size * 1024 * 1024).toFixed(2) + " ms/MB, " +
         (size * 1000 / ms / 1024 / 1024).toFixed(2) + " MB/sec\n");
-    
+
 }
