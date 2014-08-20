@@ -136,13 +136,14 @@ function copyToken(from, to) {
 
 class Context {
 
-    constructor(parent, isFunction) {
+    constructor(parent) {
 
         this.parent = parent;
         this.mode = "";
-        this.isFunction = isFunction;
+        this.isFunction = false;
         this.functionBody = false;
-        this.functionType = "";
+        this.isGenerator = false;
+        this.isAsync = false;
         this.labelSet = new IntMap;
         this.switchDepth = 0;
         this.loopDepth = 0;
@@ -324,14 +325,14 @@ export class Parser {
     peekYield() {
 
         return this.context.functionBody &&
-            this.context.functionType === "generator" &&
+            this.context.isGenerator &&
             this.peekKeyword("yield");
     }
 
     peekAwait() {
 
         return this.context.functionBody &&
-            this.context.functionType === "async" &&
+            this.context.isAsync &&
             this.peekKeyword("await");
     }
 
@@ -407,11 +408,11 @@ export class Parser {
 
     // == Context Management ==
 
-    pushContext(isFunction) {
+    pushContext() {
 
         var parent = this.context;
 
-        this.context = new Context(parent, isFunction);
+        this.context = new Context(parent);
 
         if (parent.mode === "strict")
             this.context.mode = "strict";
@@ -420,9 +421,11 @@ export class Parser {
     pushMaybeContext() {
 
         var parent = this.context;
-        this.pushContext(parent.isFunction);
+        this.pushContext();
+        this.context.isFunction = parent.isFunction;
+        this.context.isGenerator = parent.isGenerator;
+        this.context.isAsync = parent.isAsync;
         this.context.functionBody = parent.functionBody;
-        this.context.functionType = parent.functionType;
     }
 
     popContext(collapse) {
@@ -460,11 +463,29 @@ export class Parser {
         this.context.labelSet.set(label, 2);
     }
 
+    setFunctionType(kind) {
+
+        var c = this.context,
+            a = false,
+            g = false;
+
+        switch (kind) {
+
+            case "async": a = true; break;
+            case "generator": g = true; break;
+            case "async-generator": a = g = true; break;
+        }
+
+        c.isFunction = true;
+        c.isAsync = a;
+        c.isGenerator = g;
+    }
+
     // === Top Level ===
 
     Script() {
 
-        this.pushContext(false);
+        this.pushContext();
 
         var start = this.nodeStart(),
             statements = this.StatementList(true, false);
@@ -476,7 +497,7 @@ export class Parser {
 
     Module() {
 
-        this.pushContext(false);
+        this.pushContext();
         this.setStrict(true);
 
         var start = this.nodeStart(),
@@ -875,7 +896,7 @@ export class Parser {
 
                     if (next.type === "=>") {
 
-                        this.pushContext(true);
+                        this.pushContext();
                         return this.ArrowFunctionHead("", this.BindingIdentifier(), start);
 
                     } else if (next.type === "function") {
@@ -885,7 +906,7 @@ export class Parser {
                     } else if (next.type === "IDENTIFIER" && isFunctionModifier(value)) {
 
                         this.read();
-                        this.pushContext(true);
+                        this.pushContext();
                         return this.ArrowFunctionHead(value, this.BindingIdentifier(), start);
                     }
                 }
@@ -1875,8 +1896,8 @@ export class Parser {
             kind = "generator";
         }
 
-        this.pushContext(true);
-        this.context.functionType = kind;
+        this.pushContext();
+        this.setFunctionType(kind);
 
         var ident = this.BindingIdentifier(),
             params = this.FormalParameters(),
@@ -1917,8 +1938,8 @@ export class Parser {
             kind = "generator";
         }
 
-        this.pushContext(true);
-        this.context.functionType = kind;
+        this.pushContext();
+        this.setFunctionType(kind);
 
         if (this.peek() !== "(")
             ident = this.BindingIdentifier();
@@ -1968,10 +1989,8 @@ export class Parser {
             }
         }
 
-        this.pushContext(true);
-
-        if (kind === "generator" || isFunctionModifier(kind))
-            this.context.functionType = kind;
+        this.pushContext();
+        this.setFunctionType(kind);
 
         var params = kind === "get" || kind === "set" ?
             this.AccessorParameters(kind) :
@@ -2071,8 +2090,7 @@ export class Parser {
     ArrowFunctionHead(kind, formals, start) {
 
         // Context must have been pushed by caller
-        this.context.isFunction = true;
-        this.context.functionType = kind;
+        this.setFunctionType(kind);
 
         // Transform and validate formal parameters
         var params = this.checkArrowParameters(formals);
@@ -2086,7 +2104,7 @@ export class Parser {
 
         var params = head.parameters,
             start = head.start,
-            kind = this.context.functionType;
+            kind = this.context.isAsync ? "async" : "";
 
         // Use function body context even if parsing expression body form
         this.context.functionBody = true;
@@ -2157,7 +2175,7 @@ export class Parser {
             list = [],
             node;
 
-        this.pushContext(false);
+        this.pushContext();
         this.setStrict(true);
         this.read("{");
 
