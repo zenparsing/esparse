@@ -90,12 +90,13 @@ function isUnary(op) {
 // Returns true if the value is a function modifier keyword
 function isFunctionModifier(value) {
 
-    switch (value) {
+    return value === "async";
+}
 
-        case "async": return true;
-    }
+// Returns true if the value is a generator function modifier keyword
+function isGeneratorModifier(value) {
 
-    return false;
+    return value === "async" || value === "";
 }
 
 // Returns the value of the specified token, if it is an identifier and does not
@@ -1890,10 +1891,10 @@ export class Parser {
 
         this.read("function");
 
-        if (!kind && this.peek() === "*") {
+        if (isGeneratorModifier(kind) && this.peek() === "*") {
 
             this.read();
-            kind = "generator";
+            kind = kind ? kind + "-generator" : "generator";
         }
 
         this.pushContext();
@@ -1932,10 +1933,10 @@ export class Parser {
 
         this.read("function");
 
-        if (!kind && this.peek() === "*") {
+        if (isGeneratorModifier(kind) && this.peek() === "*") {
 
             this.read();
-            kind = "generator";
+            kind = kind ? kind + "-generator" : "generator";
         }
 
         this.pushContext();
@@ -1984,6 +1985,13 @@ export class Parser {
                 if (val === "get" || val === "set" || isFunctionModifier(val)) {
 
                     kind = name.value;
+
+                    if (isGeneratorModifier(kind) && this.peek("name") === "*") {
+
+                        this.read();
+                        kind += "-generator";
+                    }
+
                     name = this.PropertyName();
                 }
             }
