@@ -463,9 +463,10 @@ export var AST = {
         this.body = body;
     },
 
-    ForOfStatement(left, right, body, start, end) {
+    ForOfStatement(async, left, right, body, start, end) {
 
         this.type = "ForOfStatement";
+        this.async = async;
         this.start = start;
         this.end = end;
         this.left = left;

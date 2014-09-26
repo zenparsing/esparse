@@ -5,17 +5,17 @@
 { type: 'Script',
   start: 0,
   end: 13,
-  statements: 
+  statements:
    [ { type: 'ForInStatement',
        start: 0,
        end: 13,
-       left: 
+       left:
         { type: 'Identifier',
           start: 5,
           end: 6,
           value: 'x',
           context: 'variable' },
-       right: 
+       right:
         { type: 'Identifier',
           start: 10,
           end: 11,
@@ -28,27 +28,27 @@
 { type: 'Script',
   start: 0,
   end: 17,
-  statements: 
+  statements:
    [ { type: 'ForInStatement',
        start: 0,
        end: 17,
-       left: 
+       left:
         { type: 'VariableDeclaration',
           start: 5,
           end: 10,
           kind: 'var',
-          declarations: 
+          declarations:
            [ { type: 'VariableDeclarator',
                start: 9,
                end: 10,
-               pattern: 
+               pattern:
                 { type: 'Identifier',
                   start: 9,
                   end: 10,
                   value: 'x',
                   context: 'declaration' },
                initializer: null } ] },
-       right: 
+       right:
         { type: 'Identifier',
           start: 14,
           end: 15,
@@ -61,27 +61,27 @@
 { type: 'Script',
   start: 0,
   end: 17,
-  statements: 
+  statements:
    [ { type: 'ForInStatement',
        start: 0,
        end: 17,
-       left: 
+       left:
         { type: 'VariableDeclaration',
           start: 5,
           end: 10,
           kind: 'let',
-          declarations: 
+          declarations:
            [ { type: 'VariableDeclarator',
                start: 9,
                end: 10,
-               pattern: 
+               pattern:
                 { type: 'Identifier',
                   start: 9,
                   end: 10,
                   value: 'x',
                   context: 'declaration' },
                initializer: null } ] },
-       right: 
+       right:
         { type: 'Identifier',
           start: 14,
           end: 15,
@@ -94,28 +94,28 @@
 { type: 'Script',
   start: 0,
   end: 19,
-  statements: 
+  statements:
    [ { type: 'ForInStatement',
        start: 0,
        end: 19,
-       left: 
+       left:
         { type: 'VariableDeclaration',
           start: 5,
           end: 12,
           kind: 'let',
-          declarations: 
+          declarations:
            [ { type: 'VariableDeclarator',
                start: 9,
                end: 12,
-               pattern: 
+               pattern:
                 { type: 'ObjectPattern',
                   start: 9,
                   end: 12,
-                  properties: 
+                  properties:
                    [ { type: 'PatternProperty',
                        start: 10,
                        end: 11,
-                       name: 
+                       name:
                         { type: 'Identifier',
                           start: 10,
                           end: 11,
@@ -125,7 +125,7 @@
                        initializer: null } ],
                   trailingComma: false },
                initializer: null } ] },
-       right: 
+       right:
         { type: 'Identifier',
           start: 16,
           end: 17,
@@ -136,5 +136,63 @@
 /** for (var i = 0 in x); **/
 'initializers in for-in not allowed':
 {},
+
+/** for (var x of y); **/
+'for-of with declaration':
+{ type: 'Script',
+  start: 0,
+  end: 17,
+  statements:
+   [ { type: 'ForOfStatement',
+       async: false,
+       start: 0,
+       end: 17,
+       left:
+        { type: 'VariableDeclaration',
+          start: 5,
+          end: 10,
+          kind: 'var',
+          declarations:
+           [ { type: 'VariableDeclarator',
+               start: 9,
+               end: 10,
+               pattern:
+                { type: 'Identifier',
+                  start: 9,
+                  end: 10,
+                  value: 'x',
+                  context: 'declaration' },
+               initializer: null } ] },
+       right:
+        { type: 'Identifier',
+          start: 14,
+          end: 15,
+          value: 'y',
+          context: 'variable' },
+       body: { type: 'EmptyStatement', start: 16, end: 17 } } ] },
+
+/** for (x of y); **/
+'for-of no declaration':
+{ type: 'Script',
+  start: 0,
+  end: 13,
+  statements:
+   [ { type: 'ForOfStatement',
+       async: false,
+       start: 0,
+       end: 13,
+       left:
+        { type: 'Identifier',
+          start: 5,
+          end: 6,
+          value: 'x',
+          context: 'variable' },
+       right:
+        { type: 'Identifier',
+          start: 10,
+          end: 11,
+          value: 'y',
+          context: 'variable' },
+       body: { type: 'EmptyStatement', start: 12, end: 13 } } ] },
 
 });

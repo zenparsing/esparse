@@ -1569,6 +1569,7 @@ export class Parser {
 
         var start = this.nodeStart(),
             init = null,
+            async = false,
             test,
             step;
 
@@ -1576,6 +1577,13 @@ export class Parser {
             this.setLoopLabel(label);
 
         this.read("for");
+
+        if (this.peekKeyword("async")) {
+
+            this.read();
+            async = true;
+        }
+
         this.read("(");
 
         // Get loop initializer
@@ -1602,14 +1610,11 @@ export class Parser {
                 break;
         }
 
-        if (init) {
+        if (async || init && this.peekKeyword("of"))
+            return this.ForOfStatement(async, init, start);
 
-            if (this.peek() === "in")
-                return this.ForInStatement(init, start);
-
-            if (this.peekKeyword("of"))
-                return this.ForOfStatement(init, start);
-        }
+        if (init && this.peek() === "in")
+            return this.ForInStatement(init, start);
 
         this.read(";");
         test = this.peek() === ";" ? null : this.Expression();
@@ -1652,7 +1657,7 @@ export class Parser {
             this.nodeEnd());
     }
 
-    ForOfStatement(init, start) {
+    ForOfStatement(async, init, start) {
 
         this.checkForInit(init, "of");
 
@@ -1665,6 +1670,7 @@ export class Parser {
         this.context.loopDepth -= 1;
 
         return new AST.ForOfStatement(
+            async,
             init,
             expr,
             statement,
