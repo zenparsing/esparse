@@ -1578,7 +1578,7 @@ export class Parser {
 
         this.read("for");
 
-        if (this.peekKeyword("async")) {
+        if (this.context.isAsync && this.peekKeyword("async")) {
 
             this.read();
             async = true;
