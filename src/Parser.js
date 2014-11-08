@@ -2377,8 +2377,7 @@ export class Parser {
 
             case "var":
             case "const":
-                decl = this.VariableDeclaration(false);
-                this.Semicolon();
+                decl = this.LexicalDeclaration();
                 break;
 
             case "function":
@@ -2397,8 +2396,7 @@ export class Parser {
 
                 if (this.peekLet()) {
 
-                    decl = this.VariableDeclaration(false);
-                    this.Semicolon();
+                    decl = this.LexicalDeclaration();
                     break;
                 }
 

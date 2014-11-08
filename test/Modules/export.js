@@ -15,7 +15,7 @@
        declaration:
         { type: 'VariableDeclaration',
           start: 7,
-          end: 12,
+          end: 13,
           kind: 'var',
           declarations:
            [ { type: 'VariableDeclarator',
