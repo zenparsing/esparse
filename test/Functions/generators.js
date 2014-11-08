@@ -1,21 +1,21 @@
 {
 
 /** function *g() {} **/
-"generator declarations": 
+"generator declarations":
 {   type: "Script",
     statements: [
-    
+
     {   type: "FunctionDeclaration",
         kind: "generator",
-        
-        identifier: 
+
+        identifier:
         {   type: "Identifier",
             value: "g"
         },
-        
+
         params: [],
-        
-        body: 
+
+        body:
         {   type: "FunctionBody",
             statements: []
         }
@@ -23,27 +23,27 @@
 },
 
 /** (function *g() {}); **/
-"generator expresions": 
+"generator expresions":
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
-        
+
         {   type: "ParenExpression",
             expression:
-        
+
             {   type: "FunctionExpression",
                 kind: "generator",
-                
-                identifier: 
+
+                identifier:
                 {   type: "Identifier",
                     value: "g"
                 },
-                
+
                 params: [],
-                
-                body: 
+
+                body:
                 {   type: "FunctionBody",
                     statements: []
                 }
@@ -53,25 +53,25 @@
 },
 
 /** function *g() { yield 1; } **/
-"yield is a keyword in generators": 
+"yield is a keyword in generators":
 {   type: "Script",
     statements: [
-    
+
     {   type: "FunctionDeclaration",
         kind: "generator",
-        
-        identifier: 
+
+        identifier:
         {   type: "Identifier",
             value: "g"
         },
-        
+
         params: [],
-        
-        body: 
+
+        body:
         {   type: "FunctionBody",
             statements: [
             {   type: "ExpressionStatement",
-                expression: 
+                expression:
                 {   type: "YieldExpression",
                     delegate: false,
                     expression:
@@ -85,25 +85,25 @@
 },
 
 /** function *g() { (yield) } **/
-"yield expression inside of parens": 
+"yield expression inside of parens":
 {   type: "Script",
     statements: [
-    
+
     {   type: "FunctionDeclaration",
         kind: "generator",
-        
-        identifier: 
+
+        identifier:
         {   type: "Identifier",
             value: "g"
         },
-        
+
         params: [],
-        
-        body: 
+
+        body:
         {   type: "FunctionBody",
             statements: [
             {   type: "ExpressionStatement",
-                expression: 
+                expression:
                 {   type: "ParenExpression",
                     expression:
                     {   type: "YieldExpression",
@@ -116,28 +116,28 @@
     }]
 },
 
-/** function *g() { 
+/** function *g() {
 yield
 x } **/
 "yield has no-line-terminator restriction":
 {   type: "Script",
     statements: [
-    
+
     {   type: "FunctionDeclaration",
         kind: "generator",
-        
-        identifier: 
+
+        identifier:
         {   type: "Identifier",
             value: "g"
         },
-        
+
         params: [],
-        
-        body: 
+
+        body:
         {   type: "FunctionBody",
             statements: [
             {   type: "ExpressionStatement",
-                expression: 
+                expression:
                 {   type: "YieldExpression",
                     delegate: false,
                     expression: null

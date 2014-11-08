@@ -809,6 +809,18 @@ export class Parser {
 
                     break;
 
+                case "::":
+
+                    this.read();
+
+                    expr = new AST.VirtualPropertyExpression(
+                        expr,
+                        this.Identifier(true),
+                        start,
+                        this.nodeEnd());
+
+                    break;
+
                 default:
 
                     if (expr.type === "SuperExpression")

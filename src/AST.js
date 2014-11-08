@@ -190,6 +190,15 @@ export var AST = {
         this.computed = computed;
     },
 
+    VirtualPropertyExpression(obj, prop, start, end) {
+
+        this.type = "VirtualPropertyExpression";
+        this.start = start;
+        this.end = end;
+        this.object = obj;
+        this.property = prop;
+    },
+
     CallExpression(callee, args, start, end) {
 
         this.type = "CallExpression";
