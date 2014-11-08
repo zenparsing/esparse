@@ -348,6 +348,12 @@ export class Parser {
         return token.type === "function" && !token.newlineBefore;
     }
 
+    peekPrivate() {
+
+        return this.peekKeyword("private") &&
+            this.peekAt("div", 1) === "IDENTIFIER";
+    }
+
     peekEnd() {
 
         var token = this.peekToken();
@@ -1875,6 +1881,9 @@ export class Parser {
                 if (this.peekFunctionModifier())
                     return this.FunctionDeclaration();
 
+                if (this.peekPrivate())
+                    return this.PrivateDeclaration();
+
                 break;
         }
 
@@ -1889,6 +1898,26 @@ export class Parser {
         node.end = this.nodeEnd();
 
         return node;
+    }
+
+    PrivateDeclaration() {
+
+        var start = this.nodeStart(),
+            list = [];
+
+        this.readKeyword("private");
+
+        while (true) {
+
+            list.push(this.BindingIdentifier());
+
+            if (this.peek() === ",") this.read();
+            else break;
+        }
+
+        this.Semicolon();
+
+        return new AST.PrivateDeclaration(list, start, this.nodeEnd());
     }
 
     // === Functions ===
@@ -2376,6 +2405,12 @@ export class Parser {
                 if (this.peekFunctionModifier()) {
 
                     decl = this.FunctionDeclaration();
+                    break;
+                }
+
+                if (this.peekPrivate()) {
+
+                    decl = this.PrivateDeclaration();
                     break;
                 }
 

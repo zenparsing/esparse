@@ -384,6 +384,14 @@ export var AST = {
         this.initializer = initializer;
     },
 
+    PrivateDeclaration(list, start, end) {
+
+        this.type = "PrivateDeclaration";
+        this.start = start;
+        this.end = end;
+        this.declarations = list;
+    },
+
     ReturnStatement(arg, start, end) {
 
         this.type = "ReturnStatement";
