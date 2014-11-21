@@ -723,14 +723,15 @@ export class Parser {
 
         var start = this.nodeStart(),
             token = this.peekToken(),
+            isSuper = token.type === "super",
             arrowType = "",
             exit = false,
             prop,
             expr;
 
         expr =
+            isSuper ? this.SuperExpression() :
             token.type === "new" ? this.NewExpression() :
-            token.type === "super" ? this.SuperExpression() :
             this.PrimaryExpression();
 
         while (!exit) {
@@ -743,7 +744,7 @@ export class Parser {
 
                     this.read();
 
-                    prop = this.peek("name") === "PRIVATE" ?
+                    prop = this.peek("name") === "PRIVATE" && !isSuper ?
                         this.PrivateName() :
                         this.IdentifierName();
 
@@ -811,6 +812,9 @@ export class Parser {
 
                 case "TEMPLATE":
 
+                    if (isSuper)
+                        this.fail();
+
                     expr = new AST.TaggedTemplateExpression(
                         expr,
                         this.TemplateExpression(),
@@ -820,6 +824,9 @@ export class Parser {
                     break;
 
                 case "::":
+
+                    if (isSuper)
+                        this.fail();
 
                     this.read();
 
@@ -833,12 +840,14 @@ export class Parser {
 
                 default:
 
-                    if (expr.type === "SuperExpression")
-                        this.fail("Invalid super expression", expr);
+                    if (isSuper)
+                        this.fail();
 
                     exit = true;
                     break;
             }
+
+            isSuper = false;
         }
 
         return expr;

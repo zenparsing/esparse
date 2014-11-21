@@ -1,15 +1,15 @@
 ({
 
 /** class C {} **/
-'class declaration': 
+'class declaration':
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'ClassDeclaration',
        start: 0,
        end: 10,
-       identifier: 
+       identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
@@ -23,19 +23,19 @@
 { type: 'Script',
   start: 0,
   end: 13,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 12,
-          expression: 
+          expression:
            { type: 'ClassExpression',
              start: 1,
              end: 11,
-             identifier: 
+             identifier:
               { type: 'Identifier',
                 start: 7,
                 end: 8,
@@ -45,21 +45,21 @@
              body: { type: 'ClassBody', start: 9, end: 11, elements: [] } } } } ] },
 
 /** class C extends B {} **/
-'class with extends': 
+'class with extends':
 { type: 'Script',
   start: 0,
   end: 20,
-  statements: 
+  statements:
    [ { type: 'ClassDeclaration',
        start: 0,
        end: 20,
-       identifier: 
+       identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
-       base: 
+       base:
         { type: 'Identifier',
           start: 16,
           end: 17,
@@ -68,31 +68,31 @@
        body: { type: 'ClassBody', start: 18, end: 20, elements: [] } } ] },
 
 /** class C { static S() {} } **/
-'static method': 
+'static method':
 { type: 'Script',
   start: 0,
   end: 25,
-  statements: 
+  statements:
    [ { type: 'ClassDeclaration',
        start: 0,
        end: 25,
-       identifier: 
+       identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
        base: null,
-       body: 
+       body:
         { type: 'ClassBody',
           start: 8,
           end: 25,
-          elements: 
+          elements:
            [ { type: 'ClassElement',
                start: 10,
                end: 23,
                static: true,
-               method: 
+               method:
                 { type: 'MethodDefinition',
                   start: 17,
                   end: 23,
@@ -102,46 +102,46 @@
                   body: { type: 'FunctionBody', start: 21, end: 23, statements: [] } } } ] } } ] },
 
 /** class C { m() { new super; } } **/
-'new super without argument list': 
+'new super without argument list':
 { type: 'Script',
   start: 0,
   end: 30,
-  statements: 
+  statements:
    [ { type: 'ClassDeclaration',
        start: 0,
        end: 30,
-       identifier: 
+       identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
        base: null,
-       body: 
+       body:
         { type: 'ClassBody',
           start: 8,
           end: 30,
-          elements: 
+          elements:
            [ { type: 'ClassElement',
                start: 10,
                end: 28,
                static: false,
-               method: 
+               method:
                 { type: 'MethodDefinition',
                   start: 10,
                   end: 28,
                   kind: '',
                   name: { type: 'Identifier', start: 10, end: 11, value: 'm', context: '' },
                   params: [],
-                  body: 
+                  body:
                    { type: 'FunctionBody',
                      start: 14,
                      end: 28,
-                     statements: 
+                     statements:
                       [ { type: 'ExpressionStatement',
                           start: 16,
                           end: 26,
-                          expression: 
+                          expression:
                            { type: 'NewExpression',
                              start: 16,
                              end: 25,
@@ -158,31 +158,31 @@
 'super cannot appear outside of a function': {},
 
 /** class C { a() {} a() {} } **/
-'duplicate methods are allowed': 
+'duplicate methods are allowed':
 { type: 'Script',
   start: 0,
   end: 25,
-  statements: 
+  statements:
    [ { type: 'ClassDeclaration',
        start: 0,
        end: 25,
-       identifier: 
+       identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
        base: null,
-       body: 
+       body:
         { type: 'ClassBody',
           start: 8,
           end: 25,
-          elements: 
+          elements:
            [ { type: 'ClassElement',
                start: 10,
                end: 16,
                static: false,
-               method: 
+               method:
                 { type: 'MethodDefinition',
                   start: 10,
                   end: 16,
@@ -194,7 +194,7 @@
                start: 17,
                end: 23,
                static: false,
-               method: 
+               method:
                 { type: 'MethodDefinition',
                   start: 17,
                   end: 23,
@@ -204,31 +204,31 @@
                   body: { type: 'FunctionBody', start: 21, end: 23, statements: [] } } } ] } } ] },
 
 /** class C { static a() {} static a() {} } **/
-'duplicate static methods are allowed': 
+'duplicate static methods are allowed':
 { type: 'Script',
   start: 0,
   end: 39,
-  statements: 
+  statements:
    [ { type: 'ClassDeclaration',
        start: 0,
        end: 39,
-       identifier: 
+       identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
        base: null,
-       body: 
+       body:
         { type: 'ClassBody',
           start: 8,
           end: 39,
-          elements: 
+          elements:
            [ { type: 'ClassElement',
                start: 10,
                end: 23,
                static: true,
-               method: 
+               method:
                 { type: 'MethodDefinition',
                   start: 17,
                   end: 23,
@@ -240,7 +240,7 @@
                start: 24,
                end: 37,
                static: true,
-               method: 
+               method:
                 { type: 'MethodDefinition',
                   start: 31,
                   end: 37,
@@ -254,27 +254,27 @@
 { type: 'Script',
   start: 0,
   end: 32,
-  statements: 
+  statements:
    [ { type: 'ClassDeclaration',
        start: 0,
        end: 32,
-       identifier: 
+       identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
        base: null,
-       body: 
+       body:
         { type: 'ClassBody',
           start: 8,
           end: 32,
-          elements: 
+          elements:
            [ { type: 'ClassElement',
                start: 10,
                end: 16,
                static: false,
-               method: 
+               method:
                 { type: 'MethodDefinition',
                   start: 10,
                   end: 16,
@@ -286,7 +286,7 @@
                start: 17,
                end: 30,
                static: true,
-               method: 
+               method:
                 { type: 'MethodDefinition',
                   start: 24,
                   end: 30,
@@ -315,5 +315,9 @@
 
 /** class C { static *prototype() {} } **/
 'static prototype method not allowed - 4': {},
+
+/** function() { super`kasdf`; } **/
+'super followed by template not allowed': {},
+
 
 })
