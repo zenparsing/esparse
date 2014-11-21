@@ -351,7 +351,7 @@ export class Parser {
     peekPrivate() {
 
         return this.peekKeyword("private") &&
-            this.peekAt("div", 1) === "IDENTIFIER";
+            this.peekAt("div", 1) === "PRIVATE";
     }
 
     peekEnd() {
@@ -743,9 +743,13 @@ export class Parser {
 
                     this.read();
 
+                    prop = this.peek("name") === "PRIVATE" ?
+                        this.PrivateName() :
+                        this.IdentifierName();
+
                     expr = new AST.MemberExpression(
                         expr,
-                        this.IdentifierName(),
+                        prop,
                         false,
                         start,
                         this.nodeEnd());
@@ -1909,7 +1913,7 @@ export class Parser {
 
         while (true) {
 
-            list.push(this.BindingIdentifier());
+            list.push(this.PrivateName());
 
             if (this.peek() === ",") this.read();
             else break;
@@ -1918,6 +1922,12 @@ export class Parser {
         this.Semicolon();
 
         return new AST.PrivateDeclaration(list, start, this.nodeEnd());
+    }
+
+    PrivateName() {
+
+        var token = this.readToken("PRIVATE");
+        return new AST.PrivateName(token.value, token.start, token.end);
     }
 
     // === Functions ===
@@ -2227,15 +2237,14 @@ export class Parser {
     ClassBody() {
 
         var start = this.nodeStart(),
-            list = [],
-            node;
+            list = [];
 
         this.pushContext();
         this.setStrict(true);
         this.read("{");
 
         while (this.peekUntil("}", "name"))
-            list.push(node = this.ClassElement());
+            list.push(this.ClassElement());
 
         this.read("}");
         this.popContext();
@@ -2247,6 +2256,10 @@ export class Parser {
 
         var start = this.nodeStart(),
             isStatic = false;
+
+        // Check for private declaration
+        if (this.peekPrivate())
+            return this.PrivateDeclaration();
 
         // Check for static modifier
         if (this.peekToken("name").value === "static" &&
@@ -2403,12 +2416,6 @@ export class Parser {
                 if (this.peekFunctionModifier()) {
 
                     decl = this.FunctionDeclaration();
-                    break;
-                }
-
-                if (this.peekPrivate()) {
-
-                    decl = this.PrivateDeclaration();
                     break;
                 }
 

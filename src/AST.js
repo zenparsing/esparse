@@ -392,6 +392,14 @@ export var AST = {
         this.declarations = list;
     },
 
+    PrivateName(value, start, end) {
+
+        this.type = "PrivateName";
+        this.start = start;
+        this.end = end;
+        this.value = value;
+    },
+
     ReturnStatement(arg, start, end) {
 
         this.type = "ReturnStatement";
