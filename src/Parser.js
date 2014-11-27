@@ -1894,9 +1894,6 @@ export class Parser {
                 if (this.peekFunctionModifier())
                     return this.FunctionDeclaration();
 
-                if (this.peekPrivate())
-                    return this.PrivateDeclaration();
-
                 break;
         }
 
