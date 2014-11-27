@@ -348,12 +348,6 @@ export class Parser {
         return token.type === "function" && !token.newlineBefore;
     }
 
-    peekPrivate() {
-
-        return this.peekKeyword("private") &&
-            this.peekAt("div", 1) === "PRIVATE";
-    }
-
     peekEnd() {
 
         var token = this.peekToken();
@@ -744,8 +738,8 @@ export class Parser {
 
                     this.read();
 
-                    prop = this.peek("name") === "PRIVATE" && !isSuper ?
-                        this.PrivateName() :
+                    prop = this.peek("name") === "SYMBOL" && !isSuper ?
+                        this.SymbolName() :
                         this.IdentifierName();
 
                     expr = new AST.MemberExpression(
@@ -1910,30 +1904,10 @@ export class Parser {
         return node;
     }
 
-    PrivateDeclaration() {
+    SymbolName() {
 
-        var start = this.nodeStart(),
-            list = [];
-
-        this.readKeyword("private");
-
-        while (true) {
-
-            list.push(this.PrivateName());
-
-            if (this.peek() === ",") this.read();
-            else break;
-        }
-
-        this.Semicolon();
-
-        return new AST.PrivateDeclaration(list, start, this.nodeEnd());
-    }
-
-    PrivateName() {
-
-        var token = this.readToken("PRIVATE");
-        return new AST.PrivateName(token.value, token.start, token.end);
+        var token = this.readToken("SYMBOL");
+        return new AST.SymbolName(token.value, token.start, token.end);
     }
 
     // === Functions ===
@@ -2262,10 +2236,6 @@ export class Parser {
 
         var start = this.nodeStart(),
             isStatic = false;
-
-        // Check for private declaration
-        if (this.peekPrivate())
-            return this.PrivateDeclaration();
 
         // Check for static modifier
         if (this.peekToken("name").value === "static" &&

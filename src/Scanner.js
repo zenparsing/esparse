@@ -518,7 +518,7 @@ export class Scanner {
 
             case "string": return this.String();
 
-            case "at": return this.PrivateName();
+            case "at": return this.SymbolName();
 
             case "zero":
 
@@ -985,17 +985,17 @@ export class Scanner {
         return "IDENTIFIER";
     }
 
-    PrivateName() {
+    SymbolName() {
 
         this.offset += 1;
 
         if (this.Start("name") !== "IDENTIFIER")
             return this.Error();
 
-        // TODO: HACK
+        // TODO: Is this a hack?
         this.value = "@" + this.value;
 
-        return "PRIVATE";
+        return "SYMBOL";
     }
 
     LineComment() {

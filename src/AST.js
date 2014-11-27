@@ -384,17 +384,9 @@ export var AST = {
         this.initializer = initializer;
     },
 
-    PrivateDeclaration(list, start, end) {
+    SymbolName(value, start, end) {
 
-        this.type = "PrivateDeclaration";
-        this.start = start;
-        this.end = end;
-        this.declarations = list;
-    },
-
-    PrivateName(value, start, end) {
-
-        this.type = "PrivateName";
+        this.type = "SymbolName";
         this.start = start;
         this.end = end;
         this.value = value;
