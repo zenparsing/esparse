@@ -737,10 +737,7 @@ export class Parser {
                 case ".":
 
                     this.read();
-
-                    prop = this.peek("name") === "SYMBOL" && !isSuper ?
-                        this.SymbolName() :
-                        this.IdentifierName();
+                    prop = this.IdentifierName();
 
                     expr = new AST.MemberExpression(
                         expr,
@@ -1902,12 +1899,6 @@ export class Parser {
         node.end = this.nodeEnd();
 
         return node;
-    }
-
-    SymbolName() {
-
-        var token = this.readToken("SYMBOL");
-        return new AST.SymbolName(token.value, token.start, token.end);
     }
 
     // === Functions ===

@@ -384,14 +384,6 @@ export var AST = {
         this.initializer = initializer;
     },
 
-    SymbolName(value, start, end) {
-
-        this.type = "SymbolName";
-        this.start = start;
-        this.end = end;
-        this.value = value;
-    },
-
     ReturnStatement(arg, start, end) {
 
         this.type = "ReturnStatement";

@@ -65,7 +65,6 @@ function makeCharTable() {
     add("string", "'\"");
     add("template", "`");
     add("identifier", "$_\\");
-    add("at", "@");
 
     return table;
 
@@ -517,8 +516,6 @@ export class Scanner {
             case "template": return this.Template();
 
             case "string": return this.String();
-
-            case "at": return this.SymbolName();
 
             case "zero":
 
@@ -983,19 +980,6 @@ export class Scanner {
             return esc ? this.Error() : val;
 
         return "IDENTIFIER";
-    }
-
-    SymbolName() {
-
-        this.offset += 1;
-
-        if (this.Start("name") !== "IDENTIFIER")
-            return this.Error();
-
-        // TODO: Is this a hack?
-        this.value = "@" + this.value;
-
-        return "SYMBOL";
     }
 
     LineComment() {
