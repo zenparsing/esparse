@@ -717,16 +717,27 @@ export class Parser {
 
         var start = this.nodeStart(),
             token = this.peekToken(),
-            isSuper = token.type === "super",
             arrowType = "",
+            isSuper = false,
             exit = false,
-            prop,
-            expr;
+            expr,
+            prop;
 
-        expr =
-            isSuper ? this.SuperExpression() :
-            token.type === "new" ? this.NewExpression() :
-            this.PrimaryExpression();
+        switch (token.type) {
+
+            case "super":
+                expr = this.SuperExpression();
+                isSuper = false;
+                break;
+
+            case "new":
+                expr = this.NewExpression();
+                break;
+
+            default:
+                expr = this.PrimaryExpression();
+                break;
+        }
 
         while (!exit) {
 
@@ -819,11 +830,17 @@ export class Parser {
                     if (isSuper)
                         this.fail();
 
+                    if (!allowCall) {
+
+                        exit = true;
+                        break;
+                    }
+
                     this.read();
 
-                    expr = new AST.VirtualPropertyExpression(
+                    expr = new AST.BindExpression(
                         expr,
-                        this.Identifier(true),
+                        this.MemberExpression(false),
                         start,
                         this.nodeEnd());
 
