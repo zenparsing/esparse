@@ -830,17 +830,11 @@ export class Parser {
                     if (isSuper)
                         this.fail();
 
-                    if (!allowCall) {
-
-                        exit = true;
-                        break;
-                    }
-
                     this.read();
 
-                    expr = new AST.BindExpression(
+                    expr = new AST.VirtualPropertyExpression(
                         expr,
-                        this.MemberExpression(false),
+                        this.Identifier(true),
                         start,
                         this.nodeEnd());
 

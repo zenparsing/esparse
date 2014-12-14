@@ -190,13 +190,13 @@ export var AST = {
         this.computed = computed;
     },
 
-    BindExpression(left, right, start, end) {
+    VirtualPropertyExpression(obj, prop, start, end) {
 
-        this.type = "BindExpression";
+        this.type = "VirtualPropertyExpression";
         this.start = start;
         this.end = end;
-        this.left = left;
-        this.right = right;
+        this.object = obj;
+        this.property = prop;
     },
 
     CallExpression(callee, args, start, end) {
