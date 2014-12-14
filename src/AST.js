@@ -26,6 +26,14 @@ export var AST = {
         this.context = context;
     },
 
+    AtName(value, start, end) {
+
+        this.type = "AtName";
+        this.start = start;
+        this.end = end;
+        this.value = value;
+    },
+
     NumberLiteral(value, start, end) {
 
         this.type = "NumberLiteral";
@@ -314,6 +322,15 @@ export var AST = {
         this.name = name;
         this.params = params;
         this.body = body;
+    },
+
+    FieldDefinition(name, initializer, start, end) {
+
+        this.type = "FieldDefinition";
+        this.start = start;
+        this.end = end;
+        this.name = name;
+        this.initializer = initializer;
     },
 
     ArrayLiteral(elements, comma, start, end) {
@@ -622,13 +639,13 @@ export var AST = {
         this.elements = elems;
     },
 
-    ClassElement(isStatic, method, start, end) {
+    ClassElement(isStatic, definition, start, end) {
 
         this.type = "ClassElement";
         this.start = start;
         this.end = end;
         this.static = isStatic;
-        this.method = method;
+        this.definition = definition;
     },
 
     ModuleDeclaration(identifier, body, start, end) {

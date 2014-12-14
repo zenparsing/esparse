@@ -748,7 +748,10 @@ export class Parser {
                 case ".":
 
                     this.read();
-                    prop = this.IdentifierName();
+
+                    prop = this.peek("name") === "ATNAME" && !isSuper ?
+                        this.AtName() :
+                        this.IdentifierName();
 
                     expr = new AST.MemberExpression(
                         expr,
@@ -926,6 +929,7 @@ export class Parser {
             case "{": return this.ObjectLiteral();
             case "(": return this.ParenExpression();
             case "[": return this.ArrayLiteral();
+            case "ATNAME": return this.AtName();
 
             case "IDENTIFIER":
 
@@ -1148,6 +1152,8 @@ export class Parser {
 
             case "=":
 
+                // TODO:  Allow AtName here?
+
                 // Re-read token as an identifier
                 this.unpeek();
 
@@ -1163,6 +1169,8 @@ export class Parser {
 
             case ",":
             case "}":
+
+                // TODO:  Allow AtName here?
 
                 // Re-read token as an identifier
                 this.unpeek();
@@ -1197,10 +1205,19 @@ export class Parser {
             case "IDENTIFIER": return this.IdentifierName();
             case "STRING": return this.StringLiteral();
             case "NUMBER": return this.NumberLiteral();
+            case "ATNAME": return this.AtName();
             case "[": return this.ComputedPropertyName();
         }
 
         this.unexpected(token);
+    }
+
+    AtName() {
+
+        // TODO:  Only allow within class?  What about nested classes?
+
+        var token = this.readToken("ATNAME");
+        return new AST.AtName(token.value, token.start, token.end);
     }
 
     ComputedPropertyName() {
@@ -1431,7 +1448,7 @@ export class Parser {
             // NOTE: Patterns must have initializers when not in declaration
             // section of a for statement
 
-            this.read("=");
+            this.read();
             init = this.AssignmentExpression(noIn);
 
         } else if (isConst) {
@@ -2111,7 +2128,7 @@ export class Parser {
 
         if (allowDefault && this.peek() === "=") {
 
-            this.read("=");
+            this.read();
             init = this.AssignmentExpression();
         }
 
@@ -2240,10 +2257,36 @@ export class Parser {
         return new AST.ClassBody(list, start, this.nodeEnd());
     }
 
+    FieldDefinition() {
+
+        var start = this.nodeStart(),
+            name = this.AtName(),
+            init = null;
+
+        if (this.peek("name") === "=") {
+
+            this.read();
+            init = this.AssignmentExpression();
+        }
+
+        this.Semicolon();
+
+        return new AST.FieldDefinition(name, init, start, this.nodeEnd());
+    }
+
     ClassElement() {
 
         var start = this.nodeStart(),
             isStatic = false;
+
+        // TODO:  Reduce repitition here
+
+        // Check for private definition
+        if (this.peek("name") === "ATNAME" &&
+            this.peekAt("name", 1) !== "(") {
+
+            return new AST.ClassElement(false, this.FieldDefinition(), start, this.nodeEnd());
+        }
 
         // Check for static modifier
         if (this.peekToken("name").value === "static" &&
@@ -2267,6 +2310,7 @@ export class Parser {
                 this.fail("Invalid constructor property in class definition", name);
         }
 
+        // TODO:  Refactor AST here
         return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
     }
 

@@ -71,7 +71,7 @@
                start: 10,
                end: 43,
                static: false,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 10,
                   end: 43,

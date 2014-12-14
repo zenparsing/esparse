@@ -31,7 +31,7 @@ export class Validate {
                 return;
 
             case "MemberExpression":
-            case "VirtualPropertyExpression":
+            case "PrivateName":
                 return;
 
             case "ObjectPattern":

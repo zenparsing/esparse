@@ -92,7 +92,7 @@
                start: 10,
                end: 23,
                static: true,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 17,
                   end: 23,
@@ -126,7 +126,7 @@
                start: 10,
                end: 28,
                static: false,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 10,
                   end: 28,
@@ -182,7 +182,7 @@
                start: 10,
                end: 16,
                static: false,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 10,
                   end: 16,
@@ -194,7 +194,7 @@
                start: 17,
                end: 23,
                static: false,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 17,
                   end: 23,
@@ -228,7 +228,7 @@
                start: 10,
                end: 23,
                static: true,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 17,
                   end: 23,
@@ -240,7 +240,7 @@
                start: 24,
                end: 37,
                static: true,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 31,
                   end: 37,
@@ -274,7 +274,7 @@
                start: 10,
                end: 16,
                static: false,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 10,
                   end: 16,
@@ -286,7 +286,7 @@
                start: 17,
                end: 30,
                static: true,
-               method:
+               definition:
                 { type: 'MethodDefinition',
                   start: 24,
                   end: 30,
