@@ -2234,17 +2234,86 @@ export class Parser {
         return new AST.ClassBody(list, start, this.nodeEnd());
     }
 
+    PrivateDeclaration() {
+
+        var start = this.nodeStart(),
+            list = [];
+
+        this.readKeyword("private");
+
+        while (true) {
+
+            list.push(this.PrivateDeclarator());
+
+            if (this.peek() === ",") this.read();
+            else break;
+        }
+
+        this.Semicolon();
+
+        return new AST.VariableDeclaration("private", list, start, this.nodeEnd());
+    }
+
+    PrivateDeclarator() {
+
+        var start = this.nodeStart(),
+            ident = this.BindingIdentifier(),
+            init = null;
+
+        if (this.peek() === "=") {
+
+            this.read();
+            init = this.AssignmentExpression();
+        }
+
+        return new AST.VariableDeclarator(ident, init, start, this.nodeEnd());
+    }
+
     ClassElement() {
 
         var start = this.nodeStart(),
-            isStatic = false;
+            isStatic = false,
+            next = this.peekToken("name").value,
+            next2 = this.peekTokenAt("name", 1);
 
-        // Check for static modifier
-        if (this.peekToken("name").value === "static" &&
-            this.peekAt("name", 1) !== "(") {
+        // TODO:  Rename next2 var
+        if (next2.type !== "(") {
 
-            isStatic = true;
-            this.read();
+            switch (next) {
+
+                case "let":
+                case "var":
+                case "const":
+                    this.unpeek();
+                    return this.LexicalDeclaration();
+
+                case "class":
+                    this.unpeek();
+                    return this.ClassDeclaration();
+
+                case "function":
+                    this.unpeek();
+                    return this.FunctionDeclaration();
+
+                case "private":
+                    this.unpeek();
+                    return this.PrivateDeclaration();
+
+                case "static":
+                    this.read();
+                    isStatic = true;
+                    break;
+
+                default:
+
+                    if (next2.value === "function") {
+
+                        this.unpeek();
+                        return this.FunctionDeclaration();
+                    }
+
+                    break;
+            }
         }
 
         var method = this.MethodDefinition(),
@@ -2261,7 +2330,6 @@ export class Parser {
                 this.fail("Invalid constructor property in class definition", name);
         }
 
-        // TODO:  Refactor AST here
         return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
     }
 
