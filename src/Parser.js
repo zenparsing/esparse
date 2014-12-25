@@ -2573,6 +2573,24 @@ export class Parser {
 
 }
 
+function mixin(target, ...sources) {
+
+    target = target.prototype;
+
+    var {
+        getOwnPropertyNames: ownNames,
+        getOwnPropertySymbols: ownSymbols,
+        getOwnPropertyDescriptor: ownDesc,
+        prototype: { hasOwnProperty: hasOwn } } = Object;
+
+    sources
+    .map(source => source.prototype)
+    .forEach(source =>
+        ownNames(source)
+        .concat(ownSymbols(source))
+        .filter(key => !hasOwn.call(target, key))
+        .forEach(key => Object.defineProperty(target, key, ownDesc(source, key))));
+}
+
 // Add externally defined methods
-Object.assign(Parser.prototype, Transform.prototype);
-Object.assign(Parser.prototype, Validate.prototype);
+mixin(Parser, Transform, Validate);
