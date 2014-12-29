@@ -759,7 +759,10 @@ export class Parser {
                 case ".":
 
                     this.read();
-                    prop = this.IdentifierName();
+
+                    prop = this.peek("name") === "ATNAME" && !isSuper ?
+                        this.AtName() :
+                        this.IdentifierName();
 
                     expr = new AST.MemberExpression(
                         expr,
@@ -937,6 +940,7 @@ export class Parser {
             case "{": return this.ObjectLiteral();
             case "(": return this.ParenExpression();
             case "[": return this.ArrayLiteral();
+            case "ATNAME": return this.AtName();
 
             case "IDENTIFIER":
 
@@ -996,6 +1000,14 @@ export class Parser {
 
         var token = this.readToken("IDENTIFIER", "name");
         return new AST.Identifier(token.value, "", token.start, token.end);
+    }
+
+    AtName() {
+
+        // TODO:  Only allow within class?  What about nested classes?
+
+        var token = this.readToken("ATNAME");
+        return new AST.AtName(token.value, token.start, token.end);
     }
 
     StringLiteral() {
@@ -1159,6 +1171,8 @@ export class Parser {
 
             case "=":
 
+                // TODO:  Allow AtName here?
+
                 // Re-read token as an identifier
                 this.unpeek();
 
@@ -1174,6 +1188,8 @@ export class Parser {
 
             case ",":
             case "}":
+
+                // TODO:  Allow AtName here?
 
                 // Re-read token as an identifier
                 this.unpeek();
@@ -1208,6 +1224,7 @@ export class Parser {
             case "IDENTIFIER": return this.IdentifierName();
             case "STRING": return this.StringLiteral();
             case "NUMBER": return this.NumberLiteral();
+            case "ATNAME": return this.AtName();
             case "[": return this.ComputedPropertyName();
         }
 
@@ -2254,27 +2271,7 @@ export class Parser {
     PrivateDeclaration() {
 
         var start = this.nodeStart(),
-            list = [];
-
-        this.readKeyword("private");
-
-        while (true) {
-
-            list.push(this.PrivateDeclarator());
-
-            if (this.peek() === ",") this.read();
-            else break;
-        }
-
-        this.Semicolon();
-
-        return new AST.VariableDeclaration("private", list, start, this.nodeEnd());
-    }
-
-    PrivateDeclarator() {
-
-        var start = this.nodeStart(),
-            ident = this.BindingIdentifier(),
+            name = this.AtName(),
             init = null;
 
         if (this.peek() === "=") {
@@ -2283,10 +2280,15 @@ export class Parser {
             init = this.AssignmentExpression();
         }
 
-        return new AST.VariableDeclarator(ident, init, start, this.nodeEnd());
+        this.Semicolon();
+
+        return new AST.PrivateDeclaration(name, init, start, this.nodeEnd());
     }
 
     ClassElement() {
+
+        if (this.peek() === "ATNAME")
+            return this.PrivateDeclaration();
 
         var start = this.nodeStart(),
             isStatic = false,
@@ -2311,10 +2313,6 @@ export class Parser {
                 case "function":
                     this.unpeek();
                     return this.FunctionDeclaration();
-
-                case "private":
-                    this.unpeek();
-                    return this.PrivateDeclaration();
 
                 case "static":
                     this.read();

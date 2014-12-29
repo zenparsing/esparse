@@ -31,6 +31,7 @@ export class Validate {
                 return;
 
             case "MemberExpression":
+            case "AtName":
                 return;
 
             case "ObjectPattern":

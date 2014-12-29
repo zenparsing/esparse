@@ -26,6 +26,14 @@ export var AST = {
         this.context = context;
     },
 
+    AtName(value, start, end) {
+
+        this.type = "AtName";
+        this.start = start;
+        this.end = end;
+        this.value = value;
+    },
+
     NumberLiteral(value, start, end) {
 
         this.type = "NumberLiteral";
@@ -629,6 +637,15 @@ export var AST = {
         this.end = end;
         this.static = isStatic;
         this.definition = definition;
+    },
+
+    PrivateDeclaration(name, initializer, start, end) {
+
+        this.type = "PrivateDeclaration";
+        this.start = start;
+        this.end = end;
+        this.name = name;
+        this.initializer = initializer;
     },
 
     ModuleDeclaration(identifier, body, start, end) {
