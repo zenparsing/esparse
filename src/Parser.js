@@ -686,6 +686,17 @@ export class Parser {
         if (this.peekAwait())
             type = "await";
 
+        if (type === "::") {
+
+            this.read();
+
+            return new AST.BindExpression(
+                null,
+                this.MemberExpression(false),
+                start,
+                this.nodeEnd());
+        }
+
         if (isUnary(type)) {
 
             this.read();
@@ -830,11 +841,17 @@ export class Parser {
                     if (isSuper)
                         this.fail();
 
+                    if (!allowCall) {
+
+                        exit = true;
+                        break;
+                    }
+
                     this.read();
 
-                    expr = new AST.VirtualPropertyExpression(
+                    expr = new AST.BindExpression(
                         expr,
-                        this.Identifier(true),
+                        this.MemberExpression(false),
                         start,
                         this.nodeEnd());
 
