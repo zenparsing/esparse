@@ -686,17 +686,6 @@ export class Parser {
         if (this.peekAwait())
             type = "await";
 
-        if (type === "::") {
-
-            this.read();
-
-            return new AST.BindExpression(
-                null,
-                this.MemberExpression(false),
-                start,
-                this.nodeEnd());
-        }
-
         if (isUnary(type)) {
 
             this.read();
@@ -738,11 +727,15 @@ export class Parser {
 
             case "super":
                 expr = this.SuperExpression();
-                isSuper = false;
+                isSuper = true;
                 break;
 
             case "new":
                 expr = this.NewExpression();
+                break;
+
+            case "::":
+                expr = null;
                 break;
 
             default:
