@@ -1160,18 +1160,16 @@ export class Parser {
 
     PropertyDefinition() {
 
+        if (this.peek("name") === "*")
+            return this.MethodDefinition();
+
         var start = this.nodeStart(),
             node,
             name;
 
-        if (this.peek("name") === "*")
-            return this.MethodDefinition();
-
         switch (this.peekAt("name", 1)) {
 
             case "=":
-
-                // TODO:  Allow AtName here?
 
                 // Re-read token as an identifier
                 this.unpeek();
@@ -1188,8 +1186,6 @@ export class Parser {
 
             case ",":
             case "}":
-
-                // TODO:  Allow AtName here?
 
                 // Re-read token as an identifier
                 this.unpeek();
@@ -1224,7 +1220,6 @@ export class Parser {
             case "IDENTIFIER": return this.IdentifierName();
             case "STRING": return this.StringLiteral();
             case "NUMBER": return this.NumberLiteral();
-            case "ATNAME": return this.AtName();
             case "[": return this.ComputedPropertyName();
         }
 
