@@ -5,19 +5,19 @@
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 10,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 10,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 9,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 7,
@@ -30,19 +30,19 @@
 { type: 'Script',
   start: 0,
   end: 12,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 12,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 12,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 11,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 9,
@@ -55,19 +55,19 @@
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 10,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 10,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 9,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 7,
@@ -80,19 +80,19 @@
 { type: 'Script',
   start: 0,
   end: 12,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 12,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 11,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 10,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 7,
@@ -101,27 +101,27 @@
              trailingComma: true } } } ] },
 
 /** ({ x }); **/
-'data property without initializer': 
+'data property without initializer':
 { type: 'Script',
   start: 0,
   end: 8,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 8,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 7,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 6,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 4,
-                  name: 
+                  name:
                    { type: 'Identifier',
                      start: 3,
                      end: 4,
@@ -135,19 +135,19 @@
 { type: 'Script',
   start: 0,
   end: 16,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 16,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 16,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 15,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 7,
@@ -161,11 +161,11 @@
              trailingComma: false } } } ] },
 
 /** "use strict"; ({ package: 0 }); **/
-'strict mode keywords are allowed as property names': 
+'strict mode keywords are allowed as property names':
 { type: 'Script',
   start: 0,
   end: 31,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
@@ -173,19 +173,19 @@
      { type: 'ExpressionStatement',
        start: 14,
        end: 31,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 14,
           end: 30,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 15,
              end: 29,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 17,
                   end: 27,
-                  name: 
+                  name:
                    { type: 'Identifier',
                      start: 17,
                      end: 24,
@@ -195,11 +195,11 @@
              trailingComma: false } } } ] },
 
 /** "use strict"; ({ x: 1, x: 1 }); **/
-'duplicate data properties allowed in strict mode': 
+'duplicate data properties allowed in strict mode':
 { type: 'Script',
   start: 0,
   end: 31,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
@@ -207,15 +207,15 @@
      { type: 'ExpressionStatement',
        start: 14,
        end: 31,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 14,
           end: 30,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 15,
              end: 29,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 17,
                   end: 21,
@@ -229,26 +229,27 @@
              trailingComma: false } } } ] },
 
 /** ({ get x() {}, get x() {} }); **/
-'duplicate getters allowed': 
+'duplicate getters allowed':
 { type: 'Script',
   start: 0,
   end: 29,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 29,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 28,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 27,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 13,
+                  static: false,
                   kind: 'get',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
                   params: [],
@@ -256,6 +257,7 @@
                 { type: 'MethodDefinition',
                   start: 15,
                   end: 25,
+                  static: false,
                   kind: 'get',
                   name: { type: 'Identifier', start: 19, end: 20, value: 'x', context: '' },
                   params: [],
@@ -263,33 +265,34 @@
              trailingComma: false } } } ] },
 
 /** ({ set x(val) {}, set x(val) {} }); **/
-'duplicate setters allowed': 
+'duplicate setters allowed':
 { type: 'Script',
   start: 0,
   end: 35,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 35,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 34,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 33,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 16,
+                  static: false,
                   kind: 'set',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
-                  params: 
+                  params:
                    [ { type: 'FormalParameter',
                        start: 9,
                        end: 12,
-                       pattern: 
+                       pattern:
                         { type: 'Identifier',
                           start: 9,
                           end: 12,
@@ -300,13 +303,14 @@
                 { type: 'MethodDefinition',
                   start: 18,
                   end: 31,
+                  static: false,
                   kind: 'set',
                   name: { type: 'Identifier', start: 22, end: 23, value: 'x', context: '' },
-                  params: 
+                  params:
                    [ { type: 'FormalParameter',
                        start: 24,
                        end: 27,
-                       pattern: 
+                       pattern:
                         { type: 'Identifier',
                           start: 24,
                           end: 27,
@@ -317,26 +321,27 @@
              trailingComma: false } } } ] },
 
 /** ({ get x() {}, x: 1 }); **/
-'conflict between getter and data property allowed': 
+'conflict between getter and data property allowed':
 { type: 'Script',
   start: 0,
   end: 23,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 23,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 22,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 21,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 13,
+                  static: false,
                   kind: 'get',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
                   params: [],
@@ -349,33 +354,34 @@
              trailingComma: false } } } ] },
 
 /** ({ set x(val) {}, x: 1 }); **/
-'conflict between setter and data property allowed': 
+'conflict between setter and data property allowed':
 { type: 'Script',
   start: 0,
   end: 26,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 26,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 25,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 24,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 16,
+                  static: false,
                   kind: 'set',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
-                  params: 
+                  params:
                    [ { type: 'FormalParameter',
                        start: 9,
                        end: 12,
-                       pattern: 
+                       pattern:
                         { type: 'Identifier',
                           start: 9,
                           end: 12,
@@ -391,33 +397,34 @@
              trailingComma: false } } } ] },
 
 /** ({ x(val) {}, x: 1 }); **/
-'conflict between method and data property allowed': 
+'conflict between method and data property allowed':
 { type: 'Script',
   start: 0,
   end: 22,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 22,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 21,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 20,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 12,
+                  static: false,
                   kind: '',
                   name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
-                  params: 
+                  params:
                    [ { type: 'FormalParameter',
                        start: 5,
                        end: 8,
-                       pattern: 
+                       pattern:
                         { type: 'Identifier',
                           start: 5,
                           end: 8,
@@ -433,27 +440,27 @@
              trailingComma: false } } } ] },
 
 /** ({ x, x }) **/
-'duplicate data properties without initializers allowed': 
+'duplicate data properties without initializers allowed':
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 10,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 10,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 9,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 4,
-                  name: 
+                  name:
                    { type: 'Identifier',
                      start: 3,
                      end: 4,
@@ -463,7 +470,7 @@
                 { type: 'PropertyDefinition',
                   start: 6,
                   end: 7,
-                  name: 
+                  name:
                    { type: 'Identifier',
                      start: 6,
                      end: 7,
@@ -477,22 +484,23 @@
 { type: 'Script',
   start: 0,
   end: 32,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 32,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 31,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 30,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 13,
+                  static: false,
                   kind: 'get',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
                   params: [],
@@ -500,13 +508,14 @@
                 { type: 'MethodDefinition',
                   start: 15,
                   end: 28,
+                  static: false,
                   kind: 'set',
                   name: { type: 'Identifier', start: 19, end: 20, value: 'x', context: '' },
-                  params: 
+                  params:
                    [ { type: 'FormalParameter',
                        start: 21,
                        end: 24,
-                       pattern: 
+                       pattern:
                         { type: 'Identifier',
                           start: 21,
                           end: 24,
@@ -526,27 +535,27 @@
 'shorthand data property cannot be a strict reserved word in strict mode': {},
 
 /** ({ package }) **/
-'shorthand data property with strict reserved word': 
+'shorthand data property with strict reserved word':
 { type: 'Script',
   start: 0,
   end: 13,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 13,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 12,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 10,
-                  name: 
+                  name:
                    { type: 'Identifier',
                      start: 3,
                      end: 10,

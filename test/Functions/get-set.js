@@ -5,22 +5,23 @@
 { type: 'Script',
   start: 0,
   end: 17,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 17,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 16,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 15,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 13,
+                  static: false,
                   kind: 'get',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
                   params: [],
@@ -28,33 +29,34 @@
              trailingComma: false } } } ] },
 
 /** ({ set x(val) {} }); **/
-'object literal with setter': 
+'object literal with setter':
 { type: 'Script',
   start: 0,
   end: 20,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 20,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 19,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 18,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 16,
+                  static: false,
                   kind: 'set',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
-                  params: 
+                  params:
                    [ { type: 'FormalParameter',
                        start: 9,
                        end: 12,
-                       pattern: 
+                       pattern:
                         { type: 'Identifier',
                           start: 9,
                           end: 12,
@@ -65,23 +67,23 @@
              trailingComma: false } } } ] },
 
 /** ({ get: 0, set: 0 }); **/
-'get and set are valid property names': 
+'get and set are valid property names':
 { type: 'Script',
   start: 0,
   end: 21,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 21,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 20,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 19,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 9,
@@ -90,7 +92,7 @@
                 { type: 'PropertyDefinition',
                   start: 11,
                   end: 17,
-                  name: 
+                  name:
                    { type: 'Identifier',
                      start: 11,
                      end: 14,
@@ -100,41 +102,42 @@
              trailingComma: false } } } ] },
 
 /** ({ set x({ y }) {} }); **/
-'setter can have a destructuring param': 
+'setter can have a destructuring param':
 { type: 'Script',
   start: 0,
   end: 22,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 22,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 21,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 20,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 18,
+                  static: false,
                   kind: 'set',
                   name: { type: 'Identifier', start: 7, end: 8, value: 'x', context: '' },
-                  params: 
+                  params:
                    [ { type: 'FormalParameter',
                        start: 9,
                        end: 14,
-                       pattern: 
+                       pattern:
                         { type: 'ObjectPattern',
                           start: 9,
                           end: 14,
-                          properties: 
+                          properties:
                            [ { type: 'PatternProperty',
                                start: 11,
                                end: 12,
-                               name: 
+                               name:
                                 { type: 'Identifier',
                                   start: 11,
                                   end: 12,

@@ -5,27 +5,27 @@
 { type: 'Script',
   start: 0,
   end: 12,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 12,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 12,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 11,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 3,
                   end: 9,
-                  name: 
+                  name:
                    { type: 'ComputedPropertyName',
                      start: 3,
                      end: 6,
-                     expression: 
+                     expression:
                       { type: 'Identifier',
                         start: 4,
                         end: 5,
@@ -39,28 +39,29 @@
 { type: 'Script',
   start: 0,
   end: 14,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 14,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 14,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 13,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 11,
+                  static: false,
                   kind: '',
-                  name: 
+                  name:
                    { type: 'ComputedPropertyName',
                      start: 3,
                      end: 6,
-                     expression: 
+                     expression:
                       { type: 'Identifier',
                         start: 4,
                         end: 5,
@@ -75,28 +76,29 @@
 { type: 'Script',
   start: 0,
   end: 37,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 37,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 37,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 36,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 15,
+                  static: false,
                   kind: 'get',
-                  name: 
+                  name:
                    { type: 'ComputedPropertyName',
                      start: 7,
                      end: 10,
-                     expression: 
+                     expression:
                       { type: 'Identifier',
                         start: 8,
                         end: 9,
@@ -107,22 +109,23 @@
                 { type: 'MethodDefinition',
                   start: 17,
                   end: 34,
+                  static: false,
                   kind: 'set',
-                  name: 
+                  name:
                    { type: 'ComputedPropertyName',
                      start: 21,
                      end: 24,
-                     expression: 
+                     expression:
                       { type: 'Identifier',
                         start: 22,
                         end: 23,
                         value: 'x',
                         context: 'variable' } },
-                  params: 
+                  params:
                    [ { type: 'FormalParameter',
                        start: 25,
                        end: 30,
-                       pattern: 
+                       pattern:
                         { type: 'Identifier',
                           start: 25,
                           end: 30,
@@ -138,28 +141,29 @@
 { type: 'Script',
   start: 0,
   end: 15,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 15,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 15,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 14,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 12,
+                  static: false,
                   kind: 'generator',
-                  name: 
+                  name:
                    { type: 'ComputedPropertyName',
                      start: 4,
                      end: 7,
-                     expression: 
+                     expression:
                       { type: 'Identifier',
                         start: 5,
                         end: 6,
@@ -174,7 +178,7 @@
 { type: 'Script',
   start: 0,
   end: 34,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
@@ -182,23 +186,23 @@
      { type: 'ExpressionStatement',
        start: 14,
        end: 34,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 14,
           end: 34,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 15,
              end: 33,
-             properties: 
+             properties:
               [ { type: 'PropertyDefinition',
                   start: 17,
                   end: 23,
-                  name: 
+                  name:
                    { type: 'ComputedPropertyName',
                      start: 17,
                      end: 20,
-                     expression: 
+                     expression:
                       { type: 'Identifier',
                         start: 18,
                         end: 19,
@@ -208,11 +212,11 @@
                 { type: 'PropertyDefinition',
                   start: 25,
                   end: 31,
-                  name: 
+                  name:
                    { type: 'ComputedPropertyName',
                      start: 25,
                      end: 28,
-                     expression: 
+                     expression:
                       { type: 'Identifier',
                         start: 26,
                         end: 27,

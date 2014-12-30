@@ -5,22 +5,23 @@
 { type: 'Script',
   start: 0,
   end: 13,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 12,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 11,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 9,
+                  static: false,
                   kind: '',
                   name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
                   params: [],
@@ -32,22 +33,23 @@
 { type: 'Script',
   start: 0,
   end: 14,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 14,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 13,
-          expression: 
+          expression:
            { type: 'ObjectLiteral',
              start: 1,
              end: 12,
-             properties: 
+             properties:
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 10,
+                  static: false,
                   kind: 'generator',
                   name: { type: 'Identifier', start: 4, end: 5, value: 'x', context: '' },
                   params: [],

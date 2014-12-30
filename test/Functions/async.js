@@ -190,6 +190,7 @@ function f() {}
               [ { type: 'MethodDefinition',
                   start: 3,
                   end: 15,
+                  static: false,
                   kind: 'async',
                   name: { type: 'Identifier', start: 9, end: 10, value: 'f', context: '' },
                   params: [],

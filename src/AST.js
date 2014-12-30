@@ -313,11 +313,12 @@ export var AST = {
         this.pattern = pattern;
     },
 
-    MethodDefinition(kind, name, params, body, start, end) {
+    MethodDefinition(isStatic, kind, name, params, body, start, end) {
 
         this.type = "MethodDefinition";
         this.start = start;
         this.end = end;
+        this.static = isStatic;
         this.kind = kind;
         this.name = name;
         this.params = params;
@@ -628,15 +629,6 @@ export var AST = {
         this.start = start;
         this.end = end;
         this.elements = elems;
-    },
-
-    ClassElement(isStatic, definition, start, end) {
-
-        this.type = "ClassElement";
-        this.start = start;
-        this.end = end;
-        this.static = isStatic;
-        this.definition = definition;
     },
 
     PrivateDeclaration(name, initializer, start, end) {

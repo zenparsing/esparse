@@ -67,55 +67,51 @@
           start: 8,
           end: 45,
           elements:
-           [ { type: 'ClassElement',
+           [ { type: 'MethodDefinition',
                start: 10,
                end: 43,
                static: false,
-               definition:
-                { type: 'MethodDefinition',
-                  start: 10,
+               kind: 'async-generator',
+               name:
+                { type: 'Identifier',
+                  start: 17,
+                  end: 19,
+                  value: 'ag',
+                  context: '' },
+               params: [],
+               body:
+                { type: 'FunctionBody',
+                  start: 22,
                   end: 43,
-                  kind: 'async-generator',
-                  name:
-                   { type: 'Identifier',
-                     start: 17,
-                     end: 19,
-                     value: 'ag',
-                     context: '' },
-                  params: [],
-                  body:
-                   { type: 'FunctionBody',
-                     start: 22,
-                     end: 43,
-                     statements:
-                      [ { type: 'ExpressionStatement',
+                  statements:
+                   [ { type: 'ExpressionStatement',
+                       start: 24,
+                       end: 32,
+                       expression:
+                        { type: 'UnaryExpression',
                           start: 24,
-                          end: 32,
+                          end: 31,
+                          operator: 'await',
                           expression:
-                           { type: 'UnaryExpression',
-                             start: 24,
+                           { type: 'Identifier',
+                             start: 30,
                              end: 31,
-                             operator: 'await',
-                             expression:
-                              { type: 'Identifier',
-                                start: 30,
-                                end: 31,
-                                value: 'x',
-                                context: 'variable' } } },
-                        { type: 'ExpressionStatement',
+                             value: 'x',
+                             context: 'variable' } } },
+                     { type: 'ExpressionStatement',
+                       start: 33,
+                       end: 41,
+                       expression:
+                        { type: 'YieldExpression',
                           start: 33,
-                          end: 41,
+                          end: 40,
+                          delegate: false,
                           expression:
-                           { type: 'YieldExpression',
-                             start: 33,
+                           { type: 'Identifier',
+                             start: 39,
                              end: 40,
-                             delegate: false,
-                             expression:
-                              { type: 'Identifier',
-                                start: 39,
-                                end: 40,
-                                value: 'y',
-                                context: 'variable' } } } ] } } } ] } } ] },
+                             value: 'y',
+                             context: 'variable' } } } ] } } ] } } ] },
 
 /** async function *f() { await x; yield y; } **/
 'await and yield are allowed in async generators':

@@ -99,6 +99,20 @@ function isGeneratorModifier(value) {
     return value === "async" || value === "";
 }
 
+// Returns true if the value is a method definition keyword
+function isMethodKeyword(value) {
+
+    switch (value) {
+
+        case "get":
+        case "set":
+        case "static":
+            return true;
+    }
+
+    return false;
+}
+
 // Returns the value of the specified token, if it is an identifier and does not
 // contain any unicode escapes
 function keywordFromToken(token) {
@@ -2021,11 +2035,21 @@ export class Parser {
             this.nodeEnd());
     }
 
-    MethodDefinition(name) {
+    MethodDefinition(name, classElement) {
 
         var start = name ? name.start : this.nodeStart(),
+            isStatic = false,
             kind = "",
             val;
+
+        if (!name &&
+            classElement &&
+            this.peekToken("name").value === "static" &&
+            this.peekAt("name", 1) !== "(") {
+
+            this.read();
+            isStatic = true;
+        }
 
         if (!name && this.peek("name") === "*") {
 
@@ -2071,6 +2095,7 @@ export class Parser {
         this.popContext();
 
         return new AST.MethodDefinition(
+            isStatic,
             kind,
             name,
             params,
@@ -2275,54 +2300,42 @@ export class Parser {
 
     ClassElement() {
 
-        if (this.peek() === "ATNAME")
+        var next = this.peekToken("name");
+
+        if (next.type === "ATNAME")
             return this.PrivateDeclaration();
 
-        var start = this.nodeStart(),
-            isStatic = false,
-            next = this.peekToken("name").value,
-            next2 = this.peekTokenAt("name", 1);
+        if (next.type === "IDENTIFIER" &&
+            !isMethodKeyword(next.value) &&
+            this.peekAt("name", 1) !== "(") {
 
-        // TODO:  Rename next2 var
-        if (next2.type !== "(") {
+            this.unpeek();
 
-            switch (next) {
+            switch (this.peek()) {
 
-                case "let":
+                case "class": return this.ClassDeclaration();
+                case "function": return this.FunctionDeclaration();
+
                 case "var":
                 case "const":
-                    this.unpeek();
                     return this.LexicalDeclaration();
 
-                case "class":
-                    this.unpeek();
-                    return this.ClassDeclaration();
+                case "IDENTIFIER":
 
-                case "function":
-                    this.unpeek();
-                    return this.FunctionDeclaration();
+                    if (this.peekLet())
+                        return this.LexicalDeclaration();
 
-                case "static":
-                    this.read();
-                    isStatic = true;
-                    break;
-
-                default:
-
-                    if (next2.value === "function") {
-
-                        this.unpeek();
+                    if (this.peekFunctionModifier())
                         return this.FunctionDeclaration();
-                    }
-
-                    break;
             }
+
+            this.unpeek();
         }
 
-        var method = this.MethodDefinition(),
+        var method = this.MethodDefinition(null, true),
             name = method.name;
 
-        if (isStatic) {
+        if (method.static) {
 
             if (name.type === "Identifier" && name.value === "prototype")
                 this.fail("Invalid prototype property in class definition", name);
@@ -2333,7 +2346,7 @@ export class Parser {
                 this.fail("Invalid constructor property in class definition", name);
         }
 
-        return new AST.ClassElement(isStatic, method, start, this.nodeEnd());
+        return method;
     }
 
     // === Modules ===
