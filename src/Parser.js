@@ -749,8 +749,12 @@ export class Parser {
                 break;
 
             case "::":
-                expr = null;
-                break;
+
+                if (allowCall) {
+
+                    expr = null;
+                    break;
+                }
 
             default:
                 expr = this.PrimaryExpression();
