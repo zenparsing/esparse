@@ -12,17 +12,21 @@
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 22,
-       specifiers:
-        [ { type: 'ImportSpecifier',
-            start: 9,
-            end: 10,
-            imported:
-             { type: 'Identifier',
+       imports:
+        { type: 'NamedImports',
+          start: 7,
+          end: 12,
+          specifiers:
+           [ { type: 'ImportSpecifier',
                start: 9,
                end: 10,
-               value: 'x',
-               context: 'declaration' },
-            local: null } ],
+               imported:
+                { type: 'Identifier',
+                  start: 9,
+                  end: 10,
+                  value: 'x',
+                  context: 'declaration' },
+               local: null } ] },
        from: { type: 'StringLiteral', start: 18, end: 21, value: 'x' } } ] },
 
 /*** import { x as y } from "x"; ***/
@@ -34,17 +38,21 @@
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 27,
-       specifiers:
-        [ { type: 'ImportSpecifier',
-            start: 9,
-            end: 15,
-            imported: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
-            local:
-             { type: 'Identifier',
-               start: 14,
+       imports:
+        { type: 'NamedImports',
+          start: 7,
+          end: 17,
+          specifiers:
+           [ { type: 'ImportSpecifier',
+               start: 9,
                end: 15,
-               value: 'y',
-               context: 'declaration' } } ],
+               imported: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
+               local:
+                { type: 'Identifier',
+                  start: 14,
+                  end: 15,
+                  value: 'y',
+                  context: 'declaration' } } ] },
        from: { type: 'StringLiteral', start: 23, end: 26, value: 'x' } } ] },
 
 /*** import {} from "x"; ***/
@@ -56,7 +64,7 @@
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 19,
-       specifiers: [],
+       imports: { type: 'NamedImports', start: 7, end: 9, specifiers: [] },
        from: { type: 'StringLiteral', start: 15, end: 18, value: 'x' } } ] },
 
 /*** import { x, } from "x"; ***/
@@ -68,18 +76,25 @@
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 23,
-       specifiers:
-        [ { type: 'ImportSpecifier',
-            start: 9,
-            end: 10,
-            imported:
-             { type: 'Identifier',
+       imports:
+        { type: 'NamedImports',
+          start: 7,
+          end: 13,
+          specifiers:
+           [ { type: 'ImportSpecifier',
                start: 9,
                end: 10,
-               value: 'x',
-               context: 'declaration' },
-            local: null } ],
+               imported:
+                { type: 'Identifier',
+                  start: 9,
+                  end: 10,
+                  value: 'x',
+                  context: 'declaration' },
+               local: null } ] },
        from: { type: 'StringLiteral', start: 19, end: 22, value: 'x' } } ] },
+
+/*** import { , } from "x"; ***/
+'import list cannot contain only a comma': {},
 
 /*** import { default as y } from "x"; ***/
 'import a keyword-named binding':
@@ -90,22 +105,26 @@
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 33,
-       specifiers:
-        [ { type: 'ImportSpecifier',
-            start: 9,
-            end: 21,
-            imported:
-             { type: 'Identifier',
+       imports:
+        { type: 'NamedImports',
+          start: 7,
+          end: 23,
+          specifiers:
+           [ { type: 'ImportSpecifier',
                start: 9,
-               end: 16,
-               value: 'default',
-               context: '' },
-            local:
-             { type: 'Identifier',
-               start: 20,
                end: 21,
-               value: 'y',
-               context: 'declaration' } } ],
+               imported:
+                { type: 'Identifier',
+                  start: 9,
+                  end: 16,
+                  value: 'default',
+                  context: '' },
+               local:
+                { type: 'Identifier',
+                  start: 20,
+                  end: 21,
+                  value: 'y',
+                  context: 'declaration' } } ] },
        from: { type: 'StringLiteral', start: 29, end: 32, value: 'x' } } ] },
 
 /*** import { default } from "x"; ***/
@@ -120,24 +139,95 @@
    [ { type: 'ImportDeclaration',
        start: 0,
        end: 11,
-       specifiers: null,
+       imports: null,
        from: { type: 'StringLiteral', start: 7, end: 10, value: 'x' } } ] },
 
 /*** import * as x from "x.js"; ***/
-"importing the module namespace":
+'importing the module namespace':
 { type: 'Module',
   start: 0,
   end: 26,
   statements:
-   [ { type: 'ModuleImport',
+   [ { type: 'ImportDeclaration',
        start: 0,
        end: 26,
-       identifier:
-        { type: 'Identifier',
-          start: 12,
+       imports:
+        { type: 'NamespaceImport',
+          start: 7,
           end: 13,
-          value: 'x',
-          context: 'declaration' },
+          identifier:
+           { type: 'Identifier',
+             start: 12,
+             end: 13,
+             value: 'x',
+             context: 'declaration' } },
        from: { type: 'StringLiteral', start: 19, end: 25, value: 'x.js' } } ] },
+
+/*** import x, * as y from "a"; ***/
+'importing a default and namespace':
+{ type: 'Module',
+  start: 0,
+  end: 26,
+  statements:
+   [ { type: 'ImportDeclaration',
+       start: 0,
+       end: 26,
+       imports:
+        { type: 'DefaultImport',
+          start: 7,
+          end: 16,
+          identifier:
+           { type: 'Identifier',
+             start: 7,
+             end: 8,
+             value: 'x',
+             context: 'declaration' },
+          imports:
+           { type: 'NamespaceImport',
+             start: 10,
+             end: 16,
+             identifier:
+              { type: 'Identifier',
+                start: 15,
+                end: 16,
+                value: 'y',
+                context: 'declaration' } } },
+       from: { type: 'StringLiteral', start: 22, end: 25, value: 'a' } } ] },
+
+/*** import x, { y } from "a"; ***/
+'importing a default and named imports':
+{ type: 'Module',
+  start: 0,
+  end: 25,
+  statements:
+   [ { type: 'ImportDeclaration',
+       start: 0,
+       end: 25,
+       imports:
+        { type: 'DefaultImport',
+          start: 7,
+          end: 15,
+          identifier:
+           { type: 'Identifier',
+             start: 7,
+             end: 8,
+             value: 'x',
+             context: 'declaration' },
+          imports:
+           { type: 'NamedImports',
+             start: 10,
+             end: 15,
+             specifiers:
+              [ { type: 'ImportSpecifier',
+                  start: 12,
+                  end: 13,
+                  imported:
+                   { type: 'Identifier',
+                     start: 12,
+                     end: 13,
+                     value: 'y',
+                     context: 'declaration' },
+                  local: null } ] } },
+       from: { type: 'StringLiteral', start: 21, end: 24, value: 'a' } } ] },
 
 })

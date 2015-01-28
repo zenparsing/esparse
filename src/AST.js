@@ -647,23 +647,6 @@ export var AST = {
         this.initializer = initializer;
     },
 
-    ModuleDeclaration(identifier, body, start, end) {
-
-        this.type = "ModuleDeclaration";
-        this.start = start;
-        this.end = end;
-        this.identifier = identifier;
-        this.body = body;
-    },
-
-    ModuleBody(statements, start, end) {
-
-        this.type = "ModuleBody";
-        this.start = start;
-        this.end = end;
-        this.statements = statements;
-    },
-
     ModuleImport(identifier, from, start, end) {
 
         this.type = "ModuleImport";
@@ -671,15 +654,6 @@ export var AST = {
         this.end = end;
         this.identifier = identifier;
         this.from = from;
-    },
-
-    ModuleAlias(identifier, path, start, end) {
-
-        this.type = "ModuleAlias";
-        this.start = start;
-        this.end = end;
-        this.identifier = identifier;
-        this.path = path;
     },
 
     ImportDefaultDeclaration(ident, from, start, end) {
@@ -691,13 +665,38 @@ export var AST = {
         this.from = from;
     },
 
-    ImportDeclaration(specifiers, from, start, end) {
+    ImportDeclaration(imports, from, start, end) {
 
         this.type = "ImportDeclaration";
         this.start = start;
         this.end = end;
-        this.specifiers = specifiers;
+        this.imports = imports;
         this.from = from;
+    },
+
+    NamespaceImport(identifier, start, end) {
+
+        this.type = "NamespaceImport";
+        this.start = start;
+        this.end = end;
+        this.identifier = identifier;
+    },
+
+    NamedImports(specifiers, start, end) {
+
+        this.type = "NamedImports";
+        this.start = start;
+        this.end = end;
+        this.specifiers = specifiers;
+    },
+
+    DefaultImport(identifier, imports, start, end) {
+
+        this.type = "DefaultImport";
+        this.start = start;
+        this.end = end;
+        this.identifier = identifier;
+        this.imports = imports;
     },
 
     ImportSpecifier(imported, local, start, end) {
@@ -709,12 +708,12 @@ export var AST = {
         this.local = local;
     },
 
-    ExportDeclaration(declaration, start, end) {
+    ExportDeclaration(exports, start, end) {
 
         this.type = "ExportDeclaration";
         this.start = start;
         this.end = end;
-        this.declaration = declaration;
+        this.exports = exports;
     },
 
     DefaultExport(binding, start, end) {
@@ -725,12 +724,12 @@ export var AST = {
         this.end = end;
     },
 
-    ExportsList(list, from, start, end) {
+    ExportClause(specifiers, from, start, end) {
 
-        this.type = "ExportsList";
+        this.type = "ExportClause";
         this.start = start;
         this.end = end;
-        this.specifiers = list;
+        this.specifiers = specifiers;
         this.from = from;
     },
 

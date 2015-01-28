@@ -12,7 +12,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 13,
-       declaration:
+       exports:
         { type: 'VariableDeclaration',
           start: 7,
           end: 13,
@@ -38,8 +38,8 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 13,
-       declaration:
-        { type: 'ExportsList',
+       exports:
+        { type: 'ExportClause',
           start: 7,
           end: 12,
           specifiers:
@@ -59,8 +59,8 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 16,
-       declaration:
-        { type: 'ExportsList',
+       exports:
+        { type: 'ExportClause',
           start: 7,
           end: 15,
           specifiers:
@@ -85,8 +85,8 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 18,
-       declaration:
-        { type: 'ExportsList',
+       exports:
+        { type: 'ExportClause',
           start: 7,
           end: 17,
           specifiers:
@@ -106,8 +106,8 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 24,
-       declaration:
-        { type: 'ExportsList',
+       exports:
+        { type: 'ExportClause',
           start: 7,
           end: 23,
           specifiers:
@@ -132,8 +132,8 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 27,
-       declaration:
-        { type: 'ExportsList',
+       exports:
+        { type: 'ExportClause',
           start: 7,
           end: 26,
           specifiers:
@@ -153,8 +153,8 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 18,
-       declaration:
-        { type: 'ExportsList',
+       exports:
+        { type: 'ExportClause',
           start: 7,
           end: 17,
           specifiers: null,
@@ -178,8 +178,8 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 23,
-       declaration:
-        { type: 'ExportsList',
+       exports:
+        { type: 'ExportClause',
           start: 7,
           end: 22,
           specifiers:
@@ -199,7 +199,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 25,
-       declaration:
+       exports:
         { type: 'DefaultExport',
           binding:
            { type: 'ClassDeclaration',
@@ -225,7 +225,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 24,
-       declaration:
+       exports:
         { type: 'DefaultExport',
           binding:
            { type: 'ClassExpression',
@@ -246,7 +246,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 30,
-       declaration:
+       exports:
         { type: 'DefaultExport',
           binding:
            { type: 'FunctionDeclaration',
@@ -273,7 +273,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 29,
-       declaration:
+       exports:
         { type: 'DefaultExport',
           binding:
            { type: 'FunctionExpression',
@@ -295,7 +295,7 @@
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 21,
-       declaration:
+       exports:
         { type: 'DefaultExport',
           binding:
            { type: 'BinaryExpression',

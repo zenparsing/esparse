@@ -2370,8 +2370,7 @@ export class Parser {
     ImportDeclaration() {
 
         var start = this.nodeStart(),
-            extra = null,
-            ident,
+            imports = null,
             from;
 
         this.read("import");
@@ -2379,67 +2378,77 @@ export class Parser {
         switch (this.peek()) {
 
             case "*":
+                imports = this.NamespaceImport();
+                break;
 
-                this.read();
-                this.readKeyword("as");
-                ident = this.BindingIdentifier();
-                this.readKeyword("from");
-                from = this.StringLiteral();
-                this.Semicolon();
-
-                return new AST.ModuleImport(ident, from, start, this.nodeEnd());
-
-            case "IDENTIFIER":
-
-                ident = this.BindingIdentifier();
-
-                if (this.peek() === ",") {
-
-                    this.read();
-
-                    switch (this.peek()) {
-
-                        case "*":
-                            this.read();
-                            this.readKeyword("as");
-                            extra = this.BindingIdentifier();
-                            break;
-
-                        case "{":
-                            extra = this.ImportSpecifierList();
-                            break;
-
-                        default:
-                            this.fail();
-                    }
-                }
-
-                this.readKeyword("from");
-                from = this.StringLiteral();
-                this.Semicolon();
-
-                return new AST.ImportDefaultDeclaration(ident, from, start, this.nodeEnd());
+            case "{":
+                imports = this.NamedImports();
+                break;
 
             case "STRING":
-
                 from = this.StringLiteral();
-                this.Semicolon();
+                break;
 
-                return new AST.ImportDeclaration(null, from, start, this.nodeEnd());
+            default:
+                imports = this.DefaultImport();
+                break;
         }
 
-        var list = this.ImportSpecifierList();
+        if (!from) {
 
-        this.readKeyword("from");
-        from = this.StringLiteral();
+            this.readKeyword("from");
+            from = this.StringLiteral();
+        }
+
         this.Semicolon();
 
-        return new AST.ImportDeclaration(list, from, start, this.nodeEnd());
+        return new AST.ImportDeclaration(imports, from, start, this.nodeEnd());
     }
 
-    ImportSpecifierList() {
+    DefaultImport() {
 
-        var list = [];
+        var start = this.nodeStart(),
+            ident = this.BindingIdentifier(),
+            extra = null;
+
+        if (this.peek() === ",") {
+
+            this.read();
+
+            switch (this.peek()) {
+
+                case "*":
+                    extra = this.NamespaceImport();
+                    break;
+
+                case "{":
+                    extra = this.NamedImports();
+                    break;
+
+                default:
+                    this.fail();
+            }
+        }
+
+        return new AST.DefaultImport(ident, extra, start, this.nodeEnd());
+    }
+
+    NamespaceImport() {
+
+        var start = this.nodeStart(),
+            ident;
+
+        this.read("*");
+        this.readKeyword("as");
+        ident = this.BindingIdentifier();
+
+        return new AST.NamespaceImport(ident, start, this.nodeEnd());
+    }
+
+    NamedImports() {
+
+        var start = this.nodeStart(),
+            list = [];
 
         this.read("{");
 
@@ -2453,7 +2462,7 @@ export class Parser {
 
         this.read("}");
 
-        return list;
+        return new AST.NamedImports(list, start, this.nodeEnd());
     }
 
     ImportSpecifier() {
@@ -2492,7 +2501,7 @@ export class Parser {
     ExportDeclaration() {
 
         var start = this.nodeStart(),
-            decl;
+            exports;
 
         this.read("export");
 
@@ -2500,42 +2509,42 @@ export class Parser {
 
             case "var":
             case "const":
-                decl = this.LexicalDeclaration();
+                exports = this.LexicalDeclaration();
                 break;
 
             case "function":
-                decl = this.FunctionDeclaration();
+                exports = this.FunctionDeclaration();
                 break;
 
             case "class":
-                decl = this.ClassDeclaration();
+                exports = this.ClassDeclaration();
                 break;
 
             case "default":
-                decl = this.DefaultExport();
+                exports = this.DefaultExport();
                 break;
 
             case "IDENTIFIER":
 
                 if (this.peekLet()) {
 
-                    decl = this.LexicalDeclaration();
+                    exports = this.LexicalDeclaration();
                     break;
                 }
 
                 if (this.peekFunctionModifier()) {
 
-                    decl = this.FunctionDeclaration();
+                    exports = this.FunctionDeclaration();
                     break;
                 }
 
             default:
-                decl = this.ExportsList();
+                exports = this.ExportClause();
                 this.Semicolon();
                 break;
         }
 
-        return new AST.ExportDeclaration(decl, start, this.nodeEnd());
+        return new AST.ExportDeclaration(exports, start, this.nodeEnd());
     }
 
     DefaultExport() {
@@ -2576,7 +2585,7 @@ export class Parser {
         return new AST.DefaultExport(binding, start, this.nodeEnd());
     }
 
-    ExportsList() {
+    ExportClause() {
 
         var start = this.nodeStart(),
             list = null,
@@ -2616,7 +2625,7 @@ export class Parser {
             }
        }
 
-        return new AST.ExportsList(list, from, start, this.nodeEnd());
+        return new AST.ExportClause(list, from, start, this.nodeEnd());
     }
 
     ExportSpecifier() {

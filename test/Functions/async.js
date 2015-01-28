@@ -380,7 +380,7 @@ function f() {}
    [ { type: 'ExportDeclaration',
        start: 0,
        end: 34,
-       declaration:
+       exports:
         { type: 'DefaultExport',
           binding:
            { type: 'FunctionExpression',
