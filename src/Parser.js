@@ -2370,6 +2370,7 @@ export class Parser {
     ImportDeclaration() {
 
         var start = this.nodeStart(),
+            extra = null,
             ident,
             from;
 
@@ -2391,6 +2392,28 @@ export class Parser {
             case "IDENTIFIER":
 
                 ident = this.BindingIdentifier();
+
+                if (this.peek() === ",") {
+
+                    this.read();
+
+                    switch (this.peek()) {
+
+                        case "*":
+                            this.read();
+                            this.readKeyword("as");
+                            extra = this.BindingIdentifier();
+                            break;
+
+                        case "{":
+                            extra = this.ImportSpecifierList();
+                            break;
+
+                        default:
+                            this.fail();
+                    }
+                }
+
                 this.readKeyword("from");
                 from = this.StringLiteral();
                 this.Semicolon();
@@ -2405,6 +2428,17 @@ export class Parser {
                 return new AST.ImportDeclaration(null, from, start, this.nodeEnd());
         }
 
+        var list = this.ImportSpecifierList();
+
+        this.readKeyword("from");
+        from = this.StringLiteral();
+        this.Semicolon();
+
+        return new AST.ImportDeclaration(list, from, start, this.nodeEnd());
+    }
+
+    ImportSpecifierList() {
+
         var list = [];
 
         this.read("{");
@@ -2418,11 +2452,8 @@ export class Parser {
         }
 
         this.read("}");
-        this.readKeyword("from");
-        from = this.StringLiteral();
-        this.Semicolon();
 
-        return new AST.ImportDeclaration(list, from, start, this.nodeEnd());
+        return list;
     }
 
     ImportSpecifier() {
