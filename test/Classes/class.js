@@ -287,5 +287,65 @@
 /** function() { super`kasdf`; } **/
 'super followed by template not allowed': {},
 
+/** class C { ; ; } **/
+'empty class elements - 1':
+{ type: 'Script',
+  start: 0,
+  end: 15,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 15,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 15,
+          elements:
+           [ { type: 'EmptyClassElement', start: 10, end: 11 },
+             { type: 'EmptyClassElement', start: 12, end: 13 } ] } } ] },
+
+/** class C { foo() {}; } **/
+'empty class elements - 2':
+{ type: 'Script',
+  start: 0,
+  end: 21,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 21,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 21,
+          elements:
+           [ { type: 'MethodDefinition',
+               start: 10,
+               end: 18,
+               static: false,
+               kind: '',
+               name:
+                { type: 'Identifier',
+                  start: 10,
+                  end: 13,
+                  value: 'foo',
+                  context: '' },
+               params: [],
+               body: { type: 'FunctionBody', start: 16, end: 18, statements: [] } },
+             { type: 'EmptyClassElement', start: 18, end: 19 } ] } } ] },
+
 
 })

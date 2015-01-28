@@ -2302,9 +2302,21 @@ export class Parser {
         return new AST.PrivateDeclaration(name, init, start, this.nodeEnd());
     }
 
+    EmptyClassElement() {
+
+        var start = this.nodeStart();
+
+        this.read(";");
+
+        return new AST.EmptyClassElement(start, this.nodeEnd());
+    }
+
     ClassElement() {
 
         var next = this.peekToken("name");
+
+        if (next.type === ";")
+            return this.EmptyClassElement();
 
         if (next.type === "ATNAME")
             return this.PrivateDeclaration();

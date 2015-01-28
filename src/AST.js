@@ -631,6 +631,13 @@ export var AST = {
         this.elements = elems;
     },
 
+    EmptyClassElement(start, end) {
+
+        this.type = "EmptyClassElement";
+        this.start = start;
+        this.end = end;
+    },
+
     PrivateDeclaration(name, initializer, start, end) {
 
         this.type = "PrivateDeclaration";
