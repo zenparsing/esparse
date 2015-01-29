@@ -647,24 +647,6 @@ export var AST = {
         this.initializer = initializer;
     },
 
-    ModuleImport(identifier, from, start, end) {
-
-        this.type = "ModuleImport";
-        this.start = start;
-        this.end = end;
-        this.identifier = identifier;
-        this.from = from;
-    },
-
-    ImportDefaultDeclaration(ident, from, start, end) {
-
-        this.type = "ImportDefaultDeclaration";
-        this.start = start;
-        this.end = end;
-        this.identifier = ident;
-        this.from = from;
-    },
-
     ImportDeclaration(imports, from, start, end) {
 
         this.type = "ImportDeclaration";
