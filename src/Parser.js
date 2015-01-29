@@ -346,9 +346,16 @@ export class Parser {
 
     peekAwait() {
 
-        return this.context.functionBody &&
-            this.context.isAsync &&
-            this.peekKeyword("await");
+        if (this.peekKeyword("await")) {
+
+            if (this.context.functionBody && this.context.isAsync)
+                return true;
+
+            if (this.isModule)
+                this.fail("Await is reserved within modules");
+        }
+
+        return false;
     }
 
     peekFunctionModifier() {
@@ -500,6 +507,7 @@ export class Parser {
 
     Script() {
 
+        this.isModule = false;
         this.pushContext();
 
         var start = this.nodeStart(),
@@ -512,6 +520,7 @@ export class Parser {
 
     Module() {
 
+        this.isModule = true;
         this.pushContext();
         this.setStrict(true);
 

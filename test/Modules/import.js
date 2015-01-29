@@ -230,4 +230,31 @@
                   local: null } ] } },
        from: { type: 'StringLiteral', start: 21, end: 24, value: 'a' } } ] },
 
+/*** await (1); ***/
+'await is reserved within modules - 1': {},
+
+/*** { await (1); } ***/
+'await is reserved within modules - 2': {},
+
+/** await (1) **/
+'await is not reserved in scripts':
+{ type: 'Script',
+  start: 0,
+  end: 9,
+  statements:
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 9,
+       expression:
+        { type: 'CallExpression',
+          start: 0,
+          end: 9,
+          callee:
+           { type: 'Identifier',
+             start: 0,
+             end: 5,
+             value: 'await',
+             context: 'variable' },
+          arguments: [ { type: 'NumberLiteral', start: 7, end: 8, value: 1 } ] } } ] },
+
 })
