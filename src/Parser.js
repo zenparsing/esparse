@@ -901,11 +901,8 @@ export class Parser {
 
         this.read("new");
 
-        var expr = this.peek() === "super" ?
-            this.SuperExpression() :
-            this.MemberExpression(false);
-
-        var args = this.peek("div") === "(" ? this.ArgumentList() : null;
+        var expr = this.MemberExpression(false),
+            args = this.peek("div") === "(" ? this.ArgumentList() : null;
 
         return new AST.NewExpression(expr, args, start, this.nodeEnd());
     }

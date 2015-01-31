@@ -98,14 +98,17 @@
                body: { type: 'FunctionBody', start: 21, end: 23, statements: [] } } ] } } ] },
 
 /** class C { m() { new super; } } **/
-'new super without argument list':
+'new super not allowed': {},
+
+/** class C { m() { new super.foo; } } **/
+'new applied to super property':
 { type: 'Script',
   start: 0,
-  end: 30,
+  end: 34,
   statements:
    [ { type: 'ClassDeclaration',
        start: 0,
-       end: 30,
+       end: 34,
        identifier:
         { type: 'Identifier',
           start: 6,
@@ -116,11 +119,11 @@
        body:
         { type: 'ClassBody',
           start: 8,
-          end: 30,
+          end: 34,
           elements:
            [ { type: 'MethodDefinition',
                start: 10,
-               end: 28,
+               end: 32,
                static: false,
                kind: '',
                name: { type: 'Identifier', start: 10, end: 11, value: 'm', context: '' },
@@ -128,16 +131,27 @@
                body:
                 { type: 'FunctionBody',
                   start: 14,
-                  end: 28,
+                  end: 32,
                   statements:
                    [ { type: 'ExpressionStatement',
                        start: 16,
-                       end: 26,
+                       end: 30,
                        expression:
                         { type: 'NewExpression',
                           start: 16,
-                          end: 25,
-                          callee: { type: 'SuperExpression', start: 20, end: 25 },
+                          end: 29,
+                          callee:
+                           { type: 'MemberExpression',
+                             start: 20,
+                             end: 29,
+                             object: { type: 'SuperExpression', start: 20, end: 25 },
+                             property:
+                              { type: 'Identifier',
+                                start: 26,
+                                end: 29,
+                                value: 'foo',
+                                context: '' },
+                             computed: false },
                           arguments: null } } ] } } ] } } ] },
 
 /** class C extends A + B {} **/
@@ -286,6 +300,9 @@
 
 /** function() { super`kasdf`; } **/
 'super followed by template not allowed': {},
+
+/** class C { constructor() { super } } **/
+'super is not a primary expression': {},
 
 /** class C { ; ; } **/
 'empty class elements - 1':
