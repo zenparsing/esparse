@@ -1,4 +1,4 @@
-import { AST } from "./AST.js";
+import * as AST from "./AST.js";
 import { isReservedWord } from "./Scanner.js";
 
 

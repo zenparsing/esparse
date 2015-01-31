@@ -1,5 +1,5 @@
 import { Parser } from "./Parser.js";
-import { AST } from "./AST.js";
+import * as AST from "./AST.js";
 
 function parse(input, options) {
 
