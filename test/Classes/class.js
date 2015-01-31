@@ -364,5 +364,53 @@
                body: { type: 'FunctionBody', start: 16, end: 18, statements: [] } },
              { type: 'EmptyClassElement', start: 18, end: 19 } ] } } ] },
 
+/** class C { constructor() { new.target } } **/
+'new.target meta property':
+{ type: 'Script',
+  start: 0,
+  end: 40,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 40,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 40,
+          elements:
+           [ { type: 'MethodDefinition',
+               start: 10,
+               end: 38,
+               static: false,
+               kind: '',
+               name:
+                { type: 'Identifier',
+                  start: 10,
+                  end: 21,
+                  value: 'constructor',
+                  context: '' },
+               params: [],
+               body:
+                { type: 'FunctionBody',
+                  start: 24,
+                  end: 38,
+                  statements:
+                   [ { type: 'ExpressionStatement',
+                       start: 26,
+                       end: 36,
+                       expression:
+                        { type: 'MetaProperty',
+                          start: 26,
+                          end: 36,
+                          left: 'new',
+                          right: 'target' } } ] } } ] } } ] },
+
 
 })

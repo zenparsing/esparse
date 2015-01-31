@@ -198,6 +198,15 @@ export var AST = {
         this.computed = computed;
     },
 
+    MetaProperty(left, right, start, end) {
+
+        this.type = "MetaProperty";
+        this.start = start;
+        this.end = end;
+        this.left = left;
+        this.right = right;
+    },
+
     BindExpression(left, right, start, end) {
 
         this.type = "BindExpression";

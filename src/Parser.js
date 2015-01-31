@@ -113,6 +113,24 @@ function isMethodKeyword(value) {
     return false;
 }
 
+// Returns true if the token is valid as the object of a meta property
+function isMetaLeft(token) {
+
+    return token === "new";
+}
+
+// Returns true if the supplied meta property pair is valid
+function isValidMeta(left, right) {
+
+    switch (left) {
+
+        case "new":
+            return right === "target";
+    }
+
+    return false;
+}
+
 // Returns the value of the specified token, if it is an identifier and does not
 // contain any unicode escapes
 function keywordFromToken(token) {
@@ -749,12 +767,17 @@ export class Parser {
         switch (token.type) {
 
             case "super":
+
                 expr = this.SuperExpression();
                 isSuper = true;
                 break;
 
             case "new":
-                expr = this.NewExpression();
+
+                expr = this.peekAt("", 1) === "." ?
+                    this.MetaProperty() :
+                    this.NewExpression();
+
                 break;
 
             case "::":
@@ -905,6 +928,22 @@ export class Parser {
             args = this.peek("div") === "(" ? this.ArgumentList() : null;
 
         return new AST.NewExpression(expr, args, start, this.nodeEnd());
+    }
+
+    MetaProperty() {
+
+        var start = this.nodeStart(),
+            left = this.read(),
+            right;
+
+        this.read(".");
+
+        right = this.readToken("IDENTIFIER", "name").value;
+
+        if (!isValidMeta(left, right))
+            this.fail("Invalid meta property", right);
+
+        return new AST.MetaProperty(left, right, start, this.nodeEnd());
     }
 
     SuperExpression() {
