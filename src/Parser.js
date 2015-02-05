@@ -1468,16 +1468,12 @@ export class Parser {
         var start = this.nodeStart(),
             token = this.peekToken(),
             kind = token.type,
-            isConst = false,
             list = [];
 
         switch (kind) {
 
             case "var":
-                break;
-
             case "const":
-                isConst = true;
                 break;
 
             case "IDENTIFIER":
@@ -1496,7 +1492,7 @@ export class Parser {
 
         while (true) {
 
-            list.push(this.VariableDeclarator(noIn, isConst));
+            list.push(this.VariableDeclarator(noIn, kind));
 
             if (this.peek() === ",") this.read();
             else break;
@@ -1505,7 +1501,7 @@ export class Parser {
         return new AST.VariableDeclaration(kind, list, start, this.nodeEnd());
     }
 
-    VariableDeclarator(noIn, isConst) {
+    VariableDeclarator(noIn, kind) {
 
         var start = this.nodeStart(),
             pattern = this.BindingPattern(),
@@ -1519,7 +1515,7 @@ export class Parser {
             this.read();
             init = this.AssignmentExpression(noIn);
 
-        } else if (isConst) {
+        } else if (kind === "const") {
 
             this.fail("Missing const initializer", pattern);
         }
