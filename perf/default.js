@@ -3,7 +3,6 @@ import { Scanner, parse } from "../src/";
 var Path = require("path"),
     FS = require("fs"),
     Esprima = require("./parsers/esprima.js"),
-    EsprimaHarmony = require("./parsers/esprima-harmony.js"),
     Acorn = require("./parsers/acorn.js");
 
 var reservedWord = new RegExp("^(?:" +
@@ -129,8 +128,7 @@ var parsers = {
     "scanner": scanOnly,
     "acorn": Acorn.parse,
     "esparse": parse,
-    "esprima": Esprima.parse,
-    "esprima-harmony": EsprimaHarmony.parse
+    "esprima": Esprima.parse
 };
 
 export function main(args) {
