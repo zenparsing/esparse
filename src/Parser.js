@@ -131,6 +131,12 @@ function isValidMeta(left, right) {
     return false;
 }
 
+// Returns true if the value is a known directive
+function isDirective(value) {
+
+    return value === "use strict";
+}
+
 // Returns the value of the specified token, if it is an identifier and does not
 // contain any unicode escapes
 function keywordFromToken(token) {
@@ -1920,34 +1926,41 @@ export class Parser {
     StatementList(prologue, isModule) {
 
         var list = [],
-            element,
             node,
+            expr,
             dir;
 
         // TODO: is this wrong for braceless statement lists?
         while (this.peekUntil("}")) {
 
-            list.push(element = this.Declaration(isModule));
+            node = this.Declaration(isModule);
 
             // Check for directives
             if (prologue) {
 
-                if (element.type === "ExpressionStatement" &&
-                    element.expression.type === "StringLiteral") {
+                if (node.type === "ExpressionStatement" &&
+                    node.expression.type === "StringLiteral") {
 
                     // Get the non-escaped literal text of the string
-                    node = element.expression;
-                    dir = this.input.slice(node.start + 1, node.end - 1);
+                    expr = node.expression;
+                    dir = this.input.slice(expr.start + 1, expr.end - 1);
 
-                    // Check for strict mode
-                    if (dir === "use strict")
-                        this.setStrict(true);
+                    if (isDirective(dir)) {
+
+                        node = new AST.Directive(dir, expr, node.start, node.end);
+
+                        // Check for strict mode
+                        if (dir === "use strict")
+                            this.setStrict(true);
+                    }
 
                 } else {
 
                     prologue = false;
                 }
             }
+
+            list.push(node);
         }
 
         return list;

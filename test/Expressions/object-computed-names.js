@@ -179,9 +179,10 @@
   start: 0,
   end: 34,
   statements:
-   [ { type: 'ExpressionStatement',
+   [ { type: 'Directive',
        start: 0,
        end: 13,
+       value: 'use strict',
        expression: { type: 'StringLiteral', start: 0, end: 12, value: 'use strict' } },
      { type: 'ExpressionStatement',
        start: 14,

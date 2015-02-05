@@ -1,33 +1,33 @@
 ({
 
 /** ({ x: x } = a); **/
-'basic destructuring': 
+'basic destructuring':
 { type: 'Script',
   start: 0,
   end: 15,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 15,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 14,
-          expression: 
+          expression:
            { type: 'AssignmentExpression',
              start: 1,
              end: 13,
              operator: '=',
-             left: 
+             left:
               { type: 'ObjectPattern',
                 start: 1,
                 end: 9,
-                properties: 
+                properties:
                  [ { type: 'PatternProperty',
                      start: 3,
                      end: 7,
                      name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
-                     pattern: 
+                     pattern:
                       { type: 'Identifier',
                         start: 6,
                         end: 7,
@@ -35,7 +35,7 @@
                         context: 'variable' },
                      initializer: null } ],
                 trailingComma: false },
-             right: 
+             right:
               { type: 'Identifier',
                 start: 12,
                 end: 13,
@@ -47,28 +47,28 @@
 { type: 'Script',
   start: 0,
   end: 12,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 12,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 11,
-          expression: 
+          expression:
            { type: 'AssignmentExpression',
              start: 1,
              end: 10,
              operator: '=',
-             left: 
+             left:
               { type: 'ObjectPattern',
                 start: 1,
                 end: 6,
-                properties: 
+                properties:
                  [ { type: 'PatternProperty',
                      start: 3,
                      end: 4,
-                     name: 
+                     name:
                       { type: 'Identifier',
                         start: 3,
                         end: 4,
@@ -77,7 +77,7 @@
                      pattern: null,
                      initializer: null } ],
                 trailingComma: false },
-             right: 
+             right:
               { type: 'Identifier',
                 start: 9,
                 end: 10,
@@ -85,32 +85,32 @@
                 context: 'variable' } } } } ] },
 
 /** ({ x = 123 } = a); **/
-'defaults are allowed': 
+'defaults are allowed':
 { type: 'Script',
   start: 0,
   end: 18,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 18,
-       expression: 
+       expression:
         { type: 'ParenExpression',
           start: 0,
           end: 17,
-          expression: 
+          expression:
            { type: 'AssignmentExpression',
              start: 1,
              end: 16,
              operator: '=',
-             left: 
+             left:
               { type: 'ObjectPattern',
                 start: 1,
                 end: 12,
-                properties: 
+                properties:
                  [ { type: 'PatternProperty',
                      start: 3,
                      end: 10,
-                     name: 
+                     name:
                       { type: 'Identifier',
                         start: 3,
                         end: 4,
@@ -120,7 +120,7 @@
                      initializer: { type: 'NumberLiteral', start: 7, end: 10, value: 123 },
                      error: '' } ],
                 trailingComma: false },
-             right: 
+             right:
               { type: 'Identifier',
                 start: 15,
                 end: 16,
@@ -132,33 +132,33 @@
 { type: 'Script',
   start: 0,
   end: 17,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 17,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 16,
           operator: '=',
-          left: 
+          left:
            { type: 'ParenExpression',
              start: 0,
              end: 12,
-             expression: 
+             expression:
               { type: 'ParenExpression',
                 start: 1,
                 end: 11,
-                expression: 
+                expression:
                  { type: 'ObjectPattern',
                    start: 2,
                    end: 10,
-                   properties: 
+                   properties:
                     [ { type: 'PatternProperty',
                         start: 4,
                         end: 8,
                         name: { type: 'Identifier', start: 4, end: 5, value: 'x', context: '' },
-                        pattern: 
+                        pattern:
                          { type: 'Identifier',
                            start: 7,
                            end: 8,
@@ -166,7 +166,7 @@
                            context: 'variable' },
                         initializer: null } ],
                    trailingComma: false } } },
-          right: 
+          right:
            { type: 'Identifier',
              start: 15,
              end: 16,
@@ -175,10 +175,10 @@
 
 /** ({ x = 123 }); **/
 'invalid object literals throw': {},
- 
+
 /** ({ if } = a); **/
 'keywords cannot be used as simple names': {},
- 
+
 /** "use strict"; ({ args: arguments }) = a; **/
 'assignment to arguments throws in strict mode': {},
 
@@ -186,37 +186,38 @@
 'shorthand assignment to arguments throws in strict mode': {},
 
 /** "use strict"; ({ x: a, x: b }) = q; **/
-'duplicate names do not throw': 
+'duplicate names do not throw':
 { type: 'Script',
   start: 0,
   end: 35,
-  statements: 
-   [ { type: 'ExpressionStatement',
+  statements:
+   [ { type: 'Directive',
        start: 0,
        end: 13,
+       value: 'use strict',
        expression: { type: 'StringLiteral', start: 0, end: 12, value: 'use strict' } },
      { type: 'ExpressionStatement',
        start: 14,
        end: 35,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 14,
           end: 34,
           operator: '=',
-          left: 
+          left:
            { type: 'ParenExpression',
              start: 14,
              end: 30,
-             expression: 
+             expression:
               { type: 'ObjectPattern',
                 start: 15,
                 end: 29,
-                properties: 
+                properties:
                  [ { type: 'PatternProperty',
                      start: 17,
                      end: 21,
                      name: { type: 'Identifier', start: 17, end: 18, value: 'x', context: '' },
-                     pattern: 
+                     pattern:
                       { type: 'Identifier',
                         start: 20,
                         end: 21,
@@ -227,7 +228,7 @@
                      start: 23,
                      end: 27,
                      name: { type: 'Identifier', start: 23, end: 24, value: 'x', context: '' },
-                     pattern: 
+                     pattern:
                       { type: 'Identifier',
                         start: 26,
                         end: 27,
@@ -235,7 +236,7 @@
                         context: 'variable' },
                      initializer: null } ],
                 trailingComma: false } },
-          right: 
+          right:
            { type: 'Identifier',
              start: 33,
              end: 34,
@@ -247,33 +248,33 @@
 { type: 'Script',
   start: 0,
   end: 16,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 16,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 16,
           operator: '=',
-          left: 
+          left:
            { type: 'ParenExpression',
              start: 0,
              end: 12,
-             expression: 
+             expression:
               { type: 'ObjectPattern',
                 start: 1,
                 end: 11,
-                properties: 
+                properties:
                  [ { type: 'PatternProperty',
                      start: 3,
                      end: 9,
                      name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
-                     pattern: 
+                     pattern:
                       { type: 'MemberExpression',
                         start: 6,
                         end: 9,
-                        object: 
+                        object:
                          { type: 'Identifier',
                            start: 6,
                            end: 7,
@@ -283,7 +284,7 @@
                         computed: false },
                      initializer: null } ],
                 trailingComma: false } },
-          right: 
+          right:
            { type: 'Identifier',
              start: 15,
              end: 16,
