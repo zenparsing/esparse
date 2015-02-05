@@ -1,4 +1,3 @@
-import { IntMap } from "./IntMap.js";
 import { isStrictReservedWord } from "./Scanner.js";
 
 
@@ -111,9 +110,7 @@ export class Validate {
     // Checks function formal parameters for strict mode restrictions
     checkParameters(params, kind) {
 
-        var names = new IntMap,
-            name,
-            node;
+        var name, node;
 
         for (var i = 0; i < params.length; ++i) {
 
@@ -126,11 +123,6 @@ export class Validate {
 
             if (isPoisonIdent(name))
                 this.addStrictError("Parameter name " + name + " is not allowed in strict mode", node);
-
-            if (names.get(name))
-                this.addStrictError("Strict mode function may not have duplicate parameter names", node);
-
-            names.set(name, 1);
         }
     }
 

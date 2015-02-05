@@ -1,21 +1,21 @@
 {
 
 /** () => x; **/
-'empty paren with expression': 
+'empty paren with expression':
 { type: 'Script',
   start: 0,
   end: 8,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 8,
-       expression: 
+       expression:
         { type: 'ArrowFunction',
           start: 0,
           end: 7,
           kind: '',
           params: [],
-          body: 
+          body:
            { type: 'Identifier',
              start: 6,
              end: 7,
@@ -23,31 +23,31 @@
              context: 'variable' } } } ] },
 
 /** x => x; **/
-'identifier with expression': 
+'identifier with expression':
 { type: 'Script',
   start: 0,
   end: 7,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 7,
-       expression: 
+       expression:
         { type: 'ArrowFunction',
           start: 0,
           end: 6,
           kind: '',
-          params: 
+          params:
            [ { type: 'FormalParameter',
                start: 0,
                end: 1,
-               pattern: 
+               pattern:
                 { type: 'Identifier',
                   start: 0,
                   end: 1,
                   value: 'x',
                   context: 'declaration' },
                initializer: null } ],
-          body: 
+          body:
            { type: 'Identifier',
              start: 5,
              end: 6,
@@ -59,20 +59,20 @@
 { type: 'Script',
   start: 0,
   end: 16,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 16,
-       expression: 
+       expression:
         { type: 'ArrowFunction',
           start: 0,
           end: 15,
           kind: '',
-          params: 
+          params:
            [ { type: 'FormalParameter',
                start: 1,
                end: 2,
-               pattern: 
+               pattern:
                 { type: 'Identifier',
                   start: 1,
                   end: 2,
@@ -82,25 +82,25 @@
              { type: 'FormalParameter',
                start: 4,
                end: 5,
-               pattern: 
+               pattern:
                 { type: 'Identifier',
                   start: 4,
                   end: 5,
                   value: 'y',
                   context: 'declaration' },
                initializer: null } ],
-          body: 
+          body:
            { type: 'BinaryExpression',
              start: 10,
              end: 15,
              operator: '+',
-             left: 
+             left:
               { type: 'Identifier',
                 start: 10,
                 end: 11,
                 value: 'x',
                 context: 'variable' },
-             right: 
+             right:
               { type: 'Identifier',
                 start: 14,
                 end: 15,
@@ -108,39 +108,39 @@
                 context: 'variable' } } } } ] },
 
 /** x => { return x; } **/
-'identifier with function body': 
+'identifier with function body':
 { type: 'Script',
   start: 0,
   end: 18,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 18,
-       expression: 
+       expression:
         { type: 'ArrowFunction',
           start: 0,
           end: 18,
           kind: '',
-          params: 
+          params:
            [ { type: 'FormalParameter',
                start: 0,
                end: 1,
-               pattern: 
+               pattern:
                 { type: 'Identifier',
                   start: 0,
                   end: 1,
                   value: 'x',
                   context: 'declaration' },
                initializer: null } ],
-          body: 
+          body:
            { type: 'FunctionBody',
              start: 5,
              end: 18,
-             statements: 
+             statements:
               [ { type: 'ReturnStatement',
                   start: 7,
                   end: 16,
-                  argument: 
+                  argument:
                    { type: 'Identifier',
                      start: 14,
                      end: 15,
@@ -152,20 +152,20 @@
 { type: 'Script',
   start: 0,
   end: 16,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 16,
-       expression: 
+       expression:
         { type: 'ArrowFunction',
           start: 0,
           end: 16,
           kind: '',
-          params: 
+          params:
            [ { type: 'RestParameter',
                start: 1,
                end: 8,
-               identifier: 
+               identifier:
                 { type: 'Identifier',
                   start: 4,
                   end: 8,
@@ -178,20 +178,20 @@
 { type: 'Script',
   start: 0,
   end: 19,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 19,
-       expression: 
+       expression:
         { type: 'ArrowFunction',
           start: 0,
           end: 19,
           kind: '',
-          params: 
+          params:
            [ { type: 'FormalParameter',
                start: 1,
                end: 2,
-               pattern: 
+               pattern:
                 { type: 'Identifier',
                   start: 1,
                   end: 2,
@@ -201,7 +201,7 @@
              { type: 'RestParameter',
                start: 4,
                end: 11,
-               identifier: 
+               identifier:
                 { type: 'Identifier',
                   start: 7,
                   end: 11,
@@ -226,9 +226,6 @@
 
 /** "use strict"; ({ args: arguments }) => {} **/
 'binding to arguments with destructuring is disallowed in strict mode (2)': {},
-
-/** "use strict"; (a, a) => {} **/
-'duplicate parameters are not allowed in strict mode': {},
 
 /** x => { "use strict"; delete x; } **/
 '"use strict" prologue sets strictness of function': {},
