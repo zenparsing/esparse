@@ -1875,7 +1875,7 @@ export class Parser {
             if (type === "case" || type === "default")
                 break;
 
-            list.push(this.Statement());
+            list.push(this.Declaration(false));
         }
 
         return new AST.SwitchCase(expr, list, start, this.nodeEnd());
