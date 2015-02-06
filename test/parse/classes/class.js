@@ -412,5 +412,8 @@
                           left: 'new',
                           right: 'target' } } ] } } ] } } ] },
 
+/** class C { x() { new super() } } **/
+'new super is not allowed': {},
+
 
 })

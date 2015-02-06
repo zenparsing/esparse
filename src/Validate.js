@@ -54,7 +54,7 @@ export class Validate {
     // Validates a binding target
     checkBindingTarget(node) {
 
-        var name, msg;
+        var name;
 
         switch (node.type) {
 

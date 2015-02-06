@@ -2,7 +2,7 @@ import * as AST from "./AST.js";
 import { Scanner } from "./Scanner.js";
 import { Transform } from "./Transform.js";
 import { Validate } from "./Validate.js";
-import { IntMap } from "./IntMap.js";
+import { IntMap } from "./Dict.js";
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -840,6 +840,9 @@ export class Parser {
                 case "(":
 
                     if (!allowCall) {
+
+                        if (isSuper)
+                            this.fail();
 
                         exit = true;
                         break;
