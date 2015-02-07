@@ -103,6 +103,8 @@ export class Validate {
 
         if (ident === "yield" && this.context.isGenerator)
             this.fail("yield cannot be an identifier inside of a generator function", node);
+        else if (ident === "await" && this.context.isAsync)
+            this.fail("await cannot be an identifier inside of an async function", node);
         else if (isStrictReservedWord(ident))
             this.addStrictError(ident + " cannot be used as an identifier in strict mode", node);
     }

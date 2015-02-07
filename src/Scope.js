@@ -24,6 +24,7 @@ class Scope {
         this.type = type || "block";
         this.names = Object.create(null);
         this.free = [];
+        this.strict = false;
         this.children = [];
         this.varNames = [];
     }
@@ -44,8 +45,10 @@ class Visitor {
 
     pushScope(type) {
 
+        var strict = this.top.strict;
         this.stack.push(this.top);
         this.top = new Scope(type);
+        this.top.strict = strict;
     }
 
     flushFree() {
@@ -78,9 +81,10 @@ class Visitor {
 
         this.top = this.stack.pop();
 
-        // TODO: collapse to children if names map is empty?
-
-        this.top.children.push(scope);
+        if (Object.keys(scope.names).length === 0)
+            scope.children.forEach(c => this.top.children.push(c));
+        else
+            this.top.children.push(scope);
 
         varNames.forEach(n => {
 
@@ -109,6 +113,59 @@ class Visitor {
     fail(msg) {
 
         throw new SyntaxError(msg);
+    }
+
+    setStrict(node) {
+
+        if (this.top.strict)
+            return;
+
+        var strict = false,
+            list;
+
+        switch (node.type) {
+
+            case "Module":
+            case "ClassExpression":
+            case "ClassDeclaration":
+                strict = true;
+                break;
+
+            case "FunctionExpression":
+            case "FunctionDeclaration":
+            case "MethodDefinition":
+                list = node.body.statements;
+                break;
+
+            case "ArrowFunction":
+                if (node.body.type === "FunctionBody")
+                    list = node.body.statements;
+                break;
+
+            case "Script":
+                list = node.statements;
+                break;
+
+        }
+
+        if (list) {
+
+            list.every(n => {
+
+                if (n.type !== "Directive")
+                    return false;
+
+                if (n.value === "use strict") {
+
+                    strict = true;
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        this.top.strict = strict;
     }
 
     pushParams(params) {
@@ -193,6 +250,7 @@ class Visitor {
     Script(node) {
 
         this.pushScope();
+        this.setStrict(node);
         node.children().forEach(n => this.visit(n, "var"));
         this.popScope();
     }
@@ -245,14 +303,18 @@ class Visitor {
     FunctionDeclaration(node, kind) {
 
         this.visit(node.identifier, kind);
+        this.pushScope();
+        this.setStrict(node);
         this.pushParams(node.params);
         this.varScope(node.body);
         this.popParams(node.params);
+        this.popScope();
     }
 
     FunctionExpression(node) {
 
         this.pushScope();
+        this.setStrict(node);
         this.visit(node.identifier);
         this.pushParams(node.params);
         this.varScope(node.body);
@@ -262,7 +324,6 @@ class Visitor {
 
     MethodDefinition(node) {
 
-        this.visit(node.identifier);
         this.pushParams(node.params);
         this.varScope(node.body);
         this.popParams(node.params);
@@ -278,13 +339,17 @@ class Visitor {
     ClassDeclaration(node, kind) {
 
         this.visit(node.identifier);
+        this.pushScope();
+        this.setStrict(node);
         this.visit(node.base);
         this.visit(node.body);
+        this.popScope();
     }
 
     ClassExpression(node) {
 
         this.pushScope();
+        this.setStrict(node);
         this.visit(node.identifier);
         this.visit(node.base);
         this.visit(node.body);
