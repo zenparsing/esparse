@@ -68,7 +68,7 @@ function toObject(node) {
 
 function render(node) {
 
-    return inspect(toObject(node), { depth: 10, colors: true });
+    return inspect(node, { depth: 10, colors: true });
 }
 
 function process(source, options) {
@@ -79,7 +79,7 @@ function process(source, options) {
 
 function compare(a, b) {
 
-    return objectLike(toObject(a), toObject(b), { "message": 1 });
+    return objectLike(a, b, { "message": 1 });
 }
 
 runTests({

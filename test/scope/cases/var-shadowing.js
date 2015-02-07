@@ -52,6 +52,15 @@ function f(x) { var x }
                             context: 'declaration' } ],
                        references: [] } },
                  free: null,
-                 children: [ { type: 'block', names: {}, free: null, children: [] } ] } ] } ] } ] },
+                 children:
+                  [ { type: 'block',
+                      names: {},
+                      free: null,
+                      children: [],
+                      varNames: null } ],
+                 varNames: null } ],
+            varNames: null } ],
+       varNames: null } ],
+  varNames: [] },
 
 };

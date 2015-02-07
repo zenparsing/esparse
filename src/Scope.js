@@ -12,8 +12,6 @@ TODO:
 
 */
 
-import { Dict } from "./Dict.js";
-
 export function resolveBindings(root) {
 
     return new Visitor().resolve(root);
@@ -24,7 +22,7 @@ class Scope {
     constructor(type) {
 
         this.type = type || "block";
-        this.names = new Dict;
+        this.names = Object.create(null);
         this.free = [];
         this.children = [];
         this.varNames = [];
@@ -52,7 +50,7 @@ class Visitor {
 
     flushFree() {
 
-        var Dict = this.top.names,
+        var map = this.top.names,
             free = this.top.free,
             next = this.stack[this.stack.length - 1];
 
@@ -60,7 +58,7 @@ class Visitor {
 
             var name = r.value;
 
-            if (Dict.has(name)) Dict.get(name).references.push(r);
+            if (map[name]) map[name].references.push(r);
             else next.free.push(r);
         });
 
@@ -79,11 +77,14 @@ class Visitor {
         scope.varNames = null;
 
         this.top = this.stack.pop();
+
+        // TODO: collapse to children if names map is empty?
+
         this.top.children.push(scope);
 
         varNames.forEach(n => {
 
-            if (scope.names.has(n.value))
+            if (scope.names[n.value])
                 this.fail("Cannot shadow lexical declaration with var");
             else if (this.top.type === "var")
                 this.addName(n, "var");
@@ -112,18 +113,15 @@ class Visitor {
 
     pushParams(params) {
 
-        this.pushScope("simple-params");
-
-        var simple = true;
+        this.pushScope(this.top.strict ? "params" : "simple-params");
 
         params.forEach(n => {
 
-            if (simple && (
+            if (this.top.type === "simple-params" && (
                 n.type !== "FormalParameter" ||
                 n.initializer ||
                 n.pattern.type !== "Identifier")) {
 
-                simple = false;
                 this.top.type = "params";
             }
 
@@ -141,12 +139,12 @@ class Visitor {
 
         var block = scope.children[0].children[0];
 
-        scope.names.forEach((record, name) => {
+        Object.keys(scope.names).forEach(name => {
 
-            if (block.names.has(name))
+            if (block.names[name])
                 this.fail("Duplicate block declaration");
 
-            if (!duplicates && record.declarations.length > 1)
+            if (!duplicates && scope.names[name].declarations.length > 1)
                 this.fail("Duplicate parameter names");
         });
     }
@@ -163,32 +161,30 @@ class Visitor {
     addReference(node) {
 
         var name = node.value,
-            Dict = this.top.names,
+            map = this.top.names,
             next = this.stack[this.stack.length - 1];
 
-        if (Dict.has(name)) Dict.get(name).references.push(node);
+        if (map[name]) map[name].references.push(node);
         else top.free.push(node);
     }
 
     addName(node, kind) {
 
         var name = node.value,
-            Dict = this.top.names,
-            record;
+            map = this.top.names,
+            record = map[name];
 
-        if (Dict.has(name)) {
+        if (record) {
 
             if (kind !== "var" && kind !== "param")
                 this.fail("Duplicate variable declaration");
-
-            record = Dict.get(name);
 
         } else {
 
             if (name === "let" && (kind === "let" || kind === "const"))
                 this.fail("Invalid binding identifier");
 
-            Dict.set(name, record = { declarations: [], references: [] });
+            map[name] = record = { declarations: [], references: [] };
         }
 
         record.declarations.push(node);

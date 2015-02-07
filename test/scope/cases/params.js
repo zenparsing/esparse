@@ -40,7 +40,16 @@ function x(a, a) {}
              [ { type: 'var',
                  names: {},
                  free: null,
-                 children: [ { type: 'block', names: {}, free: null, children: [] } ] } ] } ] } ] },
+                 children:
+                  [ { type: 'block',
+                      names: {},
+                      free: null,
+                      children: [],
+                      varNames: null } ],
+                 varNames: null } ],
+            varNames: null } ],
+       varNames: null } ],
+  varNames: [] },
 
 /**
 function x(a, ...a) {}

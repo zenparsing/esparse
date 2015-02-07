@@ -2,7 +2,6 @@ import * as AST from "./AST.js";
 import { Scanner } from "./Scanner.js";
 import { Transform } from "./Transform.js";
 import { Validate } from "./Validate.js";
-import { IntMap } from "./Dict.js";
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -183,7 +182,7 @@ class Context {
         this.functionBody = false;
         this.isGenerator = false;
         this.isAsync = false;
-        this.labelSet = new IntMap;
+        this.labelMap = null;
         this.switchDepth = 0;
         this.loopDepth = 0;
         this.invalidNodes = [];
@@ -504,9 +503,20 @@ export class Parser {
         this.context.invalidNodes.push({ node, strict: !!strict });
     }
 
-    setLoopLabel(label) {
+    setLabel(label, value) {
 
-        this.context.labelSet.set(label, 2);
+        var m = this.context.labelMap;
+
+        if (!m)
+            m = this.context.labelMap = Object.create(null);
+
+        m[label] = value;
+    }
+
+    getLabel(label) {
+
+        var m = this.context.labelMap;
+        return (m && m[label]) | 0;
     }
 
     setFunctionType(kind) {
@@ -1418,17 +1428,16 @@ export class Parser {
 
         var start = this.nodeStart(),
             label = this.Identifier(),
-            name = label.value,
-            labelSet = this.context.labelSet;
+            name = label.value;
 
-        if (labelSet.get(name) > 0)
+        if (this.getLabel(name) > 0)
             this.fail("Invalid label", label);
 
         this.read(":");
 
-        labelSet.set(name, 1);
+        this.setLabel(name, 1);
         var statement = this.Statement(name);
-        labelSet.set(name, 0);
+        this.setLabel(name, 0);
 
         return new AST.LabelledStatement(
             label,
@@ -1544,8 +1553,7 @@ export class Parser {
     BreakStatement() {
 
         var start = this.nodeStart(),
-            context = this.context,
-            labelSet = context.labelSet;
+            context = this.context;
 
         this.read("break");
         var label = this.peekEnd() ? null : this.Identifier();
@@ -1555,7 +1563,7 @@ export class Parser {
 
         if (label) {
 
-            if (labelSet.get(label.value) === 0)
+            if (this.getLabel(label.value) === 0)
                 this.fail("Invalid label", label);
 
         } else if (context.loopDepth === 0 && context.switchDepth === 0) {
@@ -1569,8 +1577,7 @@ export class Parser {
     ContinueStatement() {
 
         var start = this.nodeStart(),
-            context = this.context,
-            labelSet = context.labelSet;
+            context = this.context;
 
         this.read("continue");
         var label = this.peekEnd() ? null : this.Identifier();
@@ -1580,7 +1587,7 @@ export class Parser {
 
         if (label) {
 
-            if (labelSet.get(label.value) !== 2)
+            if (this.getLabel(label.value) !== 2)
                 this.fail("Invalid label", label);
 
         } else if (context.loopDepth === 0) {
@@ -1647,7 +1654,7 @@ export class Parser {
             test;
 
         if (label)
-            this.setLoopLabel(label);
+            this.setLabel(label, 2);
 
         this.read("do");
 
@@ -1670,7 +1677,7 @@ export class Parser {
         var start = this.nodeStart();
 
         if (label)
-            this.setLoopLabel(label);
+            this.setLabel(label, 2);
 
         this.read("while");
         this.read("(");
@@ -1697,7 +1704,7 @@ export class Parser {
             step;
 
         if (label)
-            this.setLoopLabel(label);
+            this.setLabel(label, 2);
 
         this.read("for");
 
