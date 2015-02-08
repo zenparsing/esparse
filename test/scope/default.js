@@ -46,26 +46,6 @@ import { runTests, objectLike } from "../runner.js";
 
 var inspect = require("util").inspect;
 
-function toObject(node) {
-
-    if (!node || !node.names || typeof node.names.get !== "function")
-        return node;
-
-    function convertMap(map) {
-
-        var obj = {};
-        map.forEach((value, key) => obj[key] = value);
-        return obj;
-    }
-
-    return {
-        type: node.type,
-        names: convertMap(node.names),
-        free: node.free,
-        children: node.children.map(c => toObject(c))
-    };
-}
-
 function render(node) {
 
     return inspect(node, { depth: 10, colors: true });
@@ -79,7 +59,7 @@ function process(source, options) {
 
 function compare(a, b) {
 
-    return objectLike(a, b, { "message": 1, "strict": 1 });
+    return objectLike(a, b, { "message": 1, "strict": 1, "parent": 1 });
 }
 
 runTests({

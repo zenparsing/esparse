@@ -1,12 +1,3 @@
-/*
-
-TODO:
-
-- What should the output of this program be?  A scope tree, as we currently have it?
-  Or should it annotate the AST instead?  What do we need for our let-conversion?
-
-*/
-
 export function resolveBindings(root) {
 
     return new Visitor().resolve(root);
@@ -20,8 +11,20 @@ class Scope {
         this.names = Object.create(null);
         this.free = [];
         this.strict = false;
+        this.parent = null;
         this.children = [];
         this.varNames = [];
+    }
+
+    resolveName(name) {
+
+        if (this.names[name])
+            return this.names[name];
+
+        if (this.parent)
+            return this.parent.resolveName(name);
+
+        return null;
     }
 }
 
@@ -68,6 +71,13 @@ class Visitor {
         free.length = 0;
     }
 
+    linkScope(child) {
+
+        var p = this.top;
+        child.parent = p;
+        p.children.push(child);
+    }
+
     popScope() {
 
         var scope = this.top,
@@ -82,9 +92,9 @@ class Visitor {
         this.top = this.stack.pop();
 
         if (Object.keys(scope.names).length === 0)
-            scope.children.forEach(c => this.top.children.push(c));
+            scope.children.forEach(c => this.linkScope(c));
         else
-            this.top.children.push(scope);
+            this.linkScope(scope);
 
         varNames.forEach(n => {
 
