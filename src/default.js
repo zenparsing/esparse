@@ -4,7 +4,8 @@ import * as AST from "./AST.js";
 
 function parse(input, options) {
 
-    return new Parser().parse(input, options);
+    var ast = new Parser().parse(input, options);
+    return ast;
 }
 
 export {

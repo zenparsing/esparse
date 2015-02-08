@@ -18,24 +18,32 @@ class NodeBase {
 
     children() {
 
-        var list = [];
+        var list = [],
+            keys = Object.keys(this),
+            value;
 
-        Object.keys(this).forEach(k => {
+        for (var i = 0; i < keys.length; ++i) {
 
-            // Don't iterate over backlinks to parent node
-            if (k === "parent")
+            if (keys[i] === "parent")
                 return;
 
-            var value = this[k];
+            value = this[keys[i]];
 
-            if (Array.isArray(value))
-                value.forEach(x => { if (isNode(x)) list.push(x) });
-            else if (isNode(value))
+            if (Array.isArray(value)) {
+
+                for (var j = 0; j < value.length; ++j)
+                    if (isNode(value[j]))
+                        list.push(value[j]);
+
+            } else if (isNode(value)) {
+
                 list.push(value);
-        });
+            }
+        }
 
         return list;
     }
+
 }
 
 Object.keys(Nodes).forEach(k => Nodes[k].prototype = NodeBase.prototype);

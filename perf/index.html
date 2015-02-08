@@ -2,31 +2,31 @@
 <html>
 <head>
     <title>es6parse</title>
-    <script src="../build/es6parse.js"></script>
+    <script src="../build/esparse.js"></script>
     <script src="parsers/esprima.js"></script>
     <script src="parsers/acorn.js"></script>
     <script src="_input/jquery-1.9.1.js"></script>
     <script>
-    
+
     function runParser() {
-    
+
         if (!parserInput)
             return;
-        
+
         var input = parserInput.toString();
-        
+
         console.log("parsing javascript...");
-        es6parse.parseScript(input);
+        esparse.parse(input);
         console.log("finished");
     }
-    
+
     </script>
 </head>
 <body>
     <div>
-    
+
         <button onclick="runParser()">Run Parser</button>
-        
+
     </div>
 </body>
 </html>

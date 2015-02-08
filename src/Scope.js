@@ -2,11 +2,6 @@
 
 TODO:
 
-- We need to know if the context is strict for parameter processing.  Should the
-  parser output the strictness in the AST?  The issue is that the parser doesn't
-  even really know the strictness when it's processing the relevant AST node.
-  Sigh...
-
 - What should the output of this program be?  A scope tree, as we currently have it?
   Or should it annotate the AST instead?  What do we need for our let-conversion?
 
@@ -49,12 +44,17 @@ class Visitor {
         this.stack.push(this.top);
         this.top = new Scope(type);
         this.top.strict = strict;
+
+        return this.top;
     }
 
     flushFree() {
 
         var map = this.top.names,
             free = this.top.free,
+            next = null;
+
+        if (this.stack.length > 0)
             next = this.stack[this.stack.length - 1];
 
         free.forEach(r => {
@@ -62,7 +62,7 @@ class Visitor {
             var name = r.value;
 
             if (map[name]) map[name].references.push(r);
-            else next.free.push(r);
+            else if (next) next.free.push(r);
         });
 
         free.length = 0;
@@ -115,104 +115,63 @@ class Visitor {
         throw new SyntaxError(msg);
     }
 
-    setStrict(node) {
+    hasStrictDirective(statements) {
 
-        if (this.top.strict)
-            return;
+        var n, i;
 
-        var strict = false,
-            list;
+        for (i = 0; i < statements.length; ++i) {
 
-        switch (node.type) {
+            n = statements[i];
 
-            case "Module":
-            case "ClassExpression":
-            case "ClassDeclaration":
-                strict = true;
+            if (n.type !== "Directive")
                 break;
 
-            case "FunctionExpression":
-            case "FunctionDeclaration":
-            case "MethodDefinition":
-                list = node.body.statements;
-                break;
-
-            case "ArrowFunction":
-                if (node.body.type === "FunctionBody")
-                    list = node.body.statements;
-                break;
-
-            case "Script":
-                list = node.statements;
-                break;
-
-        }
-
-        if (list) {
-
-            list.every(n => {
-
-                if (n.type !== "Directive")
-                    return false;
-
-                if (n.value === "use strict") {
-
-                    strict = true;
-                    return false;
-                }
-
+            if (n.value === "use strict")
                 return true;
-            });
         }
 
-        this.top.strict = strict;
+        return false;
     }
 
-    pushParams(params) {
+    visitFunction(params, body, strictParams) {
 
-        this.pushScope(this.top.strict ? "params" : "simple-params");
+        var paramScope = this.pushScope("params");
+
+        if (!this.top.strict && this.hasStrictDirective(body.statements))
+            this.top.strict = true;
+
+        strictParams = strictParams || this.top.strict;
 
         params.forEach(n => {
 
-            if (this.top.type === "simple-params" && (
+            if (!strictParams && (
                 n.type !== "FormalParameter" ||
                 n.initializer ||
                 n.pattern.type !== "Identifier")) {
 
-                this.top.type = "params";
+                strictParams = true;
             }
 
             this.visit(n, "param");
             this.flushFree();
         });
-    }
-
-    popParams(params) {
-
-        var scope = this.top,
-            duplicates = scope.type === "simple-params";
-
-        this.popScope();
-
-        var block = scope.children[0].children[0];
-
-        Object.keys(scope.names).forEach(name => {
-
-            if (block.names[name])
-                this.fail("Duplicate block declaration");
-
-            if (!duplicates && scope.names[name].declarations.length > 1)
-                this.fail("Duplicate parameter names");
-        });
-    }
-
-    varScope(node) {
 
         this.pushScope("var");
-        this.pushScope();
-        this.visit(node, "var");
+        var blockScope = this.pushScope();
+        this.visit(body, "var");
         this.popScope();
         this.popScope();
+
+        this.popScope();
+
+        Object.keys(paramScope.names).forEach(name => {
+
+            if (blockScope.names[name])
+                this.fail("Duplicate block declaration");
+
+            if (strictParams && paramScope.names[name].declarations.length > 1)
+                this.fail("Duplicate parameter names");
+        });
     }
 
     addReference(node) {
@@ -250,14 +209,21 @@ class Visitor {
     Script(node) {
 
         this.pushScope();
-        this.setStrict(node);
+
+        if (this.hasStrictDirective(node.statements))
+            this.top.strict = true;
+
         node.children().forEach(n => this.visit(n, "var"));
+
         this.popScope();
     }
 
     Module(node) {
 
-        this.Script(node);
+        this.pushScope();
+        this.top.strict = true;
+        node.children().forEach(n => this.visit(n, "var"));
+        this.popScope();
     }
 
     Block(node) {
@@ -303,44 +269,32 @@ class Visitor {
     FunctionDeclaration(node, kind) {
 
         this.visit(node.identifier, kind);
-        this.pushScope();
-        this.setStrict(node);
-        this.pushParams(node.params);
-        this.varScope(node.body);
-        this.popParams(node.params);
-        this.popScope();
+        this.visitFunction(node.params, node.body, false);
     }
 
     FunctionExpression(node) {
 
         this.pushScope();
-        this.setStrict(node);
         this.visit(node.identifier);
-        this.pushParams(node.params);
-        this.varScope(node.body);
-        this.popParams(node.params);
+        this.visitFunction(node.params, node.body, false);
         this.popScope();
     }
 
     MethodDefinition(node) {
 
-        this.pushParams(node.params);
-        this.varScope(node.body);
-        this.popParams(node.params);
+        this.visitFunction(node.params, node.body, true);
     }
 
     ArrowFunction(node) {
 
-        this.pushParams(node.params);
-        this.varScope(node.body);
-        this.popParams(node.params);
+        this.visitFunction(node.params, node.body, true);
     }
 
     ClassDeclaration(node, kind) {
 
         this.visit(node.identifier);
         this.pushScope();
-        this.setStrict(node);
+        this.top.strict = true;
         this.visit(node.base);
         this.visit(node.body);
         this.popScope();
@@ -349,7 +303,7 @@ class Visitor {
     ClassExpression(node) {
 
         this.pushScope();
-        this.setStrict(node);
+        this.top.strict = true;
         this.visit(node.identifier);
         this.visit(node.base);
         this.visit(node.body);

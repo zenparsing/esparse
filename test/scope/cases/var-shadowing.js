@@ -24,41 +24,34 @@ function f(x) { var x }
              context: 'declaration' } ],
         references: [] } },
   free: [],
+  strict: false,
   children:
-   [ { type: 'block',
-       names: {},
+   [ { type: 'params',
+       names:
+        { x:
+           { declarations:
+              [ { type: 'Identifier',
+                  start: 25,
+                  end: 26,
+                  value: 'x',
+                  context: 'declaration' } ],
+             references: [] } },
        free: null,
+       strict: true,
        children:
-        [ { type: 'simple-params',
+        [ { type: 'var',
             names:
              { x:
                 { declarations:
                    [ { type: 'Identifier',
-                       start: 25,
-                       end: 26,
+                       start: 34,
+                       end: 35,
                        value: 'x',
                        context: 'declaration' } ],
                   references: [] } },
             free: null,
-            children:
-             [ { type: 'var',
-                 names:
-                  { x:
-                     { declarations:
-                        [ { type: 'Identifier',
-                            start: 34,
-                            end: 35,
-                            value: 'x',
-                            context: 'declaration' } ],
-                       references: [] } },
-                 free: null,
-                 children:
-                  [ { type: 'block',
-                      names: {},
-                      free: null,
-                      children: [],
-                      varNames: null } ],
-                 varNames: null } ],
+            strict: true,
+            children: [],
             varNames: null } ],
        varNames: null } ],
   varNames: [] },

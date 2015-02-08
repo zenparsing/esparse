@@ -126,7 +126,7 @@ var parsers = {
     "dry-loop": dryLoop,
     "native": nativeParse,
     "scanner": scanOnly,
-    "acorn": Acorn.parse,
+    "acorn": text => Acorn.parse(text, { ecmaVersion: 6 }),
     "esparse": parse,
     "esprima": Esprima.parse
 };

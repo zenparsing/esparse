@@ -15,41 +15,38 @@ function x(a, a) {}
              context: 'declaration' } ],
         references: [] } },
   free: [],
+  strict: false,
   children:
-   [ { type: 'block',
-       names: {},
+   [ { type: 'params',
+       names:
+        { a:
+           { declarations:
+              [ { type: 'Identifier',
+                  start: 11,
+                  end: 12,
+                  value: 'a',
+                  context: 'declaration' },
+                { type: 'Identifier',
+                  start: 14,
+                  end: 15,
+                  value: 'a',
+                  context: 'declaration' } ],
+             references: [] } },
        free: null,
-       children:
-        [ { type: 'simple-params',
-            names:
-             { a:
-                { declarations:
-                   [ { type: 'Identifier',
-                       start: 11,
-                       end: 12,
-                       value: 'a',
-                       context: 'declaration' },
-                     { type: 'Identifier',
-                       start: 14,
-                       end: 15,
-                       value: 'a',
-                       context: 'declaration' } ],
-                  references: [] } },
-            free: null,
-            children:
-             [ { type: 'var',
-                 names: {},
-                 free: null,
-                 children:
-                  [ { type: 'block',
-                      names: {},
-                      free: null,
-                      children: [],
-                      varNames: null } ],
-                 varNames: null } ],
-            varNames: null } ],
+       strict: false,
+       children: [],
        varNames: null } ],
   varNames: [] },
+
+/**
+function x(a, a) { 'use strict' }
+**/
+'duplicates not allowed in strict mode': {},
+
+/**
+function x(a = function(a, a) {}) { 'use strict' }
+**/
+'duplicates not allowed in strict mode with default nesting': {},
 
 /**
 function x(a, ...a) {}
