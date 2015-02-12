@@ -16,25 +16,50 @@ function x(a, a) {}
         references: [] } },
   free: [],
   strict: false,
+  parent: null,
   children:
-   [ { type: 'params',
-       names:
-        { a:
-           { declarations:
-              [ { type: 'Identifier',
-                  start: 11,
-                  end: 12,
-                  value: 'a',
-                  context: 'declaration' },
-                { type: 'Identifier',
-                  start: 14,
-                  end: 15,
-                  value: 'a',
-                  context: 'declaration' } ],
-             references: [] } },
-       free: null,
+   [ { type: 'block',
+       names: {},
+       free: [],
        strict: false,
-       children: [],
+       children:
+        [ { type: 'function',
+            names: {},
+            free: [],
+            strict: false,
+            children:
+             [ { type: 'param',
+                 names:
+                  { a:
+                     { declarations:
+                        [ { type: 'Identifier',
+                            start: 11,
+                            end: 12,
+                            value: 'a',
+                            context: 'declaration' },
+                          { type: 'Identifier',
+                            start: 14,
+                            end: 15,
+                            value: 'a',
+                            context: 'declaration' } ],
+                       references: [] } },
+                 free: [],
+                 strict: false,
+                 children:
+                  [ { type: 'var',
+                      names: {},
+                      free: [],
+                      strict: false,
+                      children:
+                       [ { type: 'block',
+                           names: {},
+                           free: [],
+                           strict: false,
+                           children: [],
+                           varNames: null } ],
+                      varNames: null } ],
+                 varNames: null } ],
+            varNames: null } ],
        varNames: null } ],
   varNames: [] },
 
@@ -62,5 +87,10 @@ function x(a, [a]) {}
 function x(a, {b:a}) {}
 **/
 'duplicates not allowed with object destructuring': {},
+
+/**
+function x(a) { let a }
+**/
+'block scope declarations cannot shadown parameter names': {},
 
 };

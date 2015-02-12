@@ -203,6 +203,37 @@ class Options {
     }
 }
 
+class ParseResult {
+
+    constructor(input, lineMap, ast) {
+
+        this.input = input;
+        this.lineMap = lineMap;
+        this.ast = ast;
+    }
+
+    locate(offset) {
+
+        return this.lineMap.locate(offset);
+    }
+
+    syntaxError(message, node) {
+
+        var loc = this.lineMap.locate(node.start),
+            err = new SyntaxError(message);
+
+        err.line = loc.line;
+        err.column = loc.column;
+        err.lineOffset = loc.lineOffset;
+        err.startOffset = node.start;
+        err.endOffset = node.end;
+        err.sourceText = this.input;
+
+        return err;
+    }
+
+}
+
 export class Parser {
 
     parse(input, options) {
@@ -222,15 +253,9 @@ export class Parser {
         this.context = new Context(null, false);
         this.setStrict(false);
 
-        return options.get("module") ? this.Module() : this.Script();
-    }
+        var ast = options.get("module") ? this.Module() : this.Script();
 
-    location(offset) {
-
-        if (!this.scanner)
-            throw new Error("Parser not initialized");
-
-        return this.scanner.location(offset);
+        return new ParseResult(this.input, this.scanner.lineMap, ast);
     }
 
     nextToken(context) {
@@ -430,17 +455,8 @@ export class Parser {
         if (!node)
             node = this.peekToken();
 
-        var loc = this.scanner.location(node.start),
-            err = new SyntaxError(msg);
-
-        err.line = loc.line;
-        err.column = loc.column;
-        err.lineOffset = loc.lineOffset;
-        err.startOffset = node.start;
-        err.endOffset = node.end;
-        err.sourceText = this.input;
-
-        throw err;
+        var result = new ParseResult(this.input, this.scanner.lineMap, null);
+        throw result.syntaxError(msg, node);
     }
 
     unwrapParens(node) {

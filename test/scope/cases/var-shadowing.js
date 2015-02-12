@@ -25,33 +25,52 @@ function f(x) { var x }
         references: [] } },
   free: [],
   strict: false,
+  parent: null,
   children:
-   [ { type: 'params',
-       names:
-        { x:
-           { declarations:
-              [ { type: 'Identifier',
-                  start: 25,
-                  end: 26,
-                  value: 'x',
-                  context: 'declaration' } ],
-             references: [] } },
-       free: null,
+   [ { type: 'block',
+       names: {},
+       free: [],
        strict: true,
        children:
-        [ { type: 'var',
-            names:
-             { x:
-                { declarations:
-                   [ { type: 'Identifier',
-                       start: 34,
-                       end: 35,
-                       value: 'x',
-                       context: 'declaration' } ],
-                  references: [] } },
-            free: null,
+        [ { type: 'function',
+            names: {},
+            free: [],
             strict: true,
-            children: [],
+            children:
+             [ { type: 'param',
+                 names:
+                  { x:
+                     { declarations:
+                        [ { type: 'Identifier',
+                            start: 25,
+                            end: 26,
+                            value: 'x',
+                            context: 'declaration' } ],
+                       references: [] } },
+                 free: [],
+                 strict: true,
+                 children:
+                  [ { type: 'var',
+                      names:
+                       { x:
+                          { declarations:
+                             [ { type: 'Identifier',
+                                 start: 34,
+                                 end: 35,
+                                 value: 'x',
+                                 context: 'declaration' } ],
+                            references: [] } },
+                      free: [],
+                      strict: true,
+                      children:
+                       [ { type: 'block',
+                           names: {},
+                           free: [],
+                           strict: true,
+                           children: [],
+                           varNames: null } ],
+                      varNames: null } ],
+                 varNames: null } ],
             varNames: null } ],
        varNames: null } ],
   varNames: [] },

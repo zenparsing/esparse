@@ -1,18 +1,17 @@
 import { Parser } from "./Parser.js";
-import { resolveBindings } from "./Scope.js";
+import { resolveScopes } from "./ScopeResolver.js";
 import * as AST from "./AST.js";
 
 function parse(input, options) {
 
-    var ast = new Parser().parse(input, options);
-    return ast;
+    return new Parser().parse(input, options);
 }
 
 export {
 
     AST,
     Parser,
-    resolveBindings,
+    resolveScopes,
     parse,
     parse as default
 };

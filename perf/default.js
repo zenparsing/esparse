@@ -127,7 +127,7 @@ var parsers = {
     "native": nativeParse,
     "scanner": scanOnly,
     "acorn": text => Acorn.parse(text, { ecmaVersion: 6 }),
-    "esparse": parse,
+    "esparse": text => parse(text).ast,
     "esprima": Esprima.parse
 };
 

@@ -28,7 +28,7 @@ runTests({
 
     dir:  __dirname,
     render: displayTree,
-    process: parse,
+    process: (input, options) => parse(input, options).ast,
     compare: astLike
 
 });

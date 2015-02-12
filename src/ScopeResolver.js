@@ -1,6 +1,6 @@
-export function resolveBindings(root) {
+export function resolveScopes(parseResult) {
 
-    return new Visitor().resolve(root);
+    return new ScopeResolver().resolve(parseResult);
 }
 
 class Scope {
@@ -28,17 +28,23 @@ class Scope {
     }
 }
 
-class Visitor {
+class ScopeResolver {
 
-    resolve(root) {
+    resolve(parseResult) {
 
+        this.parseResult = parseResult;
         this.stack = [];
         this.top = new Scope("var");
 
-        this.visit(root);
+        this.visit(parseResult.ast);
         this.flushFree();
 
         return this.top;
+    }
+
+   fail(msg, node) {
+
+        throw this.parseResult.syntaxError(msg, node);
     }
 
     pushScope(type) {
@@ -55,20 +61,30 @@ class Visitor {
 
         var map = this.top.names,
             free = this.top.free,
-            next = null;
+            next = null,
+            freeList = [];
 
         if (this.stack.length > 0)
             next = this.stack[this.stack.length - 1];
+
+        this.top.free = freeList;
 
         free.forEach(r => {
 
             var name = r.value;
 
-            if (map[name]) map[name].references.push(r);
-            else if (next) next.free.push(r);
-        });
+            if (map[name]) {
 
-        free.length = 0;
+                map[name].references.push(r);
+
+            } else {
+
+                freeList.push(r);
+
+                if (next)
+                    next.free.push(r);
+            }
+        });
     }
 
     linkScope(child) {
@@ -84,22 +100,16 @@ class Visitor {
             varNames = scope.varNames,
             free = scope.free;
 
-        this.flushFree();
-
-        scope.free = null;
         scope.varNames = null;
 
+        this.flushFree();
         this.top = this.stack.pop();
-
-        if (Object.keys(scope.names).length === 0)
-            scope.children.forEach(c => this.linkScope(c));
-        else
-            this.linkScope(scope);
+        this.linkScope(scope);
 
         varNames.forEach(n => {
 
             if (scope.names[n.value])
-                this.fail("Cannot shadow lexical declaration with var");
+                this.fail("Cannot shadow lexical declaration with var", n);
             else if (this.top.type === "var")
                 this.addName(n, "var");
             else
@@ -118,11 +128,6 @@ class Visitor {
             f.call(this, node, kind);
         else
             node.children().forEach(n => this.visit(n, kind));
-    }
-
-    fail(msg) {
-
-        throw new SyntaxError(msg);
     }
 
     hasStrictDirective(statements) {
@@ -145,10 +150,14 @@ class Visitor {
 
     visitFunction(params, body, strictParams) {
 
-        var paramScope = this.pushScope("params");
+        var paramScope = this.pushScope("param");
 
-        if (!this.top.strict && this.hasStrictDirective(body.statements))
+        if (!this.top.strict &&
+            body.statements &&
+            this.hasStrictDirective(body.statements)) {
+
             this.top.strict = true;
+        }
 
         strictParams = strictParams || this.top.strict;
 
@@ -164,10 +173,13 @@ class Visitor {
 
             this.visit(n, "param");
             this.flushFree();
+            this.top.free.length = 0;
         });
 
+        var blockScope = null;
+
         this.pushScope("var");
-        var blockScope = this.pushScope();
+        var blockScope = this.pushScope("block");
         this.visit(body, "var");
         this.popScope();
         this.popScope();
@@ -177,10 +189,10 @@ class Visitor {
         Object.keys(paramScope.names).forEach(name => {
 
             if (blockScope.names[name])
-                this.fail("Duplicate block declaration");
+                this.fail("Duplicate block declaration", blockScope.names[name].declarations[0]);
 
             if (strictParams && paramScope.names[name].declarations.length > 1)
-                this.fail("Duplicate parameter names");
+                this.fail("Duplicate parameter names", paramScope.names[name].declarations[1]);
         });
     }
 
@@ -203,12 +215,12 @@ class Visitor {
         if (record) {
 
             if (kind !== "var" && kind !== "param")
-                this.fail("Duplicate variable declaration");
+                this.fail("Duplicate variable declaration", node);
 
         } else {
 
             if (name === "let" && (kind === "let" || kind === "const"))
-                this.fail("Invalid binding identifier");
+                this.fail("Invalid binding identifier", node);
 
             map[name] = record = { declarations: [], references: [] };
         }
@@ -218,7 +230,7 @@ class Visitor {
 
     Script(node) {
 
-        this.pushScope();
+        this.pushScope("block");
 
         if (this.hasStrictDirective(node.statements))
             this.top.strict = true;
@@ -230,7 +242,7 @@ class Visitor {
 
     Module(node) {
 
-        this.pushScope();
+        this.pushScope("block");
         this.top.strict = true;
         node.children().forEach(n => this.visit(n, "var"));
         this.popScope();
@@ -238,7 +250,7 @@ class Visitor {
 
     Block(node) {
 
-        this.pushScope();
+        this.pushScope("block");
         node.children().forEach(n => this.visit(n));
         this.popScope();
     }
@@ -250,22 +262,24 @@ class Visitor {
 
     ForOfStatement(node) {
 
-        this.Block(node);
+        this.ForStatement(node);
     }
 
     ForInStatement(node) {
 
-        this.Block(node);
+        this.ForStatement(node);
     }
 
     ForStatement(node) {
 
-        this.Block(node);
+        this.pushScope("for");
+        node.children().forEach(n => this.visit(n));
+        this.popScope();
     }
 
     CatchClause(node) {
 
-        this.pushScope();
+        this.pushScope("catch");
         this.visit(node.param);
         node.body.children().forEach(n => this.visit(n));
         this.popScope();
@@ -279,12 +293,14 @@ class Visitor {
     FunctionDeclaration(node, kind) {
 
         this.visit(node.identifier, kind);
+        this.pushScope("function");
         this.visitFunction(node.params, node.body, false);
+        this.popScope();
     }
 
     FunctionExpression(node) {
 
-        this.pushScope();
+        this.pushScope("function");
         this.visit(node.identifier);
         this.visitFunction(node.params, node.body, false);
         this.popScope();
@@ -292,18 +308,22 @@ class Visitor {
 
     MethodDefinition(node) {
 
+        this.pushScope("function");
         this.visitFunction(node.params, node.body, true);
+        this.popScope();
     }
 
     ArrowFunction(node) {
 
+        this.pushScope("function");
         this.visitFunction(node.params, node.body, true);
+        this.popScope();
     }
 
     ClassDeclaration(node, kind) {
 
-        this.visit(node.identifier);
-        this.pushScope();
+        this.visit(node.identifier, kind);
+        this.pushScope("class");
         this.top.strict = true;
         this.visit(node.base);
         this.visit(node.body);
@@ -312,7 +332,7 @@ class Visitor {
 
     ClassExpression(node) {
 
-        this.pushScope();
+        this.pushScope("class");
         this.top.strict = true;
         this.visit(node.identifier);
         this.visit(node.base);

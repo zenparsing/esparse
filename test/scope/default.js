@@ -41,20 +41,19 @@
 
 */
 
-import { parse, resolveBindings } from "../../src/";
+import { parse, resolveScopes } from "../../src/";
 import { runTests, objectLike } from "../runner.js";
 
 var inspect = require("util").inspect;
 
 function render(node) {
 
-    return inspect(node, { depth: 10, colors: true });
+    return inspect(node, { depth: 20, colors: true });
 }
 
 function process(source, options) {
 
-    var ast = parse(source, options);
-    return resolveBindings(ast);
+    return resolveScopes(parse(source, options));
 }
 
 function compare(a, b) {

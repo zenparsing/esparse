@@ -9,6 +9,8 @@ import {
 
 } from "./Unicode.js";
 
+import { LineMap } from "./LineMap.js";
+
 var identifierEscape = /\\u([0-9a-fA-F]{4})/g,
     newlineSequence = /\r\n?|[\n\u2028\u2029]/g,
     crNewline = /\r\n?/g;
@@ -77,29 +79,6 @@ function makeCharTable() {
 
 var charTable = makeCharTable();
 
-// Performs a binary search on an array
-function binarySearch(array, val) {
-
-    var right = array.length - 1,
-        left = 0,
-        mid,
-        test;
-
-    while (left <= right) {
-
-        mid = (left + right) >> 1;
-        test = array[mid];
-
-        if (val === test)
-            return mid;
-
-        if (val < test) right = mid - 1;
-        else left = mid + 1;
-    }
-
-    return left;
-}
-
 // Returns true if the character is a valid identifier part
 function isIdentifierPartAscii(c) {
 
@@ -164,8 +143,7 @@ export class Scanner {
         this.input = input || "";
         this.offset = 0;
         this.length = this.input.length;
-        this.lines = [-1];
-        this.lastLineBreak = -1;
+        this.lineMap = new LineMap;
 
         this.value = "";
         this.number = 0;
@@ -205,25 +183,10 @@ export class Scanner {
         return this.type;
     }
 
-    location(offset) {
-
-        var line = binarySearch(this.lines, offset),
-            pos = this.lines[line - 1],
-            column = offset - pos;
-
-        return { line, column, lineOffset: pos + 1 };
-    }
-
     rawValue(start, end) {
 
         // Line endings are normalized to <LF>
         return this.input.slice(start, end).replace(crNewline, "\n");
-    }
-
-    addLineBreak(offset) {
-
-        if (offset > this.lastLineBreak)
-            this.lines.push(this.lastLineBreak = offset);
     }
 
     peekChar() {
@@ -338,7 +301,7 @@ export class Scanner {
 
             case "\r":
 
-                this.addLineBreak(this.offset - 1);
+                this.lineMap.addBreak(this.offset - 1);
 
                 if (this.peekChar() === "\n")
                     this.offset++;
@@ -349,7 +312,7 @@ export class Scanner {
             case "\u2028":
             case "\u2029":
 
-                this.addLineBreak(this.offset - 1);
+                this.lineMap.addBreak(this.offset - 1);
                 return continuationChar;
 
             case "0":
@@ -599,7 +562,7 @@ export class Scanner {
 
     Newline(code) {
 
-        this.addLineBreak(this.offset++);
+        this.lineMap.addBreak(this.offset++);
 
         // Treat /r/n as a single newline
         if (code === 13 && this.peekCode() === 10)
@@ -1039,7 +1002,7 @@ export class Scanner {
                 break;
 
             this.newlineBefore = true;
-            this.addLineBreak(m.index);
+            this.lineMap.addBreak(m.index);
         }
 
         this.value = this.input.slice(start, this.offset - 2);
