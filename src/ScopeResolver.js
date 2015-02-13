@@ -320,9 +320,9 @@ class ScopeResolver {
         this.popScope();
     }
 
-    ClassDeclaration(node, kind) {
+    ClassDeclaration(node) {
 
-        this.visit(node.identifier, kind);
+        this.visit(node.identifier, "let");
         this.pushScope("class");
         this.top.strict = true;
         this.visit(node.base);
