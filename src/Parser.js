@@ -189,20 +189,6 @@ class Context {
     }
 }
 
-class Options {
-
-    constructor(obj) {
-
-        this.obj = obj || {};
-    }
-
-    get(key, def) {
-
-        let v = this.obj[key];
-        return v === void 0 ? def : v;
-    }
-}
-
 class ParseResult {
 
     constructor(input, lineMap, ast) {
@@ -210,6 +196,7 @@ class ParseResult {
         this.input = input;
         this.lineMap = lineMap;
         this.ast = ast;
+        this.scopeTree = null;
     }
 
     locate(offset) {
@@ -217,7 +204,7 @@ class ParseResult {
         return this.lineMap.locate(offset);
     }
 
-    syntaxError(message, node) {
+    createSyntaxError(message, node) {
 
         let loc = this.lineMap.locate(node.start),
             err = new SyntaxError(message);
@@ -238,7 +225,7 @@ export class Parser {
 
     parse(input, options) {
 
-        options = new Options(options);
+        options = options || {};
 
         let scanner = new Scanner(input);
 
@@ -253,7 +240,7 @@ export class Parser {
         this.context = new Context(null, false);
         this.setStrict(false);
 
-        let ast = options.get("module") ? this.Module() : this.Script();
+        let ast = options.module ? this.Module() : this.Script();
 
         return new ParseResult(this.input, this.scanner.lineMap, ast);
     }
@@ -456,7 +443,7 @@ export class Parser {
             node = this.peekToken();
 
         let result = new ParseResult(this.input, this.scanner.lineMap, null);
-        throw result.syntaxError(msg, node);
+        throw result.createSyntaxError(msg, node);
     }
 
     unwrapParens(node) {

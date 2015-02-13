@@ -41,7 +41,7 @@
 
 */
 
-import { parse, resolveScopes } from "../../src/";
+import { parse } from "../../src/";
 import { runTests, objectLike } from "../runner.js";
 
 const inspect = require("util").inspect;
@@ -53,7 +53,7 @@ function render(node) {
 
 function process(source, options) {
 
-    return resolveScopes(parse(source, options));
+    return parse(source, Object.assign(options, { resolveScopes: true })).scopeTree;
 }
 
 function compare(a, b) {

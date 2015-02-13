@@ -1,10 +1,5 @@
-// TODO:  How we deal with the insanity that is statements?
+// TODO:  How we deal with the insanity that is with statements?
 // TODO:  Param scopes have empty free lists, which is strange
-
-export function resolveScopes(parseResult) {
-
-    return new ScopeResolver().resolve(parseResult);
-}
 
 class Scope {
 
@@ -31,7 +26,7 @@ class Scope {
     }
 }
 
-class ScopeResolver {
+export class ScopeResolver {
 
     resolve(parseResult) {
 
@@ -42,12 +37,12 @@ class ScopeResolver {
         this.visit(parseResult.ast);
         this.flushFree();
 
-        return this.top;
+        parseResult.scopeTree = this.top;
     }
 
    fail(msg, node) {
 
-        throw this.parseResult.syntaxError(msg, node);
+        throw this.parseResult.createSyntaxError(msg, node);
     }
 
     pushScope(type) {
