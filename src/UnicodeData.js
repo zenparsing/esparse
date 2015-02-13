@@ -1,6 +1,6 @@
 // Unicode 6.3.0 | 2013-09-25, 18:58:50 GMT [MD]
 
-export var IDENTIFIER = [
+export const IDENTIFIER = [
     36,0,2,
     48,9,3,
     65,25,2,
@@ -745,7 +745,7 @@ export var IDENTIFIER = [
     917760,239,3
 ];
 
-export var WHITESPACE = [
+export const WHITESPACE = [
     9,0,1,
     11,1,1,
     32,0,1,

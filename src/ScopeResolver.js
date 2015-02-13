@@ -1,3 +1,6 @@
+// TODO:  How we deal with the insanity that is statements?
+// TODO:  Param scopes have empty free lists, which is strange
+
 export function resolveScopes(parseResult) {
 
     return new ScopeResolver().resolve(parseResult);
@@ -49,7 +52,7 @@ class ScopeResolver {
 
     pushScope(type) {
 
-        var strict = this.top.strict;
+        let strict = this.top.strict;
         this.stack.push(this.top);
         this.top = new Scope(type);
         this.top.strict = strict;
@@ -59,7 +62,7 @@ class ScopeResolver {
 
     flushFree() {
 
-        var map = this.top.names,
+        let map = this.top.names,
             free = this.top.free,
             next = null,
             freeList = [];
@@ -71,7 +74,7 @@ class ScopeResolver {
 
         free.forEach(r => {
 
-            var name = r.value;
+            let name = r.value;
 
             if (map[name]) {
 
@@ -89,14 +92,14 @@ class ScopeResolver {
 
     linkScope(child) {
 
-        var p = this.top;
+        let p = this.top;
         child.parent = p;
         p.children.push(child);
     }
 
     popScope() {
 
-        var scope = this.top,
+        let scope = this.top,
             varNames = scope.varNames,
             free = scope.free;
 
@@ -122,7 +125,7 @@ class ScopeResolver {
         if (!node)
             return;
 
-        var f = this[node.type];
+        let f = this[node.type];
 
         if (typeof f === "function")
             f.call(this, node, kind);
@@ -132,11 +135,9 @@ class ScopeResolver {
 
     hasStrictDirective(statements) {
 
-        var n, i;
+        for (let i = 0; i < statements.length; ++i) {
 
-        for (i = 0; i < statements.length; ++i) {
-
-            n = statements[i];
+            let n = statements[i];
 
             if (n.type !== "Directive")
                 break;
@@ -150,7 +151,7 @@ class ScopeResolver {
 
     visitFunction(params, body, strictParams) {
 
-        var paramScope = this.pushScope("param");
+        let paramScope = this.pushScope("param");
 
         if (!this.top.strict &&
             body.statements &&
@@ -176,10 +177,8 @@ class ScopeResolver {
             this.top.free.length = 0;
         });
 
-        var blockScope = null;
-
         this.pushScope("var");
-        var blockScope = this.pushScope("block");
+        let blockScope = this.pushScope("block");
         this.visit(body, "var");
         this.popScope();
         this.popScope();
@@ -198,7 +197,7 @@ class ScopeResolver {
 
     addReference(node) {
 
-        var name = node.value,
+        let name = node.value,
             map = this.top.names,
             next = this.stack[this.stack.length - 1];
 
@@ -208,7 +207,7 @@ class ScopeResolver {
 
     addName(node, kind) {
 
-        var name = node.value,
+        let name = node.value,
             map = this.top.names,
             record = map[name];
 

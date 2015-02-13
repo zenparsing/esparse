@@ -2,7 +2,7 @@ import { IDENTIFIER, WHITESPACE } from "./UnicodeData.js";
 
 function binarySearch(table, val) {
 
-    var right = (table.length / 3) - 1,
+    let right = (table.length / 3) - 1,
         left = 0,
         mid = 0,
         test = 0,
@@ -53,13 +53,13 @@ export function codePointLength(code) {
 
 export function codePointAt(str, offset) {
 
-    var a = str.charCodeAt(offset);
+    let a = str.charCodeAt(offset);
 
     if (a >= 0xd800 &&
         a <= 0xdbff &&
         str.length > offset + 1) {
 
-        var b = str.charCodeAt(offset + 1);
+        let b = str.charCodeAt(offset + 1);
 
         if (b >= 0xdc00 && b <= 0xdfff)
             return (a - 0xd800) * 0x400 + b - 0xdc00 + 0x10000;

@@ -54,8 +54,6 @@ export class Validate {
     // Validates a binding target
     checkBindingTarget(node) {
 
-        var name;
-
         switch (node.type) {
 
             case "Identifier":
@@ -66,7 +64,7 @@ export class Validate {
                 // Mark identifier node as a declaration
                 node.context = "declaration";
 
-                name = node.value;
+                let name = node.value;
 
                 if (isPoisonIdent(name))
                     this.addStrictError("Binding cannot be created for '" + name + "' in strict mode", node);
@@ -97,7 +95,7 @@ export class Validate {
     // Checks an identifier for strict mode reserved words
     checkIdentifier(node) {
 
-        var ident = node.value;
+        let ident = node.value;
 
         if (ident === "yield" && this.context.isGenerator)
             this.fail("yield cannot be an identifier inside of a generator function", node);
@@ -110,16 +108,14 @@ export class Validate {
     // Checks function formal parameters for strict mode restrictions
     checkParameters(params, kind) {
 
-        var name, node;
+        for (let i = 0; i < params.length; ++i) {
 
-        for (var i = 0; i < params.length; ++i) {
-
-            node = params[i];
+            let node = params[i];
 
             if (node.type !== "FormalParameter" || node.pattern.type !== "Identifier")
                 continue;
 
-            name = node.pattern.value;
+            let name = node.pattern.value;
 
             if (isPoisonIdent(name))
                 this.addStrictError("Parameter name " + name + " is not allowed in strict mode", node);
@@ -145,7 +141,7 @@ export class Validate {
             if (init.declarations.length !== 1)
                 this.fail("for-" + type + " statement may not have more than one variable declaration", init);
 
-            var decl = init.declarations[0];
+            let decl = init.declarations[0];
 
             // Initializers are not allowed in for in and for of
             if (decl.initializer)
@@ -159,18 +155,15 @@ export class Validate {
 
     checkInvalidNodes() {
 
-        var context = this.context,
+        let context = this.context,
             parent = context.parent,
-            list = context.invalidNodes,
-            item,
-            node,
-            error;
+            list = context.invalidNodes;
 
-        for (var i = 0; i < list.length; ++i) {
+        for (let i = 0; i < list.length; ++i) {
 
-            item = list[i];
-            node = item.node;
-            error = node.error;
+            let item = list[i],
+                node = item.node,
+                error = node.error;
 
             // Skip if error has been resolved
             if (!error)

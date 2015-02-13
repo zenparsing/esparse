@@ -10,10 +10,7 @@ export class Transform {
         if (!expr)
             return [];
 
-        var param,
-            list,
-            node,
-            expr;
+        let list;
 
         switch (expr.type) {
 
@@ -22,9 +19,10 @@ export class Transform {
             default: list = [expr]; break;
         }
 
-        for (var i = 0; i < list.length; ++i) {
+        for (let i = 0; i < list.length; ++i) {
 
-            node = list[i];
+            let node = list[i],
+                param;
 
             if (i === list.length - 1 && node.type === "SpreadExpression") {
 
@@ -58,13 +56,12 @@ export class Transform {
         // NOTE: ArrayPattern and ArrayLiteral are isomorphic
         node.type = "ArrayPattern";
 
-        var elems = node.elements,
-            elem,
-            expr;
+        let elems = node.elements;
 
-        for (var i = 0; i < elems.length; ++i) {
+        for (let i = 0; i < elems.length; ++i) {
 
-            elem = elems[i];
+            let elem = elems[i],
+                expr;
 
             // Skip holes in pattern
             if (!elem)
@@ -120,11 +117,11 @@ export class Transform {
         // NOTE: ObjectPattern and ObjectLiteral are isomorphic
         node.type = "ObjectPattern";
 
-        var props = node.properties;
+        let props = node.properties;
 
-        for (var i = 0; i < props.length; ++i) {
+        for (let i = 0; i < props.length; ++i) {
 
-            var prop = props[i];
+            let prop = props[i];
 
             // Clear the error flag
             prop.error = "";

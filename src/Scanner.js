@@ -11,24 +11,24 @@ import {
 
 import { LineMap } from "./LineMap.js";
 
-var identifierEscape = /\\u([0-9a-fA-F]{4})/g,
-    newlineSequence = /\r\n?|[\n\u2028\u2029]/g,
-    crNewline = /\r\n?/g;
+const identifierEscape = /\\u([0-9a-fA-F]{4})/g,
+      newlineSequence = /\r\n?|[\n\u2028\u2029]/g,
+      crNewline = /\r\n?/g;
 
 // === Reserved Words ===
-var reservedWord = new RegExp("^(?:" +
+const reservedWord = new RegExp("^(?:" +
     "break|case|catch|class|const|continue|debugger|default|delete|do|" +
     "else|enum|export|extends|false|finally|for|function|if|import|in|" +
     "instanceof|new|null|return|super|switch|this|throw|true|try|typeof|" +
     "var|void|while|with" +
 ")$");
 
-var strictReservedWord = new RegExp("^(?:" +
+const strictReservedWord = new RegExp("^(?:" +
     "implements|private|public|interface|package|let|protected|static|yield" +
 ")$");
 
 // === Punctuators ===
-var multiCharPunctuator = new RegExp("^(?:" +
+const multiCharPunctuator = new RegExp("^(?:" +
     "--|[+]{2}|" +
     "&&|[|]{2}|" +
     "<<=?|" +
@@ -41,19 +41,18 @@ var multiCharPunctuator = new RegExp("^(?:" +
 ")$");
 
 // === Miscellaneous Patterns ===
-var octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
-    blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
-    hexChar = /[0-9a-f]/i;
+const octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
+      blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
+      hexChar = /[0-9a-f]/i;
 
 // === Character type lookup table ===
 function makeCharTable() {
 
-    var table = [],
-        i;
+    let table = [];
 
-    for (i = 0; i < 128; ++i) table[i] = "";
-    for (i = 65; i <= 90; ++i) table[i] = "identifier";
-    for (i = 97; i <= 122; ++i) table[i] = "identifier";
+    for (let i = 0; i < 128; ++i) table[i] = "";
+    for (let i = 65; i <= 90; ++i) table[i] = "identifier";
+    for (let i = 97; i <= 122; ++i) table[i] = "identifier";
 
     add("whitespace", "\t\v\f ");
     add("newline", "\r\n");
@@ -77,7 +76,7 @@ function makeCharTable() {
     }
 }
 
-var charTable = makeCharTable();
+const charTable = makeCharTable();
 
 // Returns true if the character is a valid identifier part
 function isIdentifierPartAscii(c) {
@@ -221,7 +220,7 @@ export class Scanner {
 
     readUnicodeEscapeValue() {
 
-        var hex = "";
+        let hex = "";
 
         if (this.peekChar() === "{") {
 
@@ -244,7 +243,7 @@ export class Scanner {
 
     readUnicodeEscape() {
 
-        var cp = this.readUnicodeEscapeValue(),
+        let cp = this.readUnicodeEscapeValue(),
             val = codePointString(cp);
 
         return val === "" ? null : val;
@@ -257,7 +256,7 @@ export class Scanner {
         if (this.readChar() !== "u")
             return null;
 
-        var cp = this.readUnicodeEscapeValue();
+        let cp = this.readUnicodeEscapeValue();
 
         if (startChar) {
 
@@ -275,7 +274,7 @@ export class Scanner {
 
     readOctalEscape() {
 
-        var m = octalEscape.exec(this.input.slice(this.offset, this.offset + 3)),
+        let m = octalEscape.exec(this.input.slice(this.offset, this.offset + 3)),
             val = m ? m[0] : "";
 
         this.offset += val.length;
@@ -287,7 +286,7 @@ export class Scanner {
 
         this.offset++;
 
-        var chr = "",
+        let chr = "",
             esc = "";
 
         switch (chr = this.readChar()) {
@@ -354,7 +353,7 @@ export class Scanner {
 
     readRange(low, high) {
 
-        var start = this.offset,
+        let start = this.offset,
             code = 0;
 
         while (code = this.peekCode()) {
@@ -368,7 +367,7 @@ export class Scanner {
 
     readInteger() {
 
-        var start = this.offset,
+        let start = this.offset,
             code = 0;
 
         while (code = this.peekCode()) {
@@ -382,7 +381,7 @@ export class Scanner {
 
     readHex(maxLen) {
 
-        var str = "",
+        let str = "",
             chr = "";
 
         while (chr = this.peekChar()) {
@@ -402,7 +401,7 @@ export class Scanner {
 
     peekNumberFollow() {
 
-        var c = this.peekCode();
+        let c = this.peekCode();
 
         if (c > 127)
             return !isIdentifierStart(this.peekCodePoint());
@@ -419,7 +418,7 @@ export class Scanner {
 
     Skip() {
 
-        var code = this.peekCode();
+        let code = this.peekCode();
 
         if (code < 128) {
 
@@ -431,7 +430,7 @@ export class Scanner {
 
                 case "slash":
 
-                    var next = this.peekCodeAt(1);
+                    let next = this.peekCodeAt(1);
 
                     if (next === 47) return this.LineComment();       // /
                     else if (next === 42) return this.BlockComment(); // *
@@ -443,7 +442,7 @@ export class Scanner {
             if (isNewlineChar(this.peekChar()))
                 return this.Newline(code);
 
-            var cp = this.peekCodePoint();
+            let cp = this.peekCodePoint();
 
             // Unicode whitespace
             if (isWhitespace(cp))
@@ -455,7 +454,7 @@ export class Scanner {
 
     Start(context) {
 
-        var code = this.peekCode(),
+        let code = this.peekCode(),
             next = 0;
 
         switch (charTable[code]) {
@@ -518,7 +517,7 @@ export class Scanner {
         if (isNewlineChar(this.peekChar()))
             return this.Newline(code);
 
-        var cp = this.peekCodePoint();
+        let cp = this.peekCodePoint();
 
         // Unicode whitespace
         if (isWhitespace(cp))
@@ -535,7 +534,7 @@ export class Scanner {
 
         this.offset++;
 
-        var code = 0;
+        let code = 0;
 
         while (code = this.peekCode()) {
 
@@ -580,7 +579,7 @@ export class Scanner {
 
     Punctuator() {
 
-        var op = this.readChar(),
+        let op = this.readChar(),
             chr = "",
             next = "";
 
@@ -604,7 +603,7 @@ export class Scanner {
 
     Template() {
 
-        var first = this.readChar(),
+        let first = this.readChar(),
             end = false,
             val = "",
             esc = "",
@@ -652,7 +651,7 @@ export class Scanner {
 
     String() {
 
-        var delim = this.readChar(),
+        let delim = this.readChar(),
             val = "",
             esc = "",
             chr = "";
@@ -694,7 +693,7 @@ export class Scanner {
 
         this.offset++;
 
-        var backslash = false,
+        let backslash = false,
             inClass = false,
             val = "",
             chr = "",
@@ -775,7 +774,7 @@ export class Scanner {
 
         this.offset++;
 
-        var start = this.offset,
+        let start = this.offset,
             code = 0;
 
         while (code = this.peekCode()) {
@@ -788,7 +787,7 @@ export class Scanner {
 
         this.strictError = "Octal literals are not allowed in strict mode";
 
-        var val = parseInt(this.input.slice(start, this.offset), 8);
+        let val = parseInt(this.input.slice(start, this.offset), 8);
 
         if (!this.peekNumberFollow())
             return this.Error();
@@ -800,7 +799,7 @@ export class Scanner {
 
     Number() {
 
-        var start = this.offset,
+        let start = this.offset,
             next = "";
 
         this.readInteger();
@@ -825,7 +824,7 @@ export class Scanner {
                 return this.Error();
         }
 
-        var val = parseFloat(this.input.slice(start, this.offset));
+        let val = parseFloat(this.input.slice(start, this.offset));
 
         if (!this.peekNumberFollow())
             return this.Error();
@@ -839,7 +838,7 @@ export class Scanner {
 
         this.offset += 2;
 
-        var val = parseInt(this.readRange(48, 49), 2);
+        let val = parseInt(this.readRange(48, 49), 2);
 
         if (!this.peekNumberFollow())
             return this.Error();
@@ -853,7 +852,7 @@ export class Scanner {
 
         this.offset += 2;
 
-        var val = parseInt(this.readRange(48, 55), 8);
+        let val = parseInt(this.readRange(48, 55), 8);
 
         if (!this.peekNumberFollow())
             return this.Error();
@@ -867,7 +866,7 @@ export class Scanner {
 
         this.offset += 2;
 
-        var val = parseInt(this.readHex(0), 16);
+        let val = parseInt(this.readHex(0), 16);
 
         if (!this.peekNumberFollow())
             return this.Error();
@@ -879,7 +878,7 @@ export class Scanner {
 
     Identifier(context, code) {
 
-        var start = this.offset,
+        let start = this.offset,
             val = "",
             esc = "";
 
@@ -965,7 +964,7 @@ export class Scanner {
 
         this.offset += 2;
 
-        var start = this.offset,
+        let start = this.offset,
             chr = "";
 
         while (chr = this.peekChar()) {
@@ -985,15 +984,14 @@ export class Scanner {
 
         this.offset += 2;
 
-        var pattern = blockCommentPattern,
-            start = this.offset,
-            m = null;
+        let pattern = blockCommentPattern,
+            start = this.offset;
 
         while (true) {
 
             pattern.lastIndex = this.offset;
 
-            m = pattern.exec(this.input);
+            let m = pattern.exec(this.input);
             if (!m) return this.Error(msg);
 
             this.offset = m.index + m[0].length;

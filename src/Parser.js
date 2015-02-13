@@ -198,7 +198,7 @@ class Options {
 
     get(key, def) {
 
-        var v = this.obj[key];
+        let v = this.obj[key];
         return v === void 0 ? def : v;
     }
 }
@@ -219,7 +219,7 @@ class ParseResult {
 
     syntaxError(message, node) {
 
-        var loc = this.lineMap.locate(node.start),
+        let loc = this.lineMap.locate(node.start),
             err = new SyntaxError(message);
 
         err.line = loc.line;
@@ -240,7 +240,7 @@ export class Parser {
 
         options = new Options(options);
 
-        var scanner = new Scanner(input);
+        let scanner = new Scanner(input);
 
         this.scanner = scanner;
         this.input = input;
@@ -253,14 +253,14 @@ export class Parser {
         this.context = new Context(null, false);
         this.setStrict(false);
 
-        var ast = options.get("module") ? this.Module() : this.Script();
+        let ast = options.get("module") ? this.Module() : this.Script();
 
         return new ParseResult(this.input, this.scanner.lineMap, ast);
     }
 
     nextToken(context) {
 
-        var scanner = this.scanner,
+        let scanner = this.scanner,
             type = "";
 
         context = context || "";
@@ -289,7 +289,7 @@ export class Parser {
 
     readToken(type, context) {
 
-        var token = this.peek0 || this.nextToken(context);
+        let token = this.peek0 || this.nextToken(context);
 
         this.peek0 = this.peek1;
         this.peek1 = null;
@@ -350,13 +350,13 @@ export class Parser {
 
     peekUntil(type, context) {
 
-        var tok = this.peek(context);
+        let tok = this.peek(context);
         return tok !== "EOF" && tok !== type ? tok : null;
     }
 
     readKeyword(word) {
 
-        var token = this.readToken();
+        let token = this.readToken();
 
         if (token.type === word || keywordFromToken(token) === word)
             return token;
@@ -366,7 +366,7 @@ export class Parser {
 
     peekKeyword(word) {
 
-        var token = this.peekToken();
+        let token = this.peekToken();
         return token.type === word || keywordFromToken(token) === word;
     }
 
@@ -408,7 +408,7 @@ export class Parser {
 
     peekFunctionModifier() {
 
-        var token = this.peekToken();
+        let token = this.peekToken();
 
         if (!isFunctionModifier(keywordFromToken(token)))
             return false;
@@ -419,7 +419,7 @@ export class Parser {
 
     peekEnd() {
 
-        var token = this.peekToken();
+        let token = this.peekToken();
 
         if (!token.newlineBefore) {
 
@@ -441,7 +441,7 @@ export class Parser {
 
     unexpected(token) {
 
-        var type = token.type, msg;
+        let type = token.type, msg;
 
         msg = type === "EOF" ?
             "Unexpected end of input" :
@@ -455,7 +455,7 @@ export class Parser {
         if (!node)
             node = this.peekToken();
 
-        var result = new ParseResult(this.input, this.scanner.lineMap, null);
+        let result = new ParseResult(this.input, this.scanner.lineMap, null);
         throw result.syntaxError(msg, node);
     }
 
@@ -471,7 +471,7 @@ export class Parser {
 
     pushContext() {
 
-        var parent = this.context;
+        let parent = this.context;
 
         this.context = new Context(parent);
 
@@ -481,7 +481,7 @@ export class Parser {
 
     pushMaybeContext() {
 
-        var parent = this.context;
+        let parent = this.context;
         this.pushContext();
         this.context.isFunction = parent.isFunction;
         this.context.isGenerator = parent.isGenerator;
@@ -491,7 +491,7 @@ export class Parser {
 
     popContext(collapse) {
 
-        var context = this.context,
+        let context = this.context,
             parent = context.parent;
 
         // If collapsing into parent context, copy invalid nodes into parent
@@ -521,7 +521,7 @@ export class Parser {
 
     setLabel(label, value) {
 
-        var m = this.context.labelMap;
+        let m = this.context.labelMap;
 
         if (!m)
             m = this.context.labelMap = Object.create(null);
@@ -531,13 +531,13 @@ export class Parser {
 
     getLabel(label) {
 
-        var m = this.context.labelMap;
+        let m = this.context.labelMap;
         return (m && m[label]) | 0;
     }
 
     setFunctionType(kind) {
 
-        var c = this.context,
+        let c = this.context,
             a = false,
             g = false;
 
@@ -560,7 +560,7 @@ export class Parser {
         this.isModule = false;
         this.pushContext();
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             statements = this.StatementList(true, false);
 
         this.popContext();
@@ -574,7 +574,7 @@ export class Parser {
         this.pushContext();
         this.setStrict(true);
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             statements = this.StatementList(true, true);
 
         this.popContext();
@@ -586,7 +586,7 @@ export class Parser {
 
     Expression(noIn) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             expr = this.AssignmentExpression(noIn),
             list = null;
 
@@ -608,7 +608,7 @@ export class Parser {
 
     AssignmentExpression(noIn, allowSpread) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             node;
 
         if (this.peek() === "...") {
@@ -650,7 +650,7 @@ export class Parser {
 
     YieldExpression(noIn) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             delegate = false,
             expr = null;
 
@@ -676,7 +676,7 @@ export class Parser {
 
     ConditionalExpression(noIn) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             left = this.BinaryExpression(noIn),
             middle,
             right;
@@ -699,7 +699,7 @@ export class Parser {
 
     PartialBinaryExpression(lhs, minPrec, noIn) {
 
-        var prec = 0,
+        let prec = 0,
             next = "",
             max = 0,
             op = "",
@@ -742,7 +742,7 @@ export class Parser {
 
     UnaryExpression() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             type = this.peek(),
             token,
             expr;
@@ -788,7 +788,7 @@ export class Parser {
 
     MemberExpression(allowCall) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             token = this.peekToken(),
             arrowType = "",
             isSuper = false,
@@ -955,11 +955,11 @@ export class Parser {
 
     NewExpression() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("new");
 
-        var expr = this.MemberExpression(false),
+        let expr = this.MemberExpression(false),
             args = this.peek("div") === "(" ? this.ArgumentList() : null;
 
         return new AST.NewExpression(expr, args, start, this.nodeEnd());
@@ -967,7 +967,7 @@ export class Parser {
 
     MetaProperty() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             left = this.read(),
             right;
 
@@ -983,10 +983,10 @@ export class Parser {
 
     SuperExpression() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
         this.read("super");
 
-        var node = new AST.SuperExpression(start, this.nodeEnd());
+        let node = new AST.SuperExpression(start, this.nodeEnd());
 
         if (!this.context.isFunction)
             this.fail("Super keyword outside of function", node);
@@ -996,7 +996,7 @@ export class Parser {
 
     ArgumentList() {
 
-        var list = [];
+        let list = [];
 
         this.read("(");
 
@@ -1015,7 +1015,7 @@ export class Parser {
 
     PrimaryExpression() {
 
-        var token = this.peekToken(),
+        let token = this.peekToken(),
             type = token.type,
             start = this.nodeStart(),
             next,
@@ -1080,7 +1080,7 @@ export class Parser {
 
     Identifier(isVar) {
 
-        var token = this.readToken("IDENTIFIER"),
+        let token = this.readToken("IDENTIFIER"),
             node = new AST.Identifier(token.value, isVar ? "variable" : "", token.start, token.end);
 
         this.checkIdentifier(node);
@@ -1089,7 +1089,7 @@ export class Parser {
 
     IdentifierName() {
 
-        var token = this.readToken("IDENTIFIER", "name");
+        let token = this.readToken("IDENTIFIER", "name");
         return new AST.Identifier(token.value, "", token.start, token.end);
     }
 
@@ -1097,13 +1097,13 @@ export class Parser {
 
         // TODO:  Only allow within class?  What about nested classes?
 
-        var token = this.readToken("ATNAME");
+        let token = this.readToken("ATNAME");
         return new AST.AtName(token.value, token.start, token.end);
     }
 
     StringLiteral() {
 
-        var token = this.readToken("STRING"),
+        let token = this.readToken("STRING"),
             node = new AST.StringLiteral(token.value, token.start, token.end);
 
         if (token.strictError)
@@ -1114,7 +1114,7 @@ export class Parser {
 
     NumberLiteral() {
 
-        var token = this.readToken("NUMBER"),
+        let token = this.readToken("NUMBER"),
             node = new AST.NumberLiteral(token.number, token.start, token.end);
 
         if (token.strictError)
@@ -1125,7 +1125,7 @@ export class Parser {
 
     TemplatePart() {
 
-        var token = this.readToken("TEMPLATE", "template"),
+        let token = this.readToken("TEMPLATE", "template"),
             end = token.templateEnd,
             node;
 
@@ -1145,7 +1145,7 @@ export class Parser {
     RegularExpression() {
 
         // TODO:  Validate regular expression against RegExp grammar (21.2.1)
-        var token = this.readToken("REGEX");
+        let token = this.readToken("REGEX");
 
         return new AST.RegularExpression(
             token.value,
@@ -1156,7 +1156,7 @@ export class Parser {
 
     BindingIdentifier() {
 
-        var token = this.readToken("IDENTIFIER"),
+        let token = this.readToken("IDENTIFIER"),
             node = new AST.Identifier(token.value, "", token.start, token.end);
 
         this.checkBindingTarget(node);
@@ -1165,7 +1165,7 @@ export class Parser {
 
     BindingPattern() {
 
-        var node;
+        let node;
 
         switch (this.peek()) {
 
@@ -1187,7 +1187,7 @@ export class Parser {
 
     ParenExpression() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             expr = null,
             rest = null;
 
@@ -1210,7 +1210,7 @@ export class Parser {
 
         this.read(")");
 
-        var next = this.peekToken("div");
+        let next = this.peekToken("div");
 
         if (!next.newlineBefore && (next.type === "=>" || expr === null))
             return this.ArrowFunctionHead("", expr, start);
@@ -1223,7 +1223,7 @@ export class Parser {
 
     ObjectLiteral() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             comma = false,
             list = [],
             node;
@@ -1254,7 +1254,7 @@ export class Parser {
         if (this.peek("name") === "*")
             return this.MethodDefinition();
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             node,
             name;
 
@@ -1304,7 +1304,7 @@ export class Parser {
 
     PropertyName() {
 
-        var token = this.peekToken("name");
+        let token = this.peekToken("name");
 
         switch (token.type) {
 
@@ -1319,10 +1319,10 @@ export class Parser {
 
     ComputedPropertyName() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("[");
-        var expr = this.AssignmentExpression();
+        let expr = this.AssignmentExpression();
         this.read("]");
 
         return new AST.ComputedPropertyName(expr, start, this.nodeEnd());
@@ -1330,7 +1330,7 @@ export class Parser {
 
     ArrayLiteral() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             comma = false,
             list = [],
             type;
@@ -1365,7 +1365,7 @@ export class Parser {
 
     TemplateExpression() {
 
-        var atom = this.TemplatePart(),
+        let atom = this.TemplatePart(),
             start = atom.start,
             lit = [atom],
             sub = [];
@@ -1387,7 +1387,7 @@ export class Parser {
 
     Statement(label) {
 
-        var next;
+        let next;
 
         switch (this.peek()) {
 
@@ -1422,10 +1422,10 @@ export class Parser {
 
     Block() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("{");
-        var list = this.StatementList(false, false);
+        let list = this.StatementList(false, false);
         this.read("}");
 
         return new AST.Block(list, start, this.nodeEnd());
@@ -1433,7 +1433,7 @@ export class Parser {
 
     Semicolon() {
 
-        var token = this.peekToken(),
+        let token = this.peekToken(),
             type = token.type;
 
         if (type === ";" || !(type === "}" || type === "EOF" || token.newlineBefore))
@@ -1442,7 +1442,7 @@ export class Parser {
 
     LabelledStatement() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             label = this.Identifier(),
             name = label.value;
 
@@ -1452,7 +1452,7 @@ export class Parser {
         this.read(":");
 
         this.setLabel(name, 1);
-        var statement = this.Statement(name);
+        let statement = this.Statement(name);
         this.setLabel(name, 0);
 
         return new AST.LabelledStatement(
@@ -1464,7 +1464,7 @@ export class Parser {
 
     ExpressionStatement() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             expr = this.Expression();
 
         this.Semicolon();
@@ -1474,7 +1474,7 @@ export class Parser {
 
     EmptyStatement() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.Semicolon();
 
@@ -1483,7 +1483,7 @@ export class Parser {
 
     VariableStatement() {
 
-        var node = this.VariableDeclaration(false);
+        let node = this.VariableDeclaration(false);
 
         this.Semicolon();
         node.end = this.nodeEnd();
@@ -1493,7 +1493,7 @@ export class Parser {
 
     VariableDeclaration(noIn) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             token = this.peekToken(),
             kind = token.type,
             list = [];
@@ -1531,7 +1531,7 @@ export class Parser {
 
     VariableDeclarator(noIn, kind) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             pattern = this.BindingPattern(),
             init = null;
 
@@ -1556,10 +1556,10 @@ export class Parser {
         if (!this.context.isFunction)
             this.fail("Return statement outside of function");
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("return");
-        var value = this.peekEnd() ? null : this.Expression();
+        let value = this.peekEnd() ? null : this.Expression();
 
         this.Semicolon();
 
@@ -1568,14 +1568,14 @@ export class Parser {
 
     BreakStatement() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             context = this.context;
 
         this.read("break");
-        var label = this.peekEnd() ? null : this.Identifier();
+        let label = this.peekEnd() ? null : this.Identifier();
         this.Semicolon();
 
-        var node = new AST.BreakStatement(label, start, this.nodeEnd());
+        let node = new AST.BreakStatement(label, start, this.nodeEnd());
 
         if (label) {
 
@@ -1592,14 +1592,14 @@ export class Parser {
 
     ContinueStatement() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             context = this.context;
 
         this.read("continue");
-        var label = this.peekEnd() ? null : this.Identifier();
+        let label = this.peekEnd() ? null : this.Identifier();
         this.Semicolon();
 
-        var node = new AST.ContinueStatement(label, start, this.nodeEnd());
+        let node = new AST.ContinueStatement(label, start, this.nodeEnd());
 
         if (label) {
 
@@ -1616,11 +1616,11 @@ export class Parser {
 
     ThrowStatement() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("throw");
 
-        var expr = this.peekEnd() ? null : this.Expression();
+        let expr = this.peekEnd() ? null : this.Expression();
 
         if (expr === null)
             this.fail("Missing throw expression");
@@ -1632,7 +1632,7 @@ export class Parser {
 
     DebuggerStatement() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("debugger");
         this.Semicolon();
@@ -1642,12 +1642,12 @@ export class Parser {
 
     IfStatement() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("if");
         this.read("(");
 
-        var test = this.Expression(),
+        let test = this.Expression(),
             body = null,
             elseBody = null;
 
@@ -1665,7 +1665,7 @@ export class Parser {
 
     DoWhileStatement(label) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             body,
             test;
 
@@ -1690,18 +1690,18 @@ export class Parser {
 
     WhileStatement(label) {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         if (label)
             this.setLabel(label, 2);
 
         this.read("while");
         this.read("(");
-        var expr = this.Expression();
+        let expr = this.Expression();
         this.read(")");
 
         this.context.loopDepth += 1;
-        var statement = this.Statement();
+        let statement = this.Statement();
         this.context.loopDepth -= 1;
 
         return new AST.WhileStatement(
@@ -1713,7 +1713,7 @@ export class Parser {
 
     ForStatement(label) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             init = null,
             async = false,
             test,
@@ -1771,7 +1771,7 @@ export class Parser {
         this.read(")");
 
         this.context.loopDepth += 1;
-        var statement = this.Statement();
+        let statement = this.Statement();
         this.context.loopDepth -= 1;
 
         return new AST.ForStatement(
@@ -1788,11 +1788,11 @@ export class Parser {
         this.checkForInit(init, "in");
 
         this.read("in");
-        var expr = this.Expression();
+        let expr = this.Expression();
         this.read(")");
 
         this.context.loopDepth += 1;
-        var statement = this.Statement();
+        let statement = this.Statement();
         this.context.loopDepth -= 1;
 
         return new AST.ForInStatement(
@@ -1808,11 +1808,11 @@ export class Parser {
         this.checkForInit(init, "of");
 
         this.readKeyword("of");
-        var expr = this.AssignmentExpression();
+        let expr = this.AssignmentExpression();
         this.read(")");
 
         this.context.loopDepth += 1;
-        var statement = this.Statement();
+        let statement = this.Statement();
         this.context.loopDepth -= 1;
 
         return new AST.ForOfStatement(
@@ -1826,12 +1826,12 @@ export class Parser {
 
     WithStatement() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("with");
         this.read("(");
 
-        var node = new AST.WithStatement(
+        let node = new AST.WithStatement(
             this.Expression(),
             (this.read(")"), this.Statement()),
             start,
@@ -1844,12 +1844,12 @@ export class Parser {
 
     SwitchStatement() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("switch");
         this.read("(");
 
-        var head = this.Expression(),
+        let head = this.Expression(),
             hasDefault = false,
             cases = [],
             node;
@@ -1881,7 +1881,7 @@ export class Parser {
 
     SwitchCase() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             expr = null,
             list = [],
             type;
@@ -1911,11 +1911,11 @@ export class Parser {
 
     TryStatement() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("try");
 
-        var tryBlock = this.Block(),
+        let tryBlock = this.Block(),
             handler = null,
             fin = null;
 
@@ -1933,11 +1933,11 @@ export class Parser {
 
     CatchClause() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("catch");
         this.read("(");
-        var param = this.BindingPattern();
+        let param = this.BindingPattern();
         this.read(")");
 
         return new AST.CatchClause(param, this.Block(), start, this.nodeEnd());
@@ -1947,7 +1947,7 @@ export class Parser {
 
     StatementList(prologue, isModule) {
 
-        var list = [],
+        let list = [],
             node,
             expr,
             dir;
@@ -2024,7 +2024,7 @@ export class Parser {
 
     LexicalDeclaration() {
 
-        var node = this.VariableDeclaration(false);
+        let node = this.VariableDeclaration(false);
 
         this.Semicolon();
         node.end = this.nodeEnd();
@@ -2036,7 +2036,7 @@ export class Parser {
 
     FunctionDeclaration() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             kind = "",
             tok;
 
@@ -2059,7 +2059,7 @@ export class Parser {
         this.pushContext();
         this.setFunctionType(kind);
 
-        var ident = this.BindingIdentifier(),
+        let ident = this.BindingIdentifier(),
             params = this.FormalParameters(),
             body = this.FunctionBody();
 
@@ -2077,7 +2077,7 @@ export class Parser {
 
     FunctionExpression() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             ident = null,
             kind = "",
             tok;
@@ -2104,7 +2104,7 @@ export class Parser {
         if (this.peek() !== "(")
             ident = this.BindingIdentifier();
 
-        var params = this.FormalParameters(),
+        let params = this.FormalParameters(),
             body = this.FunctionBody();
 
         this.checkParameters(params);
@@ -2121,7 +2121,7 @@ export class Parser {
 
     MethodDefinition(name, classElement) {
 
-        var start = name ? name.start : this.nodeStart(),
+        let start = name ? name.start : this.nodeStart(),
             isStatic = false,
             kind = "",
             val;
@@ -2169,11 +2169,11 @@ export class Parser {
         this.pushContext();
         this.setFunctionType(kind);
 
-        var params = kind === "get" || kind === "set" ?
+        let params = kind === "get" || kind === "set" ?
             this.AccessorParameters(kind) :
             this.FormalParameters();
 
-        var body = this.FunctionBody();
+        let body = this.FunctionBody();
 
         this.checkParameters(params);
         this.popContext();
@@ -2190,7 +2190,7 @@ export class Parser {
 
     AccessorParameters(kind) {
 
-        var list = [];
+        let list = [];
 
         this.read("(");
 
@@ -2204,7 +2204,7 @@ export class Parser {
 
     FormalParameters() {
 
-        var list = [];
+        let list = [];
 
         this.read("(");
 
@@ -2230,7 +2230,7 @@ export class Parser {
 
     FormalParameter(allowDefault) {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             pattern = this.BindingPattern(),
             init = null;
 
@@ -2245,7 +2245,7 @@ export class Parser {
 
     RestParameter() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("...");
 
@@ -2256,10 +2256,10 @@ export class Parser {
 
         this.context.functionBody = true;
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read("{");
-        var statements = this.StatementList(true, false);
+        let statements = this.StatementList(true, false);
         this.read("}");
 
         return new AST.FunctionBody(statements, start, this.nodeEnd());
@@ -2271,7 +2271,7 @@ export class Parser {
         this.setFunctionType(kind);
 
         // Transform and validate formal parameters
-        var params = this.checkArrowParameters(formals);
+        let params = this.checkArrowParameters(formals);
 
         return new AST.ArrowFunctionHead(params, start, this.nodeEnd());
     }
@@ -2280,14 +2280,14 @@ export class Parser {
 
         this.read("=>");
 
-        var params = head.parameters,
+        let params = head.parameters,
             start = head.start,
             kind = this.context.isAsync ? "async" : "";
 
         // Use function body context even if parsing expression body form
         this.context.functionBody = true;
 
-        var body = this.peek() === "{" ?
+        let body = this.peek() === "{" ?
             this.FunctionBody() :
             this.AssignmentExpression(noIn);
 
@@ -2300,7 +2300,7 @@ export class Parser {
 
     ClassDeclaration() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             ident = null,
             base = null;
 
@@ -2324,7 +2324,7 @@ export class Parser {
 
     ClassExpression() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             ident = null,
             base = null;
 
@@ -2349,7 +2349,7 @@ export class Parser {
 
     ClassBody() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             list = [];
 
         this.pushContext();
@@ -2367,7 +2367,7 @@ export class Parser {
 
     PrivateDeclaration() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             name = this.AtName(),
             init = null;
 
@@ -2384,7 +2384,7 @@ export class Parser {
 
     EmptyClassElement() {
 
-        var start = this.nodeStart();
+        let start = this.nodeStart();
 
         this.read(";");
 
@@ -2393,7 +2393,7 @@ export class Parser {
 
     ClassElement() {
 
-        var next = this.peekToken("name");
+        let next = this.peekToken("name");
 
         if (next.type === ";")
             return this.EmptyClassElement();
@@ -2428,7 +2428,7 @@ export class Parser {
             this.unpeek();
         }
 
-        var method = this.MethodDefinition(null, true),
+        let method = this.MethodDefinition(null, true),
             name = method.name;
 
         if (method.static) {
@@ -2449,7 +2449,7 @@ export class Parser {
 
     ImportDeclaration() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             imports = null,
             from;
 
@@ -2487,7 +2487,7 @@ export class Parser {
 
     DefaultImport() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             ident = this.BindingIdentifier(),
             extra = null;
 
@@ -2515,7 +2515,7 @@ export class Parser {
 
     NamespaceImport() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             ident;
 
         this.read("*");
@@ -2527,7 +2527,7 @@ export class Parser {
 
     NamedImports() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             list = [];
 
         this.read("{");
@@ -2547,7 +2547,7 @@ export class Parser {
 
     ImportSpecifier() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             hasLocal = false,
             local = null,
             remote;
@@ -2580,7 +2580,7 @@ export class Parser {
 
     ExportDeclaration() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             exports;
 
         this.read("export");
@@ -2629,7 +2629,7 @@ export class Parser {
 
     DefaultExport() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             binding;
 
         this.read("default");
@@ -2657,7 +2657,7 @@ export class Parser {
                 break;
         }
 
-        var isDecl = this.transformDefaultExport(binding);
+        let isDecl = this.transformDefaultExport(binding);
 
         if (!isDecl)
             this.Semicolon();
@@ -2667,7 +2667,7 @@ export class Parser {
 
     ExportClause() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             list = null,
             from = null;
 
@@ -2710,7 +2710,7 @@ export class Parser {
 
     ExportSpecifier() {
 
-        var start = this.nodeStart(),
+        let start = this.nodeStart(),
             local = this.IdentifierName(),
             remote = null;
 
@@ -2729,7 +2729,7 @@ function mixin(target, ...sources) {
 
     target = target.prototype;
 
-    var {
+    let {
         getOwnPropertyNames: ownNames,
         getOwnPropertySymbols: ownSymbols,
         getOwnPropertyDescriptor: ownDesc,
