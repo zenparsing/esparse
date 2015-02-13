@@ -1,11 +1,11 @@
 import { Scanner, parse } from "../src/";
 
-var Path = require("path"),
-    FS = require("fs"),
-    Esprima = require("./parsers/esprima.js"),
-    Acorn = require("./parsers/acorn.js");
+const Path = require("path"),
+      FS = require("fs"),
+      Esprima = require("./parsers/esprima.js"),
+      Acorn = require("./parsers/acorn.js");
 
-var reservedWord = new RegExp("^(?:" +
+const reservedWord = new RegExp("^(?:" +
     "break|case|catch|class|const|continue|debugger|default|delete|do|" +
     "else|enum|export|extends|false|finally|for|function|if|import|in|" +
     "instanceof|new|null|return|super|switch|this|throw|true|try|typeof|" +
@@ -42,7 +42,7 @@ function walkDirectory(dir, fn) {
 
 function analyzeChars(string) {
 
-    var a = string.split(""),
+    let a = string.split(""),
         occ = {};
 
     a.forEach(c => {
@@ -66,9 +66,8 @@ function analyzeChars(string) {
 
 function analyzeReserved(string) {
 
-    var scanner = new Scanner(string),
-        words = Object.create(null),
-        word;
+    let scanner = new Scanner(string),
+        words = Object.create(null);
 
     reservedWord
     .toString()
@@ -78,7 +77,7 @@ function analyzeReserved(string) {
 
     while (scanner.next("div") !== "EOF") {
 
-        word = scanner.type;
+        let word = scanner.type;
 
         if (reservedWord.test(word)) {
 
@@ -89,7 +88,7 @@ function analyzeReserved(string) {
         }
     }
 
-    var freq = Object.keys(words)
+    let freq = Object.keys(words)
     .sort((a, b) => words[b] - words[a])
     .map(k => ({ word: k, num: words[k] }));
 
@@ -99,7 +98,7 @@ function analyzeReserved(string) {
         return i < 100;
     });
 
-    var cases = freq.map(obj => `case "${obj.word}":`).join(" ");
+    let cases = freq.map(obj => `case "${obj.word}":`).join(" ");
 
     console.log(cases);
 }
@@ -111,13 +110,13 @@ function nativeParse(src) {
 
 function dryLoop(src) {
 
-    for (var i = 0, c; i < src.length; ++i)
+    for (let i = 0, c; i < src.length; ++i)
         c = src.charAt(i);
 }
 
 function scanOnly(src) {
 
-    var scanner = new Scanner(src);
+    let scanner = new Scanner(src);
     while (scanner.next("div") !== "EOF");
 }
 
@@ -133,11 +132,11 @@ var parsers = {
 
 export function main(args) {
 
-    var libs = {};
+    let libs = {};
 
     Object.keys(parsers).forEach(k => libs[k] = parsers[k]);
 
-    var lib = args[2] || "esparse",
+    let lib = args[2] || "esparse",
         parser = parsers[lib],
         size = 0,
         ms = 0;
@@ -146,13 +145,12 @@ export function main(args) {
 
     walkDirectory(Path.join(__dirname, "_input"), path => {
 
-        var input = FS.readFileSync(path, "utf8"),
-            name = Path.basename(path),
-            ts;
+        let input = FS.readFileSync(path, "utf8"),
+            name = Path.basename(path);
 
         console.log(`Parsing ${ name }`);
 
-        ts = +new Date;
+        let ts = +new Date;
 
         try {
 

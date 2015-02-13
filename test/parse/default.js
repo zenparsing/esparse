@@ -1,9 +1,9 @@
 import { parse } from "../../src/";
 import { runTests, objectLike } from "../runner.js";
 
-var inspect = require("util").inspect;
+const inspect = require("util").inspect;
 
-var SKIP_KEYS = {
+const SKIP_KEYS = {
 
     "start": 1,
     "end": 1,

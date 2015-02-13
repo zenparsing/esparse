@@ -154,7 +154,7 @@ export class Transform {
 
     transformPatternElement(elem, binding) {
 
-        var node = elem.pattern;
+        let node = elem.pattern;
 
         // Split assignment into pattern and initializer
         if (node && node.type === "AssignmentExpression" && node.operator === "=") {
@@ -168,7 +168,7 @@ export class Transform {
 
     transformIdentifier(node) {
 
-        var value = node.value;
+        let value = node.value;
 
         if (isReservedWord(value))
             this.fail("Unexpected token " + value, node);
@@ -178,7 +178,7 @@ export class Transform {
 
     transformDefaultExport(node) {
 
-        var toType = null;
+        let toType = null;
 
         switch (node.type) {
 

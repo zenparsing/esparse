@@ -44,7 +44,7 @@
 import { parse, resolveScopes } from "../../src/";
 import { runTests, objectLike } from "../runner.js";
 
-var inspect = require("util").inspect;
+const inspect = require("util").inspect;
 
 function render(node) {
 

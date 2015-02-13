@@ -1,12 +1,12 @@
-var Path = require("path"),
-    FS = require("fs");
+const Path = require("path"),
+      FS = require("fs");
 
-var TEST_COMMENT = /\/\*\*[\s\S]+?\*\*\//g,
-    COMMENT_TRIM = /^\/\*+\s+|\s+\*+\/$/g,
-    HOP = {}.hasOwnProperty;
+const TEST_COMMENT = /\/\*\*[\s\S]+?\*\*\//g,
+      COMMENT_TRIM = /^\/\*+\s+|\s+\*+\/$/g,
+      HOP = {}.hasOwnProperty;
 
-var testsPassed = 0,
-    testsFailed = 0;
+const testsPassed = 0,
+      testsFailed = 0;
 
 // Returns a stat object for a path
 function statPath(path) {
@@ -83,7 +83,7 @@ function printResult(msg, pass) {
 // Read a javascript or json file
 function readFile(filename) {
 
-    var text = FS.readFileSync(filename, "utf8");
+    let text = FS.readFileSync(filename, "utf8");
 
     // From node/lib/module.js/Module.prototype._compile
     text = text.replace(/^\#\!.*/, '');
@@ -98,7 +98,7 @@ function readFile(filename) {
 // Parses a list of test inputs from comments
 function parseTestComments(text) {
 
-    var list = text.match(TEST_COMMENT) || [];
+    let list = text.match(TEST_COMMENT) || [];
 
     return list.map(source => {
 
@@ -124,14 +124,12 @@ export function objectLike(a, b, skipKeys) {
     if (!isObject(a) || !isObject(b))
 		return a === b;
 
-	var keys, i;
-
 	// Each key in control must be in test
-	for (keys = Object.keys(b), i = 0; i < keys.length; ++i)
+	for (let keys = Object.keys(b), i = 0; i < keys.length; ++i)
 	    if (!HOP.call(a, keys[i]))
 	        return false;
 
-	for (keys = Object.keys(a), i = 0; i < keys.length; ++i) {
+	for (let keys = Object.keys(a), i = 0; i < keys.length; ++i) {
 
 		// Control must have same own property
 		if (!HOP.call(b, keys[i])) {
@@ -150,7 +148,7 @@ export function objectLike(a, b, skipKeys) {
 
 export function runTests(options) {
 
-    var dirname = options.dir,
+    let dirname = options.dir,
         process = options.process,
         compare = options.compare,
         render = options.render;
@@ -168,13 +166,13 @@ export function runTests(options) {
 
     function run() {
 
-        var currentGroup = null;
+        let currentGroup = null;
 
         printMessage("\nStarting tests...");
 
         walkDirectory(dirname, path => {
 
-            var group = groupName(path),
+            let group = groupName(path),
                 name = Path.basename(path, ".js"),
                 tree;
 
@@ -186,17 +184,14 @@ export function runTests(options) {
             if (group !== currentGroup)
                 printHeader(currentGroup = group);
 
-            var text = readFile(path),
+            let text = readFile(path),
                 programs = parseTestComments(text),
                 outputs = (new Function("return " + text))(),
-                keys = Object.keys(outputs),
-                program,
-                pass,
-                i;
+                keys = Object.keys(outputs);
 
-            for (i = 0; i < programs.length; ++i) {
+            for (let i = 0; i < programs.length; ++i) {
 
-                program = programs[i];
+                let program = programs[i];
 
                 try {
 
@@ -210,7 +205,7 @@ export function runTests(options) {
                         throw err;
                 }
 
-                pass = compare(tree, outputs[keys[i]]);
+                let pass = compare(tree, outputs[keys[i]]);
                 printResult(name + " - " + keys[i], pass);
 
                 if (!pass) {
