@@ -393,4 +393,10 @@ function f() {}
           start: 7,
           end: 34 } } ] },
 
+/** async function f() { (await ) => {} } **/
+'await not allowed in arrow function parameter list - 1': {},
+
+/** async function f() { (a = await 1) => {} } **/
+'await not allowed in arrow function parameter list - 2': {},
+
 };

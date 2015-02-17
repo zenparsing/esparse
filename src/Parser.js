@@ -184,6 +184,7 @@ class Context {
         this.isAsync = false;
         this.isMethod = false;
         this.isConstructor = false;
+        this.hasYieldAwait = false;
         this.labelMap = null;
         this.switchDepth = 0;
         this.loopDepth = 0;
@@ -458,24 +459,36 @@ export class Parser {
 
     // == Context Management ==
 
-    pushContext() {
+    pushContext(isArrow) {
 
-        let parent = this.context;
+        let parent = this.context,
+            c = new Context(parent);
 
-        this.context = new Context(parent);
+        this.context = c;
 
         if (parent.mode === "strict")
-            this.context.mode = "strict";
+            c.mode = "strict";
+
+        if (isArrow) {
+
+            c.isMethod = parent.isMethod;
+            c.isConstructor = parent.isConstructor;
+        }
+
+        return c;
     }
 
     pushMaybeContext() {
 
-        let parent = this.context;
-        this.pushContext();
-        this.context.isFunction = parent.isFunction;
-        this.context.isGenerator = parent.isGenerator;
-        this.context.isAsync = parent.isAsync;
-        this.context.functionBody = parent.functionBody;
+        let parent = this.context,
+            c = this.pushContext();
+
+        c.isFunction = parent.isFunction;
+        c.isGenerator = parent.isGenerator;
+        c.isAsync = parent.isAsync;
+        c.isMethod = parent.isMethod;
+        c.isConstructor = parent.isConstructor;
+        c.functionBody = parent.functionBody;
     }
 
     popContext(collapse) {
@@ -656,6 +669,8 @@ export class Parser {
             expr = this.AssignmentExpression(noIn);
         }
 
+        this.context.hasYieldAwait = true;
+
         return new AST.YieldExpression(
             expr,
             delegate,
@@ -745,8 +760,11 @@ export class Parser {
             return new AST.UpdateExpression(type, expr, true, start, this.nodeEnd());
         }
 
-        if (this.peekAwait())
+        if (this.peekAwait()) {
+
             type = "await";
+            this.context.hasYieldAwait = true;
+        }
 
         if (isUnary(type)) {
 
@@ -1032,7 +1050,7 @@ export class Parser {
 
                     if (next.type === "=>") {
 
-                        this.pushContext();
+                        this.pushContext(true);
                         return this.ArrowFunctionHead("", this.BindingIdentifier(), start);
 
                     } else if (next.type === "function") {
@@ -1042,7 +1060,7 @@ export class Parser {
                     } else if (next.type === "IDENTIFIER" && isFunctionModifier(value)) {
 
                         this.read();
-                        this.pushContext();
+                        this.pushContext(true);
                         return this.ArrowFunctionHead(value, this.BindingIdentifier(), start);
                     }
                 }
@@ -2275,6 +2293,9 @@ export class Parser {
 
         // Context must have been pushed by caller
         this.setFunctionType(kind);
+
+        if (this.context.hasYieldAwait)
+            this.fail("Invalid yield or await within arrow function head");
 
         // Transform and validate formal parameters
         let params = this.checkArrowParameters(formals);

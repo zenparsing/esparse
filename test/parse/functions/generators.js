@@ -167,9 +167,9 @@ x } **/
 "yield is not allowed as a binding identifier within a generator head": {},
 
 /** function* g() { (yield) => null } **/
-"yield is not allowed within an arrow parameter list inside of a generator": {},
+"yield is not allowed within an arrow parameter list inside of a generator - 1": {},
 
-// What about this?
-// function* g() { ({ abc }) => null }
+/** function* g() { (x = yield 1) => null } **/
+"yield is not allowed within an arrow parameter list inside of a generator - 2": {},
 
 };

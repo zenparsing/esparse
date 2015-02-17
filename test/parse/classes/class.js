@@ -475,5 +475,121 @@
 /** class C { a() { super() } } **/
 'super call not allowed outside of constructor': {},
 
+/** class C { constructor() { (super()) } } **/
+'super call allowed inside of parens':
+{ type: 'Script',
+  start: 0,
+  end: 39,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 39,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 39,
+          elements:
+           [ { type: 'MethodDefinition',
+               start: 10,
+               end: 37,
+               static: false,
+               kind: 'constructor',
+               name:
+                { type: 'Identifier',
+                  start: 10,
+                  end: 21,
+                  value: 'constructor',
+                  context: '' },
+               params: [],
+               body:
+                { type: 'FunctionBody',
+                  start: 24,
+                  end: 37,
+                  statements:
+                   [ { type: 'ExpressionStatement',
+                       start: 26,
+                       end: 35,
+                       expression:
+                        { type: 'ParenExpression',
+                          start: 26,
+                          end: 35,
+                          expression:
+                           { type: 'CallExpression',
+                             start: 27,
+                             end: 34,
+                             callee: { type: 'SuperKeyword', start: 27, end: 32 },
+                             arguments: [] } } } ] } } ] } } ] },
+
+/** class C { constructor() { _=> super() } } **/
+'super call allowed within arrow in constructor':
+{ type: 'Script',
+  start: 0,
+  end: 41,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 41,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 41,
+          elements:
+           [ { type: 'MethodDefinition',
+               start: 10,
+               end: 39,
+               static: false,
+               kind: 'constructor',
+               name:
+                { type: 'Identifier',
+                  start: 10,
+                  end: 21,
+                  value: 'constructor',
+                  context: '' },
+               params: [],
+               body:
+                { type: 'FunctionBody',
+                  start: 24,
+                  end: 39,
+                  statements:
+                   [ { type: 'ExpressionStatement',
+                       start: 26,
+                       end: 37,
+                       expression:
+                        { type: 'ArrowFunction',
+                          start: 26,
+                          end: 37,
+                          kind: '',
+                          params:
+                           [ { type: 'FormalParameter',
+                               start: 26,
+                               end: 27,
+                               pattern:
+                                { type: 'Identifier',
+                                  start: 26,
+                                  end: 27,
+                                  value: '_',
+                                  context: 'declaration' },
+                               initializer: null } ],
+                          body:
+                           { type: 'CallExpression',
+                             start: 30,
+                             end: 37,
+                             callee: { type: 'SuperKeyword', start: 30, end: 35 },
+                             arguments: [] } } } ] } } ] } } ] },
+
 
 })
