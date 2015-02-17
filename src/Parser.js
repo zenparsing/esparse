@@ -182,6 +182,8 @@ class Context {
         this.functionBody = false;
         this.isGenerator = false;
         this.isAsync = false;
+        this.isMethod = false;
+        this.isConstructor = false;
         this.labelMap = null;
         this.switchDepth = 0;
         this.loopDepth = 0;
@@ -852,10 +854,13 @@ export class Parser {
 
                 case "(":
 
-                    if (!allowCall) {
+                    if (isSuper) {
 
-                        if (isSuper)
-                            this.fail();
+                        if (!allowCall || !this.context.isConstructor)
+                            this.fail("Invalid super call");
+                    }
+
+                    if (!allowCall) {
 
                         exit = true;
                         break;
@@ -973,8 +978,8 @@ export class Parser {
         let token = this.readToken("super"),
             node = new AST.SuperKeyword(token.start, token.end);
 
-        if (!this.context.isFunction)
-            this.fail("Super keyword outside of function", node);
+        if (!this.context.isMethod)
+            this.fail("Super keyword outside of method", node);
 
         return node;
     }
@@ -2149,8 +2154,26 @@ export class Parser {
             }
         }
 
+        if (classElement) {
+
+            if (isStatic) {
+
+                if (name.type === "Identifier" && name.value === "prototype")
+                    this.fail("Invalid prototype property in class definition", name);
+
+            } else if (name.type === "Identifier" && name.value === "constructor") {
+
+                if (kind !== "")
+                    this.fail("Invalid constructor property in class definition", name);
+
+                kind = "constructor";
+            }
+        }
+
         this.pushContext();
         this.setFunctionType(kind);
+        this.context.isMethod = true;
+        this.context.isConstructor = kind === "constructor";
 
         let params = kind === "get" || kind === "set" ?
             this.AccessorParameters(kind) :
@@ -2333,14 +2356,27 @@ export class Parser {
     ClassBody() {
 
         let start = this.nodeStart(),
+            hasConstructor = false,
             list = [];
 
         this.pushContext();
         this.setStrict(true);
         this.read("{");
 
-        while (this.peekUntil("}", "name"))
-            list.push(this.ClassElement());
+        while (this.peekUntil("}", "name")) {
+
+            let elem = this.ClassElement();
+
+            if (elem.type === "MethodDefinition" && elem.kind === "constructor") {
+
+                if (hasConstructor)
+                    this.fail("Duplicate constructor definitions", elem.name);
+
+                hasConstructor = true;
+            }
+
+            list.push(elem);
+        }
 
         this.read("}");
         this.popContext();
@@ -2411,21 +2447,7 @@ export class Parser {
             this.unpeek();
         }
 
-        let method = this.MethodDefinition(null, true),
-            name = method.name;
-
-        if (method.static) {
-
-            if (name.type === "Identifier" && name.value === "prototype")
-                this.fail("Invalid prototype property in class definition", name);
-
-        } else {
-
-            if (name.type === "Identifier" && name.value === "constructor" && method.kind !== "")
-                this.fail("Invalid constructor property in class definition", name);
-        }
-
-        return method;
+        return this.MethodDefinition(null, true);
     }
 
     // === Modules ===

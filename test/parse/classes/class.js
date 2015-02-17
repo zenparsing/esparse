@@ -389,7 +389,7 @@
                start: 10,
                end: 38,
                static: false,
-               kind: '',
+               kind: 'constructor',
                name:
                 { type: 'Identifier',
                   start: 10,
@@ -414,6 +414,66 @@
 
 /** class C { x() { new super() } } **/
 'new super is not allowed': {},
+
+/** class C { constructor() {} constructor() {} } **/
+'duplicate constructors not allowed': {},
+
+/** function f() { super.foo } **/
+'super not allowed in function declaration': {},
+
+/** function *g() { super.foo } **/
+'super not allowed in generator declaration': {},
+
+/** class C { constructor() { super() } } **/
+'super call':
+{ type: 'Script',
+  start: 0,
+  end: 37,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 37,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 37,
+          elements:
+           [ { type: 'MethodDefinition',
+               start: 10,
+               end: 35,
+               static: false,
+               kind: 'constructor',
+               name:
+                { type: 'Identifier',
+                  start: 10,
+                  end: 21,
+                  value: 'constructor',
+                  context: '' },
+               params: [],
+               body:
+                { type: 'FunctionBody',
+                  start: 24,
+                  end: 35,
+                  statements:
+                   [ { type: 'ExpressionStatement',
+                       start: 26,
+                       end: 33,
+                       expression:
+                        { type: 'CallExpression',
+                          start: 26,
+                          end: 33,
+                          callee: { type: 'SuperKeyword', start: 26, end: 31 },
+                          arguments: [] } } ] } } ] } } ] },
+
+/** class C { a() { super() } } **/
+'super call not allowed outside of constructor': {},
 
 
 })
