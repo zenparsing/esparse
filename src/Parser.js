@@ -588,8 +588,7 @@ export class Parser {
 
     Expression(noIn) {
 
-        let start = this.nodeStart(),
-            expr = this.AssignmentExpression(noIn),
+        let expr = this.AssignmentExpression(noIn),
             list = null;
 
         while (this.peek("div") === ",") {
@@ -597,7 +596,7 @@ export class Parser {
             this.read();
 
             if (list === null)
-                expr = new AST.SequenceExpression(list = [expr], start, -1);
+                expr = new AST.SequenceExpression(list = [expr], expr.start, -1);
 
             list.push(this.AssignmentExpression(noIn));
         }
@@ -658,7 +657,7 @@ export class Parser {
 
         this.readKeyword("yield");
 
-        if (!this.peekEnd()) {
+        if (!this.peekEnd() && this.peek() !== ",") {
 
             if (this.peek() === "*") {
 

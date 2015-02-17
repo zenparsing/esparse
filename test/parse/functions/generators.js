@@ -172,4 +172,41 @@ x } **/
 /** function* g() { (x = yield 1) => null } **/
 "yield is not allowed within an arrow parameter list inside of a generator - 2": {},
 
+/** function* g() { yield, null } **/
+"yield is allowed in comma expressions":
+{ type: 'Script',
+  start: 0,
+  end: 29,
+  statements:
+   [ { type: 'FunctionDeclaration',
+       start: 0,
+       end: 29,
+       kind: 'generator',
+       identifier:
+        { type: 'Identifier',
+          start: 10,
+          end: 11,
+          value: 'g',
+          context: 'declaration' },
+       params: [],
+       body:
+        { type: 'FunctionBody',
+          start: 14,
+          end: 29,
+          statements:
+           [ { type: 'ExpressionStatement',
+               start: 16,
+               end: 27,
+               expression:
+                { type: 'SequenceExpression',
+                  start: 16,
+                  end: 27,
+                  expressions:
+                   [ { type: 'YieldExpression',
+                       start: 16,
+                       end: 21,
+                       delegate: false,
+                       expression: null },
+                     { type: 'NullLiteral', start: 23, end: 27 } ] } } ] } } ] },
+
 };
