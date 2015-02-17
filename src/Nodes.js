@@ -95,9 +95,9 @@ export function ThisExpression(start, end) {
     this.end = end;
 }
 
-export function SuperExpression(start, end) {
+export function SuperKeyword(start, end) {
 
-    this.type = "SuperExpression";
+    this.type = "SuperKeyword";
     this.start = start;
     this.end = end;
 }
@@ -163,7 +163,7 @@ export function UpdateExpression(op, expr, prefix, start, end) {
     this.start = start;
     this.end = end;
     this.operator = op;
-    this.expression = expr
+    this.expression = expr;
     this.prefix = prefix;
 }
 
@@ -173,7 +173,7 @@ export function UnaryExpression(op, expr, start, end) {
     this.start = start;
     this.end = end;
     this.operator = op;
-    this.expression = expr
+    this.expression = expr;
 }
 
 export function MemberExpression(obj, prop, computed, start, end) {
@@ -181,8 +181,8 @@ export function MemberExpression(obj, prop, computed, start, end) {
     this.type = "MemberExpression";
     this.start = start;
     this.end = end;
-    this.object = obj
-    this.property = prop
+    this.object = obj;
+    this.property = prop;
     this.computed = computed;
 }
 
@@ -209,7 +209,7 @@ export function CallExpression(callee, args, start, end) {
     this.type = "CallExpression";
     this.start = start;
     this.end = end;
-    this.callee = callee
+    this.callee = callee;
     this.arguments = args;
 }
 
@@ -218,7 +218,7 @@ export function TaggedTemplateExpression(tag, template, start, end) {
     this.type = "TaggedTemplateExpression";
     this.start = start;
     this.end = end;
-    this.tag = tag
+    this.tag = tag;
     this.template = template;
 }
 

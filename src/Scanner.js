@@ -182,6 +182,7 @@ export class Scanner {
         return this.type;
     }
 
+    // TODO:  Should this be put on ParseResult instead?
     rawValue(start, end) {
 
         // Line endings are normalized to <LF>

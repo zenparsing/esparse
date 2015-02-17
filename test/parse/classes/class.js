@@ -144,7 +144,7 @@
                            { type: 'MemberExpression',
                              start: 20,
                              end: 29,
-                             object: { type: 'SuperExpression', start: 20, end: 25 },
+                             object: { type: 'SuperKeyword', start: 20, end: 25 },
                              property:
                               { type: 'Identifier',
                                 start: 26,

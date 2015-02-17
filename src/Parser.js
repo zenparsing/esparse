@@ -787,7 +787,7 @@ export class Parser {
 
             case "super":
 
-                expr = this.SuperExpression();
+                expr = this.SuperKeyword();
                 isSuper = true;
                 break;
 
@@ -968,12 +968,10 @@ export class Parser {
         return new AST.MetaProperty(left, right, start, this.nodeEnd());
     }
 
-    SuperExpression() {
+    SuperKeyword() {
 
-        let start = this.nodeStart();
-        this.read("super");
-
-        let node = new AST.SuperExpression(start, this.nodeEnd());
+        let token = this.readToken("super"),
+            node = new AST.SuperKeyword(token.start, token.end);
 
         if (!this.context.isFunction)
             this.fail("Super keyword outside of function", node);
@@ -1380,9 +1378,7 @@ export class Parser {
 
             case "IDENTIFIER":
 
-                next = this.peekTokenAt("div", 1);
-
-                if (next.type === ":")
+                if (this.peekAt("div", 1) === ":")
                     return this.LabelledStatement();
 
                 return this.ExpressionStatement();
