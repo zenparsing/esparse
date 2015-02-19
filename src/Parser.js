@@ -112,12 +112,6 @@ function isMethodKeyword(value) {
     return false;
 }
 
-// Returns true if the token is valid as the object of a meta property
-function isMetaLeft(token) {
-
-    return token === "new";
-}
-
 // Returns true if the supplied meta property pair is valid
 function isValidMeta(left, right) {
 
@@ -125,6 +119,9 @@ function isValidMeta(left, right) {
 
         case "new":
             return right === "target";
+
+        case "yield":
+            return right === "input";
     }
 
     return false;
@@ -627,7 +624,7 @@ export class Parser {
             return node;
         }
 
-        if (this.peekYield())
+        if (this.peekYield() && this.peekAt("", 1) !== ".")
             return this.YieldExpression(noIn);
 
         node = this.ConditionalExpression(noIn);
@@ -794,8 +791,8 @@ export class Parser {
 
     MemberExpression(allowCall) {
 
-        let start = this.nodeStart(),
-            token = this.peekToken(),
+        let token = this.peekToken(),
+            start = token.start,
             arrowType = "",
             isSuper = false,
             exit = false,
@@ -827,7 +824,12 @@ export class Parser {
                 }
 
             default:
-                expr = this.PrimaryExpression();
+
+                if (this.peekYield() && this.peekAt("", 1) === ".")
+                    expr = this.MetaProperty();
+                else
+                    expr = this.PrimaryExpression();
+
                 break;
         }
 
@@ -976,16 +978,18 @@ export class Parser {
 
     MetaProperty() {
 
-        let start = this.nodeStart(),
-            left = this.read(),
+        let token = this.readToken(),
+            start = token.start,
+            left = token.type === "IDENTIFIER" ? token.value : token.type,
             right;
 
         this.read(".");
 
-        right = this.readToken("IDENTIFIER", "name").value;
+        token = this.readToken("IDENTIFIER", "name");
+        right = token.value;
 
         if (!isValidMeta(left, right))
-            this.fail("Invalid meta property", right);
+            this.fail("Invalid meta property", token);
 
         return new AST.MetaProperty(left, right, start, this.nodeEnd());
     }
