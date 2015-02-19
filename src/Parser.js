@@ -119,9 +119,6 @@ function isValidMeta(left, right) {
 
         case "new":
             return right === "target";
-
-        case "yield":
-            return right === "input";
     }
 
     return false;
@@ -624,7 +621,7 @@ export class Parser {
             return node;
         }
 
-        if (this.peekYield() && this.peekAt("", 1) !== ".")
+        if (this.peekYield())
             return this.YieldExpression(noIn);
 
         node = this.ConditionalExpression(noIn);
@@ -825,11 +822,7 @@ export class Parser {
 
             default:
 
-                if (this.peekYield() && this.peekAt("", 1) === ".")
-                    expr = this.MetaProperty();
-                else
-                    expr = this.PrimaryExpression();
-
+                expr = this.PrimaryExpression();
                 break;
         }
 
