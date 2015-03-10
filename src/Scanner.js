@@ -993,7 +993,7 @@ export class Scanner {
             pattern.lastIndex = this.offset;
 
             let m = pattern.exec(this.input);
-            if (!m) return this.Error(msg);
+            if (!m) return this.Error();
 
             this.offset = m.index + m[0].length;
 
