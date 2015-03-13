@@ -251,5 +251,8 @@
 => x **/
 'new line restriction before arrow (3)': {},
 
+/** () + 1 **/
+'empty parens not allowed without an arrow': {},
+
 
 };

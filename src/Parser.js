@@ -1192,7 +1192,7 @@ export class Parser {
     ParenExpression() {
 
         let start = this.nodeStart(),
-            expr = null,
+            next = null,
             rest = null;
 
         // Push a new context in case we are parsing an arrow function
@@ -1200,23 +1200,24 @@ export class Parser {
 
         this.read("(");
 
-        switch (this.peek()) {
+        if (this.peek() === ")") {
 
-            // An empty arrow function formal list
-            case ")":
-                break;
+            next = this.peekTokenAt("", 1);
 
-            // Paren expression
-            default:
-                expr = this.Expression();
-                break;
+            if (next.newlineBefore || next.type !== "=>")
+                this.fail();
+
+            this.read(")");
+
+            return this.ArrowFunctionHead("", null, start);
         }
 
+        let expr = this.Expression();
+
         this.read(")");
+        next = this.peekToken("div");
 
-        let next = this.peekToken("div");
-
-        if (!next.newlineBefore && (next.type === "=>" || expr === null))
+        if (!next.newlineBefore && next.type === "=>")
             return this.ArrowFunctionHead("", expr, start);
 
         // Collapse this context into its parent
