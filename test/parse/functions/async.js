@@ -377,21 +377,17 @@ function f() {}
   start: 0,
   end: 34,
   statements:
-   [ { type: 'ExportDeclaration',
+   [ { type: 'ExportDefault',
+       binding:
+        { type: 'FunctionExpression',
+          start: 15,
+          end: 34,
+          kind: 'async',
+          identifier: null,
+          params: [],
+          body: { type: 'FunctionBody', start: 32, end: 34, statements: [] } },
        start: 0,
-       end: 34,
-       exports:
-        { type: 'DefaultExport',
-          binding:
-           { type: 'FunctionExpression',
-             start: 15,
-             end: 34,
-             kind: 'async',
-             identifier: null,
-             params: [],
-             body: { type: 'FunctionBody', start: 32, end: 34, statements: [] } },
-          start: 7,
-          end: 34 } } ] },
+       end: 34 } ] },
 
 /** async function f() { (await ) => {} } **/
 'await not allowed in arrow function parameter list - 1': {},

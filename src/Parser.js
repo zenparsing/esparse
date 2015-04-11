@@ -2604,56 +2604,55 @@ export class Parser {
     ExportDeclaration() {
 
         let start = this.nodeStart(),
-            exports;
+            decl;
 
         this.read("export");
 
         switch (this.peek()) {
 
+            case "default":
+                return this.ExportDefault(start);
+
+            case "*":
+                return this.ExportNamespace(start);
+
+            case "{":
+                return this.ExportNameList(start);
+
             case "var":
             case "const":
-                exports = this.LexicalDeclaration();
+                decl = this.LexicalDeclaration();
                 break;
 
             case "function":
-                exports = this.FunctionDeclaration();
+                decl = this.FunctionDeclaration();
                 break;
 
             case "class":
-                exports = this.ClassDeclaration();
-                break;
-
-            case "default":
-                exports = this.DefaultExport();
+                decl = this.ClassDeclaration();
                 break;
 
             case "IDENTIFIER":
 
-                if (this.peekLet()) {
+                if (this.peekLet())
+                    decl = this.LexicalDeclaration();
+                else if (this.peekFunctionModifier())
+                    decl = this.FunctionDeclaration();
+                else
+                    return this.ExportDefaultFrom(start);
 
-                    exports = this.LexicalDeclaration();
-                    break;
-                }
-
-                if (this.peekFunctionModifier()) {
-
-                    exports = this.FunctionDeclaration();
-                    break;
-                }
+                break;
 
             default:
-                exports = this.ExportClause();
-                this.Semicolon();
-                break;
+                this.fail();
         }
 
-        return new AST.ExportDeclaration(exports, start, this.nodeEnd());
+        return new AST.ExportDeclaration(decl, start, this.nodeEnd());
     }
 
-    DefaultExport() {
+    ExportDefault(start) {
 
-        let start = this.nodeStart(),
-            binding;
+        let binding;
 
         this.read("default");
 
@@ -2685,50 +2684,70 @@ export class Parser {
         if (!isDecl)
             this.Semicolon();
 
-        return new AST.DefaultExport(binding, start, this.nodeEnd());
+        return new AST.ExportDefault(binding, start, this.nodeEnd());
     }
 
-    ExportClause() {
+    ExportNameList(start) {
 
-        let start = this.nodeStart(),
-            list = null,
+        let list = [],
             from = null;
 
-        if (this.peek() === "*") {
+        this.read("{");
+
+        while (this.peekUntil("}", "name")) {
+
+            list.push(this.ExportSpecifier());
+
+            if (this.peek() === ",")
+                this.read();
+        }
+
+        this.read("}");
+
+        if (this.peekKeyword("from")) {
 
             this.read();
-            this.readKeyword("from");
             from = this.StringLiteral();
 
         } else {
 
-            list = [];
+            // Transform identifier names to identifiers
+            list.forEach(node => this.transformIdentifier(node.local));
+        }
 
-            this.read("{");
+        this.Semicolon();
 
-            while (this.peekUntil("}", "name")) {
+        return new AST.ExportNameList(list, from, start, this.nodeEnd());
+    }
 
-                list.push(this.ExportSpecifier());
+    ExportDefaultFrom(start) {
 
-                if (this.peek() === ",")
-                    this.read();
-            }
+        let name = this.Identifier();
 
-            this.read("}");
+        this.readKeyword("from");
+        let from = this.StringLiteral();
+        this.Semicolon();
 
-            if (this.peekKeyword("from")) {
+        return new AST.ExportDefaultFrom(name, from, start, this.nodeEnd());
+    }
 
-                this.read();
-                from = this.StringLiteral();
+    ExportNamespace(start) {
 
-            } else {
+        let ident = null;
 
-                // Transform identifier names to identifiers
-                list.forEach(node => this.transformIdentifier(node.local));
-            }
-       }
+        this.read("*");
 
-        return new AST.ExportClause(list, from, start, this.nodeEnd());
+        if (this.peekKeyword("as")) {
+
+            this.read();
+            ident = this.BindingIdentifier();
+        }
+
+        this.readKeyword("from");
+        let from = this.StringLiteral();
+        this.Semicolon();
+
+        return new AST.ExportNamespace(ident, from, start, this.nodeEnd());
     }
 
     ExportSpecifier() {

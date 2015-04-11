@@ -696,28 +696,46 @@ export function ImportSpecifier(imported, local, start, end) {
     this.local = local;
 }
 
-export function ExportDeclaration(exports, start, end) {
+export function ExportDeclaration(declaration, start, end) {
 
     this.type = "ExportDeclaration";
     this.start = start;
     this.end = end;
-    this.exports = exports;
+    this.declaration = declaration;
 }
 
-export function DefaultExport(binding, start, end) {
+export function ExportDefault(binding, start, end) {
 
-    this.type = "DefaultExport";
+    this.type = "ExportDefault";
     this.binding = binding;
     this.start = start;
     this.end = end;
 }
 
-export function ExportClause(specifiers, from, start, end) {
+export function ExportNameList(specifiers, from, start, end) {
 
-    this.type = "ExportClause";
+    this.type = "ExportNameList";
     this.start = start;
     this.end = end;
     this.specifiers = specifiers;
+    this.from = from;
+}
+
+export function ExportNamespace(identifier, from, start, end) {
+
+    this.type = "ExportNamespace";
+    this.start = start;
+    this.end = end;
+    this.identifier = identifier;
+    this.from = from;
+}
+
+export function ExportDefaultFrom(identifier, from, start, end) {
+
+    this.type = "ExportDefaultFrom";
+    this.start = start;
+    this.end = end;
+    this.identifier = identifier;
     this.from = from;
 }
 
