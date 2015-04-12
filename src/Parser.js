@@ -2430,42 +2430,12 @@ export class Parser {
 
     ClassElement() {
 
-        let next = this.peekToken("name");
+        switch (this.peek("name")) {
 
-        if (next.type === ";")
-            return this.EmptyClassElement();
-
-        if (next.type === "ATNAME")
-            return this.PrivateDeclaration();
-
-        if (next.type === "IDENTIFIER" &&
-            !isMethodKeyword(next.value) &&
-            this.peekAt("name", 1) !== "(") {
-
-            this.unpeek();
-
-            switch (this.peek()) {
-
-                case "class": return this.ClassDeclaration();
-                case "function": return this.FunctionDeclaration();
-
-                case "var":
-                case "const":
-                    return this.LexicalDeclaration();
-
-                case "IDENTIFIER":
-
-                    if (this.peekLet())
-                        return this.LexicalDeclaration();
-
-                    if (this.peekFunctionModifier())
-                        return this.FunctionDeclaration();
-            }
-
-            this.unpeek();
+            case ";": return this.EmptyClassElement();
+            case "ATNAME": return this.PrivateDeclaration();
+            default: return this.MethodDefinition(null, true);
         }
-
-        return this.MethodDefinition(null, true);
     }
 
     // === Modules ===
