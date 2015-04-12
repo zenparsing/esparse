@@ -20,14 +20,6 @@ AST compatibility with other parsers is not a project goal.  However, it
 is expected that any future changes to the AST protocol will be backward
 compatible with previous versions.
 
-## Roadmap ##
-
-The primary focus in the coming months will be preparing the library
-for production readiness, including:
-
-- Creating documentation describing the library API and the AST structure.
-- Widening the scope of the test suite.
-- Resolving any divergences from the emerging ECMAScript 6 specification.
 
 ## Hacking ##
 
@@ -41,7 +33,7 @@ a minimal and transparent ES6+-to-ES5 compiler.
 ### Getting Started ###
 
 1.  Install [esdown](https://github.com/zenparsing/esdown), either manually
-    or using npm.  Take a look at the `es6now` README to get a feel for the
+    or using npm.  Take a look at the `esdown` README to get a feel for the
     command syntax.
 
         npm install -g esdown
@@ -52,7 +44,7 @@ a minimal and transparent ES6+-to-ES5 compiler.
 
         esdown test
 
-    This will execute the test runner located at `test/main.js`.
+    This will execute the test runner located at `test/default.js`.
 
 4.  Start hacking the source code and have fun!
 
@@ -71,4 +63,4 @@ the library into a single ES5-compatible script:
 
     esdown build
 
-This will execute a simple build script located at `build/main.js`.
+This will execute a simple build script located at `build/default.js`.
