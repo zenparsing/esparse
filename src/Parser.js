@@ -218,6 +218,37 @@ class ParseResult {
 
 }
 
+class AtNameSet {
+
+    constructor(parser) {
+
+        this.parser = parser;
+        this.names = {};
+    }
+
+    add(node, kind) {
+
+        if (node.type !== "AtName")
+            return true;
+
+        let name = node.value,
+            code = 3;
+
+        switch (kind) {
+
+            case "get": code = 1; break;
+            case "set": code = 2; break;
+        }
+
+        let current = this.names[name];
+
+        if (current & code)
+            this.parser.fail("Duplicate private name definition", node);
+
+        this.names[name] = current | code;
+    }
+}
+
 export class Parser {
 
     parse(input, options) {
@@ -1229,6 +1260,7 @@ export class Parser {
     ObjectLiteral() {
 
         let start = this.nodeStart(),
+            atNames = new AtNameSet(this),
             comma = false,
             list = [],
             node;
@@ -1246,6 +1278,17 @@ export class Parser {
 
                 comma = false;
                 list.push(node = this.PropertyDefinition());
+
+                switch (node.type) {
+
+                    case "PropertyDefinition":
+                        atNames.add(node.name, "");
+                        break;
+
+                    case "MethodDefinition":
+                        atNames.add(node.name, node.kind);
+                        break;
+                }
             }
         }
 
@@ -1314,6 +1357,7 @@ export class Parser {
         switch (token.type) {
 
             case "IDENTIFIER": return this.IdentifierName();
+            case "ATNAME": return this.AtName();
             case "STRING": return this.StringLiteral();
             case "NUMBER": return this.NumberLiteral();
             case "[": return this.ComputedPropertyName();
@@ -2375,6 +2419,7 @@ export class Parser {
 
         let start = this.nodeStart(),
             hasConstructor = false,
+            atNames = new AtNameSet(this),
             list = [];
 
         this.pushContext();
@@ -2385,12 +2430,24 @@ export class Parser {
 
             let elem = this.ClassElement();
 
-            if (elem.type === "MethodDefinition" && elem.kind === "constructor") {
+            switch (elem.type) {
 
-                if (hasConstructor)
-                    this.fail("Duplicate constructor definitions", elem.name);
+                case "MethodDefinition":
 
-                hasConstructor = true;
+                    if (elem.kind === "constructor") {
+
+                        if (hasConstructor)
+                            this.fail("Duplicate constructor definitions", elem.name);
+
+                        hasConstructor = true;
+                    }
+
+                    atNames.add(elem.name, elem.kind);
+                    break;
+
+                case "PrivateDeclaration":
+                    atNames.add(elem.name, "");
+                    break;
             }
 
             list.push(elem);
@@ -2432,10 +2489,16 @@ export class Parser {
 
         switch (this.peek("name")) {
 
-            case ";": return this.EmptyClassElement();
-            case "ATNAME": return this.PrivateDeclaration();
-            default: return this.MethodDefinition(null, true);
+            case ";":
+                return this.EmptyClassElement();
+
+            case "ATNAME":
+                if (this.peekAt("name", 1) !== "(")
+                    return this.PrivateDeclaration();
+                break;
         }
+
+        return this.MethodDefinition(null, true);
     }
 
     // === Modules ===
