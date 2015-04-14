@@ -644,11 +644,12 @@ export function EmptyClassElement(start, end) {
     this.end = end;
 }
 
-export function PrivateDeclaration(name, initializer, start, end) {
+export function PrivateDeclaration(isStatic, name, initializer, start, end) {
 
     this.type = "PrivateDeclaration";
     this.start = start;
     this.end = end;
+    this.static = isStatic;
     this.name = name;
     this.initializer = initializer;
 }

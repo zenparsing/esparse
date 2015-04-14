@@ -24,6 +24,7 @@
            [ { type: 'PrivateDeclaration',
                start: 10,
                end: 12,
+               static: false,
                name: { type: 'AtName', start: 10, end: 12, value: '@x' },
                initializer: null } ] } } ] },
 
@@ -51,6 +52,7 @@
            [ { type: 'PrivateDeclaration',
                start: 10,
                end: 20,
+               static: false,
                name: { type: 'AtName', start: 10, end: 12, value: '@x' },
                initializer:
                 { type: 'AssignmentExpression',
@@ -64,6 +66,34 @@
                      value: 'a',
                      context: 'variable' },
                   right: { type: 'NumberLiteral', start: 19, end: 20, value: 1 } } } ] } } ] },
+
+/** class C { static @x = 1 } **/
+'private static field with initializer':
+{ type: 'Script',
+  start: 0,
+  end: 25,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 25,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 25,
+          elements:
+           [ { type: 'PrivateDeclaration',
+               start: 10,
+               end: 23,
+               static: true,
+               name: { type: 'AtName', start: 17, end: 19, value: '@x' },
+               initializer: { type: 'NumberLiteral', start: 22, end: 23, value: 1 } } ] } } ] },
 
 /** class C { @x() {} } **/
 'private class method':

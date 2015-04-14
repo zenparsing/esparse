@@ -1300,7 +1300,7 @@ export class Parser {
     PropertyDefinition() {
 
         if (this.peek("name") === "*")
-            return this.MethodDefinition();
+            return this.MethodDefinition(null, "");
 
         let start = this.nodeStart(),
             node,
@@ -1347,7 +1347,7 @@ export class Parser {
                 this.nodeEnd());
         }
 
-        return this.MethodDefinition(name);
+        return this.MethodDefinition(name, "");
     }
 
     PropertyName() {
@@ -2166,21 +2166,9 @@ export class Parser {
             this.nodeEnd());
     }
 
-    MethodDefinition(name, classElement) {
+    MethodDefinition(name, kind) {
 
-        let start = name ? name.start : this.nodeStart(),
-            isStatic = false,
-            kind = "",
-            val;
-
-        if (!name &&
-            classElement &&
-            this.peekToken("name").value === "static" &&
-            this.peekAt("name", 1) !== "(") {
-
-            this.read();
-            isStatic = true;
-        }
+        let start = name ? name.start : this.nodeStart();
 
         if (!name && this.peek("name") === "*") {
 
@@ -2194,7 +2182,7 @@ export class Parser {
             if (!name)
                 name = this.PropertyName();
 
-            val = keywordFromNode(name);
+            let val = keywordFromNode(name);
 
             if (this.peek("name") !== "(") {
 
@@ -2213,22 +2201,6 @@ export class Parser {
             }
         }
 
-        if (classElement) {
-
-            if (isStatic) {
-
-                if (name.type === "Identifier" && name.value === "prototype")
-                    this.fail("Invalid prototype property in class definition", name);
-
-            } else if (name.type === "Identifier" && name.value === "constructor") {
-
-                if (kind !== "")
-                    this.fail("Invalid constructor property in class definition", name);
-
-                kind = "constructor";
-            }
-        }
-
         this.pushContext();
         this.setFunctionType(kind);
         this.context.isMethod = true;
@@ -2244,7 +2216,7 @@ export class Parser {
         this.popContext();
 
         return new AST.MethodDefinition(
-            isStatic,
+            false,
             kind,
             name,
             params,
@@ -2459,10 +2431,9 @@ export class Parser {
         return new AST.ClassBody(list, start, this.nodeEnd());
     }
 
-    PrivateDeclaration() {
+    PrivateDeclaration(start, isStatic) {
 
-        let start = this.nodeStart(),
-            name = this.AtName(),
+        let name = this.AtName(),
             init = null;
 
         if (this.peek() === "=") {
@@ -2473,7 +2444,7 @@ export class Parser {
 
         this.Semicolon();
 
-        return new AST.PrivateDeclaration(name, init, start, this.nodeEnd());
+        return new AST.PrivateDeclaration(isStatic, name, init, start, this.nodeEnd());
     }
 
     EmptyClassElement() {
@@ -2487,18 +2458,49 @@ export class Parser {
 
     ClassElement() {
 
-        switch (this.peek("name")) {
+        let token = this.peekToken("name"),
+            start = token.start,
+            isStatic = false;
 
-            case ";":
-                return this.EmptyClassElement();
+        if (token.type === ";")
+            return this.EmptyClassElement();
 
-            case "ATNAME":
-                if (this.peekAt("name", 1) !== "(")
-                    return this.PrivateDeclaration();
-                break;
+        if (token.type === "IDENTIFIER" &&
+            token.value === "static" &&
+            this.peekAt("name", 1) !== "(") {
+
+            this.read();
+            isStatic = true;
         }
 
-        return this.MethodDefinition(null, true);
+        if (this.peek("name") === "ATNAME" && this.peekAt("name", 1) !== "(")
+            return this.PrivateDeclaration(start, isStatic);
+
+        token = this.peekToken("name");
+
+        let kind = "";
+
+        if (!isStatic && token.type === "IDENTIFIER" && token.value === "constructor")
+            kind = "constructor";
+
+        let method = this.MethodDefinition(null, kind),
+            name = method.name;
+
+        if (isStatic) {
+
+            if (name.type === "Identifier" && name.value === "prototype")
+                this.fail("Invalid prototype property in class definition", name);
+
+        } else if (name.type === "Identifier" && name.value === "constructor") {
+
+            if (method.kind !== "constructor")
+                this.fail("Invalid constructor property in class definition", name);
+        }
+
+        method.start = start;
+        method.static = isStatic;
+
+        return method;
     }
 
     // === Modules ===
