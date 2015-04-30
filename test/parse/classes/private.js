@@ -408,17 +408,6 @@
                   body: { type: 'FunctionBody', start: 9, end: 11, statements: [] } } ],
              trailingComma: false } } } ] },
 
-/** @x; **/
-'shorthand private lookup':
-{ type: 'Script',
-  start: 0,
-  end: 3,
-  statements:
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 3,
-       expression: { type: 'AtName', start: 0, end: 2, value: '@x' } } ] },
-
 /** this.@x; **/
 'private member expression':
 { type: 'Script',
@@ -477,6 +466,12 @@
              end: 15,
              value: 'a',
              context: 'variable' } } } ] },
+
+/** ({ @x }) **/
+'shorthand private names not allowed in object literals': {},
+
+/** ({ @x } = y) **/
+'shorthand private names not allowed in object patterns': {},
 
 /** class C { @x; @x; } **/
 'duplicate private names not allowed - 1': {},

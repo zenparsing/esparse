@@ -1066,7 +1066,6 @@ export class Parser {
             case "{": return this.ObjectLiteral();
             case "(": return this.ParenExpression();
             case "[": return this.ArrayLiteral();
-            case "ATNAME": return this.AtName();
 
             case "IDENTIFIER":
 
