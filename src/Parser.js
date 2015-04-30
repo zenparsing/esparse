@@ -1259,7 +1259,6 @@ export class Parser {
     ObjectLiteral() {
 
         let start = this.nodeStart(),
-            atNames = new AtNameSet(this),
             comma = false,
             list = [],
             node;
@@ -1277,17 +1276,6 @@ export class Parser {
 
                 comma = false;
                 list.push(node = this.PropertyDefinition());
-
-                switch (node.type) {
-
-                    case "PropertyDefinition":
-                        atNames.add(node.name, "");
-                        break;
-
-                    case "MethodDefinition":
-                        atNames.add(node.name, node.kind);
-                        break;
-                }
             }
         }
 
@@ -1349,17 +1337,19 @@ export class Parser {
         return this.MethodDefinition(name, "");
     }
 
-    PropertyName() {
+    PropertyName(allowAtNames) {
 
         let token = this.peekToken("name");
 
         switch (token.type) {
 
             case "IDENTIFIER": return this.IdentifierName();
-            case "ATNAME": return this.AtName();
             case "STRING": return this.StringLiteral();
             case "NUMBER": return this.NumberLiteral();
             case "[": return this.ComputedPropertyName();
+            case "ATNAME":
+                if (allowAtNames) return this.AtName();
+                else break;
         }
 
         this.unexpected(token);
@@ -2165,7 +2155,7 @@ export class Parser {
             this.nodeEnd());
     }
 
-    MethodDefinition(name, kind) {
+    MethodDefinition(name, kind, isClass) {
 
         let start = name ? name.start : this.nodeStart();
 
@@ -2174,12 +2164,12 @@ export class Parser {
             this.read();
 
             kind = "generator";
-            name = this.PropertyName();
+            name = this.PropertyName(isClass);
 
         } else {
 
             if (!name)
-                name = this.PropertyName();
+                name = this.PropertyName(isClass);
 
             let val = keywordFromNode(name);
 
@@ -2482,7 +2472,7 @@ export class Parser {
         if (!isStatic && token.type === "IDENTIFIER" && token.value === "constructor")
             kind = "constructor";
 
-        let method = this.MethodDefinition(null, kind),
+        let method = this.MethodDefinition(null, kind, true),
             name = method.name;
 
         if (isStatic) {

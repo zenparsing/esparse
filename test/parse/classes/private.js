@@ -126,52 +126,7 @@
                body: { type: 'FunctionBody', start: 15, end: 17, statements: [] } } ] } } ] },
 
 /** class C { get @x() {} set @x(v) {} } **/
-'private class getter and setter':
-{ type: 'Script',
-  start: 0,
-  end: 36,
-  statements:
-   [ { type: 'ClassDeclaration',
-       start: 0,
-       end: 36,
-       identifier:
-        { type: 'Identifier',
-          start: 6,
-          end: 7,
-          value: 'C',
-          context: 'declaration' },
-       base: null,
-       body:
-        { type: 'ClassBody',
-          start: 8,
-          end: 36,
-          elements:
-           [ { type: 'MethodDefinition',
-               start: 10,
-               end: 21,
-               static: false,
-               kind: 'get',
-               name: { type: 'AtName', start: 14, end: 16, value: '@x' },
-               params: [],
-               body: { type: 'FunctionBody', start: 19, end: 21, statements: [] } },
-             { type: 'MethodDefinition',
-               start: 22,
-               end: 34,
-               static: false,
-               kind: 'set',
-               name: { type: 'AtName', start: 26, end: 28, value: '@x' },
-               params:
-                [ { type: 'FormalParameter',
-                    start: 29,
-                    end: 30,
-                    pattern:
-                     { type: 'Identifier',
-                       start: 29,
-                       end: 30,
-                       value: 'v',
-                       context: 'declaration' },
-                    initializer: null } ],
-               body: { type: 'FunctionBody', start: 32, end: 34, statements: [] } } ] } } ] },
+'private class getter and setters not allowed': {},
 
 /** class C { *@x() {} } **/
 'private class generator method':
@@ -234,179 +189,19 @@
                body: { type: 'FunctionBody', start: 22, end: 24, statements: [] } } ] } } ] },
 
 /** class C { static get @x() {} static set @x(v) {} } **/
-'private static class getter and setter':
-{ type: 'Script',
-  start: 0,
-  end: 50,
-  statements:
-   [ { type: 'ClassDeclaration',
-       start: 0,
-       end: 50,
-       identifier:
-        { type: 'Identifier',
-          start: 6,
-          end: 7,
-          value: 'C',
-          context: 'declaration' },
-       base: null,
-       body:
-        { type: 'ClassBody',
-          start: 8,
-          end: 50,
-          elements:
-           [ { type: 'MethodDefinition',
-               start: 10,
-               end: 28,
-               static: true,
-               kind: 'get',
-               name: { type: 'AtName', start: 21, end: 23, value: '@x' },
-               params: [],
-               body: { type: 'FunctionBody', start: 26, end: 28, statements: [] } },
-             { type: 'MethodDefinition',
-               start: 29,
-               end: 48,
-               static: true,
-               kind: 'set',
-               name: { type: 'AtName', start: 40, end: 42, value: '@x' },
-               params:
-                [ { type: 'FormalParameter',
-                    start: 43,
-                    end: 44,
-                    pattern:
-                     { type: 'Identifier',
-                       start: 43,
-                       end: 44,
-                       value: 'v',
-                       context: 'declaration' },
-                    initializer: null } ],
-               body: { type: 'FunctionBody', start: 46, end: 48, statements: [] } } ] } } ] },
+'private static class getter and setter not allowed': {},
 
 /** ({ @x: 1 }) **/
-'private object property':
-{ type: 'Script',
-  start: 0,
-  end: 11,
-  statements:
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 11,
-       expression:
-        { type: 'ParenExpression',
-          start: 0,
-          end: 11,
-          expression:
-           { type: 'ObjectLiteral',
-             start: 1,
-             end: 10,
-             properties:
-              [ { type: 'PropertyDefinition',
-                  start: 3,
-                  end: 8,
-                  name: { type: 'AtName', start: 3, end: 5, value: '@x' },
-                  expression: { type: 'NumberLiteral', start: 7, end: 8, value: 1 } } ],
-             trailingComma: false } } } ] },
+'private object property not allowed': {},
 
 /** ({ @x() {} }) **/
-'private object method':
-{ type: 'Script',
-  start: 0,
-  end: 13,
-  statements:
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 13,
-       expression:
-        { type: 'ParenExpression',
-          start: 0,
-          end: 13,
-          expression:
-           { type: 'ObjectLiteral',
-             start: 1,
-             end: 12,
-             properties:
-              [ { type: 'MethodDefinition',
-                  start: 3,
-                  end: 10,
-                  static: false,
-                  kind: '',
-                  name: { type: 'AtName', start: 3, end: 5, value: '@x' },
-                  params: [],
-                  body: { type: 'FunctionBody', start: 8, end: 10, statements: [] } } ],
-             trailingComma: false } } } ] },
+'private object method not allowed': {},
 
 /** ({ get @x() {}, set @x(v) {} }) **/
-'private object getter and setter':
-{ type: 'Script',
-  start: 0,
-  end: 31,
-  statements:
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 31,
-       expression:
-        { type: 'ParenExpression',
-          start: 0,
-          end: 31,
-          expression:
-           { type: 'ObjectLiteral',
-             start: 1,
-             end: 30,
-             properties:
-              [ { type: 'MethodDefinition',
-                  start: 3,
-                  end: 14,
-                  static: false,
-                  kind: 'get',
-                  name: { type: 'AtName', start: 7, end: 9, value: '@x' },
-                  params: [],
-                  body: { type: 'FunctionBody', start: 12, end: 14, statements: [] } },
-                { type: 'MethodDefinition',
-                  start: 16,
-                  end: 28,
-                  static: false,
-                  kind: 'set',
-                  name: { type: 'AtName', start: 20, end: 22, value: '@x' },
-                  params:
-                   [ { type: 'FormalParameter',
-                       start: 23,
-                       end: 24,
-                       pattern:
-                        { type: 'Identifier',
-                          start: 23,
-                          end: 24,
-                          value: 'v',
-                          context: 'declaration' },
-                       initializer: null } ],
-                  body: { type: 'FunctionBody', start: 26, end: 28, statements: [] } } ],
-             trailingComma: false } } } ] },
+'private object getter and setter not allowed': {},
 
 /** ({ *@x() {} }) **/
-'private object generator method':
-{ type: 'Script',
-  start: 0,
-  end: 14,
-  statements:
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 14,
-       expression:
-        { type: 'ParenExpression',
-          start: 0,
-          end: 14,
-          expression:
-           { type: 'ObjectLiteral',
-             start: 1,
-             end: 13,
-             properties:
-              [ { type: 'MethodDefinition',
-                  start: 3,
-                  end: 11,
-                  static: false,
-                  kind: 'generator',
-                  name: { type: 'AtName', start: 4, end: 6, value: '@x' },
-                  params: [],
-                  body: { type: 'FunctionBody', start: 9, end: 11, statements: [] } } ],
-             trailingComma: false } } } ] },
+'private object generator method not allowed': {},
 
 /** this.@x; **/
 'private member expression':
@@ -426,46 +221,7 @@
           computed: false } } ] },
 
 /** ({ @x: x }) = a; **/
-'destructuring pattern with private property':
-{ type: 'Script',
-  start: 0,
-  end: 16,
-  statements:
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 16,
-       expression:
-        { type: 'AssignmentExpression',
-          start: 0,
-          end: 15,
-          operator: '=',
-          left:
-           { type: 'ParenExpression',
-             start: 0,
-             end: 11,
-             expression:
-              { type: 'ObjectPattern',
-                start: 1,
-                end: 10,
-                properties:
-                 [ { type: 'PatternProperty',
-                     start: 3,
-                     end: 8,
-                     name: { type: 'AtName', start: 3, end: 5, value: '@x' },
-                     pattern:
-                      { type: 'Identifier',
-                        start: 7,
-                        end: 8,
-                        value: 'x',
-                        context: 'variable' },
-                     initializer: null } ],
-                trailingComma: false } },
-          right:
-           { type: 'Identifier',
-             start: 14,
-             end: 15,
-             value: 'a',
-             context: 'variable' } } } ] },
+'destructuring pattern with private property not allowed': {},
 
 /** ({ @x }) **/
 'shorthand private names not allowed in object literals': {},
