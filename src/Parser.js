@@ -255,6 +255,8 @@ export class Parser {
 
         options = options || {};
 
+        this.onASI = options.onASI || null;
+
         let scanner = new Scanner(input);
 
         this.scanner = scanner;
@@ -971,6 +973,9 @@ export class Parser {
                         start,
                         this.nodeEnd());
 
+                    if (!expr.left)
+                        this.checkUnaryBind(expr.right);
+
                     break;
 
                 default:
@@ -1472,8 +1477,19 @@ export class Parser {
         let token = this.peekToken(),
             type = token.type;
 
-        if (type === ";" || !(type === "}" || type === "EOF" || token.newlineBefore))
-            this.read(";");
+        if (type === ";") {
+
+            this.read();
+
+        } else if (type === "}" || type === "EOF" || token.newlineBefore) {
+
+            if (this.onASI && !this.onASI(token))
+                this.unexpected(token);
+
+        } else {
+
+            this.unexpected(token);
+        }
     }
 
     LabelledStatement() {
