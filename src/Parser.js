@@ -911,7 +911,7 @@ export class Parser {
                         break;
                     }
 
-                    if (isFunctionModifier(keywordFromNode(expr))) {
+                    if (isFunctionModifier(keywordFromNode(expr)) && !token.newlineBefore) {
 
                         arrowType = expr.value;
                         this.pushMaybeContext();
@@ -1092,7 +1092,15 @@ export class Parser {
 
                         this.read();
                         this.pushContext(true);
-                        return this.ArrowFunctionHead(value, this.BindingIdentifier(), start);
+
+                        let ident = this.BindingIdentifier();
+
+                        next = this.peekToken();
+
+                        if (next.type !== "=>" || next.newlineBefore)
+                            this.fail();
+
+                        return this.ArrowFunctionHead(value, ident, start);
                     }
                 }
 
@@ -2090,14 +2098,14 @@ export class Parser {
 
         let start = this.nodeStart(),
             kind = "",
-            tok;
+            token;
 
-        tok = this.peekToken();
+        token = this.peekToken();
 
-        if (isFunctionModifier(keywordFromToken(tok))) {
+        if (isFunctionModifier(keywordFromToken(token))) {
 
             this.read();
-            kind = tok.value;
+            kind = token.value;
         }
 
         this.read("function");
@@ -2132,14 +2140,14 @@ export class Parser {
         let start = this.nodeStart(),
             ident = null,
             kind = "",
-            tok;
+            token;
 
-        tok = this.peekToken();
+        token = this.peekToken();
 
-        if (isFunctionModifier(keywordFromToken(tok))) {
+        if (isFunctionModifier(keywordFromToken(token))) {
 
             this.read();
-            kind = tok.value;
+            kind = token.value;
         }
 
         this.read("function");

@@ -48,6 +48,11 @@ function f() {}
     }]
 },
 
+/** x = async
+function() {}
+**/
+'async expression has newline restriction': {},
+
 /** (async function f() {}); **/
 "async expression": {
     type: "Script",
@@ -100,7 +105,6 @@ function f() {}
         }
     }]
 },
-
 
 /** async function f() { (await 0); } **/
 "await expression inside of paren": {
@@ -339,6 +343,54 @@ function f() {}
 /** async ()
 => 0 **/
 'newline restriction between right paren and arrow': {},
+
+/** async x
+=> 0 **/
+'newline restriction between identifier and arrow': {},
+
+/** async
+x => 0 **/
+'newline restriction between async and identifier in arrows':
+{ type: 'Script',
+  start: 0,
+  end: 12,
+  statements:
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 5,
+       expression:
+        { type: 'Identifier',
+          start: 0,
+          end: 5,
+          value: 'async',
+          context: 'variable' } },
+     { type: 'ExpressionStatement',
+       start: 6,
+       end: 12,
+       expression:
+        { type: 'ArrowFunction',
+          start: 6,
+          end: 12,
+          kind: '',
+          params:
+           [ { type: 'FormalParameter',
+               start: 6,
+               end: 7,
+               pattern:
+                { type: 'Identifier',
+                  start: 6,
+                  end: 7,
+                  value: 'x',
+                  context: 'declaration' },
+               initializer: null } ],
+          body: { type: 'NumberLiteral', start: 11, end: 12, value: 0 } } } ] },
+
+/** async foo + bar **/
+'async arrow head cannot appear without body': {},
+
+/** async
+() => 0 **/
+'newline restriction between async and argument list': {},
 
 /** (async x => 0) **/
 'no newline restriction before async keyword in arrow':
