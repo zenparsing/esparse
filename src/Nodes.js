@@ -654,6 +654,14 @@ export function PrivateDeclaration(isStatic, name, initializer, start, end) {
     this.initializer = initializer;
 }
 
+export function ClassStaticBlock(statements, start, end) {
+
+    this.type = "ClassStaticBlock";
+    this.start = start;
+    this.end = end;
+    this.statements = statements;
+}
+
 export function ImportDeclaration(imports, from, start, end) {
 
     this.type = "ImportDeclaration";

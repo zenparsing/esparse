@@ -2404,6 +2404,7 @@ export class Parser {
 
         let start = this.nodeStart(),
             hasConstructor = false,
+            hasBlock = false,
             atNames = new AtNameSet(this),
             list = [];
 
@@ -2432,6 +2433,14 @@ export class Parser {
 
                 case "PrivateDeclaration":
                     atNames.add(elem.name, "");
+                    break;
+
+                case "ClassStaticBlock":
+
+                    if (hasBlock)
+                        this.fail("Duplicate static initialization block", elem);
+
+                    hasBlock = true;
                     break;
             }
 
@@ -2479,11 +2488,21 @@ export class Parser {
             return this.EmptyClassElement();
 
         if (token.type === "IDENTIFIER" &&
-            token.value === "static" &&
-            this.peekAt("name", 1) !== "(") {
+            token.value === "static") {
 
-            this.read();
-            isStatic = true;
+            switch (this.peekAt("name", 1)) {
+
+                case "(":
+                    break;
+
+                case "{":
+                    return this.ClassStaticBlock();
+                    break;
+
+                default:
+                    this.read();
+                    isStatic = true;
+            }
         }
 
         if (this.peek("name") === "ATNAME" && this.peekAt("name", 1) !== "(")
@@ -2514,6 +2533,19 @@ export class Parser {
         method.static = isStatic;
 
         return method;
+    }
+
+    ClassStaticBlock() {
+
+        let start = this.nodeStart();
+
+        this.read("IDENTIFIER");
+
+        this.read("{");
+        let list = this.StatementList(false, false);
+        this.read("}");
+
+        return new AST.ClassStaticBlock(list, start, this.nodeEnd());
     }
 
     // === Modules ===
