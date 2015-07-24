@@ -86,18 +86,6 @@ function isUnary(op) {
     return false;
 }
 
-// Returns true if the value is a function modifier keyword
-function isFunctionModifier(value) {
-
-    return value === "async";
-}
-
-// Returns true if the value is a generator function modifier keyword
-function isGeneratorModifier(value) {
-
-    return value === "async" || value === "";
-}
-
 // Returns true if the value is a method definition keyword
 function isMethodKeyword(value) {
 
@@ -423,15 +411,21 @@ export class Parser {
         return false;
     }
 
-    peekFunctionModifier() {
+    peekAsync() {
 
         let token = this.peekToken();
 
-        if (!isFunctionModifier(keywordFromToken(token)))
-            return false;
+        if (keywordFromToken(token) !== "async")
+            return "";
 
         token = this.peekTokenAt("div", 1);
-        return token.type === "function" && !token.newlineBefore;
+
+        if (token.newlineBefore)
+            return "";
+
+        let type = token.type;
+
+        return type === "function" ? type : "";
     }
 
     peekEnd() {
@@ -911,9 +905,9 @@ export class Parser {
                         break;
                     }
 
-                    if (isFunctionModifier(keywordFromNode(expr)) && !token.newlineBefore) {
+                    if (keywordFromNode(expr) === "async" && !token.newlineBefore) {
 
-                        arrowType = expr.value;
+                        arrowType = "async";
                         this.pushMaybeContext();
                     }
 
@@ -1088,7 +1082,7 @@ export class Parser {
 
                         return this.FunctionExpression();
 
-                    } else if (next.type === "IDENTIFIER" && isFunctionModifier(value)) {
+                    } else if (next.type === "IDENTIFIER" && value === "async") {
 
                         this.read();
                         this.pushContext(true);
@@ -1784,7 +1778,7 @@ export class Parser {
 
         this.read("for");
 
-        if (this.context.isAsync && this.peekKeyword("async")) {
+        if (this.peekAwait()) {
 
             this.read();
             async = true;
@@ -2073,7 +2067,7 @@ export class Parser {
                 if (this.peekLet())
                     return this.LexicalDeclaration();
 
-                if (this.peekFunctionModifier())
+                if (this.peekAsync() === "function")
                     return this.FunctionDeclaration();
 
                 break;
@@ -2102,15 +2096,15 @@ export class Parser {
 
         token = this.peekToken();
 
-        if (isFunctionModifier(keywordFromToken(token))) {
+        if (keywordFromToken(token) === "async") {
 
             this.read();
-            kind = token.value;
+            kind = "async";
         }
 
         this.read("function");
 
-        if (isGeneratorModifier(kind) && this.peek() === "*") {
+        if (this.peek() === "*") {
 
             this.read();
             kind = kind ? kind + "-generator" : "generator";
@@ -2144,15 +2138,15 @@ export class Parser {
 
         token = this.peekToken();
 
-        if (isFunctionModifier(keywordFromToken(token))) {
+        if (keywordFromToken(token) === "async") {
 
             this.read();
-            kind = token.value;
+            kind = "async";
         }
 
         this.read("function");
 
-        if (isGeneratorModifier(kind) && this.peek() === "*") {
+        if (this.peek() === "*") {
 
             this.read();
             kind = kind ? kind + "-generator" : "generator";
@@ -2199,11 +2193,11 @@ export class Parser {
 
             if (this.peek("name") !== "(") {
 
-                if (val === "get" || val === "set" || isFunctionModifier(val)) {
+                if (val === "get" || val === "set" || val === "async") {
 
                     kind = name.value;
 
-                    if (isGeneratorModifier(kind) && this.peek("name") === "*") {
+                    if (kind === "async" && this.peek("name") === "*") {
 
                         this.read();
                         kind += "-generator";
@@ -2716,7 +2710,7 @@ export class Parser {
 
                 if (this.peekLet())
                     decl = this.LexicalDeclaration();
-                else if (this.peekFunctionModifier())
+                else if (this.peekAsync() === "function")
                     decl = this.FunctionDeclaration();
                 else
                     return this.ExportDefaultFrom(start);
@@ -2748,7 +2742,7 @@ export class Parser {
 
             case "IDENTIFIER":
 
-                if (this.peekFunctionModifier()) {
+                if (this.peekAsync() === "function") {
 
                     binding = this.FunctionExpression();
                     break;

@@ -1,7 +1,7 @@
 ({
 
-/** async function f() { for async (let x of y); } **/
-'async for-of':
+/** async function f() { for await (let x of y); } **/
+'for await-of':
 { type: 'Script',
   start: 0,
   end: 46,
@@ -50,16 +50,16 @@
                   context: 'variable' },
                body: { type: 'EmptyStatement', start: 43, end: 44 } } ] } } ] },
 
-/** for async (x of y); **/
-'async for-of only allowed in async context':
+/** for await (x of y); **/
+'for await-of only allowed in async context':
 {},
 
-/** async function f() { for async (x in y); } **/
-'async for-in not allowed':
+/** async function f() { for await (x in y); } **/
+'for await-in not allowed':
 {},
 
-/** async function f() { for async (var i = 0; i < 10; ++i); } **/
-'async for-loop not allowed':
+/** async function f() { for await (var i = 0; i < 10; ++i); } **/
+'for await-loop not allowed':
 {},
 
 });
