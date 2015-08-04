@@ -195,13 +195,23 @@ export function MetaProperty(left, right, start, end) {
     this.right = right;
 }
 
-export function BindExpression(left, right, start, end) {
+export function PipeExpression(left, right, args, start, end) {
 
-    this.type = "BindExpression";
+    this.type = "PipeExpression";
     this.start = start;
     this.end = end;
     this.left = left;
     this.right = right;
+    this.arguments = args;
+}
+
+export function BindExpression(obj, prop, start, end) {
+
+    this.type = "BindExpression";
+    this.start = start;
+    this.end = end;
+    this.object = obj;
+    this.property = prop;
 }
 
 export function CallExpression(callee, args, start, end) {
@@ -652,14 +662,6 @@ export function PrivateDeclaration(isStatic, name, initializer, start, end) {
     this.static = isStatic;
     this.name = name;
     this.initializer = initializer;
-}
-
-export function ClassStaticBlock(statements, start, end) {
-
-    this.type = "ClassStaticBlock";
-    this.start = start;
-    this.end = end;
-    this.statements = statements;
 }
 
 export function ImportDeclaration(imports, from, start, end) {

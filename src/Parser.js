@@ -839,14 +839,6 @@ export class Parser {
 
                 break;
 
-            case "::":
-
-                if (allowCall) {
-
-                    expr = null;
-                    break;
-                }
-
             default:
 
                 expr = this.PrimaryExpression();
@@ -950,6 +942,18 @@ export class Parser {
 
                 case "::":
 
+                    this.read();
+
+                    expr = new AST.BindExpression(
+                        expr,
+                        this.IdentifierName(),
+                        start,
+                        this.nodeEnd());
+
+                    break;
+
+                case "->":
+
                     if (isSuper)
                         this.fail();
 
@@ -961,14 +965,12 @@ export class Parser {
 
                     this.read();
 
-                    expr = new AST.BindExpression(
+                    expr = new AST.PipeExpression(
                         expr,
-                        this.MemberExpression(false),
+                        this.Identifier(true),
+                        this.ArgumentList(),
                         start,
                         this.nodeEnd());
-
-                    if (!expr.left)
-                        this.checkUnaryBind(expr.right);
 
                     break;
 
@@ -2428,14 +2430,6 @@ export class Parser {
                 case "PrivateDeclaration":
                     atNames.add(elem.name, "");
                     break;
-
-                case "ClassStaticBlock":
-
-                    if (hasBlock)
-                        this.fail("Duplicate static initialization block", elem);
-
-                    hasBlock = true;
-                    break;
             }
 
             list.push(elem);
@@ -2489,10 +2483,6 @@ export class Parser {
                 case "(":
                     break;
 
-                case "{":
-                    return this.ClassStaticBlock();
-                    break;
-
                 default:
                     this.read();
                     isStatic = true;
@@ -2527,19 +2517,6 @@ export class Parser {
         method.static = isStatic;
 
         return method;
-    }
-
-    ClassStaticBlock() {
-
-        let start = this.nodeStart();
-
-        this.read("IDENTIFIER");
-
-        this.read("{");
-        let list = this.StatementList(false, false);
-        this.read("}");
-
-        return new AST.ClassStaticBlock(list, start, this.nodeEnd());
     }
 
     // === Modules ===
