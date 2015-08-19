@@ -205,15 +205,6 @@ export function PipeExpression(left, right, args, start, end) {
     this.arguments = args;
 }
 
-export function BindExpression(obj, prop, start, end) {
-
-    this.type = "BindExpression";
-    this.start = start;
-    this.end = end;
-    this.object = obj;
-    this.property = prop;
-}
-
 export function CallExpression(callee, args, start, end) {
 
     this.type = "CallExpression";

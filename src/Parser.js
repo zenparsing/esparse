@@ -940,18 +940,6 @@ export class Parser {
 
                     break;
 
-                case "::":
-
-                    this.read();
-
-                    expr = new AST.BindExpression(
-                        expr,
-                        this.IdentifierName(),
-                        start,
-                        this.nodeEnd());
-
-                    break;
-
                 case "->":
 
                     if (isSuper)
