@@ -216,7 +216,12 @@ export class ScopeResolver {
             if (name === "let" && (kind === "let" || kind === "const"))
                 this.fail("Invalid binding identifier", node);
 
-            map[name] = record = { declarations: [], references: [] };
+            map[name] = record = {
+
+                declarations: [],
+                references: [],
+                const: kind === "const"
+            };
         }
 
         record.declarations.push(node);
