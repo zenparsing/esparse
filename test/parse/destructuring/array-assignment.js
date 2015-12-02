@@ -5,24 +5,24 @@
 { type: 'Script',
   start: 0,
   end: 7,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 7,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 7,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 3,
-             elements: 
+             elements:
               [ { type: 'PatternElement',
                   start: 1,
                   end: 2,
-                  pattern: 
+                  pattern:
                    { type: 'Identifier',
                      start: 1,
                      end: 2,
@@ -30,7 +30,7 @@
                      context: 'variable' },
                   initializer: null } ],
               trailingComma: false },
-          right: 
+          right:
            { type: 'Identifier',
              start: 6,
              end: 7,
@@ -42,37 +42,37 @@
 { type: 'Script',
   start: 0,
   end: 11,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 11,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 11,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 7,
-             elements: 
+             elements:
               [ { type: 'PatternElement',
                   start: 1,
                   end: 6,
-                  pattern: 
+                  pattern:
                    { type: 'Identifier',
                      start: 1,
                      end: 2,
                      value: 'a',
                      context: 'variable' },
-                  initializer: 
+                  initializer:
                    { type: 'Identifier',
                      start: 5,
                      end: 6,
                      value: 'b',
                      context: 'variable' } } ],
               trailingComma: false },
-          right: 
+          right:
            { type: 'Identifier',
              start: 10,
              end: 11,
@@ -84,32 +84,32 @@
 { type: 'Script',
   start: 0,
   end: 13,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 13,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 9,
-             elements: 
+             elements:
               [ { type: 'PatternElement',
                   start: 1,
                   end: 8,
-                  pattern: 
+                  pattern:
                    { type: 'ArrayPattern',
                      start: 1,
                      end: 4,
-                     elements: 
+                     elements:
                       [ { type: 'PatternElement',
                           start: 2,
                           end: 3,
-                          pattern: 
+                          pattern:
                            { type: 'Identifier',
                              start: 2,
                              end: 3,
@@ -117,14 +117,14 @@
                              context: 'variable' },
                           initializer: null } ],
                      trailingComma: false },
-                  initializer: 
+                  initializer:
                    { type: 'Identifier',
                      start: 7,
                      end: 8,
                      value: 'b',
                      context: 'variable' } } ],
              trailingComma: false },
-          right: 
+          right:
            { type: 'Identifier',
              start: 12,
              end: 13,
@@ -136,36 +136,36 @@
 { type: 'Script',
   start: 0,
   end: 9,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 9,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 9,
           operator: '=',
-          left: 
+          left:
            { type: 'ParenExpression',
              start: 0,
              end: 5,
-             expression: 
+             expression:
               { type: 'ArrayPattern',
                 start: 1,
                 end: 4,
                 trailingComma: false,
-                elements: 
+                elements:
                  [ { type: 'PatternElement',
                      start: 2,
                      end: 3,
-                     pattern: 
+                     pattern:
                       { type: 'Identifier',
                         start: 2,
                         end: 3,
                         value: 'a',
                         context: 'variable' },
                      initializer: null } ] } },
-          right: 
+          right:
            { type: 'Identifier',
              start: 8,
              end: 9,
@@ -177,31 +177,31 @@
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 10,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 10,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 6,
              trailingComma: false,
-             elements: 
+             elements:
               [ { type: 'PatternRestElement',
                   start: 1,
                   end: 5,
-                  pattern: 
+                  pattern:
                    { type: 'Identifier',
                      start: 4,
                      end: 5,
                      value: 'a',
                      context: 'variable' } } ] },
-          right: 
+          right:
            { type: 'Identifier',
              start: 9,
              end: 10,
@@ -213,17 +213,17 @@
 { type: 'Script',
   start: 0,
   end: 6,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 6,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 6,
           operator: '=',
           left: { type: 'ArrayPattern', start: 0, end: 2, elements: [], trailingComma: false },
-          right: 
+          right:
            { type: 'Identifier',
              start: 5,
              end: 6,
@@ -235,22 +235,22 @@
 { type: 'Script',
   start: 0,
   end: 9,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 9,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 9,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 5,
              elements: [ null, null, null ],
              trailingComma: true },
-          right: 
+          right:
            { type: 'Identifier',
              start: 8,
              end: 9,
@@ -262,24 +262,24 @@
 { type: 'Script',
   start: 0,
   end: 8,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 8,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 8,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 4,
-             elements: 
+             elements:
               [ { type: 'PatternElement',
                   start: 1,
                   end: 2,
-                  pattern: 
+                  pattern:
                    { type: 'Identifier',
                      start: 1,
                      end: 2,
@@ -287,7 +287,7 @@
                      context: 'variable' },
                   initializer: null } ],
              trailingComma: true },
-          right: 
+          right:
            { type: 'Identifier',
              start: 7,
              end: 8,
@@ -303,28 +303,28 @@
 { type: 'Script',
   start: 0,
   end: 12,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 12,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 12,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 8,
-             elements: 
+             elements:
               [ { type: 'PatternRestElement',
                   start: 1,
                   end: 7,
-                  pattern: 
+                  pattern:
                    { type: 'MemberExpression',
                      start: 4,
                      end: 7,
-                     object: 
+                     object:
                       { type: 'Identifier',
                         start: 4,
                         end: 5,
@@ -333,7 +333,7 @@
                      property: { type: 'Identifier', start: 6, end: 7, value: 'b', context: '' },
                      computed: false } } ],
              trailingComma: false },
-          right: 
+          right:
            { type: 'Identifier',
              start: 11,
              end: 12,
@@ -345,32 +345,32 @@
 { type: 'Script',
   start: 0,
   end: 9,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 9,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 9,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 5,
-             elements: 
+             elements:
               [ { type: 'PatternElement',
                   start: 1,
                   end: 4,
-                  pattern: 
+                  pattern:
                    { type: 'ArrayPattern',
                      start: 1,
                      end: 4,
-                     elements: 
+                     elements:
                       [ { type: 'PatternElement',
                           start: 2,
                           end: 3,
-                          pattern: 
+                          pattern:
                            { type: 'Identifier',
                              start: 2,
                              end: 3,
@@ -380,10 +380,56 @@
                      trailingComma: false },
                   initializer: null } ],
              trailingComma: false },
-          right: 
+          right:
            { type: 'Identifier',
              start: 8,
              end: 9,
+             value: 'x',
+             context: 'variable' } } } ] },
+
+/** [...[a]] = x **/
+'rest element target can be a pattern':
+{ type: 'Script',
+  start: 0,
+  end: 12,
+  statements:
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 12,
+       expression:
+        { type: 'AssignmentExpression',
+          start: 0,
+          end: 12,
+          operator: '=',
+          left:
+           { type: 'ArrayPattern',
+             start: 0,
+             end: 8,
+             elements:
+              [ { type: 'PatternRestElement',
+                  start: 1,
+                  end: 7,
+                  pattern:
+                   { type: 'ArrayPattern',
+                     start: 4,
+                     end: 7,
+                     elements:
+                      [ { type: 'PatternElement',
+                          start: 5,
+                          end: 6,
+                          pattern:
+                           { type: 'Identifier',
+                             start: 5,
+                             end: 6,
+                             value: 'a',
+                             context: 'variable' },
+                          initializer: null } ],
+                     trailingComma: false } } ],
+             trailingComma: false },
+          right:
+           { type: 'Identifier',
+             start: 11,
+             end: 12,
              value: 'x',
              context: 'variable' } } } ] },
 
@@ -393,10 +439,6 @@
 
 /** [...a, ...b] = x **/
 'pattern can only have one rest element':
-{},
-
-/** [...[a]] = x **/
-'rest element target cannot be a pattern':
 {},
 
 /** [...a = b] = x **/

@@ -5,8 +5,7 @@ const TEST_COMMENT = /\/\*\*[\s\S]+?\*\*\//g,
       COMMENT_TRIM = /^\/\*+\s+|\s+\*+\/$/g,
       HOP = {}.hasOwnProperty;
 
-const testsPassed = 0,
-      testsFailed = 0;
+let testsPassed = 0, testsFailed = 0;
 
 // Returns a stat object for a path
 function statPath(path) {
@@ -236,4 +235,3 @@ export function runTests(options) {
         console.log("");
     }
 }
-

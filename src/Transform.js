@@ -78,6 +78,7 @@ export class Transform {
 
                     expr = elem.expression;
 
+                    /*
                     // Rest target cannot be a destructuring pattern
                     switch (expr.type) {
 
@@ -87,6 +88,7 @@ export class Transform {
                         case "ArrayPattern":
                             this.fail("Invalid rest pattern", expr);
                     }
+                    */
 
                     elem = new AST.PatternRestElement(expr, elem.start, elem.end);
                     this.checkPatternTarget(elem.pattern, binding);
@@ -201,4 +203,3 @@ export class Transform {
     }
 
 }
-
