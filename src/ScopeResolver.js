@@ -1,4 +1,4 @@
-// TODO:  How we deal with the insanity that is with statements?
+// TODO:  How do we deal with the insanity that is with statements?
 // TODO:  Param scopes have empty free lists, which is strange
 
 class Scope {

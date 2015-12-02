@@ -539,7 +539,7 @@ export class Parser {
     addInvalidNode(error, node, strict) {
 
         node.error = error;
-        this.context.invalidNodes.push({ node, strict: !!strict });
+        this.context.invalidNodes.push({ node, strict: Boolean(strict) });
     }
 
     setLabel(label, value) {
