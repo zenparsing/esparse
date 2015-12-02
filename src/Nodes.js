@@ -195,16 +195,6 @@ export function MetaProperty(left, right, start, end) {
     this.right = right;
 }
 
-export function PipeExpression(left, right, args, start, end) {
-
-    this.type = "PipeExpression";
-    this.start = start;
-    this.end = end;
-    this.left = left;
-    this.right = right;
-    this.arguments = args;
-}
-
 export function CallExpression(callee, args, start, end) {
 
     this.type = "CallExpression";

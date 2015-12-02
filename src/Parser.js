@@ -940,28 +940,6 @@ export class Parser {
 
                     break;
 
-                case "->":
-
-                    if (isSuper)
-                        this.fail();
-
-                    if (!allowCall) {
-
-                        exit = true;
-                        break;
-                    }
-
-                    this.read();
-
-                    expr = new AST.PipeExpression(
-                        expr,
-                        this.Identifier(true),
-                        this.ArgumentList(),
-                        start,
-                        this.nodeEnd());
-
-                    break;
-
                 default:
 
                     if (isSuper)
