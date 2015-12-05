@@ -839,6 +839,14 @@ export class Parser {
 
                 break;
 
+            case "::":
+
+                if (allowCall) {
+
+                    expr = null;
+                    break;
+                }
+
             default:
 
                 expr = this.PrimaryExpression();
@@ -937,6 +945,30 @@ export class Parser {
                         this.TemplateExpression(),
                         start,
                         this.nodeEnd());
+
+                    break;
+
+                case "::":
+
+                    if (isSuper)
+                        this.fail();
+
+                    if (!allowCall) {
+
+                        exit = true;
+                        break;
+                    }
+
+                    this.read();
+
+                    expr = new AST.BindExpression(
+                        expr,
+                        this.MemberExpression(false),
+                        start,
+                        this.nodeEnd());
+
+                    if (!expr.left)
+                        this.checkUnaryBind(expr.right);
 
                     break;
 

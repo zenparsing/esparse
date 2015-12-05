@@ -198,4 +198,12 @@ export class Validate {
             this.addStrictError("Cannot delete unqualified property in strict mode", node);
     }
 
+    checkUnaryBind(node) {
+
+        node = this.unwrapParens(node);
+
+        if (node.type !== "MemberExpression" || node.object.type === "SuperKeyword")
+            this.fail("Unary bind operand must be a property lookup", node);
+    }
+
 }

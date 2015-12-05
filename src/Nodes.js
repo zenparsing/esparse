@@ -195,6 +195,15 @@ export function MetaProperty(left, right, start, end) {
     this.right = right;
 }
 
+export function BindExpression(left, right, start, end) {
+
+    this.type = "BindExpression";
+    this.start = start;
+    this.end = end;
+    this.left = left;
+    this.right = right;
+}
+
 export function CallExpression(callee, args, start, end) {
 
     this.type = "CallExpression";
