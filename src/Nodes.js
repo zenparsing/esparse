@@ -204,6 +204,14 @@ export function BindExpression(left, right, start, end) {
     this.right = right;
 }
 
+export function BindNewExpression(expr, start, end) {
+
+    this.type = "BindNewExpression";
+    this.start = start;
+    this.end = end;
+    this.expression = expr;
+}
+
 export function CallExpression(callee, args, start, end) {
 
     this.type = "CallExpression";

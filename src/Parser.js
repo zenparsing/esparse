@@ -961,14 +961,22 @@ export class Parser {
 
                     this.read();
 
-                    expr = new AST.BindExpression(
-                        expr,
-                        this.MemberExpression(false),
-                        start,
-                        this.nodeEnd());
+                    if (expr && this.peek() === "new") {
 
-                    if (!expr.left)
-                        this.checkUnaryBind(expr.right);
+                        this.read();
+                        expr = new AST.BindNewExpression(expr, start, this.nodeEnd());
+
+                    } else {
+
+                        expr = new AST.BindExpression(
+                            expr,
+                            this.MemberExpression(false),
+                            start,
+                            this.nodeEnd());
+
+                        if (!expr.left)
+                            this.checkUnaryBind(expr.right);
+                    }
 
                     break;
 

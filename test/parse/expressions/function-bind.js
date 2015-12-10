@@ -101,35 +101,27 @@
           arguments: [] } } ] },
 
 /** x::new F() **/
-'new on right':
+'new expressions on right not allowed': {},
+
+/** x::new **/
+'bind-new expressions':
 { type: 'Script',
   start: 0,
-  end: 10,
+  end: 6,
   statements:
    [ { type: 'ExpressionStatement',
        start: 0,
-       end: 10,
+       end: 6,
        expression:
-        { type: 'BindExpression',
+        { type: 'BindNewExpression',
           start: 0,
-          end: 10,
-          left:
+          end: 6,
+          expression:
            { type: 'Identifier',
              start: 0,
              end: 1,
              value: 'x',
-             context: 'variable' },
-          right:
-           { type: 'NewExpression',
-             start: 3,
-             end: 10,
-             callee:
-              { type: 'Identifier',
-                start: 7,
-                end: 8,
-                value: 'F',
-                context: 'variable' },
-             arguments: [] } } } ] },
+             context: 'variable' } } } ] },
 
 /** ::a.b **/
 'unary bind':
@@ -197,6 +189,53 @@
                    computed: false } } } } } ] },
 
 /** ({ f() { ::super.f } }) **/
-'super not allowed as object in unary bind': {},
+'super properties allowed as reference in unary bind':
+{ type: 'Script',
+  start: 0,
+  end: 23,
+  statements:
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 23,
+       expression:
+        { type: 'ParenExpression',
+          start: 0,
+          end: 23,
+          expression:
+           { type: 'ObjectLiteral',
+             start: 1,
+             end: 22,
+             properties:
+              [ { type: 'MethodDefinition',
+                  start: 3,
+                  end: 20,
+                  static: false,
+                  kind: '',
+                  name: { type: 'Identifier', start: 3, end: 4, value: 'f', context: '' },
+                  params: [],
+                  body:
+                   { type: 'FunctionBody',
+                     start: 7,
+                     end: 20,
+                     statements:
+                      [ { type: 'ExpressionStatement',
+                          start: 9,
+                          end: 18,
+                          expression:
+                           { type: 'BindExpression',
+                             start: 9,
+                             end: 18,
+                             left: null,
+                             right:
+                              { type: 'MemberExpression',
+                                start: 11,
+                                end: 18,
+                                object: { type: 'SuperKeyword', start: 11, end: 16 },
+                                property: { type: 'Identifier', start: 17, end: 18, value: 'f', context: '' },
+                                computed: false } } } ] } } ],
+             trailingComma: false } } } ] },
+
+/** class C { constructor() { ::super() } } **/
+'super call not allowed in unary bind': {},
 
 });

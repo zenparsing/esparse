@@ -202,7 +202,7 @@ export class Validate {
 
         node = this.unwrapParens(node);
 
-        if (node.type !== "MemberExpression" || node.object.type === "SuperKeyword")
+        if (node.type !== "MemberExpression")
             this.fail("Unary bind operand must be a property lookup", node);
     }
 
