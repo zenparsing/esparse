@@ -127,51 +127,8 @@
                 value: 'a',
                 context: 'variable' } } } } ] },
 
-/** (({ x: x })) = a; **/
-'parens are allowed around pattern':
-{ type: 'Script',
-  start: 0,
-  end: 17,
-  statements:
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 17,
-       expression:
-        { type: 'AssignmentExpression',
-          start: 0,
-          end: 16,
-          operator: '=',
-          left:
-           { type: 'ParenExpression',
-             start: 0,
-             end: 12,
-             expression:
-              { type: 'ParenExpression',
-                start: 1,
-                end: 11,
-                expression:
-                 { type: 'ObjectPattern',
-                   start: 2,
-                   end: 10,
-                   properties:
-                    [ { type: 'PatternProperty',
-                        start: 4,
-                        end: 8,
-                        name: { type: 'Identifier', start: 4, end: 5, value: 'x', context: '' },
-                        pattern:
-                         { type: 'Identifier',
-                           start: 7,
-                           end: 8,
-                           value: 'x',
-                           context: 'variable' },
-                        initializer: null } ],
-                   trailingComma: false } } },
-          right:
-           { type: 'Identifier',
-             start: 15,
-             end: 16,
-             value: 'a',
-             context: 'variable' } } } ] },
+/** ({ x: x }) = a; **/
+'parens are not allowed around pattern': {},
 
 /** ({ x = 123 }); **/
 'invalid object literals throw': {},
@@ -179,13 +136,13 @@
 /** ({ if } = a); **/
 'keywords cannot be used as simple names': {},
 
-/** "use strict"; ({ args: arguments }) = a; **/
+/** "use strict"; ({ args: arguments } = a); **/
 'assignment to arguments throws in strict mode': {},
 
-/** "use strict"; ({ arguments }) = a; **/
+/** "use strict"; ({ arguments } = a); **/
 'shorthand assignment to arguments throws in strict mode': {},
 
-/** "use strict"; ({ x: a, x: b }) = q; **/
+/** "use strict"; ({ x: a, x: b } = q); **/
 'duplicate names do not throw':
 { type: 'Script',
   start: 0,
@@ -200,15 +157,15 @@
        start: 14,
        end: 35,
        expression:
-        { type: 'AssignmentExpression',
+        { type: 'ParenExpression',
           start: 14,
           end: 34,
-          operator: '=',
-          left:
-           { type: 'ParenExpression',
-             start: 14,
-             end: 30,
-             expression:
+          expression:
+           { type: 'AssignmentExpression',
+             start: 15,
+             end: 33,
+             operator: '=',
+             left:
               { type: 'ObjectPattern',
                 start: 15,
                 end: 29,
@@ -235,15 +192,15 @@
                         value: 'b',
                         context: 'variable' },
                      initializer: null } ],
-                trailingComma: false } },
-          right:
-           { type: 'Identifier',
-             start: 33,
-             end: 34,
-             value: 'q',
-             context: 'variable' } } } ] },
+                trailingComma: false },
+             right:
+              { type: 'Identifier',
+                start: 32,
+                end: 33,
+                value: 'q',
+                context: 'variable' } } } } ] },
 
-/** ({ x: y.z }) = a **/
+/** ({ x: y.z } = a) **/
 'assignment target can be a member expression':
 { type: 'Script',
   start: 0,
@@ -253,15 +210,15 @@
        start: 0,
        end: 16,
        expression:
-        { type: 'AssignmentExpression',
+        { type: 'ParenExpression',
           start: 0,
           end: 16,
-          operator: '=',
-          left:
-           { type: 'ParenExpression',
-             start: 0,
-             end: 12,
-             expression:
+          expression:
+           { type: 'AssignmentExpression',
+             start: 1,
+             end: 15,
+             operator: '=',
+             left:
               { type: 'ObjectPattern',
                 start: 1,
                 end: 11,
@@ -283,18 +240,18 @@
                         property: { type: 'Identifier', start: 8, end: 9, value: 'z', context: '' },
                         computed: false },
                      initializer: null } ],
-                trailingComma: false } },
-          right:
-           { type: 'Identifier',
-             start: 15,
-             end: 16,
-             value: 'a',
-             context: 'variable' } } } ] },
+                trailingComma: false },
+             right:
+              { type: 'Identifier',
+                start: 14,
+                end: 15,
+                value: 'a',
+                context: 'variable' } } } } ] },
 
-/** ({ x: f() }) = a; **/
+/** ({ x: f() } = a); **/
 'call expressions are invalid assignment targets': {},
 
-/** ({ x: new f }) = a; **/
+/** ({ x: new f } = a); **/
 'new expressions are invalid assignment targets': {},
 
 })

@@ -132,45 +132,7 @@
              context: 'variable' } } } ] },
 
 /** ([a]) = x **/
-'parens are unwrapped':
-{ type: 'Script',
-  start: 0,
-  end: 9,
-  statements:
-   [ { type: 'ExpressionStatement',
-       start: 0,
-       end: 9,
-       expression:
-        { type: 'AssignmentExpression',
-          start: 0,
-          end: 9,
-          operator: '=',
-          left:
-           { type: 'ParenExpression',
-             start: 0,
-             end: 5,
-             expression:
-              { type: 'ArrayPattern',
-                start: 1,
-                end: 4,
-                trailingComma: false,
-                elements:
-                 [ { type: 'PatternElement',
-                     start: 2,
-                     end: 3,
-                     pattern:
-                      { type: 'Identifier',
-                        start: 2,
-                        end: 3,
-                        value: 'a',
-                        context: 'variable' },
-                     initializer: null } ] } },
-          right:
-           { type: 'Identifier',
-             start: 8,
-             end: 9,
-             value: 'x',
-             context: 'variable' } } } ] },
+'parens are not unwrapped': {},
 
 /** [...a] = x **/
 'rest element':

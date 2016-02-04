@@ -660,7 +660,7 @@ export class Parser {
         if (!isAssignment(this.peek("div")))
             return node;
 
-        this.checkAssignmentTarget(this.unwrapParens(node), false);
+        this.checkAssignmentTarget(node, false);
 
         return new AST.AssignmentExpression(
             this.read(),
