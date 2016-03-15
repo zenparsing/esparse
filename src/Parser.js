@@ -584,7 +584,7 @@ export class Parser {
         this.pushContext();
 
         let start = this.nodeStart(),
-            statements = this.StatementList(true, false);
+            statements = this.StatementList(true);
 
         this.popContext();
 
@@ -598,11 +598,11 @@ export class Parser {
         this.setStrict(true);
 
         let start = this.nodeStart(),
-            statements = this.StatementList(true, true);
+            list = this.ModuleItemList();
 
         this.popContext();
 
-        return new AST.Module(statements, start, this.nodeEnd());
+        return new AST.Module(list, start, this.nodeEnd());
     }
 
     // === Expressions ===
@@ -1145,7 +1145,6 @@ export class Parser {
     AtName() {
 
         // TODO:  Only allow within class?  What about nested classes?
-
         let token = this.readToken("ATNAME");
         return new AST.AtName(token.value, token.start, token.end);
     }
@@ -1193,7 +1192,7 @@ export class Parser {
 
     RegularExpression() {
 
-        // TODO:  Validate regular expression against RegExp grammar (21.2.1)
+        // TODO:  Validate regular expression against RegExp grammar (21.2.1)?
         let token = this.readToken("REGEX");
 
         return new AST.RegularExpression(
@@ -1476,7 +1475,7 @@ export class Parser {
         let start = this.nodeStart();
 
         this.read("{");
-        let list = this.StatementList(false, false);
+        let list = this.StatementList(false);
         this.read("}");
 
         return new AST.Block(list, start, this.nodeEnd());
@@ -1514,6 +1513,7 @@ export class Parser {
         this.read(":");
 
         this.setLabel(name, 1);
+        // TODO: Annex B allows a function declaration here in sloppy mode
         let statement = this.Statement(name);
         this.setLabel(name, 0);
 
@@ -1965,7 +1965,7 @@ export class Parser {
             if (type === "case" || type === "default")
                 break;
 
-            list.push(this.Declaration(false));
+            list.push(this.StatementListItem());
         }
 
         return new AST.SwitchCase(expr, list, start, this.nodeEnd());
@@ -2007,7 +2007,7 @@ export class Parser {
 
     // === Declarations ===
 
-    StatementList(prologue, isModule) {
+    StatementList(prologue) {
 
         let list = [],
             node,
@@ -2017,7 +2017,7 @@ export class Parser {
         // TODO: is this wrong for braceless statement lists?
         while (this.peekUntil("}")) {
 
-            node = this.Declaration(isModule);
+            node = this.StatementListItem();
 
             // Check for directives
             if (prologue) {
@@ -2050,25 +2050,13 @@ export class Parser {
         return list;
     }
 
-    Declaration(isModule) {
+    StatementListItem() {
 
         switch (this.peek()) {
 
             case "function": return this.FunctionDeclaration();
             case "class": return this.ClassDeclaration();
             case "const": return this.LexicalDeclaration();
-
-            case "import":
-
-                if (isModule)
-                    return this.ImportDeclaration();
-
-            case "export":
-
-                if (isModule)
-                    return this.ExportDeclaration();
-
-                break;
 
             case "IDENTIFIER":
 
@@ -2311,7 +2299,7 @@ export class Parser {
         let start = this.nodeStart();
 
         this.read("{");
-        let statements = this.StatementList(true, false);
+        let statements = this.StatementList(true);
         this.read("}");
 
         return new AST.FunctionBody(statements, start, this.nodeEnd());
@@ -2526,6 +2514,23 @@ export class Parser {
     }
 
     // === Modules ===
+
+    ModuleItemList() {
+
+        let list = [],
+            type;
+
+        while (true) {
+
+            switch (this.peek()) {
+
+                case "EOF": return list;
+                case "import": list.push(this.ImportDeclaration()); break;
+                case "export": list.push(this.ExportDeclaration()); break;
+                default: list.push(this.StatementListItem()); break;
+            }
+        }
+    }
 
     ImportDeclaration() {
 

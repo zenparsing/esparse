@@ -230,6 +230,25 @@
                   local: null } ] } },
        from: { type: 'StringLiteral', start: 21, end: 24, value: 'a' } } ] },
 
+/*** 1; import 'x'; 2; ***/
+'import declarations allowed between statements': { type: 'Module',
+  start: 0,
+  end: 17,
+  statements:
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 2,
+       expression: { type: 'NumberLiteral', start: 0, end: 1, value: 1 } },
+     { type: 'ImportDeclaration',
+       start: 3,
+       end: 14,
+       imports: null,
+       from: { type: 'StringLiteral', start: 10, end: 13, value: 'x' } },
+     { type: 'ExpressionStatement',
+       start: 15,
+       end: 17,
+       expression: { type: 'NumberLiteral', start: 15, end: 16, value: 2 } } ] },
+
 /*** await (1); ***/
 'await is reserved within modules - 1': {},
 
