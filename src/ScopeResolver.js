@@ -3,10 +3,11 @@
 
 class Scope {
 
-    constructor(type) {
+    constructor(type, node = null) {
 
         this.type = type || "block";
         this.names = Object.create(null);
+        this.node = node;
         this.free = [];
         this.strict = false;
         this.parent = null;
@@ -45,11 +46,11 @@ export class ScopeResolver {
         throw this.parseResult.createSyntaxError(msg, node);
     }
 
-    pushScope(type) {
+    pushScope(type, node) {
 
         let strict = this.top.strict;
         this.stack.push(this.top);
-        this.top = new Scope(type);
+        this.top = new Scope(type, node);
         this.top.strict = strict;
 
         return this.top;
@@ -229,7 +230,7 @@ export class ScopeResolver {
 
     Script(node) {
 
-        this.pushScope("block");
+        this.pushScope("block", node);
 
         if (this.hasStrictDirective(node.statements))
             this.top.strict = true;
@@ -241,7 +242,7 @@ export class ScopeResolver {
 
     Module(node) {
 
-        this.pushScope("block");
+        this.pushScope("block", node);
         this.top.strict = true;
         node.children().forEach(n => this.visit(n, "var"));
         this.popScope();
@@ -249,7 +250,7 @@ export class ScopeResolver {
 
     Block(node) {
 
-        this.pushScope("block");
+        this.pushScope("block", node);
         node.children().forEach(n => this.visit(n));
         this.popScope();
     }
@@ -271,14 +272,14 @@ export class ScopeResolver {
 
     ForStatement(node) {
 
-        this.pushScope("for");
+        this.pushScope("for", node);
         node.children().forEach(n => this.visit(n));
         this.popScope();
     }
 
     CatchClause(node) {
 
-        this.pushScope("catch");
+        this.pushScope("catch", node);
         this.visit(node.param);
         node.body.children().forEach(n => this.visit(n));
         this.popScope();
@@ -292,14 +293,14 @@ export class ScopeResolver {
     FunctionDeclaration(node, kind) {
 
         this.visit(node.identifier, kind);
-        this.pushScope("function");
+        this.pushScope("function", node);
         this.visitFunction(node.params, node.body, false);
         this.popScope();
     }
 
     FunctionExpression(node) {
 
-        this.pushScope("function");
+        this.pushScope("function", node);
         this.visit(node.identifier);
         this.visitFunction(node.params, node.body, false);
         this.popScope();
@@ -307,14 +308,14 @@ export class ScopeResolver {
 
     MethodDefinition(node) {
 
-        this.pushScope("function");
+        this.pushScope("function", node);
         this.visitFunction(node.params, node.body, true);
         this.popScope();
     }
 
     ArrowFunction(node) {
 
-        this.pushScope("function");
+        this.pushScope("function", node);
         this.visitFunction(node.params, node.body, true);
         this.popScope();
     }
@@ -322,7 +323,7 @@ export class ScopeResolver {
     ClassDeclaration(node) {
 
         this.visit(node.identifier, "let");
-        this.pushScope("class");
+        this.pushScope("class", node);
         this.top.strict = true;
         this.visit(node.base);
         this.visit(node.body);
@@ -331,7 +332,7 @@ export class ScopeResolver {
 
     ClassExpression(node) {
 
-        this.pushScope("class");
+        this.pushScope("class", node);
         this.top.strict = true;
         this.visit(node.identifier);
         this.visit(node.base);
