@@ -1513,8 +1513,20 @@ export class Parser {
         this.read(":");
 
         this.setLabel(name, 1);
-        // TODO: Annex B allows a function declaration here in sloppy mode
-        let statement = this.Statement(name);
+
+        // Annex B allows a function declaration in non-strict mode
+        let statement;
+
+        if (this.peek() === "function") {
+
+            statement = this.FunctionDeclaration();
+            this.addStrictError("Labeled FunctionDeclarations are disallowed in strict mode", statement);
+
+        } else {
+
+            statement = this.Statement(name);
+        }
+
         this.setLabel(name, 0);
 
         return new AST.LabelledStatement(
