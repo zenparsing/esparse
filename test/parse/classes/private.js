@@ -65,6 +65,49 @@
                      context: 'variable' },
                   right: { type: 'NumberLiteral', start: 19, end: 20, value: 1 } } } ] } } ] },
 
+/** class C { @x; m() { @x } } **/
+'shorthand private references':
+{ type: 'Script',
+  start: 0,
+  end: 26,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 26,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'C',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 26,
+          elements:
+           [ { type: 'PrivateFieldDefinition',
+               start: 10,
+               end: 13,
+               name: { type: 'AtName', start: 10, end: 12, value: '@x' },
+               initializer: null },
+             { type: 'MethodDefinition',
+               start: 14,
+               end: 24,
+               static: false,
+               kind: '',
+               name: { type: 'Identifier', start: 14, end: 15, value: 'm', context: '' },
+               params: [],
+               body:
+                { type: 'FunctionBody',
+                  start: 18,
+                  end: 24,
+                  statements:
+                   [ { type: 'ExpressionStatement',
+                       start: 20,
+                       end: 22,
+                       expression: { type: 'AtName', start: 20, end: 22, value: '@x' } } ] } } ] } } ] },
+
 /** class C { static @x = 1 } **/
 'private static fields not allowed': {},
 
