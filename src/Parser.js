@@ -165,7 +165,7 @@ class Context {
         this.isGenerator = false;
         this.isAsync = false;
         this.isMethod = false;
-        this.isConstructor = false;
+        this.allowSuperCall = false;
         this.hasYieldAwait = false;
         this.labelMap = null;
         this.switchDepth = 0;
@@ -480,7 +480,7 @@ export class Parser {
 
     // == Context Management ==
 
-    pushContext(isArrow) {
+    pushContext(lexical) {
 
         let parent = this.context,
             c = new Context(parent);
@@ -490,10 +490,10 @@ export class Parser {
         if (parent.mode === "strict")
             c.mode = "strict";
 
-        if (isArrow) {
+        if (lexical) {
 
             c.isMethod = parent.isMethod;
-            c.isConstructor = parent.isConstructor;
+            c.allowSuperCall = parent.allowSuperCall;
         }
 
         return c;
@@ -508,7 +508,7 @@ export class Parser {
         c.isGenerator = parent.isGenerator;
         c.isAsync = parent.isAsync;
         c.isMethod = parent.isMethod;
-        c.isConstructor = parent.isConstructor;
+        c.allowSuperCall = parent.allowSuperCall;
         c.functionBody = parent.functionBody;
     }
 
@@ -893,17 +893,14 @@ export class Parser {
 
                 case "(":
 
-                    if (isSuper) {
-
-                        if (!allowCall || !this.context.isConstructor)
-                            this.fail("Invalid super call");
-                    }
-
                     if (!allowCall) {
 
                         exit = true;
                         break;
                     }
+
+                    if (isSuper && !this.context.allowSuperCall)
+                        this.fail("Invalid super call");
 
                     if (keywordFromNode(expr) === "async" && !token.newlineBefore) {
 
@@ -1003,6 +1000,9 @@ export class Parser {
 
         let expr = this.MemberExpression(false),
             args = this.peek("div") === "(" ? this.ArgumentList() : null;
+
+        if (expr.type === "SuperKeyword")
+            this.fail("Invalid super keyword", expr);
 
         return new AST.NewExpression(expr, args, start, this.nodeEnd());
     }
@@ -1144,7 +1144,6 @@ export class Parser {
 
     AtName() {
 
-        // TODO:  Only allow within class?  What about nested classes?
         let token = this.readToken("ATNAME");
         return new AST.AtName(token.value, token.start, token.end);
     }
@@ -1351,7 +1350,7 @@ export class Parser {
         return this.MethodDefinition(name, "");
     }
 
-    PropertyName(allowAtNames) {
+    PropertyName() {
 
         let token = this.peekToken("name");
 
@@ -1361,9 +1360,6 @@ export class Parser {
             case "STRING": return this.StringLiteral();
             case "NUMBER": return this.NumberLiteral();
             case "[": return this.ComputedPropertyName();
-            case "ATNAME":
-                if (allowAtNames) return this.AtName();
-                else break;
         }
 
         this.unexpected(token);
@@ -2181,7 +2177,7 @@ export class Parser {
             this.nodeEnd());
     }
 
-    MethodDefinition(name, kind, isClass) {
+    MethodDefinition(name, kind, classKind) {
 
         let start = name ? name.start : this.nodeStart();
 
@@ -2190,12 +2186,12 @@ export class Parser {
             this.read();
 
             kind = "generator";
-            name = this.PropertyName(isClass);
+            name = this.PropertyName();
 
         } else {
 
             if (!name)
-                name = this.PropertyName(isClass);
+                name = this.PropertyName();
 
             let val = keywordFromNode(name);
 
@@ -2217,9 +2213,11 @@ export class Parser {
         }
 
         this.pushContext();
-        this.setFunctionType(kind);
         this.context.isMethod = true;
-        this.context.isConstructor = kind === "constructor";
+        this.setFunctionType(kind);
+
+        if (kind === "constructor" && classKind === "derived")
+            this.context.allowSuperCall = true;
 
         let params = kind === "get" || kind === "set" ?
             this.AccessorParameters(kind) :
@@ -2356,6 +2354,7 @@ export class Parser {
     ClassDeclaration() {
 
         let start = this.nodeStart(),
+            kind = "base",
             ident = null,
             base = null;
 
@@ -2366,13 +2365,14 @@ export class Parser {
         if (this.peek() === "extends") {
 
             this.read();
+            kind = "derived";
             base = this.MemberExpression(true);
         }
 
         return new AST.ClassDeclaration(
             ident,
             base,
-            this.ClassBody(),
+            this.ClassBody(kind),
             start,
             this.nodeEnd());
     }
@@ -2380,6 +2380,7 @@ export class Parser {
     ClassExpression() {
 
         let start = this.nodeStart(),
+            kind = "base",
             ident = null,
             base = null;
 
@@ -2391,18 +2392,19 @@ export class Parser {
         if (this.peek() === "extends") {
 
             this.read();
+            kind = "derived";
             base = this.MemberExpression(true);
         }
 
         return new AST.ClassExpression(
             ident,
             base,
-            this.ClassBody(),
+            this.ClassBody(kind),
             start,
             this.nodeEnd());
     }
 
-    ClassBody() {
+    ClassBody(classKind) {
 
         let start = this.nodeStart(),
             hasConstructor = false,
@@ -2410,13 +2412,13 @@ export class Parser {
             atNames = new AtNameSet(this),
             list = [];
 
-        this.pushContext();
+        this.pushContext(true);
         this.setStrict(true);
         this.read("{");
 
         while (this.peekUntil("}", "name")) {
 
-            let elem = this.ClassElement();
+            let elem = this.ClassElement(classKind);
 
             switch (elem.type) {
 
@@ -2429,11 +2431,9 @@ export class Parser {
 
                         hasConstructor = true;
                     }
-
-                    atNames.add(elem.name, elem.kind);
                     break;
 
-                case "PrivateDeclaration":
+                case "PrivateFieldDefinition":
                     atNames.add(elem.name, "");
                     break;
             }
@@ -2447,9 +2447,10 @@ export class Parser {
         return new AST.ClassBody(list, start, this.nodeEnd());
     }
 
-    PrivateDeclaration(start, isStatic) {
+    PrivateFieldDefinition() {
 
-        let name = this.AtName(),
+        let start = this.nodeStart(),
+            name = this.AtName(),
             init = null;
 
         if (this.peek() === "=") {
@@ -2460,7 +2461,7 @@ export class Parser {
 
         this.Semicolon();
 
-        return new AST.PrivateDeclaration(isStatic, name, init, start, this.nodeEnd());
+        return new AST.PrivateFieldDefinition(name, init, start, this.nodeEnd());
     }
 
     EmptyClassElement() {
@@ -2472,7 +2473,7 @@ export class Parser {
         return new AST.EmptyClassElement(start, this.nodeEnd());
     }
 
-    ClassElement() {
+    ClassElement(classKind) {
 
         let token = this.peekToken("name"),
             start = token.start,
@@ -2481,8 +2482,10 @@ export class Parser {
         if (token.type === ";")
             return this.EmptyClassElement();
 
-        if (token.type === "IDENTIFIER" &&
-            token.value === "static") {
+        if (token.type === "ATNAME")
+            return this.PrivateFieldDefinition();
+
+        if (token.type === "IDENTIFIER" && token.value === "static") {
 
             switch (this.peekAt("name", 1)) {
 
@@ -2491,32 +2494,31 @@ export class Parser {
 
                 default:
                     this.read();
+                    token = this.peekToken("name");
                     isStatic = true;
             }
         }
-
-        if (this.peek("name") === "ATNAME" && this.peekAt("name", 1) !== "(")
-            return this.PrivateDeclaration(start, isStatic);
-
-        token = this.peekToken("name");
 
         let kind = "";
 
         if (!isStatic && token.type === "IDENTIFIER" && token.value === "constructor")
             kind = "constructor";
 
-        let method = this.MethodDefinition(null, kind, true),
+        let method = this.MethodDefinition(null, kind, classKind),
             name = method.name;
 
-        if (isStatic) {
+        if (name.type === "Identifier") {
 
-            if (name.type === "Identifier" && name.value === "prototype")
-                this.fail("Invalid prototype property in class definition", name);
+            if (isStatic) {
 
-        } else if (name.type === "Identifier" && name.value === "constructor") {
+                if (name.value === "prototype")
+                    this.fail("Invalid prototype property in class definition", name);
 
-            if (method.kind !== "constructor")
-                this.fail("Invalid constructor property in class definition", name);
+            } else {
+
+                if (name.value === "constructor" && method.kind !== "constructor")
+                    this.fail("Invalid constructor property in class definition", name);
+            }
         }
 
         method.start = start;

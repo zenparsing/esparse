@@ -412,7 +412,7 @@
                           left: 'new',
                           right: 'target' } } ] } } ] } } ] },
 
-/** class C { x() { new super() } } **/
+/** class C extends B { x() { new super() } } **/
 'new super is not allowed': {},
 
 /** class C { constructor() {} constructor() {} } **/
@@ -424,172 +424,256 @@
 /** function *g() { super.foo } **/
 'super not allowed in generator declaration': {},
 
-/** class C { constructor() { super() } } **/
+/** class C extends B { constructor() { super() } } **/
 'super call':
 { type: 'Script',
   start: 0,
-  end: 37,
+  end: 47,
   statements:
    [ { type: 'ClassDeclaration',
        start: 0,
-       end: 37,
+       end: 47,
        identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
-       base: null,
+       base:
+        { type: 'Identifier',
+          start: 16,
+          end: 17,
+          value: 'B',
+          context: 'variable' },
        body:
         { type: 'ClassBody',
-          start: 8,
-          end: 37,
+          start: 18,
+          end: 47,
           elements:
            [ { type: 'MethodDefinition',
-               start: 10,
-               end: 35,
+               start: 20,
+               end: 45,
                static: false,
                kind: 'constructor',
                name:
                 { type: 'Identifier',
-                  start: 10,
-                  end: 21,
+                  start: 20,
+                  end: 31,
                   value: 'constructor',
                   context: '' },
                params: [],
                body:
                 { type: 'FunctionBody',
-                  start: 24,
-                  end: 35,
+                  start: 34,
+                  end: 45,
                   statements:
                    [ { type: 'ExpressionStatement',
-                       start: 26,
-                       end: 33,
+                       start: 36,
+                       end: 43,
                        expression:
                         { type: 'CallExpression',
-                          start: 26,
-                          end: 33,
-                          callee: { type: 'SuperKeyword', start: 26, end: 31 },
+                          start: 36,
+                          end: 43,
+                          callee: { type: 'SuperKeyword', start: 36, end: 41 },
                           arguments: [] } } ] } } ] } } ] },
+
+/** class C { constructor() { super() } } **/
+'super call not allowed in base class constructor': {},
 
 /** class C { a() { super() } } **/
 'super call not allowed outside of constructor': {},
 
-/** class C { constructor() { (super()) } } **/
+/** class C extends B { constructor() { (super()) } } **/
 'super call allowed inside of parens':
 { type: 'Script',
   start: 0,
-  end: 39,
+  end: 49,
   statements:
    [ { type: 'ClassDeclaration',
        start: 0,
-       end: 39,
+       end: 49,
        identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
-       base: null,
+       base:
+        { type: 'Identifier',
+          start: 16,
+          end: 17,
+          value: 'B',
+          context: 'variable' },
        body:
         { type: 'ClassBody',
-          start: 8,
-          end: 39,
+          start: 18,
+          end: 49,
           elements:
            [ { type: 'MethodDefinition',
-               start: 10,
-               end: 37,
+               start: 20,
+               end: 47,
                static: false,
                kind: 'constructor',
                name:
                 { type: 'Identifier',
-                  start: 10,
-                  end: 21,
+                  start: 20,
+                  end: 31,
                   value: 'constructor',
                   context: '' },
                params: [],
                body:
                 { type: 'FunctionBody',
-                  start: 24,
-                  end: 37,
+                  start: 34,
+                  end: 47,
                   statements:
                    [ { type: 'ExpressionStatement',
-                       start: 26,
-                       end: 35,
+                       start: 36,
+                       end: 45,
                        expression:
                         { type: 'ParenExpression',
-                          start: 26,
-                          end: 35,
+                          start: 36,
+                          end: 45,
                           expression:
                            { type: 'CallExpression',
-                             start: 27,
-                             end: 34,
-                             callee: { type: 'SuperKeyword', start: 27, end: 32 },
+                             start: 37,
+                             end: 44,
+                             callee: { type: 'SuperKeyword', start: 37, end: 42 },
                              arguments: [] } } } ] } } ] } } ] },
 
-/** class C { constructor() { _=> super() } } **/
+/** class C extends B { constructor() { _=> super() } } **/
 'super call allowed within arrow in constructor':
 { type: 'Script',
   start: 0,
-  end: 41,
+  end: 51,
   statements:
    [ { type: 'ClassDeclaration',
        start: 0,
-       end: 41,
+       end: 51,
        identifier:
         { type: 'Identifier',
           start: 6,
           end: 7,
           value: 'C',
           context: 'declaration' },
-       base: null,
+       base:
+        { type: 'Identifier',
+          start: 16,
+          end: 17,
+          value: 'B',
+          context: 'variable' },
        body:
         { type: 'ClassBody',
-          start: 8,
-          end: 41,
+          start: 18,
+          end: 51,
           elements:
            [ { type: 'MethodDefinition',
-               start: 10,
-               end: 39,
+               start: 20,
+               end: 49,
                static: false,
                kind: 'constructor',
                name:
                 { type: 'Identifier',
-                  start: 10,
-                  end: 21,
+                  start: 20,
+                  end: 31,
                   value: 'constructor',
                   context: '' },
                params: [],
                body:
                 { type: 'FunctionBody',
-                  start: 24,
-                  end: 39,
+                  start: 34,
+                  end: 49,
                   statements:
                    [ { type: 'ExpressionStatement',
-                       start: 26,
-                       end: 37,
+                       start: 36,
+                       end: 47,
                        expression:
                         { type: 'ArrowFunction',
-                          start: 26,
-                          end: 37,
+                          start: 36,
+                          end: 47,
                           kind: '',
                           params:
                            [ { type: 'FormalParameter',
-                               start: 26,
-                               end: 27,
+                               start: 36,
+                               end: 37,
                                pattern:
                                 { type: 'Identifier',
-                                  start: 26,
-                                  end: 27,
+                                  start: 36,
+                                  end: 37,
                                   value: '_',
                                   context: 'declaration' },
                                initializer: null } ],
                           body:
                            { type: 'CallExpression',
-                             start: 30,
-                             end: 37,
-                             callee: { type: 'SuperKeyword', start: 30, end: 35 },
+                             start: 40,
+                             end: 47,
+                             callee: { type: 'SuperKeyword', start: 40, end: 45 },
                              arguments: [] } } } ] } } ] } } ] },
 
+/** class A { m() { class B { [super.x]() {} }  } } **/
+'class context is lexical':
+{ type: 'Script',
+  start: 0,
+  end: 47,
+  statements:
+   [ { type: 'ClassDeclaration',
+       start: 0,
+       end: 47,
+       identifier:
+        { type: 'Identifier',
+          start: 6,
+          end: 7,
+          value: 'A',
+          context: 'declaration' },
+       base: null,
+       body:
+        { type: 'ClassBody',
+          start: 8,
+          end: 47,
+          elements:
+           [ { type: 'MethodDefinition',
+               start: 10,
+               end: 45,
+               static: false,
+               kind: '',
+               name: { type: 'Identifier', start: 10, end: 11, value: 'm', context: '' },
+               params: [],
+               body:
+                { type: 'FunctionBody',
+                  start: 14,
+                  end: 45,
+                  statements:
+                   [ { type: 'ClassDeclaration',
+                       start: 16,
+                       end: 42,
+                       identifier:
+                        { type: 'Identifier',
+                          start: 22,
+                          end: 23,
+                          value: 'B',
+                          context: 'declaration' },
+                       base: null,
+                       body:
+                        { type: 'ClassBody',
+                          start: 24,
+                          end: 42,
+                          elements:
+                           [ { type: 'MethodDefinition',
+                               start: 26,
+                               end: 40,
+                               static: false,
+                               kind: '',
+                               name:
+                                { type: 'ComputedPropertyName',
+                                  start: 26,
+                                  end: 35,
+                                  expression:
+                                   { type: 'MemberExpression',
+                                     start: 27,
+                                     end: 34,
+                                     object: { type: 'SuperKeyword', start: 27, end: 32 },
+                                     property: { type: 'Identifier', start: 33, end: 34, value: 'x', context: '' },
+                                     computed: false } },
+                               params: [],
+                               body: { type: 'FunctionBody', start: 38, end: 40, statements: [] } } ] } } ] } } ] } } ] },
 
 })

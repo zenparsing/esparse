@@ -21,10 +21,9 @@
           start: 8,
           end: 14,
           elements:
-           [ { type: 'PrivateDeclaration',
+           [ { type: 'PrivateFieldDefinition',
                start: 10,
                end: 12,
-               static: false,
                name: { type: 'AtName', start: 10, end: 12, value: '@x' },
                initializer: null } ] } } ] },
 
@@ -49,10 +48,9 @@
           start: 8,
           end: 22,
           elements:
-           [ { type: 'PrivateDeclaration',
+           [ { type: 'PrivateFieldDefinition',
                start: 10,
                end: 20,
-               static: false,
                name: { type: 'AtName', start: 10, end: 12, value: '@x' },
                initializer:
                 { type: 'AssignmentExpression',
@@ -68,125 +66,19 @@
                   right: { type: 'NumberLiteral', start: 19, end: 20, value: 1 } } } ] } } ] },
 
 /** class C { static @x = 1 } **/
-'private static field with initializer':
-{ type: 'Script',
-  start: 0,
-  end: 25,
-  statements:
-   [ { type: 'ClassDeclaration',
-       start: 0,
-       end: 25,
-       identifier:
-        { type: 'Identifier',
-          start: 6,
-          end: 7,
-          value: 'C',
-          context: 'declaration' },
-       base: null,
-       body:
-        { type: 'ClassBody',
-          start: 8,
-          end: 25,
-          elements:
-           [ { type: 'PrivateDeclaration',
-               start: 10,
-               end: 23,
-               static: true,
-               name: { type: 'AtName', start: 17, end: 19, value: '@x' },
-               initializer: { type: 'NumberLiteral', start: 22, end: 23, value: 1 } } ] } } ] },
+'private static fields not allowed': {},
 
 /** class C { @x() {} } **/
-'private class method':
-{ type: 'Script',
-  start: 0,
-  end: 19,
-  statements:
-   [ { type: 'ClassDeclaration',
-       start: 0,
-       end: 19,
-       identifier:
-        { type: 'Identifier',
-          start: 6,
-          end: 7,
-          value: 'C',
-          context: 'declaration' },
-       base: null,
-       body:
-        { type: 'ClassBody',
-          start: 8,
-          end: 19,
-          elements:
-           [ { type: 'MethodDefinition',
-               start: 10,
-               end: 17,
-               static: false,
-               kind: '',
-               name: { type: 'AtName', start: 10, end: 12, value: '@x' },
-               params: [],
-               body: { type: 'FunctionBody', start: 15, end: 17, statements: [] } } ] } } ] },
+'private methods not allowed': {},
 
 /** class C { get @x() {} set @x(v) {} } **/
-'private class getter and setters not allowed': {},
+'private getter and setters not allowed': {},
 
 /** class C { *@x() {} } **/
-'private class generator method':
-{ type: 'Script',
-  start: 0,
-  end: 20,
-  statements:
-   [ { type: 'ClassDeclaration',
-       start: 0,
-       end: 20,
-       identifier:
-        { type: 'Identifier',
-          start: 6,
-          end: 7,
-          value: 'C',
-          context: 'declaration' },
-       base: null,
-       body:
-        { type: 'ClassBody',
-          start: 8,
-          end: 20,
-          elements:
-           [ { type: 'MethodDefinition',
-               start: 10,
-               end: 18,
-               static: false,
-               kind: 'generator',
-               name: { type: 'AtName', start: 11, end: 13, value: '@x' },
-               params: [],
-               body: { type: 'FunctionBody', start: 16, end: 18, statements: [] } } ] } } ] },
+'private generator method not allowed': {},
 
 /** class C { static @x() {} } **/
-'private static class method':
-{ type: 'Script',
-  start: 0,
-  end: 26,
-  statements:
-   [ { type: 'ClassDeclaration',
-       start: 0,
-       end: 26,
-       identifier:
-        { type: 'Identifier',
-          start: 6,
-          end: 7,
-          value: 'C',
-          context: 'declaration' },
-       base: null,
-       body:
-        { type: 'ClassBody',
-          start: 8,
-          end: 26,
-          elements:
-           [ { type: 'MethodDefinition',
-               start: 10,
-               end: 24,
-               static: true,
-               kind: '',
-               name: { type: 'AtName', start: 17, end: 19, value: '@x' },
-               params: [],
-               body: { type: 'FunctionBody', start: 22, end: 24, statements: [] } } ] } } ] },
+'private static class method': {},
 
 /** class C { static get @x() {} static set @x(v) {} } **/
 'private static class getter and setter not allowed': {},
