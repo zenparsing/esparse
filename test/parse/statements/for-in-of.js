@@ -195,4 +195,40 @@
           context: 'variable' },
        body: { type: 'EmptyStatement', start: 12, end: 13 } } ] },
 
+/** for (const x of y); **/
+'for-of with const declaration': { type: 'Script',
+  start: 0,
+  end: 19,
+  statements:
+   [ { type: 'ForOfStatement',
+       async: false,
+       start: 0,
+       end: 19,
+       left:
+        { type: 'VariableDeclaration',
+          start: 5,
+          end: 12,
+          kind: 'const',
+          declarations:
+           [ { type: 'VariableDeclarator',
+               start: 11,
+               end: 12,
+               pattern:
+                { type: 'Identifier',
+                  start: 11,
+                  end: 12,
+                  value: 'x',
+                  context: 'declaration' },
+               initializer: null } ] },
+       right:
+        { type: 'Identifier',
+          start: 16,
+          end: 17,
+          value: 'y',
+          context: 'variable' },
+       body: { type: 'EmptyStatement', start: 18, end: 19 } } ] },
+
+/** for (let [x, y] = foo of z); **/
+'initializers not allowed in for-in/of head': {},
+
 });

@@ -1608,13 +1608,12 @@ export class Parser {
 
         if ((!noIn && pattern.type !== "Identifier") || this.peek() === "=") {
 
-            // NOTE: Patterns must have initializers when not in declaration
-            // section of a for statement
-
+            // Patterns must have initializers when not in declaration section
+            // of a for statement
             this.read();
             init = this.AssignmentExpression(noIn);
 
-        } else if (kind === "const") {
+        } else if (!noIn && kind === "const") {
 
             this.fail("Missing const initializer", pattern);
         }
@@ -1832,6 +1831,8 @@ export class Parser {
 
         if (init && this.peek() === "in")
             return this.ForInStatement(init, start);
+
+        this.checkForInit(init, "");
 
         this.read(";");
         test = this.peek() === ";" ? null : this.Expression();

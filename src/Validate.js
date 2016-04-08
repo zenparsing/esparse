@@ -133,19 +133,44 @@ export class Validate {
     }
 
     // Performs validation on the init portion of a for-in or for-of statement
-    checkForInit(init, type) {
+    checkForInit(init, iterationType) {
+
+        if (!init)
+            return;
+        
+        if (!iterationType) {
+
+            if (init.type !== "VariableDeclaration")
+                return;
+
+            init.declarations.forEach(decl => {
+
+                if (decl.initializer)
+                    return;
+
+                // Enforce const intilization in for(;;)
+                if (init.kind === "const")
+                    this.fail("Missing const initializer", decl.pattern);
+
+                // Enforce pattern initialization in for(;;)
+                if (decl.pattern.type !== "Identifier")
+                    this.fail("Missing pattern initializer", decl.pattern);
+            });
+
+            return;
+        }
 
         if (init.type === "VariableDeclaration") {
 
             // For-in/of may only have one variable declaration
             if (init.declarations.length !== 1)
-                this.fail("for-" + type + " statement may not have more than one variable declaration", init);
+                this.fail("for-" + iterationType + " statement may not have more than one variable declaration", init);
 
             let decl = init.declarations[0];
 
             // Initializers are not allowed in for in and for of
             if (decl.initializer)
-                this.fail("Invalid initializer in for-" + type + " statement", init);
+                this.fail("Invalid initializer in for-" + iterationType + " statement", init);
 
         } else {
 
