@@ -37,7 +37,8 @@ const multiCharPunctuator = new RegExp("^(?:" +
     "=>|" +
     "::|" +
     "[\.]{2,3}|" +
-    "[-+&|<>!=*&\^%\/]=" +
+    "[-+&|<>!=*&\^%\/]=|" +
+    "[*]{2}=?" +
 ")$");
 
 // === Miscellaneous Patterns ===
@@ -117,6 +118,7 @@ function isPunctuatorNext(c) {
         case "=":
         case ".":
         case ":":
+        case "*":
             return true;
     }
 

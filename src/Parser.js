@@ -37,6 +37,7 @@ function getPrecedence(op) {
         case "*":
         case "/":
         case "%": return 10;
+        case "**": return 11;
     }
 
     return 0;
@@ -51,6 +52,7 @@ function isAssignment(op) {
     switch (op) {
 
         case "*=":
+        case "**=":
         case "&=":
         case "^=":
         case "|=":
@@ -734,6 +736,10 @@ export class Parser {
             // Exit if operator is "in" and in is not allowed
             if (next === "in" && noIn)
                 break;
+
+            // Unary expression not allowed on LHS of exponetiation operator
+            if (next === "**" && lhs.type === "UnaryExpression")
+                this.fail();
 
             prec = getPrecedence(next);
 
