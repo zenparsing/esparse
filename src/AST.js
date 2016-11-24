@@ -10,11 +10,10 @@ import * as Nodes from "./Nodes.js";
 export * from "./Nodes.js";
 
 function isNode(x) {
-
     return x !== null && typeof x === "object" && typeof x.type === "string";
 }
 
-class NodeBase {
+class AstNode {
 
     children() {
 
@@ -45,4 +44,4 @@ class NodeBase {
 
 }
 
-Object.keys(Nodes).forEach(k => Nodes[k].prototype = NodeBase.prototype);
+Object.keys(Nodes).forEach(k => Nodes[k].prototype = AstNode.prototype);
