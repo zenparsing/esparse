@@ -3,13 +3,11 @@ import { isStrictReservedWord } from "./Scanner.js";
 
 // Returns true if the specified name is a restricted identifier in strict mode
 function isPoisonIdent(name) {
-
     return name === "eval" || name === "arguments";
 }
 
 // Unwraps parens surrounding an expression
 function unwrapParens(node) {
-
     // Remove any parenthesis surrounding the target
     for (; node.type === "ParenExpression"; node = node.expression);
     return node;
@@ -19,11 +17,8 @@ export class Validate {
 
     // Validates an assignment target
     checkAssignmentTarget(node, simple) {
-
         switch (node.type) {
-
             case "Identifier":
-
                 if (isPoisonIdent(node.value))
                     this.addStrictError("Cannot modify " + node.value + " in strict mode", node);
 
@@ -53,11 +48,8 @@ export class Validate {
 
     // Validates a binding target
     checkBindingTarget(node) {
-
         switch (node.type) {
-
             case "Identifier":
-
                 // Perform basic identifier validation
                 this.checkIdentifier(node);
 
@@ -65,7 +57,6 @@ export class Validate {
                 node.context = "declaration";
 
                 let name = node.value;
-
                 if (isPoisonIdent(name))
                     this.addStrictError("Binding cannot be created for '" + name + "' in strict mode", node);
 
@@ -88,13 +79,11 @@ export class Validate {
 
     // Validates a target in a binding or assignment pattern
     checkPatternTarget(node, binding) {
-
         return binding ? this.checkBindingTarget(node) : this.checkAssignmentTarget(node, false);
     }
 
     // Checks an identifier for strict mode reserved words
     checkIdentifier(node) {
-
         let ident = node.value;
 
         if (ident === "yield" && this.context.isGenerator)
@@ -107,11 +96,8 @@ export class Validate {
 
     // Checks function formal parameters for strict mode restrictions
     checkParameters(params, kind) {
-
         for (let i = 0; i < params.length; ++i) {
-
             let node = params[i];
-
             if (node.type !== "FormalParameter" || node.pattern.type !== "Identifier")
                 continue;
 
@@ -124,7 +110,6 @@ export class Validate {
 
     // Performs validation on transformed arrow formal parameters
     checkArrowParameters(params) {
-
         params = this.transformFormals(params);
         // TODO: Check that formal parameters do not contain yield expressions or
         // await expressions
@@ -134,17 +119,14 @@ export class Validate {
 
     // Performs validation on the init portion of a for-in or for-of statement
     checkForInit(init, iterationType) {
-
         if (!init)
             return;
-        
-        if (!iterationType) {
 
+        if (!iterationType) {
             if (init.type !== "VariableDeclaration")
                 return;
 
             init.declarations.forEach(decl => {
-
                 if (decl.initializer)
                     return;
 
@@ -161,7 +143,6 @@ export class Validate {
         }
 
         if (init.type === "VariableDeclaration") {
-
             // For-in/of may only have one variable declaration
             if (init.declarations.length !== 1)
                 this.fail("for-" + iterationType + " statement may not have more than one variable declaration", init);
@@ -171,24 +152,20 @@ export class Validate {
             // Initializers are not allowed in for in and for of
             if (decl.initializer)
                 this.fail("Invalid initializer in for-" + iterationType + " statement", init);
-
         } else {
-
             this.checkAssignmentTarget(this.unwrapParens(init));
         }
     }
 
     checkInvalidNodes() {
-
-        let context = this.context,
-            parent = context.parent,
-            list = context.invalidNodes;
+        let context = this.context;
+        let parent = context.parent;
+        let list = context.invalidNodes;
 
         for (let i = 0; i < list.length; ++i) {
-
-            let item = list[i],
-                node = item.node,
-                error = node.error;
+            let item = list[i];
+            let node = item.node;
+            let error = node.error;
 
             // Skip if error has been resolved
             if (!error)
@@ -216,17 +193,13 @@ export class Validate {
     }
 
     checkDelete(node) {
-
         node = this.unwrapParens(node);
-
         if (node.type === "Identifier")
             this.addStrictError("Cannot delete unqualified property in strict mode", node);
     }
 
     checkUnaryBind(node) {
-
         node = this.unwrapParens(node);
-
         if (node.type !== "MemberExpression")
             this.fail("Unary bind operand must be a property lookup", node);
     }

@@ -6,26 +6,22 @@ export class Transform {
 
     // Transform an expression into a formal parameter list
     transformFormals(expr) {
-
         if (!expr)
             return [];
 
         let list;
 
         switch (expr.type) {
-
             case "SequenceExpression": list = expr.expressions; break;
             case "CallExpression": list = expr.arguments; break;
             default: list = [expr]; break;
         }
 
         for (let i = 0; i < list.length; ++i) {
-
             let node = list[i],
                 param;
 
             if (i === list.length - 1 && node.type === "SpreadExpression") {
-
                 expr = node.expression;
 
                 // Rest parameters can only be identifiers
@@ -38,9 +34,7 @@ export class Transform {
                 node.error = "";
 
                 param = new AST.RestParameter(expr, node.start, node.end);
-
             } else {
-
                 param = new AST.FormalParameter(node, null, node.start, node.end);
                 this.transformPatternElement(param, true);
             }
@@ -52,14 +46,12 @@ export class Transform {
     }
 
     transformArrayPattern(node, binding) {
-
         // NOTE: ArrayPattern and ArrayLiteral are isomorphic
         node.type = "ArrayPattern";
 
         let elems = node.elements;
 
         for (let i = 0; i < elems.length; ++i) {
-
             let elem = elems[i],
                 expr;
 
@@ -68,9 +60,7 @@ export class Transform {
                 continue;
 
             switch (elem.type) {
-
                 case "SpreadExpression":
-
                     // Rest element must be in the last position and cannot be followed
                     // by a comma
                     if (i < elems.length - 1 || node.trailingComma)
@@ -79,6 +69,7 @@ export class Transform {
                     expr = elem.expression;
 
                     /*
+                    TODO: Why is this commented out?
                     // Rest target cannot be a destructuring pattern
                     switch (expr.type) {
 
@@ -115,23 +106,19 @@ export class Transform {
     }
 
     transformObjectPattern(node, binding) {
-
         // NOTE: ObjectPattern and ObjectLiteral are isomorphic
         node.type = "ObjectPattern";
 
         let props = node.properties;
 
         for (let i = 0; i < props.length; ++i) {
-
             let prop = props[i];
 
             // Clear the error flag
             prop.error = "";
 
             switch (prop.type) {
-
                 case "PropertyDefinition":
-
                     // Replace node
                     props[i] = prop = new AST.PatternProperty(
                         prop.name,
@@ -139,7 +126,6 @@ export class Transform {
                         null,
                         prop.start,
                         prop.end);
-
                     break;
 
                 case "PatternProperty":
@@ -155,12 +141,10 @@ export class Transform {
     }
 
     transformPatternElement(elem, binding) {
-
         let node = elem.pattern;
 
         // Split assignment into pattern and initializer
         if (node && node.type === "AssignmentExpression" && node.operator === "=") {
-
             elem.initializer = node.right;
             elem.pattern = node = node.left;
         }
@@ -169,7 +153,6 @@ export class Transform {
     }
 
     transformIdentifier(node) {
-
         let value = node.value;
 
         if (isReservedWord(value))
@@ -179,11 +162,9 @@ export class Transform {
     }
 
     transformDefaultExport(node) {
-
         let toType = null;
 
         switch (node.type) {
-
             case "ClassExpression":
                 if (node.identifier) toType = "ClassDeclaration";
                 break;
@@ -194,7 +175,6 @@ export class Transform {
         }
 
         if (toType) {
-
             node.type = toType;
             return true;
         }

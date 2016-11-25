@@ -5,15 +5,12 @@ import { Validate } from "./Validate.js";
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
-
     return op === "++" || op === "--";
 }
 
 // Returns a binary operator precedence level
 function getPrecedence(op) {
-
     switch (op) {
-
         case "||": return 1;
         case "&&": return 2;
         case "|": return 3;
@@ -45,12 +42,10 @@ function getPrecedence(op) {
 
 // Returns true if the specified operator is an assignment operator
 function isAssignment(op) {
-
     if (op === "=")
         return true;
 
     switch (op) {
-
         case "*=":
         case "**=":
         case "&=":
@@ -71,9 +66,7 @@ function isAssignment(op) {
 
 // Returns true if the specified operator is a unary operator
 function isUnary(op) {
-
     switch (op) {
-
         case "await":
         case "delete":
         case "void":
@@ -90,9 +83,7 @@ function isUnary(op) {
 
 // Returns true if the value is a method definition keyword
 function isMethodKeyword(value) {
-
     switch (value) {
-
         case "get":
         case "set":
         case "static":
@@ -104,9 +95,7 @@ function isMethodKeyword(value) {
 
 // Returns true if the supplied meta property pair is valid
 function isValidMeta(left, right) {
-
     switch (left) {
-
         case "new":
             return right === "target";
     }
@@ -116,14 +105,12 @@ function isValidMeta(left, right) {
 
 // Returns true if the value is a known directive
 function isDirective(value) {
-
     return value === "use strict";
 }
 
 // Returns the value of the specified token, if it is an identifier and does not
 // contain any unicode escapes
 function keywordFromToken(token) {
-
     if (token.type === "IDENTIFIER" && token.end - token.start === token.value.length)
         return token.value;
 
@@ -133,7 +120,6 @@ function keywordFromToken(token) {
 // Returns the value of the specified node, if it is an Identifier and does not
 // contain any unicode escapes
 function keywordFromNode(node) {
-
     if (node.type === "Identifier" && node.end - node.start === node.value.length)
         return node.value;
 
@@ -142,7 +128,6 @@ function keywordFromNode(node) {
 
 // Copies token data
 function copyToken(from, to) {
-
     to.type = from.type;
     to.value = from.value;
     to.number = from.number;
@@ -159,7 +144,6 @@ function copyToken(from, to) {
 class Context {
 
     constructor(parent) {
-
         this.parent = parent;
         this.mode = "";
         this.isFunction = false;
@@ -179,7 +163,6 @@ class Context {
 class ParseResult {
 
     constructor(input, lineMap, ast) {
-
         this.input = input;
         this.lineMap = lineMap;
         this.ast = ast;
@@ -187,14 +170,12 @@ class ParseResult {
     }
 
     locate(offset) {
-
         return this.lineMap.locate(offset);
     }
 
     createSyntaxError(message, node) {
-
-        let loc = this.lineMap.locate(node.start),
-            err = new SyntaxError(message);
+        let loc = this.lineMap.locate(node.start);
+        let err = new SyntaxError(message);
 
         err.line = loc.line;
         err.column = loc.column;
@@ -211,27 +192,23 @@ class ParseResult {
 class AtNameSet {
 
     constructor(parser) {
-
         this.parser = parser;
         this.names = {};
     }
 
     add(node, kind) {
-
         if (node.type !== "AtName")
             return true;
 
-        let name = node.value,
-            code = 3;
+        let name = node.value;
+        let code = 3;
 
         switch (kind) {
-
             case "get": code = 1; break;
             case "set": code = 2; break;
         }
 
         let current = this.names[name];
-
         if (current & code)
             this.parser.fail("Duplicate private name definition", node);
 
@@ -241,10 +218,7 @@ class AtNameSet {
 
 export class Parser {
 
-    parse(input, options) {
-
-        options = options || {};
-
+    parse(input, options = {}) {
         this.onASI = options.onASI || null;
 
         let scanner = new Scanner(input);
@@ -266,9 +240,8 @@ export class Parser {
     }
 
     nextToken(context) {
-
-        let scanner = this.scanner,
-            type = "";
+        let scanner = this.scanner;
+        let type = "";
 
         context = context || "";
 
@@ -279,7 +252,6 @@ export class Parser {
     }
 
     nodeStart() {
-
         if (this.peek0)
             return this.peek0.start;
 
@@ -290,12 +262,10 @@ export class Parser {
     }
 
     nodeEnd() {
-
         return this.tokenEnd;
     }
 
     readToken(type, context) {
-
         let token = this.peek0 || this.nextToken(context);
 
         this.peek0 = this.peek1;
@@ -309,12 +279,10 @@ export class Parser {
     }
 
     read(type, context) {
-
         return this.readToken(type, context).type;
     }
 
     peekToken(context) {
-
         if (!this.peek0)
             this.peek0 = this.nextToken(context);
 
@@ -322,17 +290,14 @@ export class Parser {
     }
 
     peek(context) {
-
         return this.peekToken(context).type;
     }
 
     peekTokenAt(context, index) {
-
         if (index !== 1 || this.peek0 === null)
             throw new Error("Invalid lookahead")
 
         if (this.peek1 === null) {
-
             this.peek0 = copyToken(this.peek0, this.tokenStash);
             this.peek1 = this.nextToken(context);
         }
@@ -341,14 +306,11 @@ export class Parser {
     }
 
     peekAt(context, index) {
-
         return this.peekTokenAt(context, index).type;
     }
 
     unpeek() {
-
         if (this.peek0) {
-
             this.scanner.offset = this.peek0.start;
             this.peek0 = null;
             this.peek1 = null;
@@ -356,15 +318,12 @@ export class Parser {
     }
 
     peekUntil(type, context) {
-
         let tok = this.peek(context);
         return tok !== "EOF" && tok !== type ? tok : null;
     }
 
     readKeyword(word) {
-
         let token = this.readToken();
-
         if (token.type === word || keywordFromToken(token) === word)
             return token;
 
@@ -372,17 +331,13 @@ export class Parser {
     }
 
     peekKeyword(word) {
-
         let token = this.peekToken();
         return token.type === word || keywordFromToken(token) === word;
     }
 
     peekLet() {
-
         if (this.peekKeyword("let")) {
-
             switch (this.peekAt("div", 1)) {
-
                 case "{":
                 case "[":
                 case "IDENTIFIER": return true;
@@ -393,16 +348,13 @@ export class Parser {
     }
 
     peekYield() {
-
         return this.context.functionBody &&
             this.context.isGenerator &&
             this.peekKeyword("yield");
     }
 
     peekAwait() {
-
         if (this.peekKeyword("await")) {
-
             if (this.context.functionBody && this.context.isAsync)
                 return true;
 
@@ -414,30 +366,23 @@ export class Parser {
     }
 
     peekAsync() {
-
         let token = this.peekToken();
-
         if (keywordFromToken(token) !== "async")
             return "";
 
         token = this.peekTokenAt("div", 1);
-
         if (token.newlineBefore)
             return "";
 
         let type = token.type;
-
         return type === "function" ? type : "";
     }
 
     peekEnd() {
-
         let token = this.peekToken();
 
         if (!token.newlineBefore) {
-
             switch (token.type) {
-
                 case "EOF":
                 case "}":
                 case ";":
@@ -453,8 +398,8 @@ export class Parser {
     }
 
     unexpected(token) {
-
-        let type = token.type, msg;
+        let type = token.type;
+        let msg;
 
         msg = type === "EOF" ?
             "Unexpected end of input" :
@@ -464,7 +409,6 @@ export class Parser {
     }
 
     fail(msg, node) {
-
         if (!node)
             node = this.peekToken();
 
@@ -473,7 +417,6 @@ export class Parser {
     }
 
     unwrapParens(node) {
-
         // Remove any parenthesis surrounding the target
         for (; node.type === "ParenExpression"; node = node.expression);
         return node;
@@ -483,9 +426,8 @@ export class Parser {
     // == Context Management ==
 
     pushContext(lexical) {
-
-        let parent = this.context,
-            c = new Context(parent);
+        let parent = this.context;
+        let c = new Context(parent);
 
         this.context = c;
 
@@ -493,7 +435,6 @@ export class Parser {
             c.mode = "strict";
 
         if (lexical) {
-
             c.isMethod = parent.isMethod;
             c.allowSuperCall = parent.allowSuperCall;
         }
@@ -502,9 +443,8 @@ export class Parser {
     }
 
     pushMaybeContext() {
-
-        let parent = this.context,
-            c = this.pushContext();
+        let parent = this.context;
+        let c = this.pushContext();
 
         c.isFunction = parent.isFunction;
         c.isGenerator = parent.isGenerator;
@@ -515,9 +455,8 @@ export class Parser {
     }
 
     popContext(collapse) {
-
-        let context = this.context,
-            parent = context.parent;
+        let context = this.context;
+        let parent = context.parent;
 
         // If collapsing into parent context, copy invalid nodes into parent
         if (collapse)
@@ -529,25 +468,20 @@ export class Parser {
     }
 
     setStrict(strict) {
-
         this.context.mode = strict ? "strict" : "sloppy";
     }
 
     addStrictError(error, node) {
-
         this.addInvalidNode(error, node, true);
     }
 
     addInvalidNode(error, node, strict) {
-
         node.error = error;
         this.context.invalidNodes.push({ node, strict: Boolean(strict) });
     }
 
     setLabel(label, value) {
-
         let m = this.context.labelMap;
-
         if (!m)
             m = this.context.labelMap = Object.create(null);
 
@@ -555,19 +489,16 @@ export class Parser {
     }
 
     getLabel(label) {
-
         let m = this.context.labelMap;
         return (m && m[label]) | 0;
     }
 
     setFunctionType(kind) {
-
-        let c = this.context,
-            a = false,
-            g = false;
+        let c = this.context;
+        let a = false;
+        let g = false;
 
         switch (kind) {
-
             case "async": a = true; break;
             case "generator": g = true; break;
             case "async-generator": a = g = true; break;
@@ -581,26 +512,23 @@ export class Parser {
     // === Top Level ===
 
     Script() {
-
         this.isModule = false;
         this.pushContext();
 
-        let start = this.nodeStart(),
-            statements = this.StatementList(true);
+        let start = this.nodeStart();
+        let statements = this.StatementList(true);
 
         this.popContext();
-
         return new AST.Script(statements, start, this.nodeEnd());
     }
 
     Module() {
-
         this.isModule = true;
         this.pushContext();
         this.setStrict(true);
 
-        let start = this.nodeStart(),
-            list = this.ModuleItemList();
+        let start = this.nodeStart();
+        let list = this.ModuleItemList();
 
         this.popContext();
 
@@ -610,12 +538,10 @@ export class Parser {
     // === Expressions ===
 
     Expression(noIn) {
-
-        let expr = this.AssignmentExpression(noIn),
-            list = null;
+        let expr = this.AssignmentExpression(noIn);
+        let list = null;
 
         while (this.peek("div") === ",") {
-
             this.read();
 
             if (list === null)
@@ -631,12 +557,10 @@ export class Parser {
     }
 
     AssignmentExpression(noIn, allowSpread) {
-
-        let start = this.nodeStart(),
-            node;
+        let start = this.nodeStart();
+        let node;
 
         if (this.peek() === "...") {
-
             this.read();
 
             node = new AST.SpreadExpression(
@@ -673,17 +597,14 @@ export class Parser {
     }
 
     YieldExpression(noIn) {
-
-        let start = this.nodeStart(),
-            delegate = false,
-            expr = null;
+        let start = this.nodeStart();
+        let delegate = false;
+        let expr = null;
 
         this.readKeyword("yield");
 
         if (!this.peekEnd() && this.peek() !== ",") {
-
             if (this.peek() === "*") {
-
                 this.read();
                 delegate = true;
             }
@@ -701,11 +622,10 @@ export class Parser {
     }
 
     ConditionalExpression(noIn) {
-
-        let start = this.nodeStart(),
-            left = this.BinaryExpression(noIn),
-            middle,
-            right;
+        let start = this.nodeStart();
+        let left = this.BinaryExpression(noIn);
+        let middle;
+        let right;
 
         if (this.peek("div") !== "?")
             return left;
@@ -719,20 +639,17 @@ export class Parser {
     }
 
     BinaryExpression(noIn) {
-
         return this.PartialBinaryExpression(this.UnaryExpression(), 0, noIn);
     }
 
     PartialBinaryExpression(lhs, minPrec, noIn) {
-
-        let prec = 0,
-            next = "",
-            max = 0,
-            op = "",
-            rhs;
+        let prec = 0;
+        let next = "";
+        let max = 0;
+        let op = "";
+        let rhs;
 
         while (next = this.peek("div")) {
-
             // Exit if operator is "in" and in is not allowed
             if (next === "in" && noIn)
                 break;
@@ -754,7 +671,6 @@ export class Parser {
             rhs = this.UnaryExpression();
 
             while (next = this.peek("div")) {
-
                 prec = getPrecedence(next);
 
                 // Exit if not a binary operator or equal or higher precendence
@@ -771,29 +687,24 @@ export class Parser {
     }
 
     UnaryExpression() {
-
-        let start = this.nodeStart(),
-            type = this.peek(),
-            token,
-            expr;
+        let start = this.nodeStart();
+        let type = this.peek();
+        let token;
+        let expr;
 
         if (isIncrement(type)) {
-
             this.read();
             expr = this.MemberExpression(true);
             this.checkAssignmentTarget(this.unwrapParens(expr), true);
-
             return new AST.UpdateExpression(type, expr, true, start, this.nodeEnd());
         }
 
         if (this.peekAwait()) {
-
             type = "await";
             this.context.hasYieldAwait = true;
         }
 
         if (isUnary(type)) {
-
             this.read();
             expr = this.UnaryExpression();
 
@@ -809,10 +720,8 @@ export class Parser {
 
         // Check for postfix operator
         if (isIncrement(type) && !token.newlineBefore) {
-
             this.read();
             this.checkAssignmentTarget(this.unwrapParens(expr), true);
-
             return new AST.UpdateExpression(type, expr, false, start, this.nodeEnd());
         }
 
@@ -820,53 +729,42 @@ export class Parser {
     }
 
     MemberExpression(allowCall) {
-
-        let token = this.peekToken(),
-            start = token.start,
-            arrowType = "",
-            isSuper = false,
-            exit = false,
-            expr,
-            prop;
+        let token = this.peekToken();
+        let start = token.start;
+        let arrowType = "";
+        let isSuper = false;
+        let exit = false;
+        let expr;
+        let prop;
 
         switch (token.type) {
-
             case "super":
-
                 expr = this.SuperKeyword();
                 isSuper = true;
                 break;
 
             case "new":
-
                 expr = this.peekAt("", 1) === "." ?
                     this.MetaProperty() :
                     this.NewExpression();
-
                 break;
 
             case "::":
-
                 if (allowCall) {
-
                     expr = null;
                     break;
                 }
 
             default:
-
                 expr = this.PrimaryExpression();
                 break;
         }
 
         while (!exit) {
-
             token = this.peekToken("div");
 
             switch (token.type) {
-
                 case ".":
-
                     this.read();
 
                     prop = this.peek("name") === "ATNAME" && !isSuper ?
@@ -883,7 +781,6 @@ export class Parser {
                     break;
 
                 case "[":
-
                     this.read();
                     prop = this.Expression();
                     this.read("]");
@@ -898,9 +795,7 @@ export class Parser {
                     break;
 
                 case "(":
-
                     if (!allowCall) {
-
                         exit = true;
                         break;
                     }
@@ -909,7 +804,6 @@ export class Parser {
                         this.fail("Invalid super call");
 
                     if (keywordFromNode(expr) === "async" && !token.newlineBefore) {
-
                         arrowType = "async";
                         this.pushMaybeContext();
                     }
@@ -921,25 +815,19 @@ export class Parser {
                         this.nodeEnd());
 
                     if (arrowType) {
-
                         token = this.peekToken("div");
 
                         if (token.type === "=>" && !token.newlineBefore) {
-
                             expr = this.ArrowFunctionHead(arrowType, expr, start);
                             exit = true;
-
                         } else {
-
                             arrowType = "";
                             this.popContext(true);
                         }
                     }
-
                     break;
 
                 case "TEMPLATE":
-
                     if (isSuper)
                         this.fail();
 
@@ -952,12 +840,10 @@ export class Parser {
                     break;
 
                 case "::":
-
                     if (isSuper)
                         this.fail();
 
                     if (!allowCall) {
-
                         exit = true;
                         break;
                     }
@@ -965,12 +851,9 @@ export class Parser {
                     this.read();
 
                     if (expr && this.peek() === "new") {
-
                         this.read();
                         expr = new AST.BindNewExpression(expr, start, this.nodeEnd());
-
                     } else {
-
                         expr = new AST.BindExpression(
                             expr,
                             this.MemberExpression(false),
@@ -984,7 +867,6 @@ export class Parser {
                     break;
 
                 default:
-
                     if (isSuper)
                         this.fail();
 
@@ -999,13 +881,12 @@ export class Parser {
     }
 
     NewExpression() {
-
         let start = this.nodeStart();
 
         this.read("new");
 
-        let expr = this.MemberExpression(false),
-            args = this.peek("div") === "(" ? this.ArgumentList() : null;
+        let expr = this.MemberExpression(false);
+        let args = this.peek("div") === "(" ? this.ArgumentList() : null;
 
         if (expr.type === "SuperKeyword")
             this.fail("Invalid super keyword", expr);
@@ -1014,11 +895,10 @@ export class Parser {
     }
 
     MetaProperty() {
-
-        let token = this.readToken(),
-            start = token.start,
-            left = token.type === "IDENTIFIER" ? token.value : token.type,
-            right;
+        let token = this.readToken();
+        let start = token.start;
+        let left = token.type === "IDENTIFIER" ? token.value : token.type;
+        let right;
 
         this.read(".");
 
@@ -1032,9 +912,8 @@ export class Parser {
     }
 
     SuperKeyword() {
-
-        let token = this.readToken("super"),
-            node = new AST.SuperKeyword(token.start, token.end);
+        let token = this.readToken("super");
+        let node = new AST.SuperKeyword(token.start, token.end);
 
         if (!this.context.isMethod)
             this.fail("Super keyword outside of method", node);
@@ -1043,13 +922,11 @@ export class Parser {
     }
 
     ArgumentList() {
-
         let list = [];
 
         this.read("(");
 
         while (this.peekUntil(")")) {
-
             if (list.length > 0)
                 this.read(",");
 
@@ -1057,20 +934,17 @@ export class Parser {
         }
 
         this.read(")");
-
         return list;
     }
 
     PrimaryExpression() {
-
-        let token = this.peekToken(),
-            type = token.type,
-            start = this.nodeStart(),
-            next,
-            value;
+        let token = this.peekToken();
+        let type = token.type;
+        let start = this.nodeStart();
+        let next;
+        let value;
 
         switch (type) {
-
             case "function": return this.FunctionExpression();
             case "class": return this.ClassExpression();
             case "TEMPLATE": return this.TemplateExpression();
@@ -1082,30 +956,22 @@ export class Parser {
             case "ATNAME": return this.AtName();
 
             case "IDENTIFIER":
-
                 value = keywordFromToken(token);
                 next = this.peekTokenAt("div", 1);
 
                 if (!next.newlineBefore) {
-
                     if (next.type === "=>") {
-
                         this.pushContext(true);
                         return this.ArrowFunctionHead("", this.BindingIdentifier(), start);
-
                     } else if (next.type === "function") {
-
                         return this.FunctionExpression();
-
                     } else if (next.type === "IDENTIFIER" && value === "async") {
-
                         this.read();
                         this.pushContext(true);
 
                         let ident = this.BindingIdentifier();
 
                         next = this.peekToken();
-
                         if (next.type !== "=>" || next.newlineBefore)
                             this.fail();
 
@@ -1135,30 +1001,26 @@ export class Parser {
     }
 
     Identifier(isVar) {
-
-        let token = this.readToken("IDENTIFIER"),
-            node = new AST.Identifier(token.value, isVar ? "variable" : "", token.start, token.end);
+        let token = this.readToken("IDENTIFIER");
+        let node = new AST.Identifier(token.value, isVar ? "variable" : "", token.start, token.end);
 
         this.checkIdentifier(node);
         return node;
     }
 
     IdentifierName() {
-
         let token = this.readToken("IDENTIFIER", "name");
         return new AST.Identifier(token.value, "", token.start, token.end);
     }
 
     AtName() {
-
         let token = this.readToken("ATNAME");
         return new AST.AtName(token.value, token.start, token.end);
     }
 
     StringLiteral() {
-
-        let token = this.readToken("STRING"),
-            node = new AST.StringLiteral(token.value, token.start, token.end);
+        let token = this.readToken("STRING");
+        let node = new AST.StringLiteral(token.value, token.start, token.end);
 
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -1167,9 +1029,8 @@ export class Parser {
     }
 
     NumberLiteral() {
-
-        let token = this.readToken("NUMBER"),
-            node = new AST.NumberLiteral(token.number, token.start, token.end);
+        let token = this.readToken("NUMBER");
+        let node = new AST.NumberLiteral(token.number, token.start, token.end);
 
         if (token.strictError)
             this.addStrictError(token.strictError, node);
@@ -1178,10 +1039,9 @@ export class Parser {
     }
 
     TemplatePart() {
-
-        let token = this.readToken("TEMPLATE", "template"),
-            end = token.templateEnd,
-            node;
+        let token = this.readToken("TEMPLATE", "template");
+        let end = token.templateEnd;
+        let node;
 
         node = new AST.TemplatePart(
             token.value,
@@ -1197,7 +1057,6 @@ export class Parser {
     }
 
     RegularExpression() {
-
         // TODO:  Validate regular expression against RegExp grammar (21.2.1)?
         let token = this.readToken("REGEX");
 
@@ -1209,20 +1068,17 @@ export class Parser {
     }
 
     BindingIdentifier() {
-
-        let token = this.readToken("IDENTIFIER"),
-            node = new AST.Identifier(token.value, "", token.start, token.end);
+        let token = this.readToken("IDENTIFIER");
+        let node = new AST.Identifier(token.value, "", token.start, token.end);
 
         this.checkBindingTarget(node);
         return node;
     }
 
     BindingPattern() {
-
         let node;
 
         switch (this.peek()) {
-
             case "{":
                 node = this.ObjectLiteral();
                 break;
@@ -1240,10 +1096,9 @@ export class Parser {
     }
 
     ParenExpression() {
-
-        let start = this.nodeStart(),
-            next = null,
-            rest = null;
+        let start = this.nodeStart();
+        let next = null;
+        let rest = null;
 
         // Push a new context in case we are parsing an arrow function
         this.pushMaybeContext();
@@ -1251,9 +1106,7 @@ export class Parser {
         this.read("(");
 
         if (this.peek() === ")") {
-
             next = this.peekTokenAt("", 1);
-
             if (next.newlineBefore || next.type !== "=>")
                 this.fail();
 
@@ -1277,23 +1130,18 @@ export class Parser {
     }
 
     ObjectLiteral() {
-
-        let start = this.nodeStart(),
-            comma = false,
-            list = [],
-            node;
+        let start = this.nodeStart();
+        let comma = false;
+        let list = [];
+        let node;
 
         this.read("{");
 
         while (this.peekUntil("}", "name")) {
-
             if (!comma && node) {
-
                 this.read(",");
                 comma = true;
-
             } else {
-
                 comma = false;
                 list.push(node = this.PropertyDefinition());
             }
@@ -1305,18 +1153,15 @@ export class Parser {
     }
 
     PropertyDefinition() {
-
         if (this.peek("name") === "*")
             return this.MethodDefinition(null, "");
 
-        let start = this.nodeStart(),
-            node,
-            name;
+        let start = this.nodeStart();
+        let node;
+        let name;
 
         switch (this.peekAt("name", 1)) {
-
             case "=":
-
                 // Re-read token as an identifier
                 this.unpeek();
 
@@ -1332,7 +1177,6 @@ export class Parser {
 
             case ",":
             case "}":
-
                 // Re-read token as an identifier
                 this.unpeek();
 
@@ -1346,7 +1190,6 @@ export class Parser {
         name = this.PropertyName();
 
         if (this.peek("name") === ":") {
-
             return new AST.PropertyDefinition(
                 name,
                 (this.read(), this.AssignmentExpression()),
@@ -1358,11 +1201,9 @@ export class Parser {
     }
 
     PropertyName() {
-
         let token = this.peekToken("name");
 
         switch (token.type) {
-
             case "IDENTIFIER": return this.IdentifierName();
             case "STRING": return this.StringLiteral();
             case "NUMBER": return this.NumberLiteral();
@@ -1373,7 +1214,6 @@ export class Parser {
     }
 
     ComputedPropertyName() {
-
         let start = this.nodeStart();
 
         this.read("[");
@@ -1384,29 +1224,23 @@ export class Parser {
     }
 
     ArrayLiteral() {
-
-        let start = this.nodeStart(),
-            comma = false,
-            list = [],
-            type;
+        let start = this.nodeStart();
+        let comma = false;
+        let list = [];
+        let type;
 
         this.read("[");
 
         while (type = this.peekUntil("]")) {
-
             if (type === ",") {
-
                 this.read();
                 comma = true;
                 list.push(null);
-
             } else {
-
                 list.push(this.AssignmentExpression(false, true));
                 comma = false;
 
                 if (this.peek() !== "]") {
-
                     this.read(",");
                     comma = true;
                 }
@@ -1419,35 +1253,34 @@ export class Parser {
     }
 
     TemplateExpression() {
-
-        let atom = this.TemplatePart(),
-            start = atom.start,
-            lit = [atom],
-            sub = [];
+        let atom = this.TemplatePart();
+        let start = atom.start;
+        let parts = [atom];
 
         while (!atom.templateEnd) {
-
-            sub.push(this.Expression());
+            parts.push(this.TemplateSubstitution());
 
             // Discard any tokens that have been scanned using a different context
             this.unpeek();
 
-            lit.push(atom = this.TemplatePart());
+            parts.push(atom = this.TemplatePart());
         }
 
-        return new AST.TemplateExpression(lit, sub, start, this.nodeEnd());
+        return new AST.TemplateExpression(parts, start, this.nodeEnd());
+    }
+
+    TemplateSubstitution() {
+        let start = this.nodeStart();
+        return new AST.TemplateSubstitution(this.Expression(), start, this.nodeEnd());
     }
 
     // === Statements ===
 
     Statement(label) {
-
         let next;
 
         switch (this.peek()) {
-
             case "IDENTIFIER":
-
                 if (this.peekAt("div", 1) === ":")
                     return this.LabelledStatement();
 
@@ -1474,7 +1307,6 @@ export class Parser {
     }
 
     Block() {
-
         let start = this.nodeStart();
 
         this.read("{");
@@ -1485,30 +1317,23 @@ export class Parser {
     }
 
     Semicolon() {
-
-        let token = this.peekToken(),
-            type = token.type;
+        let token = this.peekToken();
+        let type = token.type;
 
         if (type === ";") {
-
             this.read();
-
         } else if (type === "}" || type === "EOF" || token.newlineBefore) {
-
             if (this.onASI && !this.onASI(token))
                 this.unexpected(token);
-
         } else {
-
             this.unexpected(token);
         }
     }
 
     LabelledStatement() {
-
-        let start = this.nodeStart(),
-            label = this.Identifier(),
-            name = label.value;
+        let start = this.nodeStart();
+        let label = this.Identifier();
+        let name = label.value;
 
         if (this.getLabel(name) > 0)
             this.fail("Invalid label", label);
@@ -1521,12 +1346,9 @@ export class Parser {
         let statement;
 
         if (this.peek() === "function") {
-
             statement = this.FunctionDeclaration();
             this.addStrictError("Labeled FunctionDeclarations are disallowed in strict mode", statement);
-
         } else {
-
             statement = this.Statement(name);
         }
 
@@ -1540,51 +1362,38 @@ export class Parser {
     }
 
     ExpressionStatement() {
-
-        let start = this.nodeStart(),
-            expr = this.Expression();
-
+        let start = this.nodeStart();
+        let expr = this.Expression();
         this.Semicolon();
-
         return new AST.ExpressionStatement(expr, start, this.nodeEnd());
     }
 
     EmptyStatement() {
-
         let start = this.nodeStart();
-
         this.Semicolon();
-
         return new AST.EmptyStatement(start, this.nodeEnd());
     }
 
     VariableStatement() {
-
         let node = this.VariableDeclaration(false);
-
         this.Semicolon();
         node.end = this.nodeEnd();
-
         return node;
     }
 
     VariableDeclaration(noIn) {
-
-        let start = this.nodeStart(),
-            token = this.peekToken(),
-            kind = token.type,
-            list = [];
+        let start = this.nodeStart();
+        let token = this.peekToken();
+        let kind = token.type;
+        let list = [];
 
         switch (kind) {
-
             case "var":
             case "const":
                 break;
 
             case "IDENTIFIER":
-
                 if (token.value === "let") {
-
                     kind = "let";
                     break;
                 }
@@ -1596,9 +1405,7 @@ export class Parser {
         this.read();
 
         while (true) {
-
             list.push(this.VariableDeclarator(noIn, kind));
-
             if (this.peek() === ",") this.read();
             else break;
         }
@@ -1607,20 +1414,16 @@ export class Parser {
     }
 
     VariableDeclarator(noIn, kind) {
-
-        let start = this.nodeStart(),
-            pattern = this.BindingPattern(),
-            init = null;
+        let start = this.nodeStart();
+        let pattern = this.BindingPattern();
+        let init = null;
 
         if ((!noIn && pattern.type !== "Identifier") || this.peek() === "=") {
-
             // Patterns must have initializers when not in declaration section
             // of a for statement
             this.read();
             init = this.AssignmentExpression(noIn);
-
         } else if (!noIn && kind === "const") {
-
             this.fail("Missing const initializer", pattern);
         }
 
@@ -1628,7 +1431,6 @@ export class Parser {
     }
 
     ReturnStatement() {
-
         if (!this.context.isFunction)
             this.fail("Return statement outside of function");
 
@@ -1643,9 +1445,8 @@ export class Parser {
     }
 
     BreakStatement() {
-
-        let start = this.nodeStart(),
-            context = this.context;
+        let start = this.nodeStart();
+        let context = this.context;
 
         this.read("break");
         let label = this.peekEnd() ? null : this.Identifier();
@@ -1654,12 +1455,9 @@ export class Parser {
         let node = new AST.BreakStatement(label, start, this.nodeEnd());
 
         if (label) {
-
             if (this.getLabel(label.value) === 0)
                 this.fail("Invalid label", label);
-
         } else if (context.loopDepth === 0 && context.switchDepth === 0) {
-
             this.fail("Break not contained within a switch or loop", node);
         }
 
@@ -1667,9 +1465,8 @@ export class Parser {
     }
 
     ContinueStatement() {
-
-        let start = this.nodeStart(),
-            context = this.context;
+        let start = this.nodeStart();
+        let context = this.context;
 
         this.read("continue");
         let label = this.peekEnd() ? null : this.Identifier();
@@ -1678,12 +1475,9 @@ export class Parser {
         let node = new AST.ContinueStatement(label, start, this.nodeEnd());
 
         if (label) {
-
             if (this.getLabel(label.value) !== 2)
                 this.fail("Invalid label", label);
-
         } else if (context.loopDepth === 0) {
-
             this.fail("Continue not contained within a loop", node);
         }
 
@@ -1691,13 +1485,11 @@ export class Parser {
     }
 
     ThrowStatement() {
-
         let start = this.nodeStart();
 
         this.read("throw");
 
         let expr = this.peekEnd() ? null : this.Expression();
-
         if (expr === null)
             this.fail("Missing throw expression");
 
@@ -1707,7 +1499,6 @@ export class Parser {
     }
 
     DebuggerStatement() {
-
         let start = this.nodeStart();
 
         this.read("debugger");
@@ -1717,21 +1508,19 @@ export class Parser {
     }
 
     IfStatement() {
-
         let start = this.nodeStart();
 
         this.read("if");
         this.read("(");
 
-        let test = this.Expression(),
-            body = null,
-            elseBody = null;
+        let test = this.Expression();
+        let body = null;
+        let elseBody = null;
 
         this.read(")");
         body = this.Statement();
 
         if (this.peek() === "else") {
-
             this.read();
             elseBody = this.Statement();
         }
@@ -1740,10 +1529,9 @@ export class Parser {
     }
 
     DoWhileStatement(label) {
-
-        let start = this.nodeStart(),
-            body,
-            test;
+        let start = this.nodeStart();
+        let body;
+        let test;
 
         if (label)
             this.setLabel(label, 2);
@@ -1765,7 +1553,6 @@ export class Parser {
     }
 
     WhileStatement(label) {
-
         let start = this.nodeStart();
 
         if (label)
@@ -1788,12 +1575,11 @@ export class Parser {
     }
 
     ForStatement(label) {
-
-        let start = this.nodeStart(),
-            init = null,
-            async = false,
-            test,
-            step;
+        let start = this.nodeStart();
+        let init = null;
+        let async = false;
+        let test;
+        let step;
 
         if (label)
             this.setLabel(label, 2);
@@ -1801,7 +1587,6 @@ export class Parser {
         this.read("for");
 
         if (this.peekAwait()) {
-
             this.read();
             async = true;
         }
@@ -1810,7 +1595,6 @@ export class Parser {
 
         // Get loop initializer
         switch (this.peek()) {
-
             case ";":
                 break;
 
@@ -1820,9 +1604,7 @@ export class Parser {
                 break;
 
             case "IDENTIFIER":
-
                 if (this.peekLet()) {
-
                     init = this.VariableDeclaration(true);
                     break;
                 }
@@ -1862,7 +1644,6 @@ export class Parser {
     }
 
     ForInStatement(init, start) {
-
         this.checkForInit(init, "in");
 
         this.read("in");
@@ -1882,7 +1663,6 @@ export class Parser {
     }
 
     ForOfStatement(async, init, start) {
-
         this.checkForInit(init, "of");
 
         this.readKeyword("of");
@@ -1903,7 +1683,6 @@ export class Parser {
     }
 
     WithStatement() {
-
         let start = this.nodeStart();
 
         this.read("with");
@@ -1921,27 +1700,23 @@ export class Parser {
     }
 
     SwitchStatement() {
-
         let start = this.nodeStart();
 
         this.read("switch");
         this.read("(");
 
-        let head = this.Expression(),
-            hasDefault = false,
-            cases = [],
-            node;
+        let head = this.Expression();
+        let hasDefault = false;
+        let cases = [];
+        let node;
 
         this.read(")");
         this.read("{");
         this.context.switchDepth += 1;
 
         while (this.peekUntil("}")) {
-
             node = this.SwitchCase();
-
             if (node.test === null) {
-
                 if (hasDefault)
                     this.fail("Switch statement cannot have more than one default", node);
 
@@ -1958,18 +1733,14 @@ export class Parser {
     }
 
     SwitchCase() {
-
-        let start = this.nodeStart(),
-            expr = null,
-            list = [],
-            type;
+        let start = this.nodeStart();
+        let expr = null;
+        let list = [];
+        let type;
 
         if (this.peek() === "default") {
-
             this.read();
-
         } else {
-
             this.read("case");
             expr = this.Expression();
         }
@@ -1977,7 +1748,6 @@ export class Parser {
         this.read(":");
 
         while (type = this.peekUntil("}")) {
-
             if (type === "case" || type === "default")
                 break;
 
@@ -1988,20 +1758,18 @@ export class Parser {
     }
 
     TryStatement() {
-
         let start = this.nodeStart();
 
         this.read("try");
 
-        let tryBlock = this.Block(),
-            handler = null,
-            fin = null;
+        let tryBlock = this.Block();
+        let handler = null;
+        let fin = null;
 
         if (this.peek() === "catch")
             handler = this.CatchClause();
 
         if (this.peek() === "finally") {
-
             this.read("finally");
             fin = this.Block();
         }
@@ -2010,7 +1778,6 @@ export class Parser {
     }
 
     CatchClause() {
-
         let start = this.nodeStart();
 
         this.read("catch");
@@ -2024,20 +1791,17 @@ export class Parser {
     // === Declarations ===
 
     StatementList(prologue) {
-
-        let list = [],
-            node,
-            expr,
-            dir;
+        let list = [];
+        let node;
+        let expr;
+        let dir;
 
         // TODO: is this wrong for braceless statement lists?
         while (this.peekUntil("}")) {
-
             node = this.StatementListItem();
 
             // Check for directives
             if (prologue) {
-
                 if (node.type === "ExpressionStatement" &&
                     node.expression.type === "StringLiteral") {
 
@@ -2046,16 +1810,13 @@ export class Parser {
                     dir = this.input.slice(expr.start + 1, expr.end - 1);
 
                     if (isDirective(dir)) {
-
                         node = new AST.Directive(dir, expr, node.start, node.end);
 
                         // Check for strict mode
                         if (dir === "use strict")
                             this.setStrict(true);
                     }
-
                 } else {
-
                     prologue = false;
                 }
             }
@@ -2067,15 +1828,12 @@ export class Parser {
     }
 
     StatementListItem() {
-
         switch (this.peek()) {
-
             case "function": return this.FunctionDeclaration();
             case "class": return this.ClassDeclaration();
             case "const": return this.LexicalDeclaration();
 
             case "IDENTIFIER":
-
                 if (this.peekLet())
                     return this.LexicalDeclaration();
 
@@ -2089,7 +1847,6 @@ export class Parser {
     }
 
     LexicalDeclaration() {
-
         let node = this.VariableDeclaration(false);
 
         this.Semicolon();
@@ -2101,15 +1858,13 @@ export class Parser {
     // === Functions ===
 
     FunctionDeclaration() {
-
-        let start = this.nodeStart(),
-            kind = "",
-            token;
+        let start = this.nodeStart();
+        let kind = "";
+        let token;
 
         token = this.peekToken();
 
         if (keywordFromToken(token) === "async") {
-
             this.read();
             kind = "async";
         }
@@ -2117,7 +1872,6 @@ export class Parser {
         this.read("function");
 
         if (this.peek() === "*") {
-
             this.read();
             kind = kind ? kind + "-generator" : "generator";
         }
@@ -2125,9 +1879,9 @@ export class Parser {
         this.pushContext();
         this.setFunctionType(kind);
 
-        let ident = this.BindingIdentifier(),
-            params = this.FormalParameters(),
-            body = this.FunctionBody();
+        let ident = this.BindingIdentifier();
+        let params = this.FormalParameters();
+        let body = this.FunctionBody();
 
         this.checkParameters(params);
         this.popContext();
@@ -2142,16 +1896,14 @@ export class Parser {
     }
 
     FunctionExpression() {
-
-        let start = this.nodeStart(),
-            ident = null,
-            kind = "",
-            token;
+        let start = this.nodeStart();
+        let ident = null;
+        let kind = "";
+        let token;
 
         token = this.peekToken();
 
         if (keywordFromToken(token) === "async") {
-
             this.read();
             kind = "async";
         }
@@ -2159,7 +1911,6 @@ export class Parser {
         this.read("function");
 
         if (this.peek() === "*") {
-
             this.read();
             kind = kind ? kind + "-generator" : "generator";
         }
@@ -2170,8 +1921,8 @@ export class Parser {
         if (this.peek() !== "(")
             ident = this.BindingIdentifier();
 
-        let params = this.FormalParameters(),
-            body = this.FunctionBody();
+        let params = this.FormalParameters();
+        let body = this.FunctionBody();
 
         this.checkParameters(params);
         this.popContext();
@@ -2186,31 +1937,23 @@ export class Parser {
     }
 
     MethodDefinition(name, kind, classKind) {
-
         let start = name ? name.start : this.nodeStart();
 
         if (!name && this.peek("name") === "*") {
-
             this.read();
-
             kind = "generator";
             name = this.PropertyName();
-
         } else {
-
             if (!name)
                 name = this.PropertyName();
 
             let val = keywordFromNode(name);
 
             if (this.peek("name") !== "(") {
-
                 if (val === "get" || val === "set" || val === "async") {
-
                     kind = name.value;
 
                     if (kind === "async" && this.peek("name") === "*") {
-
                         this.read();
                         kind += "-generator";
                     }
@@ -2247,7 +1990,6 @@ export class Parser {
     }
 
     AccessorParameters(kind) {
-
         let list = [];
 
         this.read("(");
@@ -2261,19 +2003,16 @@ export class Parser {
     }
 
     FormalParameters() {
-
         let list = [];
 
         this.read("(");
 
         while (this.peekUntil(")")) {
-
             if (list.length > 0)
                 this.read(",");
 
             // Parameter list may have a trailing rest parameter
             if (this.peek() === "...") {
-
                 list.push(this.RestParameter());
                 break;
             }
@@ -2287,13 +2026,11 @@ export class Parser {
     }
 
     FormalParameter(allowDefault) {
-
-        let start = this.nodeStart(),
-            pattern = this.BindingPattern(),
-            init = null;
+        let start = this.nodeStart();
+        let pattern = this.BindingPattern();
+        let init = null;
 
         if (allowDefault && this.peek() === "=") {
-
             this.read();
             init = this.AssignmentExpression();
         }
@@ -2302,16 +2039,12 @@ export class Parser {
     }
 
     RestParameter() {
-
         let start = this.nodeStart();
-
         this.read("...");
-
         return new AST.RestParameter(this.BindingIdentifier(), start, this.nodeEnd());
     }
 
     FunctionBody() {
-
         this.context.functionBody = true;
 
         let start = this.nodeStart();
@@ -2324,7 +2057,6 @@ export class Parser {
     }
 
     ArrowFunctionHead(kind, formals, start) {
-
         // Context must have been pushed by caller
         this.setFunctionType(kind);
 
@@ -2338,12 +2070,11 @@ export class Parser {
     }
 
     ArrowFunctionBody(head, noIn) {
-
         this.read("=>");
 
-        let params = head.parameters,
-            start = head.start,
-            kind = this.context.isAsync ? "async" : "";
+        let params = head.parameters;
+        let start = head.start;
+        let kind = this.context.isAsync ? "async" : "";
 
         // Use function body context even if parsing expression body form
         this.context.functionBody = true;
@@ -2360,18 +2091,16 @@ export class Parser {
     // === Classes ===
 
     ClassDeclaration() {
-
-        let start = this.nodeStart(),
-            kind = "base",
-            ident = null,
-            base = null;
+        let start = this.nodeStart();
+        let kind = "base";
+        let ident = null;
+        let base = null;
 
         this.read("class");
 
         ident = this.BindingIdentifier();
 
         if (this.peek() === "extends") {
-
             this.read();
             kind = "derived";
             base = this.MemberExpression(true);
@@ -2386,11 +2115,10 @@ export class Parser {
     }
 
     ClassExpression() {
-
-        let start = this.nodeStart(),
-            kind = "base",
-            ident = null,
-            base = null;
+        let start = this.nodeStart();
+        let kind = "base";
+        let ident = null;
+        let base = null;
 
         this.read("class");
 
@@ -2398,7 +2126,6 @@ export class Parser {
             ident = this.BindingIdentifier();
 
         if (this.peek() === "extends") {
-
             this.read();
             kind = "derived";
             base = this.MemberExpression(true);
@@ -2413,27 +2140,22 @@ export class Parser {
     }
 
     ClassBody(classKind) {
-
-        let start = this.nodeStart(),
-            hasConstructor = false,
-            hasBlock = false,
-            atNames = new AtNameSet(this),
-            list = [];
+        let start = this.nodeStart();
+        let hasConstructor = false;
+        let hasBlock = false;
+        let atNames = new AtNameSet(this);
+        let list = [];
 
         this.pushContext(true);
         this.setStrict(true);
         this.read("{");
 
         while (this.peekUntil("}", "name")) {
-
             let elem = this.ClassElement(classKind);
 
             switch (elem.type) {
-
                 case "MethodDefinition":
-
                     if (elem.kind === "constructor") {
-
                         if (hasConstructor)
                             this.fail("Duplicate constructor definitions", elem.name);
 
@@ -2456,13 +2178,11 @@ export class Parser {
     }
 
     PrivateFieldDefinition() {
-
-        let start = this.nodeStart(),
-            name = this.AtName(),
-            init = null;
+        let start = this.nodeStart();
+        let name = this.AtName();
+        let init = null;
 
         if (this.peek() === "=") {
-
             this.read();
             init = this.AssignmentExpression();
         }
@@ -2473,19 +2193,15 @@ export class Parser {
     }
 
     EmptyClassElement() {
-
         let start = this.nodeStart();
-
         this.read(";");
-
         return new AST.EmptyClassElement(start, this.nodeEnd());
     }
 
     ClassElement(classKind) {
-
-        let token = this.peekToken("name"),
-            start = token.start,
-            isStatic = false;
+        let token = this.peekToken("name");
+        let start = token.start;
+        let isStatic = false;
 
         if (token.type === ";")
             return this.EmptyClassElement();
@@ -2494,9 +2210,7 @@ export class Parser {
             return this.PrivateFieldDefinition();
 
         if (token.type === "IDENTIFIER" && token.value === "static") {
-
             switch (this.peekAt("name", 1)) {
-
                 case "(":
                     break;
 
@@ -2508,22 +2222,17 @@ export class Parser {
         }
 
         let kind = "";
-
         if (!isStatic && token.type === "IDENTIFIER" && token.value === "constructor")
             kind = "constructor";
 
-        let method = this.MethodDefinition(null, kind, classKind),
-            name = method.name;
+        let method = this.MethodDefinition(null, kind, classKind);
+        let name = method.name;
 
         if (name.type === "Identifier") {
-
             if (isStatic) {
-
                 if (name.value === "prototype")
                     this.fail("Invalid prototype property in class definition", name);
-
             } else {
-
                 if (name.value === "constructor" && method.kind !== "constructor")
                     this.fail("Invalid constructor property in class definition", name);
             }
@@ -2538,14 +2247,11 @@ export class Parser {
     // === Modules ===
 
     ModuleItemList() {
-
-        let list = [],
-            type;
+        let list = [];
+        let type;
 
         while (true) {
-
             switch (this.peek()) {
-
                 case "EOF": return list;
                 case "import": list.push(this.ImportDeclaration()); break;
                 case "export": list.push(this.ExportDeclaration()); break;
@@ -2555,15 +2261,13 @@ export class Parser {
     }
 
     ImportDeclaration() {
-
-        let start = this.nodeStart(),
-            imports = null,
-            from;
+        let start = this.nodeStart();
+        let imports = null;
+        let from;
 
         this.read("import");
 
         switch (this.peek()) {
-
             case "*":
                 imports = this.NamespaceImport();
                 break;
@@ -2582,7 +2286,6 @@ export class Parser {
         }
 
         if (!from) {
-
             this.readKeyword("from");
             from = this.StringLiteral();
         }
@@ -2593,17 +2296,14 @@ export class Parser {
     }
 
     DefaultImport() {
-
-        let start = this.nodeStart(),
-            ident = this.BindingIdentifier(),
-            extra = null;
+        let start = this.nodeStart();
+        let ident = this.BindingIdentifier();
+        let extra = null;
 
         if (this.peek() === ",") {
-
             this.read();
 
             switch (this.peek()) {
-
                 case "*":
                     extra = this.NamespaceImport();
                     break;
@@ -2621,9 +2321,8 @@ export class Parser {
     }
 
     NamespaceImport() {
-
-        let start = this.nodeStart(),
-            ident;
+        let start = this.nodeStart();
+        let ident;
 
         this.read("*");
         this.readKeyword("as");
@@ -2633,16 +2332,13 @@ export class Parser {
     }
 
     NamedImports() {
-
-        let start = this.nodeStart(),
-            list = [];
+        let start = this.nodeStart();
+        let list = [];
 
         this.read("{");
 
         while (this.peekUntil("}")) {
-
             list.push(this.ImportSpecifier());
-
             if (this.peek() === ",")
                 this.read();
         }
@@ -2653,32 +2349,25 @@ export class Parser {
     }
 
     ImportSpecifier() {
-
-        let start = this.nodeStart(),
-            hasLocal = false,
-            local = null,
-            remote;
+        let start = this.nodeStart();
+        let hasLocal = false;
+        let local = null;
+        let remote;
 
         if (this.peek() !== "IDENTIFIER") {
-
             // Re-scan token as an identifier name
             this.unpeek();
             remote = this.IdentifierName();
             hasLocal = true;
-
         } else {
-
             remote = this.Identifier();
             hasLocal = this.peekKeyword("as");
         }
 
         if (hasLocal) {
-
             this.readKeyword("as");
             local = this.BindingIdentifier();
-
         } else {
-
             this.checkBindingTarget(remote);
         }
 
@@ -2686,14 +2375,12 @@ export class Parser {
     }
 
     ExportDeclaration() {
-
-        let start = this.nodeStart(),
-            decl;
+        let start = this.nodeStart();
+        let decl;
 
         this.read("export");
 
         switch (this.peek()) {
-
             case "default":
                 return this.ExportDefault(start);
 
@@ -2717,14 +2404,12 @@ export class Parser {
                 break;
 
             case "IDENTIFIER":
-
                 if (this.peekLet())
                     decl = this.LexicalDeclaration();
                 else if (this.peekAsync() === "function")
                     decl = this.FunctionDeclaration();
                 else
                     return this.ExportDefaultFrom(start);
-
                 break;
 
             default:
@@ -2735,13 +2420,11 @@ export class Parser {
     }
 
     ExportDefault(start) {
-
         let binding;
 
         this.read("default");
 
         switch (this.peek()) {
-
             case "class":
                 binding = this.ClassExpression();
                 break;
@@ -2751,9 +2434,7 @@ export class Parser {
                 break;
 
             case "IDENTIFIER":
-
                 if (this.peekAsync() === "function") {
-
                     binding = this.FunctionExpression();
                     break;
                 }
@@ -2764,7 +2445,6 @@ export class Parser {
         }
 
         let isDecl = this.transformDefaultExport(binding);
-
         if (!isDecl)
             this.Semicolon();
 
@@ -2772,16 +2452,13 @@ export class Parser {
     }
 
     ExportNameList(start) {
-
-        let list = [],
-            from = null;
+        let list = [];
+        let from = null;
 
         this.read("{");
 
         while (this.peekUntil("}", "name")) {
-
             list.push(this.ExportSpecifier());
-
             if (this.peek() === ",")
                 this.read();
         }
@@ -2789,12 +2466,9 @@ export class Parser {
         this.read("}");
 
         if (this.peekKeyword("from")) {
-
             this.read();
             from = this.StringLiteral();
-
         } else {
-
             // Transform identifier names to identifiers
             list.forEach(node => this.transformIdentifier(node.local));
         }
@@ -2805,7 +2479,6 @@ export class Parser {
     }
 
     ExportDefaultFrom(start) {
-
         let name = this.Identifier();
 
         this.readKeyword("from");
@@ -2816,13 +2489,11 @@ export class Parser {
     }
 
     ExportNamespace(start) {
-
         let ident = null;
 
         this.read("*");
 
         if (this.peekKeyword("as")) {
-
             this.read();
             ident = this.BindingIdentifier();
         }
@@ -2835,13 +2506,11 @@ export class Parser {
     }
 
     ExportSpecifier() {
-
-        let start = this.nodeStart(),
-            local = this.IdentifierName(),
-            remote = null;
+        let start = this.nodeStart();
+        let local = this.IdentifierName();
+        let remote = null;
 
         if (this.peekKeyword("as")) {
-
             this.read();
             remote = this.IdentifierName();
         }
@@ -2852,22 +2521,19 @@ export class Parser {
 }
 
 function mixin(target, ...sources) {
-
-    target = target.prototype;
-
     let {
         getOwnPropertyNames: ownNames,
         getOwnPropertySymbols: ownSymbols,
         getOwnPropertyDescriptor: ownDesc,
         prototype: { hasOwnProperty: hasOwn } } = Object;
 
-    sources
-    .map(source => source.prototype)
-    .forEach(source =>
+    sources.map(source => source.prototype).forEach(source => {
+        let p = target.prototype;
         ownNames(source)
-        .concat(ownSymbols(source))
-        .filter(key => !hasOwn.call(target, key))
-        .forEach(key => Object.defineProperty(target, key, ownDesc(source, key))));
+            .concat(ownSymbols(source))
+            .filter(key => !hasOwn.call(p, key))
+            .forEach(key => Object.defineProperty(p, key, ownDesc(source, key)));
+    });
 }
 
 // Add externally defined methods

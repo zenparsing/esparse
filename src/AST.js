@@ -16,25 +16,20 @@ function isNode(x) {
 class AstNode {
 
     children() {
-
-        let keys = Object.keys(this),
-            list = [];
+        let keys = Object.keys(this);
+        let list = [];
 
         for (let i = 0; i < keys.length; ++i) {
-
             if (keys[i] === "parent")
                 break;
 
             let value = this[keys[i]];
 
             if (Array.isArray(value)) {
-
-                for (var j = 0; j < value.length; ++j)
+                for (let j = 0; j < value.length; ++j)
                     if (isNode(value[j]))
                         list.push(value[j]);
-
             } else if (isNode(value)) {
-
                 list.push(value);
             }
         }

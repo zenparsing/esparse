@@ -5,15 +5,15 @@ import {
     isWhitespace,
     codePointLength,
     codePointAt,
-    codePointString
+    codePointString,
 
 } from "./Unicode.js";
 
 import { LineMap } from "./LineMap.js";
 
-const identifierEscape = /\\u([0-9a-fA-F]{4})/g,
-      newlineSequence = /\r\n?|[\n\u2028\u2029]/g,
-      crNewline = /\r\n?/g;
+const identifierEscape = /\\u([0-9a-fA-F]{4})/g;
+const newlineSequence = /\r\n?|[\n\u2028\u2029]/g;
+const crNewline = /\r\n?/g;
 
 // === Reserved Words ===
 const reservedWord = new RegExp("^(?:" +
@@ -42,13 +42,12 @@ const multiCharPunctuator = new RegExp("^(?:" +
 ")$");
 
 // === Miscellaneous Patterns ===
-const octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/,
-      blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g,
-      hexChar = /[0-9a-f]/i;
+const octalEscape = /^(?:[0-3][0-7]{0,2}|[4-7][0-7]?)/;
+const blockCommentPattern = /\r\n?|[\n\u2028\u2029]|\*\//g;
+const hexChar = /[0-9a-f]/i;
 
 // === Character type lookup table ===
 function makeCharTable() {
-
     let table = [];
 
     for (let i = 0; i < 128; ++i) table[i] = "";
@@ -72,7 +71,6 @@ function makeCharTable() {
     return table;
 
     function add(type, string) {
-
         string.split("").forEach(c => table[c.charCodeAt(0)] = type);
     }
 }
@@ -81,7 +79,6 @@ const charTable = makeCharTable();
 
 // Returns true if the character is a valid identifier part
 function isIdentifierPartAscii(c) {
-
     return  c > 64 && c < 91 ||
             c > 96 && c < 123 ||
             c > 47 && c < 58 ||
@@ -91,9 +88,7 @@ function isIdentifierPartAscii(c) {
 
 // Returns true if the specified character is a newline
 function isNewlineChar(c) {
-
     switch (c) {
-
         case "\r":
         case "\n":
         case "\u2028":
@@ -106,9 +101,7 @@ function isNewlineChar(c) {
 
 // Returns true if the specified character can exist in a non-starting position
 function isPunctuatorNext(c) {
-
     switch (c) {
-
         case "+":
         case "-":
         case "&":
@@ -127,20 +120,17 @@ function isPunctuatorNext(c) {
 
 // Returns true if the specified string is a reserved word
 export function isReservedWord(word) {
-
     return reservedWord.test(word);
 }
 
 // Returns true if the specified string is a strict mode reserved word
 export function isStrictReservedWord(word) {
-
     return strictReservedWord.test(word);
 }
 
 export class Scanner {
 
     constructor(input) {
-
         this.input = input || "";
         this.offset = 0;
         this.length = this.input.length;
@@ -157,86 +147,66 @@ export class Scanner {
     }
 
     skip() {
-
         return this.next("skip");
     }
 
     next(context) {
-
         if (this.type !== "COMMENT")
             this.newlineBefore = false;
 
         this.strictError = "";
 
         do {
-
             this.start = this.offset;
-
             this.type =
                 this.start >= this.length ? this.EOF() :
                 context === "skip" ? this.Skip() :
                 this.Start(context);
-
         } while (!this.type)
 
         this.end = this.offset;
-
         return this.type;
     }
 
-    // TODO:  Should this be put on ParseResult instead?
     rawValue(start, end) {
-
         // Line endings are normalized to <LF>
         return this.input.slice(start, end).replace(crNewline, "\n");
     }
 
     peekChar() {
-
         return this.input.charAt(this.offset);
     }
 
     peekCharAt(n) {
-
         return this.input.charAt(this.offset + n);
     }
 
     peekCodePoint() {
-
         return codePointAt(this.input, this.offset);
     }
 
     peekCode() {
-
         return this.input.charCodeAt(this.offset) | 0;
     }
 
     peekCodeAt(n) {
-
         return this.input.charCodeAt(this.offset + n) | 0;
     }
 
     readChar() {
-
         return this.input.charAt(this.offset++);
     }
 
     readUnicodeEscapeValue() {
-
         let hex = "";
 
         if (this.peekChar() === "{") {
-
             this.offset++;
             hex = this.readHex(0);
-
             if (hex.length < 1 || this.readChar() !== "}")
                 return null;
-
         } else {
-
             hex = this.readHex(4);
-
             if (hex.length < 4)
                 return null;
         }
@@ -245,55 +215,43 @@ export class Scanner {
     }
 
     readUnicodeEscape() {
-
-        let cp = this.readUnicodeEscapeValue(),
-            val = codePointString(cp);
-
+        let cp = this.readUnicodeEscapeValue();
+        let val = codePointString(cp);
         return val === "" ? null : val;
     }
 
     readIdentifierEscape(startChar) {
-
         this.offset++;
-
         if (this.readChar() !== "u")
             return null;
 
         let cp = this.readUnicodeEscapeValue();
 
         if (startChar) {
-
             if (!isIdentifierStart(cp))
                 return null;
-
-        } else {
-
-            if (!isIdentifierPart(cp))
-                return null;
+        } else if (!isIdentifierPart(cp)) {
+            return null;
         }
 
         return codePointString(cp);
     }
 
     readOctalEscape() {
-
-        let m = octalEscape.exec(this.input.slice(this.offset, this.offset + 3)),
-            val = m ? m[0] : "";
+        let m = octalEscape.exec(this.input.slice(this.offset, this.offset + 3));
+        let val = m ? m[0] : "";
 
         this.offset += val.length;
-
         return val;
     }
 
     readStringEscape(continuationChar) {
-
         this.offset++;
 
-        let chr = "",
-            esc = "";
+        let chr = "";
+        let esc = "";
 
         switch (chr = this.readChar()) {
-
             case "t": return "\t";
             case "b": return "\b";
             case "v": return "\v";
@@ -302,7 +260,6 @@ export class Scanner {
             case "n": return "\n";
 
             case "\r":
-
                 this.lineMap.addBreak(this.offset - 1);
 
                 if (this.peekChar() === "\n")
@@ -313,7 +270,6 @@ export class Scanner {
             case "\n":
             case "\u2028":
             case "\u2029":
-
                 this.lineMap.addBreak(this.offset - 1);
                 return continuationChar;
 
@@ -325,42 +281,33 @@ export class Scanner {
             case "5":
             case "6":
             case "7":
-
                 this.offset--;
                 esc = this.readOctalEscape();
 
                 if (esc === "0") {
-
                     return String.fromCharCode(0);
-
                 } else {
-
                     this.strictError = "Octal literals are not allowed in strict mode";
                     return String.fromCharCode(parseInt(esc, 8));
                 }
 
             case "x":
-
                 esc = this.readHex(2);
                 return (esc.length < 2) ? null : String.fromCharCode(parseInt(esc, 16));
 
             case "u":
-
                 return this.readUnicodeEscape();
 
             default:
-
                 return chr;
         }
     }
 
     readRange(low, high) {
-
-        let start = this.offset,
-            code = 0;
+        let start = this.offset;
+        let code = 0;
 
         while (code = this.peekCode()) {
-
             if (code >= low && code <= high) this.offset++;
             else break;
         }
@@ -369,12 +316,10 @@ export class Scanner {
     }
 
     readInteger() {
-
-        let start = this.offset,
-            code = 0;
+        let start = this.offset;
+        let code = 0;
 
         while (code = this.peekCode()) {
-
             if (code >= 48 && code <= 57) this.offset++;
             else break;
         }
@@ -383,12 +328,10 @@ export class Scanner {
     }
 
     readHex(maxLen) {
-
-        let str = "",
-            chr = "";
+        let str = "";
+        let chr = "";
 
         while (chr = this.peekChar()) {
-
             if (!hexChar.test(chr))
                 break;
 
@@ -403,7 +346,6 @@ export class Scanner {
     }
 
     peekNumberFollow() {
-
         let c = this.peekCode();
 
         if (c > 127)
@@ -420,21 +362,19 @@ export class Scanner {
     }
 
     Skip() {
-
         let code = this.peekCode();
 
         if (code < 128) {
 
             switch (charTable[code]) {
+                case "whitespace":
+                    return this.Whitespace();
 
-                case "whitespace": return this.Whitespace();
-
-                case "newline": return this.Newline(code);
+                case "newline":
+                    return this.Newline(code);
 
                 case "slash":
-
                     let next = this.peekCodeAt(1);
-
                     if (next === 47) return this.LineComment();       // /
                     else if (next === 42) return this.BlockComment(); // *
             }
@@ -456,39 +396,43 @@ export class Scanner {
     }
 
     Start(context) {
-
-        let code = this.peekCode(),
-            next = 0;
+        let code = this.peekCode();
+        let next = 0;
 
         switch (charTable[code]) {
+            case "punctuator-char":
+                return this.PunctuatorChar();
 
-            case "punctuator-char": return this.PunctuatorChar();
+            case "whitespace":
+                return this.Whitespace();
 
-            case "whitespace": return this.Whitespace();
-
-            case "identifier": return this.Identifier(context, code);
+            case "identifier":
+                return this.Identifier(context, code);
 
             case "rbrace":
-
                 if (context === "template") return this.Template();
                 else return this.PunctuatorChar();
 
-            case "punctuator": return this.Punctuator();
+            case "punctuator":
+                return this.Punctuator();
 
-            case "newline": return this.Newline(code);
+            case "newline":
+                return this.Newline(code);
 
-            case "decimal-digit": return this.Number();
+            case "decimal-digit":
+                return this.Number();
 
-            case "template": return this.Template();
+            case "template":
+                return this.Template();
 
-            case "string": return this.String();
+            case "string":
+                return this.String();
 
-            case "at": return this.AtName();
+            case "at":
+                return this.AtName();
 
             case "zero":
-
                 switch (next = this.peekCodeAt(1)) {
-
                     case 88: case 120: return this.HexNumber();   // x
                     case 66: case 98: return this.BinaryNumber(); // b
                     case 79: case 111: return this.OctalNumber(); // o
@@ -499,14 +443,11 @@ export class Scanner {
                     this.Number();
 
             case "dot":
-
                 next = this.peekCodeAt(1);
-
                 if (next >= 48 && next <= 57) return this.Number();
                 else return this.Punctuator();
 
             case "slash":
-
                 next = this.peekCodeAt(1);
 
                 if (next === 47) return this.LineComment();       // /
@@ -534,13 +475,11 @@ export class Scanner {
     }
 
     Whitespace() {
-
         this.offset++;
 
         let code = 0;
 
         while (code = this.peekCode()) {
-
             // ASCII Whitespace:  [\t] [\v] [\f] [ ]
             if (code === 9 || code === 11 || code === 12 || code === 32)
                 this.offset++;
@@ -552,7 +491,6 @@ export class Scanner {
     }
 
     UnicodeWhitespace(cp) {
-
         this.offset += codePointLength(cp);
 
         // General unicode whitespace
@@ -563,7 +501,6 @@ export class Scanner {
     }
 
     Newline(code) {
-
         this.lineMap.addBreak(this.offset++);
 
         // Treat /r/n as a single newline
@@ -571,20 +508,17 @@ export class Scanner {
             this.offset++;
 
         this.newlineBefore = true;
-
         return "";
     }
 
     PunctuatorChar() {
-
         return this.readChar();
     }
 
     Punctuator() {
-
-        let op = this.readChar(),
-            chr = "",
-            next = "";
+        let op = this.readChar();
+        let chr = "";
+        let next = "";
 
         while (
             isPunctuatorNext(chr = this.peekChar()) &&
@@ -596,7 +530,6 @@ export class Scanner {
 
         // ".." is not a valid token
         if (op === "..") {
-
             this.offset--;
             op = ".";
         }
@@ -605,38 +538,30 @@ export class Scanner {
     }
 
     Template() {
-
-        let first = this.readChar(),
-            end = false,
-            val = "",
-            esc = "",
-            chr = "";
+        let first = this.readChar();
+        let end = false;
+        let val = "";
+        let esc = "";
+        let chr = "";
 
         while (chr = this.peekChar()) {
-
             if (chr === "`") {
-
                 end = true;
                 break;
             }
 
             if (chr === "$" && this.peekCharAt(1) === "{") {
-
                 this.offset++;
                 break;
             }
 
             if (chr === "\\") {
-
                 esc = this.readStringEscape("\n");
-
                 if (esc === null)
                     return this.Error();
 
                 val += esc;
-
             } else {
-
                 val += chr;
                 this.offset++;
             }
@@ -653,14 +578,12 @@ export class Scanner {
     }
 
     String() {
-
-        let delim = this.readChar(),
-            val = "",
-            esc = "",
-            chr = "";
+        let delim = this.readChar();
+        let val = "";
+        let esc = "";
+        let chr = "";
 
         while (chr = this.input[this.offset]) {
-
             if (chr === delim)
                 break;
 
@@ -668,16 +591,12 @@ export class Scanner {
                 return this.Error();
 
             if (chr === "\\") {
-
                 esc = this.readStringEscape("");
-
                 if (esc === null)
                     return this.Error();
 
                 val += esc;
-
             } else {
-
                 val += chr;
                 this.offset++;
             }
@@ -693,46 +612,33 @@ export class Scanner {
     }
 
     RegularExpression() {
-
         this.offset++;
 
-        let backslash = false,
-            inClass = false,
-            val = "",
-            chr = "",
-            code = 0,
-            flagStart = 0;
+        let backslash = false;
+        let inClass = false;
+        let val = "";
+        let chr = "";
+        let code = 0;
+        let flagStart = 0;
 
         while (chr = this.readChar()) {
-
             if (isNewlineChar(chr))
                 return this.Error();
 
             if (backslash) {
-
                 val += "\\" + chr;
                 backslash = false;
-
             } else if (chr === "[") {
-
                 inClass = true;
                 val += chr;
-
             } else if (chr === "]" && inClass) {
-
                 inClass = false;
                 val += chr;
-
             } else if (chr === "/" && !inClass) {
-
                 break;
-
             } else if (chr === "\\") {
-
                 backslash = true;
-
             } else {
-
                 val += chr;
             }
         }
@@ -743,26 +649,17 @@ export class Scanner {
         flagStart = this.offset;
 
         while (true) {
-
             code = this.peekCode();
-
             if (code === 92) {
-
                 return this.Error();
-
             } else if (code > 127) {
-
                 if (isIdentifierPart(code = this.peekCodePoint()))
                     this.offset += codePointLength(code);
                 else
                     break;
-
             } else if (isIdentifierPartAscii(code)) {
-
                 this.offset++;
-
             } else {
-
                 break;
             }
         }
@@ -774,14 +671,12 @@ export class Scanner {
     }
 
     LegacyOctalNumber() {
-
         this.offset++;
 
-        let start = this.offset,
-            code = 0;
+        let start = this.offset;
+        let code = 0;
 
         while (code = this.peekCode()) {
-
             if (code >= 48 && code <= 55)
                 this.offset++;
             else
@@ -801,25 +696,21 @@ export class Scanner {
     }
 
     Number() {
-
-        let start = this.offset,
-            next = "";
+        let start = this.offset;
+        let next = "";
 
         this.readInteger();
 
         if ((next = this.peekChar()) === ".") {
-
             this.offset++;
             this.readInteger();
             next = this.peekChar();
         }
 
         if (next === "e" || next === "E") {
-
             this.offset++;
 
             next = this.peekChar();
-
             if (next === "+" || next === "-")
                 this.offset++;
 
@@ -838,7 +729,6 @@ export class Scanner {
     }
 
     BinaryNumber() {
-
         this.offset += 2;
 
         let val = parseInt(this.readRange(48, 49), 2);
@@ -847,12 +737,10 @@ export class Scanner {
             return this.Error();
 
         this.number = val;
-
         return "NUMBER";
     }
 
     OctalNumber() {
-
         this.offset += 2;
 
         let val = parseInt(this.readRange(48, 55), 8);
@@ -861,12 +749,10 @@ export class Scanner {
             return this.Error();
 
         this.number = val;
-
         return "NUMBER";
     }
 
     HexNumber() {
-
         this.offset += 2;
 
         let val = parseInt(this.readHex(0), 16);
@@ -875,67 +761,47 @@ export class Scanner {
             return this.Error();
 
         this.number = val;
-
         return "NUMBER";
     }
 
     Identifier(context, code) {
-
-        let start = this.offset,
-            val = "",
-            esc = "";
+        let start = this.offset;
+        let val = "";
+        let esc = "";
 
         // Identifier Start
-
         if (code === 92) {
-
             esc = this.readIdentifierEscape(true);
-
             if (esc === null)
                 return this.Error();
 
             val = esc;
             start = this.offset;
-
         } else if (code > 127) {
-
             this.offset += codePointLength(code);
-
         } else {
-
             this.offset++;
         }
 
         // Identifier Part
-
         while (true) {
-
             code = this.peekCode();
-
             if (code === 92) {
-
                 val += this.input.slice(start, this.offset);
                 esc = this.readIdentifierEscape(false);
-
                 if (esc === null)
                     return this.Error();
 
                 val += esc;
                 start = this.offset;
-
             } else if (code > 127) {
-
                 if (isIdentifierPart(code = this.peekCodePoint()))
                     this.offset += codePointLength(code);
                 else
                     break;
-
             } else if (isIdentifierPartAscii(code)) {
-
                 this.offset++;
-
             } else {
-
                 break;
             }
         }
@@ -951,7 +817,6 @@ export class Scanner {
     }
 
     AtName() {
-
         this.offset += 1;
 
         if (this.Start("name") !== "IDENTIFIER")
@@ -964,14 +829,12 @@ export class Scanner {
     }
 
     LineComment() {
-
         this.offset += 2;
 
-        let start = this.offset,
-            chr = "";
+        let start = this.offset;
+        let chr = "";
 
         while (chr = this.peekChar()) {
-
             if (isNewlineChar(chr))
                 break;
 
@@ -979,19 +842,16 @@ export class Scanner {
         }
 
         this.value = this.input.slice(start, this.offset);
-
         return "COMMENT";
     }
 
     BlockComment() {
-
         this.offset += 2;
 
-        let pattern = blockCommentPattern,
-            start = this.offset;
+        let pattern = blockCommentPattern;
+        let start = this.offset;
 
         while (true) {
-
             pattern.lastIndex = this.offset;
 
             let m = pattern.exec(this.input);
@@ -1007,17 +867,14 @@ export class Scanner {
         }
 
         this.value = this.input.slice(start, this.offset - 2);
-
         return "COMMENT";
     }
 
     EOF() {
-
         return "EOF";
     }
 
     Error(msg) {
-
         if (this.start === this.offset)
             this.offset++;
 
