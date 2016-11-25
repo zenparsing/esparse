@@ -2,8 +2,8 @@ import { Scanner, parse } from "../src/";
 
 const Path = require("path"),
       FS = require("fs"),
-      Esprima = require("./parsers/esprima.js"),
-      Acorn = require("./parsers/acorn.js");
+      Esprima = require("./_parsers/esprima.js"),
+      Acorn = require("./_parsers/acorn.js");
 
 const reservedWord = new RegExp("^(?:" +
     "break|case|catch|class|const|continue|debugger|default|delete|do|" +
