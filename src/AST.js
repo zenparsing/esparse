@@ -5,42 +5,41 @@ super() tends to be slow in transpiled code.  Instead, we use regular constructo
 functions and give them a common prototype property.
 
 */
-
-import * as Nodes from "./Nodes.js";
-export * from "./Nodes.js";
+import * as Nodes from './Nodes.js';
+export * from './Nodes.js';
 
 function isNode(x) {
-    return x !== null && typeof x === "object" && typeof x.type === "string";
+  return x !== null && typeof x === 'object' && typeof x.type === 'string';
 }
 
 class AstNode {
 
-    children() {
+  children() {
+    let keys = Object.keys(this);
+    let list = [];
 
-        let keys = Object.keys(this),
-            list = [];
+    for (let i = 0; i < keys.length; ++i) {
+      if (keys[i] === 'parent')
+        break;
 
-        for (let i = 0; i < keys.length; ++i) {
+      let value = this[keys[i]];
 
-            if (keys[i] === "parent")
-                break;
+      if (Array.isArray(value)) {
 
-            let value = this[keys[i]];
-
-            if (Array.isArray(value)) {
-
-                for (var j = 0; j < value.length; ++j)
-                    if (isNode(value[j]))
-                        list.push(value[j]);
-
-            } else if (isNode(value)) {
-
-                list.push(value);
-            }
+        for (var j = 0; j < value.length; ++j) {
+          if (isNode(value[j]))
+            list.push(value[j]);
         }
 
-        return list;
+      } else if (isNode(value)) {
+
+        list.push(value);
+
+      }
     }
+
+    return list;
+  }
 
 }
 

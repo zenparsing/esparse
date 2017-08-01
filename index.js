@@ -1,1 +1,1 @@
-module.exports = require("./build/esparse")
+module.exports = require('./dist/esparse');
