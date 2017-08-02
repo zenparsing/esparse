@@ -17,7 +17,8 @@
                   end: 7,
                   value: 'C',
                   context: 'declaration' } ],
-             references: [] } },
+             references: [],
+             const: false } },
        free: [],
        strict: false,
        children:

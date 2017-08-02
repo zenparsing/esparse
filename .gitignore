@@ -1,5 +1,4 @@
 .DS_Store
 _*
 node_modules
-build/esparse.js
-
+dist/

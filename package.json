@@ -1,6 +1,14 @@
 {
-    "name": "esparse",
-    "version": "0.1.2",
-    "description": "ECMAScript 6 Parser",
-    "homepage": "https://github.com/zenparsing/esparse"
+  "name": "esparse",
+  "version": "0.2.0",
+  "description": "ECMAScript 6 Parser",
+  "homepage": "https://github.com/zenparsing/esparse",
+  "devDependencies": {
+    "esdown": "^1.1.21",
+    "eslint": "^4.3.0"
+  },
+  "scripts": {
+    "test": "eslint src/* && esdown test",
+    "pack": "esdown - src/default.js dist/esparse.js -b -r -g esparse"
+  }
 }

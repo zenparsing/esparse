@@ -1,44 +1,44 @@
 // Performs a binary search on an array
 function binarySearch(array, val) {
+  let right = array.length - 1;
+  let left = 0;
 
-    let right = array.length - 1,
-        left = 0;
+  while (left <= right) {
+    let mid = (left + right) >> 1;
+    let test = array[mid];
 
-    while (left <= right) {
+    if (val === test)
+      return mid;
 
-        let mid = (left + right) >> 1,
-            test = array[mid];
+    if (val < test) right = mid - 1;
+    else left = mid + 1;
+  }
 
-        if (val === test)
-            return mid;
-
-        if (val < test) right = mid - 1;
-        else left = mid + 1;
-    }
-
-    return left;
+  return left;
 }
 
 export class LineMap {
 
-    constructor() {
+  constructor() {
+    this.lines = [-1];
+    this.lastLineBreak = -1;
+  }
 
-        this.lines = [-1];
-        this.lastLineBreak = -1;
-    }
+  addBreak(offset) {
+    if (offset > this.lastLineBreak)
+      this.lines.push(this.lastLineBreak = offset);
+  }
 
-    addBreak(offset) {
+  locate(offset) {
+    let line = binarySearch(this.lines, offset);
+    let pos = this.lines[line - 1];
+    let column = offset - pos;
 
-        if (offset > this.lastLineBreak)
-            this.lines.push(this.lastLineBreak = offset);
-    }
+    return {
+      line,
+      column,
+      lineOffset: pos + 1,
+    };
+  }
 
-    locate(offset) {
-
-        let line = binarySearch(this.lines, offset),
-            pos = this.lines[line - 1],
-            column = offset - pos;
-
-        return { line, column, lineOffset: pos + 1 };
-    }
 }

@@ -1,1 +1,1 @@
-import "./parse/default.js";
+import './parse/default.js';

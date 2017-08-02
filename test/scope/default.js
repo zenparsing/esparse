@@ -4,12 +4,12 @@
     - no duplicate lexical names in body
     - lexical names cannot conflict with var names in body
 13.2.1.1 (Lexical Declarations)
-    - "let" cannot be a binding variable name
+    - 'let' cannot be a binding variable name
     - no duplicate binding names in lexical declarations
 13.6.3.1 (For Head)
     - var names can't shadow lexical names in head
 13.6.4.1 (ForIn/Of Head)
-    - "let" cannot be a binding variable name
+    - 'let' cannot be a binding variable name
     - no duplicate binding names in lexical declarations
     - var names can't shadown lexical names in head
 13.11.1 (Case Block)
@@ -41,31 +41,25 @@
 
 */
 
-import { parse } from "../../src/";
-import { runTests, objectLike } from "../runner.js";
-
-const inspect = require("util").inspect;
+import { parse } from '../../src/';
+import { runTests, objectLike } from '../runner.js';
+import { inspect } from 'util';
 
 function render(node) {
-
-    return inspect(node, { depth: 20, colors: true });
+  return inspect(node, { depth: 20, colors: true });
 }
 
 function process(source, options) {
-
-    return parse(source, Object.assign(options, { resolveScopes: true })).scopeTree;
+  return parse(source, Object.assign(options, { resolveScopes: true })).scopeTree;
 }
 
 function compare(a, b) {
-
-    return objectLike(a, b, { "message": 1, "strict": 1, "parent": 1 });
+  return objectLike(a, b, { 'message': 1, 'strict': 1, 'parent': 1 });
 }
 
 runTests({
-
-    dir:  __dirname,
-    render,
-    process,
-    compare,
-
+  dir:  __dirname,
+  render,
+  process,
+  compare,
 });
