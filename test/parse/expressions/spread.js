@@ -5,51 +5,52 @@
 { type: 'Script',
   start: 0,
   end: 7,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 7,
-       expression: 
+       expression:
         { type: 'CallExpression',
           start: 0,
           end: 7,
-          callee: 
+          callee:
            { type: 'Identifier',
              start: 0,
              end: 1,
              value: 'f',
              context: 'variable' },
-          arguments: 
+          arguments:
            [ { type: 'SpreadExpression',
                start: 2,
                end: 6,
-               expression: 
+               expression:
                 { type: 'Identifier',
                   start: 5,
                   end: 6,
                   value: 'a',
-                  context: 'variable' } } ] } } ] },
+                  context: 'variable' } } ],
+          trailingComma: false } } ] },
 
 /** f(a, ...1 + 1, b) **/
 'spread allows any arbitrary expression':
 { type: 'Script',
   start: 0,
   end: 17,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 17,
-       expression: 
+       expression:
         { type: 'CallExpression',
           start: 0,
           end: 17,
-          callee: 
+          callee:
            { type: 'Identifier',
              start: 0,
              end: 1,
              value: 'f',
              context: 'variable' },
-          arguments: 
+          arguments:
            [ { type: 'Identifier',
                start: 2,
                end: 3,
@@ -58,7 +59,7 @@
              { type: 'SpreadExpression',
                start: 5,
                end: 13,
-               expression: 
+               expression:
                 { type: 'BinaryExpression',
                   start: 8,
                   end: 13,
@@ -69,26 +70,27 @@
                start: 15,
                end: 16,
                value: 'b',
-               context: 'variable' } ] } } ] },
+               context: 'variable' } ],
+             trailingComma: false } } ] },
 
 /** [...a] **/
-'spread in an array literal': 
+'spread in an array literal':
 { type: 'Script',
   start: 0,
   end: 6,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 6,
-       expression: 
+       expression:
         { type: 'ArrayLiteral',
           start: 0,
           end: 6,
-          elements: 
+          elements:
            [ { type: 'SpreadExpression',
                start: 1,
                end: 5,
-               expression: 
+               expression:
                 { type: 'Identifier',
                   start: 4,
                   end: 5,
@@ -101,31 +103,31 @@
 { type: 'Script',
   start: 0,
   end: 11,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 11,
-       expression: 
+       expression:
         { type: 'AssignmentExpression',
           start: 0,
           end: 11,
           operator: '=',
-          left: 
+          left:
            { type: 'ArrayPattern',
              start: 0,
              end: 6,
-             elements: 
+             elements:
               [ { type: 'PatternRestElement',
                   start: 1,
                   end: 5,
-                  pattern: 
+                  pattern:
                    { type: 'Identifier',
                      start: 4,
                      end: 5,
                      value: 'a',
                      context: 'variable' } } ],
              trailingComma: false },
-          right: 
+          right:
            { type: 'ArrayLiteral',
              start: 9,
              end: 11,

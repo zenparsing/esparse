@@ -180,12 +180,13 @@ export function BindNewExpression(expr, start, end) {
   this.expression = expr;
 }
 
-export function CallExpression(callee, args, start, end) {
+export function CallExpression(callee, args, trailingComma, start, end) {
   this.type = 'CallExpression';
   this.start = start;
   this.end = end;
   this.callee = callee;
   this.arguments = args;
+  this.trailingComma = trailingComma;
 }
 
 export function TaggedTemplateExpression(tag, template, start, end) {
@@ -196,12 +197,13 @@ export function TaggedTemplateExpression(tag, template, start, end) {
   this.template = template;
 }
 
-export function NewExpression(callee, args, start, end) {
+export function NewExpression(callee, args, trailingComma, start, end) {
   this.type = 'NewExpression';
   this.start = start;
   this.end = end;
   this.callee = callee;
   this.arguments = args;
+  this.trailingComma = trailingComma;
 }
 
 export function ParenExpression(expr, start, end) {

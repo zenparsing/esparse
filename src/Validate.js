@@ -110,8 +110,6 @@ export class Validate {
   // Performs validation on transformed arrow formal parameters
   checkArrowParameters(params) {
     params = this.transformFormals(params);
-    // TODO: Check that formal parameters do not contain yield expressions or
-    // await expressions
     this.checkParameters(params);
     return params;
   }

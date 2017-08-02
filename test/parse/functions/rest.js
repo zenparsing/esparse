@@ -5,22 +5,22 @@
 { type: 'Script',
   start: 0,
   end: 22,
-  statements: 
+  statements:
    [ { type: 'FunctionDeclaration',
        start: 0,
        end: 22,
        kind: '',
-       identifier: 
+       identifier:
         { type: 'Identifier',
           start: 9,
           end: 10,
           value: 'f',
           context: 'declaration' },
-       params: 
+       params:
         [ { type: 'RestParameter',
             start: 11,
             end: 18,
-            identifier: 
+            identifier:
              { type: 'Identifier',
                start: 14,
                end: 18,
@@ -33,7 +33,7 @@
 {},
 
 /** function f(a, ...b, c) {} **/
-'rest parameter can only occur as the last formal parameter': 
+'rest parameter can only occur as the last formal parameter':
 {},
 
 })

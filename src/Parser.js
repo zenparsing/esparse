@@ -537,6 +537,11 @@ export class Parser {
       if (list === null)
         expr = new AST.SequenceExpression(list = [expr], expr.start, -1);
 
+      if (this.peek() === ')') {
+        this.addInvalidNode('Invalid trailing comma in sequence expression', expr);
+        break;
+      }
+
       list.push(this.AssignmentExpression(noIn));
     }
 
@@ -723,24 +728,18 @@ export class Parser {
   MemberExpression(allowCall) {
     let token = this.peekToken();
     let start = token.start;
-    let arrowType = '';
     let isSuper = false;
     let exit = false;
     let expr;
-    let prop;
 
     switch (token.type) {
       case 'super':
         expr = this.SuperKeyword();
         isSuper = true;
         break;
-
       case 'new':
-        expr = this.peekAt('', 1) === '.' ?
-          this.MetaProperty() :
-          this.NewExpression();
+        expr = this.peekAt('', 1) === '.' ? this.MetaProperty() : this.NewExpression();
         break;
-
       default:
         expr = this.PrimaryExpression();
         break;
@@ -749,9 +748,9 @@ export class Parser {
     while (!exit) {
       token = this.peekToken('div');
       switch (token.type) {
-        case '.':
+        case '.': {
           this.read();
-          prop = this.IdentifierName();
+          let prop = this.IdentifierName();
           expr = new AST.MemberExpression(
             expr,
             prop,
@@ -759,10 +758,11 @@ export class Parser {
             start,
             this.nodeEnd());
           break;
+        }
 
-        case '[':
+        case '[': {
           this.read();
-          prop = this.Expression();
+          let prop = this.Expression();
           this.read(']');
           expr = new AST.MemberExpression(
             expr,
@@ -771,8 +771,9 @@ export class Parser {
             start,
             this.nodeEnd());
           break;
+        }
 
-        case '(':
+        case '(': {
           if (!allowCall) {
             exit = true;
             break;
@@ -781,29 +782,38 @@ export class Parser {
           if (isSuper && !this.context.allowSuperCall)
             this.fail('Invalid super call');
 
+          let arrowType = '';
+
           if (keywordFromNode(expr) === 'async' && !token.newlineBefore) {
             arrowType = 'async';
             this.pushMaybeContext();
           }
 
-          expr = new AST.CallExpression(
-            expr,
-            this.ArgumentList(),
-            start,
-            this.nodeEnd());
+          this.read('(');
+
+          let args = this.ArgumentList();
+          let trailingComma = false;
+
+          if (this.peek() === ',') {
+            this.read();
+            trailingComma = true;
+          }
+
+          this.read(')');
+
+          expr = new AST.CallExpression(expr, args, trailingComma, start, this.nodeEnd());
 
           if (arrowType) {
             token = this.peekToken('div');
-
             if (token.type === '=>' && !token.newlineBefore) {
               expr = this.ArrowFunctionHead(arrowType, expr, start);
               exit = true;
             } else {
-              arrowType = '';
               this.popContext(true);
             }
           }
           break;
+        }
 
         case 'TEMPLATE':
           if (isSuper)
@@ -837,12 +847,23 @@ export class Parser {
     this.read('new');
 
     let expr = this.MemberExpression(false);
-    let args = this.peek('div') === '(' ? this.ArgumentList() : null;
+    let args = null;
+    let trailingComma = false;
+
+    if (this.peek('div') === '(') {
+      this.read('(');
+      args = this.ArgumentList();
+      if (this.peek() === ',') {
+        this.read();
+        trailingComma = true;
+      }
+      this.read(')');
+    }
 
     if (expr.type === 'SuperKeyword')
       this.fail('Invalid super keyword', expr);
 
-    return new AST.NewExpression(expr, args, start, this.nodeEnd());
+    return new AST.NewExpression(expr, args, trailingComma, start, this.nodeEnd());
   }
 
   MetaProperty() {
@@ -875,16 +896,16 @@ export class Parser {
   ArgumentList() {
     let list = [];
 
-    this.read('(');
-
     while (this.peekUntil(')')) {
-      if (list.length > 0)
-        this.read(',');
-
       list.push(this.AssignmentExpression(false, true));
-    }
 
-    this.read(')');
+      if (this.peek() === ',') {
+        if (this.peekAt('', 1) === ')')
+          break;
+
+        this.read();
+      }
+    }
 
     return list;
   }
@@ -1994,9 +2015,6 @@ export class Parser {
     this.read('(');
 
     while (this.peekUntil(')')) {
-      if (list.length > 0)
-        this.read(',');
-
       // Parameter list may have a trailing rest parameter
       if (this.peek() === '...') {
         list.push(this.RestParameter());
@@ -2004,6 +2022,9 @@ export class Parser {
       }
 
       list.push(this.FormalParameter(true));
+
+      if (this.peek() !== ')')
+        this.read(',');
     }
 
     this.read(')');
@@ -2042,7 +2063,7 @@ export class Parser {
     return new AST.FunctionBody(statements, start, this.nodeEnd());
   }
 
-  ArrowFunctionHead(kind, formals, start) {
+  ArrowFunctionHead(kind, params, start) {
     // Context must have been pushed by caller
     this.setFunctionType(kind);
 
@@ -2050,9 +2071,9 @@ export class Parser {
       this.fail('Invalid yield or await within arrow function head');
 
     // Transform and validate formal parameters
-    let params = this.checkArrowParameters(formals);
+    let formals = this.checkArrowParameters(params);
 
-    return new AST.ArrowFunctionHead(params, start, this.nodeEnd());
+    return new AST.ArrowFunctionHead(formals, start, this.nodeEnd());
   }
 
   ArrowFunctionBody(head, noIn) {

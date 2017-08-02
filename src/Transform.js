@@ -8,14 +8,20 @@ export class Transform {
     if (!expr)
       return [];
 
+    let trailingComma = false;
     let list;
 
     switch (expr.type) {
       case 'SequenceExpression':
         list = expr.expressions;
+        if (expr.error) {
+          trailingComma = true;
+          expr.error = '';
+        }
         break;
       case 'CallExpression':
         list = expr.arguments;
+        trailingComma = expr.trailingComma;
         break;
       default:
         list = [expr];
@@ -28,6 +34,10 @@ export class Transform {
 
       if (i === list.length - 1 && node.type === 'SpreadExpression') {
         expr = node.expression;
+
+        // Trailing commas not allowed after rest parameters
+        if (trailingComma)
+          this.fail('Trailing comma not allowed after rest parameter', expr);
 
         // Rest parameters can only be identifiers
         if (expr.type !== 'Identifier')

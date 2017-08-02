@@ -302,7 +302,8 @@ function() {}
                     {   type: "Identifier",
                         value: "g"
                     }
-                }]
+                }],
+                trailingComma: false
             }
         }
     }]

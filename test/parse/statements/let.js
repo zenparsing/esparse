@@ -4,16 +4,17 @@
 "let is an identifier in non-strict code": {
     type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
-    
+
         expression:
         {   type: "CallExpression",
             callee:
             {   type: "Identifier",
                 value: "let"
             },
-            arguments: []
+            arguments: [],
+            trailingComma: false,
         }
     }]
 },
@@ -25,7 +26,7 @@
 "basic let declaration": {
     type: "Script",
     statements: [
-    
+
     {   type: "VariableDeclaration",
         kind: "let",
         declarations: [

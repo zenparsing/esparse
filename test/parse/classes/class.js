@@ -152,7 +152,8 @@
                                 value: 'foo',
                                 context: '' },
                              computed: false },
-                          arguments: null } } ] } } ] } } ] },
+                          arguments: null,
+                          trailingComma: false } } ] } } ] } } ] },
 
 /** class C extends A + B {} **/
 'extends clause does not allow assignment expression': {},
@@ -475,7 +476,8 @@
                           start: 36,
                           end: 43,
                           callee: { type: 'SuperKeyword', start: 36, end: 41 },
-                          arguments: [] } } ] } } ] } } ] },
+                          arguments: [],
+                          trailingComma: false } } ] } } ] } } ] },
 
 /** class C { constructor() { super() } } **/
 'super call not allowed in base class constructor': {},
@@ -538,7 +540,8 @@
                              start: 37,
                              end: 44,
                              callee: { type: 'SuperKeyword', start: 37, end: 42 },
-                             arguments: [] } } } ] } } ] } } ] },
+                             arguments: [],
+                             trailingComma: false } } } ] } } ] } } ] },
 
 /** class C extends B { constructor() { _=> super() } } **/
 'super call allowed within arrow in constructor':
@@ -607,7 +610,8 @@
                              start: 40,
                              end: 47,
                              callee: { type: 'SuperKeyword', start: 40, end: 45 },
-                             arguments: [] } } } ] } } ] } } ] },
+                             arguments: [],
+                             trailingComma: false } } } ] } } ] } } ] },
 
 /** class A { m() { class B { [super.x]() {} }  } } **/
 'class context is lexical':

@@ -215,6 +215,9 @@
 /** (...a, b) => 1 **/
 'rest parameter must be final parameter': {},
 
+/** (a, ...b); **/
+'rest is not allowed in paren expressions': {},
+
 /** "use strict"; (arguments) => {} **/
 'binding to arguments is disallowed in strict mode': {},
 

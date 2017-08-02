@@ -274,6 +274,7 @@
              end: 5,
              value: 'await',
              context: 'variable' },
-          arguments: [ { type: 'NumberLiteral', start: 7, end: 8, value: 1 } ] } } ] },
+          arguments: [ { type: 'NumberLiteral', start: 7, end: 8, value: 1 } ],
+          trailingComma: false } } ] },
 
 })
