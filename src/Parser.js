@@ -1141,6 +1141,14 @@ export class Parser {
     let node;
     let name;
 
+    if (this.peek('name') === '...') {
+      this.read();
+      return new AST.SpreadExpression(
+        this.AssignmentExpression(),
+        start,
+        this.nodeEnd());
+    }
+
     switch (this.peekAt('name', 1)) {
       case '=':
         // Re-read token as an identifier

@@ -63,14 +63,12 @@ export class Transform {
   }
 
   transformArrayPattern(node, binding) {
-    // ArrayPattern and ArrayLiteral are isomorphic
-    node.type = 'ArrayPattern';
+    node.type = 'ArrayPattern'; // ArrayPattern and ArrayLiteral are isomorphic
 
     let elems = node.elements;
 
     for (let i = 0; i < elems.length; ++i) {
       let elem = elems[i];
-      let expr;
 
       // Skip holes in pattern
       if (!elem)
@@ -78,27 +76,11 @@ export class Transform {
 
       switch (elem.type) {
         case 'SpreadExpression':
-          // Rest element must be in the last position and cannot be followed
-          // by a comma
+          // Rest element must be in the last position and cannot be followed by a comma
           if (i < elems.length - 1 || node.trailingComma)
             this.fail('Invalid destructuring pattern', elem);
 
-          expr = elem.expression;
-
-          /*
-          TODO: Why is this commented out?
-          // Rest target cannot be a destructuring pattern
-          switch (expr.type) {
-
-              case 'ObjectLiteral':
-              case 'ObjectPattern':
-              case 'ArrayLiteral':
-              case 'ArrayPattern':
-                  this.fail('Invalid rest pattern', expr);
-          }
-          */
-
-          elem = new AST.PatternRestElement(expr, elem.start, elem.end);
+          elem = new AST.PatternRestElement(elem.expression, elem.start, elem.end);
           this.checkPatternTarget(elem.pattern, binding);
           break;
 
@@ -122,8 +104,7 @@ export class Transform {
   }
 
   transformObjectPattern(node, binding) {
-    // ObjectPattern and ObjectLiteral are isomorphic
-    node.type = 'ObjectPattern';
+    node.type = 'ObjectPattern'; // ObjectPattern and ObjectLiteral are isomorphic
 
     let props = node.properties;
 
@@ -135,14 +116,29 @@ export class Transform {
 
       switch (prop.type) {
         case 'PropertyDefinition':
-          // Replace node
-          props[i] = prop = new AST.PatternProperty(
+          prop = new AST.PatternProperty(
             prop.name,
             prop.expression,
             null,
             prop.start,
             prop.end);
+          break;
 
+        case 'SpreadExpression':
+          // Rest element must be in the last position and cannot be followed by a comma
+          if (i < props.length - 1 || node.trailingComma)
+            this.fail('Invalid destructuring pattern', prop);
+
+          // Rest target cannot be a destructuring pattern
+          switch (prop.expression.type) {
+            case 'ObjectLiteral':
+            case 'ObjectPattern':
+            case 'ArrayLiteral':
+            case 'ArrayPattern':
+              this.fail('Invalid rest pattern', prop.expression);
+          }
+
+          prop = new AST.PatternRestElement(prop.expression, prop.start, prop.end);
           break;
 
         case 'PatternProperty':
@@ -152,8 +148,12 @@ export class Transform {
           this.fail('Invalid pattern', prop);
       }
 
-      if (prop.pattern) this.transformPatternElement(prop, binding);
-      else this.checkPatternTarget(prop.name, binding);
+      props[i] = prop;
+
+      if (prop.pattern)
+        this.transformPatternElement(prop, binding);
+      else
+        this.checkPatternTarget(prop.name, binding);
     }
   }
 

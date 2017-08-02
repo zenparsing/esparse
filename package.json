@@ -1,7 +1,7 @@
 {
   "name": "esparse",
   "version": "0.2.0",
-  "description": "ECMAScript 6 Parser",
+  "description": "An ECMAScript Parser",
   "homepage": "https://github.com/zenparsing/esparse",
   "devDependencies": {
     "esdown": "^1.1.21",

@@ -37,7 +37,6 @@ export class Validate {
           return;
         }
         break;
-
     }
 
     this.fail('Invalid left-hand side in assignment', node);
