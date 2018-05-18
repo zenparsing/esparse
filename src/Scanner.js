@@ -83,13 +83,14 @@ function isIdentifierPartAscii(c) {
 }
 
 // Returns true if the specified character is a newline
-function isNewlineChar(c) {
+function isNewlineChar(c, asciiOnly = false) {
   switch (c) {
     case '\r':
     case '\n':
+      return true;
     case '\u2028':
     case '\u2029':
-      return true;
+      return !asciiOnly;
   }
 
   return false;
@@ -601,7 +602,7 @@ export class Scanner {
       if (chr === delim)
         break;
 
-      if (isNewlineChar(chr))
+      if (isNewlineChar(chr, true))
         return this.Error();
 
       if (chr === '\\') {
