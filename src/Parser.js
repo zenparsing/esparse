@@ -740,8 +740,10 @@ export class Parser {
         isSuper = true;
         break;
       case 'new':
-      case 'import':
         expr = this.peekAt('', 1) === '.' ? this.MetaProperty() : this.NewExpression();
+        break;
+      case 'import':
+        expr = this.peekAt('', 1) === '.' ? this.MetaProperty() : this.ImportCall();
         break;
       default:
         expr = this.PrimaryExpression();
@@ -874,6 +876,9 @@ export class Parser {
     let start = token.start;
     let left = token.type === 'IDENTIFIER' ? token.value : token.type;
     let right;
+
+    if (left === 'import' && !this.isModule)
+      this.fail('Invalid meta property', token);
 
     this.read('.');
 
@@ -2252,7 +2257,15 @@ export class Parser {
         case 'EOF':
           return list;
         case 'import':
-          list.push(this.ImportDeclaration());
+          switch (this.peekAt('', 1)) {
+            case '(':
+            case '.':
+              list.push(this.StatementListItem());
+              break;
+            default:
+              list.push(this.ImportDeclaration());
+              break;
+          }
           break;
         case 'export':
           list.push(this.ExportDeclaration());
@@ -2262,6 +2275,17 @@ export class Parser {
           break;
       }
     }
+  }
+
+  ImportCall() {
+    let start = this.nodeStart();
+
+    this.read('import');
+    this.read('(');
+    let argument = this.AssignmentExpression();
+    this.read(')');
+
+    return new AST.ImportCall(argument, start, this.nodeEnd());
   }
 
   ImportDeclaration() {

@@ -277,9 +277,9 @@
           arguments: [ { type: 'NumberLiteral', start: 7, end: 8, value: 1 } ],
           trailingComma: false } } ] },
 
-/** import.meta **/
+/*** import.meta ***/
 'import.meta meta property':
-{ type: 'Script',
+{ type: 'Module',
   start: 0,
   end: 11,
   statements:
@@ -292,5 +292,45 @@
           end: 11,
           left: 'import',
           right: 'meta' } } ] },
+
+/** import.meta **/
+'import.meta only allowed in modules':
+{},
+
+/*** import('foobar') ***/
+'dynamic import':
+{
+  type: 'Module',
+  start: 0,
+  end: 16,
+  statements:
+   [ {
+       type: 'ExpressionStatement',
+       start: 0,
+       end: 16,
+       expression:
+        {
+          type: 'ImportCall',
+          argument: { type: 'StringLiteral', start: 7, end: 15, value: 'foobar' },
+          start: 0,
+          end: 16 } } ] },
+
+/** import('foobar') **/
+'dynamic import allowed in script':
+{
+  type: 'Script',
+  start: 0,
+  end: 16,
+  statements:
+   [ {
+       type: 'ExpressionStatement',
+       start: 0,
+       end: 16,
+       expression:
+        {
+          type: 'ImportCall',
+          argument: { type: 'StringLiteral', start: 7, end: 15, value: 'foobar' },
+          start: 0,
+          end: 16 } } ] },
 
 })

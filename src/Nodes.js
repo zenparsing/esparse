@@ -582,6 +582,13 @@ export function ClassField(isStatic, name, initializer, start, end) {
   this.end = end;
 }
 
+export function ImportCall(argument, start, end) {
+  this.type = 'ImportCall';
+  this.argument = argument;
+  this.start = start;
+  this.end = end;
+}
+
 export function ImportDeclaration(imports, from, start, end) {
   this.type = 'ImportDeclaration';
   this.start = start;
