@@ -41,9 +41,9 @@
 
 */
 
-import { parse } from '../../src/';
-import { runTests, objectLike } from '../runner.js';
-import { inspect } from 'util';
+const { parse } = require('../../dist/');
+const { runTests, objectLike } = require('../runner.js');
+const { inspect } = require('util');
 
 function render(node) {
   return inspect(node, { depth: 20, colors: true });

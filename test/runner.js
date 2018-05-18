@@ -107,7 +107,7 @@ function isObject(obj) {
 }
 
 // Returns true if the specified object is 'like' another object
-export function objectLike(a, b, skipKeys) {
+function objectLike(a, b, skipKeys) {
   if (a === b)
     return true;
 
@@ -134,7 +134,7 @@ export function objectLike(a, b, skipKeys) {
   return true;
 }
 
-export function runTests(options) {
+function runTests(options) {
   let dirname = options.dir;
   let process = options.process;
   let compare = options.compare;
@@ -211,3 +211,6 @@ export function runTests(options) {
     console.log('');
   }
 }
+
+exports.objectLike = objectLike;
+exports.runTests = runTests;
