@@ -5,7 +5,7 @@
   "homepage": "https://github.com/zenparsing/esparse",
   "devDependencies": {
     "esdown": "^1.2.2",
-    "eslint": "^4.3.0"
+    "eslint": "^4.19.1"
   },
   "scripts": {
     "test": "eslint src/* && esdown test",
