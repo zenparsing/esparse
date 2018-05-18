@@ -1792,11 +1792,15 @@ export class Parser {
 
   CatchClause() {
     let start = this.nodeStart();
+    let param = null;
 
     this.read('catch');
-    this.read('(');
-    let param = this.BindingPattern();
-    this.read(')');
+
+    if (this.peek() === '(') {
+      this.read('(');
+      param = this.BindingPattern();
+      this.read(')');
+    }
 
     return new AST.CatchClause(param, this.Block(), start, this.nodeEnd());
   }
