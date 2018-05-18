@@ -97,6 +97,8 @@ function isValidMeta(left, right) {
   switch (left) {
     case 'new':
       return right === 'target';
+    case 'import':
+      return right === 'meta';
   }
 
   return false;
@@ -738,6 +740,7 @@ export class Parser {
         isSuper = true;
         break;
       case 'new':
+      case 'import':
         expr = this.peekAt('', 1) === '.' ? this.MetaProperty() : this.NewExpression();
         break;
       default:

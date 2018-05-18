@@ -277,4 +277,20 @@
           arguments: [ { type: 'NumberLiteral', start: 7, end: 8, value: 1 } ],
           trailingComma: false } } ] },
 
+/** import.meta **/
+'import.meta meta property':
+{ type: 'Script',
+  start: 0,
+  end: 11,
+  statements:
+   [ { type: 'ExpressionStatement',
+       start: 0,
+       end: 11,
+       expression:
+        { type: 'MetaProperty',
+          start: 0,
+          end: 11,
+          left: 'import',
+          right: 'meta' } } ] },
+
 })
