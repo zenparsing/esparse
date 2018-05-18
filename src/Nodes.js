@@ -573,6 +573,15 @@ export function EmptyClassElement(start, end) {
   this.end = end;
 }
 
+export function ClassField(isStatic, name, initializer, start, end) {
+  this.type = 'ClassField';
+  this.static = isStatic;
+  this.name = name;
+  this.initializer = initializer;
+  this.start = start;
+  this.end = end;
+}
+
 export function ImportDeclaration(imports, from, start, end) {
   this.type = 'ImportDeclaration';
   this.start = start;

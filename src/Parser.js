@@ -2202,13 +2202,12 @@ export class Parser {
 
     if (token.type === 'IDENTIFIER' && token.value === 'static') {
       switch (this.peekAt('name', 1)) {
-        case '(':
-          break;
-
-        default:
+        case 'IDENTIFIER':
+        case '[':
           this.read();
           token = this.peekToken('name');
           isStatic = true;
+          break;
       }
     }
 
