@@ -65,7 +65,7 @@ function printMessage(msg) {
 
 // Prints a group header to the console
 function printHeader(msg) {
-  console.log(`${ Style.bold('== ' + msg + ' ==') }`);
+  console.log(`\n${ Style.bold('== ' + msg + ' ==') }\n`);
 }
 
 // Prints a test result
