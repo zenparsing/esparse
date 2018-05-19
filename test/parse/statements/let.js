@@ -1,4 +1,4 @@
-{
+({
 
 /** let(); **/
 "let is an identifier in non-strict code": {
@@ -40,4 +40,4 @@
     }]
 }
 
-};
+})

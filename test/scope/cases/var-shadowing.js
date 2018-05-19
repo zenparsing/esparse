@@ -1,4 +1,4 @@
-{
+({
 
 /**
 let x;
@@ -75,4 +75,4 @@ function f(x) { var x }
        varNames: null } ],
   varNames: [] },
 
-};
+})

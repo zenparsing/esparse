@@ -23,7 +23,7 @@
 },
 
 /** true **/
-"true": {   
+"true": {
     type: "Script",
     statements: [
     {   type: "ExpressionStatement",

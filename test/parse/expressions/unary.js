@@ -1,20 +1,20 @@
 ({
 
 /** delete x **/
-'unqualified delete in sloppy mode': 
+'unqualified delete in sloppy mode':
 { type: 'Script',
   start: 0,
   end: 8,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 8,
-       expression: 
+       expression:
         { type: 'UnaryExpression',
           start: 0,
           end: 8,
           operator: 'delete',
-          expression: 
+          expression:
            { type: 'Identifier',
              start: 7,
              end: 8,
@@ -29,4 +29,4 @@
 'unqualified delete within parens cannot appear in strict mode': {},
 
 
-});
+})

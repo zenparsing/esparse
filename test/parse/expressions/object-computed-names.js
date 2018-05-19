@@ -1,4 +1,4 @@
-{
+({
 
 /** ({ [x]: 1 }) **/
 'computed data properties':
@@ -226,4 +226,4 @@
                   expression: { type: 'NumberLiteral', start: 30, end: 31, value: 1 } } ],
              trailingComma: false } } } ] },
 
-};
+})

@@ -62,4 +62,4 @@
 'for await-loop not allowed':
 {},
 
-});
+})

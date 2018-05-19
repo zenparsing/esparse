@@ -1,4 +1,4 @@
-{
+({
 
 /** class C {} **/
 'classes declarations are always block-scoped':
@@ -34,4 +34,4 @@
 /** class C {} class C {} **/
 'duplicate class declarations not allowed': {},
 
-};
+})

@@ -3,7 +3,7 @@
 /** 42 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -15,7 +15,7 @@
 /** 42.42 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -27,7 +27,7 @@
 /** .42 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -39,7 +39,7 @@
 /** 0.42 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -51,7 +51,7 @@
 /** 42e10 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -63,7 +63,7 @@
 /** 42e+10 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -75,7 +75,7 @@
 /** 42e-10 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -87,7 +87,7 @@
 /** 42E10 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -99,7 +99,7 @@
 /** 42.42e10 **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -111,7 +111,7 @@
 /** 0x42; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -123,7 +123,7 @@
 /** 0X42; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -135,7 +135,7 @@
 /** 0b1010; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -147,7 +147,7 @@
 /** 0B1010; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -159,7 +159,7 @@
 /** 0o777; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -171,7 +171,7 @@
 /** 0O777; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -183,7 +183,7 @@
 /** 0999; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",
@@ -195,7 +195,7 @@
 /** 0777; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "NumberLiteral",

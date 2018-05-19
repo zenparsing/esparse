@@ -5,11 +5,11 @@
 { type: 'Script',
   start: 0,
   end: 6,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 6,
-       expression: 
+       expression:
         { type: 'RegularExpression',
           start: 0,
           end: 6,
@@ -21,11 +21,11 @@
 { type: 'Script',
   start: 0,
   end: 5,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 5,
-       expression: 
+       expression:
         { type: 'RegularExpression',
           start: 0,
           end: 5,
@@ -37,11 +37,11 @@
 { type: 'Script',
   start: 0,
   end: 8,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 8,
-       expression: 
+       expression:
         { type: 'RegularExpression',
           start: 0,
           end: 8,
@@ -51,4 +51,4 @@
 /** /abc/i\u0065 **/
 'regular expression flags cannot contain unicode escapes': {},
 
-});
+})

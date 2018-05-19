@@ -1,4 +1,4 @@
-{
+({
 
 /** function f(a, b,) {} **/
 'trailing comma allowed in formal parameters': {
@@ -156,4 +156,4 @@
 /** async (...x,) => {} **/
 'trailing comma not allowed in async arrow after rest parameter': {},
 
-};
+});

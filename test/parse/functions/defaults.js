@@ -1,4 +1,4 @@
-{
+({
 
 /** function f(a = delete x) { "use strict"; } **/
 "default expressions have the strictness of thier function": {},
@@ -24,4 +24,4 @@
     ) { "use strict" } **/
 "nested default scopes inherit strictness (3)": {},
 
-}
+})

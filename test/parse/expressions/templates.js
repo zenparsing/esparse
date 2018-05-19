@@ -5,15 +5,15 @@
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 10,
-       expression: 
+       expression:
         { type: 'TemplateExpression',
           start: 0,
           end: 9,
-          literals: 
+          literals:
            [ { type: 'TemplatePart',
                start: 0,
                end: 9,
@@ -27,15 +27,15 @@
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 10,
-       expression: 
+       expression:
         { type: 'TemplateExpression',
           start: 0,
           end: 9,
-          literals: 
+          literals:
            [ { type: 'TemplatePart',
                start: 0,
                end: 9,
@@ -49,15 +49,15 @@
 { type: 'Script',
   start: 0,
   end: 15,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 15,
-       expression: 
+       expression:
         { type: 'TemplateExpression',
           start: 0,
           end: 14,
-          literals: 
+          literals:
            [ { type: 'TemplatePart',
                start: 0,
                end: 6,
@@ -70,7 +70,7 @@
                value: 'efg',
                raw: 'efg',
                templateEnd: true } ],
-          substitutions: 
+          substitutions:
            [ { type: 'Identifier',
                start: 7,
                end: 8,
@@ -82,15 +82,15 @@
 { type: 'Script',
   start: 0,
   end: 17,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 17,
-       expression: 
+       expression:
         { type: 'TemplateExpression',
           start: 0,
           end: 16,
-          literals: 
+          literals:
            [ { type: 'TemplatePart',
                start: 0,
                end: 6,
@@ -103,11 +103,11 @@
                value: 'efg',
                raw: 'efg',
                templateEnd: true } ],
-          substitutions: 
+          substitutions:
            [ { type: 'TemplateExpression',
                start: 7,
                end: 10,
-               literals: 
+               literals:
                 [ { type: 'TemplatePart',
                     start: 7,
                     end: 10,
@@ -121,19 +121,19 @@
 { type: 'Script',
   start: 0,
   end: 7,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 7,
-       expression: 
+       expression:
         { type: 'TaggedTemplateExpression',
           start: 0,
           end: 6,
-          tag: 
+          tag:
            { type: 'MemberExpression',
              start: 0,
              end: 3,
-             object: 
+             object:
               { type: 'Identifier',
                 start: 0,
                 end: 1,
@@ -141,11 +141,11 @@
                 context: 'variable' },
              property: { type: 'Identifier', start: 2, end: 3, value: 'b', context: '' },
              computed: false },
-          template: 
+          template:
            { type: 'TemplateExpression',
              start: 3,
              end: 6,
-             literals: 
+             literals:
               [ { type: 'TemplatePart',
                   start: 3,
                   end: 6,
@@ -155,19 +155,19 @@
              substitutions: [] } } } ] },
 
 /** `\n` **/
-'raw value does not process escapes': 
+'raw value does not process escapes':
 { type: 'Script',
   start: 0,
   end: 4,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 4,
-       expression: 
+       expression:
         { type: 'TemplateExpression',
           start: 0,
           end: 4,
-          literals: 
+          literals:
            [ { type: 'TemplatePart',
                start: 0,
                end: 4,
@@ -181,15 +181,15 @@
 { type: 'Script',
   start: 0,
   end: 2,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 2,
-       expression: 
+       expression:
         { type: 'TemplateExpression',
           start: 0,
           end: 2,
-          literals: 
+          literals:
            [ { type: 'TemplatePart',
                start: 0,
                end: 2,
@@ -203,15 +203,15 @@
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 10,
-       expression: 
+       expression:
         { type: 'TemplateExpression',
           start: 0,
           end: 10,
-          literals: 
+          literals:
            [ { type: 'TemplatePart',
                start: 0,
                end: 3,
@@ -230,7 +230,7 @@
                value: '',
                raw: '',
                templateEnd: true } ],
-          substitutions: 
+          substitutions:
            [ { type: 'NumberLiteral', start: 3, end: 4, value: 1 },
              { type: 'NumberLiteral', start: 7, end: 8, value: 1 } ] } } ] },
 
@@ -240,15 +240,15 @@
 { type: 'Script',
   start: 0,
   end: 4,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 4,
-       expression: 
+       expression:
         { type: 'TemplateExpression',
           start: 0,
           end: 4,
-          literals: 
+          literals:
            [ { type: 'TemplatePart',
                start: 0,
                end: 4,

@@ -1,4 +1,4 @@
-{
+({
 
 /** async function *f() {} **/
 'async generator declaration':
@@ -164,4 +164,4 @@
                      value: 'y',
                      context: 'variable' } } } ] } } ] },
 
-};
+})

@@ -1,4 +1,4 @@
-{
+({
 
 /** () => x; **/
 'empty paren with expression':
@@ -258,4 +258,4 @@
 'empty parens not allowed without an arrow': {},
 
 
-};
+})

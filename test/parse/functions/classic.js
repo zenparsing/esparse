@@ -1,4 +1,4 @@
-{
+({
 
 /** function x() {} **/
 "function declaration": {
@@ -82,4 +82,4 @@
 /** function x(...b, c) { } **/
 "a parameter cannot follow a rest": {},
 
-}
+})

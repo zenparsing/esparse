@@ -1,4 +1,4 @@
-{
+({
 
 /** switch (x) { case 1: let x; } **/
 "case clauses can have declarations":
@@ -37,4 +37,4 @@
                          context: 'declaration' },
                       initializer: null } ] } ] } ] } ] },
 
-};
+})

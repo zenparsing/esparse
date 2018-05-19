@@ -1,4 +1,4 @@
-{
+({
 
 /** async function f() {} **/
 "async declaration": {
@@ -448,4 +448,4 @@ x => 0 **/
 /** async function f() { (a = await 1) => {} } **/
 'await not allowed in arrow function parameter list - 2': {},
 
-};
+})

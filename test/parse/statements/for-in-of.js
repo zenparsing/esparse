@@ -231,4 +231,4 @@
 /** for (let [x, y] = foo of z); **/
 'initializers not allowed in for-in/of head': {},
 
-});
+})

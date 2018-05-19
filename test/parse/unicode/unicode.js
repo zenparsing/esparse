@@ -1,22 +1,22 @@
 ({
 
 /** "ab\xB5cd"; **/
-'hex escape in string': 
+'hex escape in string':
 { type: 'Script',
   start: 0,
   end: 11,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 11,
        expression: { type: 'StringLiteral', start: 0, end: 10, value: 'abµcd' } } ] },
 
 /** "ab\u01BBcd"; **/
-'unicode escape in string': 
+'unicode escape in string':
 { type: 'Script',
   start: 0,
   end: 13,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 13,
@@ -59,11 +59,11 @@
 },
 
 /** "\u{2f804}" **/
-'non-bmp unicode escapes': 
+'non-bmp unicode escapes':
 { type: 'Script',
   start: 0,
   end: 11,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 11,
@@ -74,11 +74,11 @@
 { type: 'Script',
   start: 0,
   end: 9,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 9,
-       expression: 
+       expression:
         { type: 'Identifier',
           start: 0,
           end: 9,
@@ -86,15 +86,15 @@
           context: 'variable' } } ] },
 
 /** 𝒢; **/
-'non-bmp identifier characters': 
+'non-bmp identifier characters':
 { type: 'Script',
   start: 0,
   end: 3,
-  statements: 
+  statements:
    [ { type: 'ExpressionStatement',
        start: 0,
        end: 3,
-       expression: 
+       expression:
         { type: 'Identifier',
           start: 0,
           end: 2,
@@ -132,4 +132,4 @@
 'contextual keywords cannot contain unicode escapes - 2': {},
 
 
-});
+})

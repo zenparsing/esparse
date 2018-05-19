@@ -3,7 +3,7 @@
 /** "hello"; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
         {   type: "StringLiteral",
@@ -15,9 +15,9 @@
 /** "\world"; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
-        expression: 
+        expression:
         {   type: "StringLiteral",
             value: "world"
         }
@@ -27,9 +27,9 @@
 /** "\r"; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
-        expression: 
+        expression:
         {   type: "StringLiteral",
             value: "\r"
         }
@@ -39,9 +39,9 @@
 /** "\n"; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
-        expression: 
+        expression:
         {   type: "StringLiteral",
             value: "\n"
         }
@@ -51,9 +51,9 @@
 /** "\t"; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
-        expression: 
+        expression:
         {   type: "StringLiteral",
             value: "\t"
         }
@@ -64,9 +64,9 @@
 continuation"; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
-        expression: 
+        expression:
         {   type: "StringLiteral",
             value: "linecontinuation"
         }
@@ -76,9 +76,9 @@ continuation"; **/
 /** "\101"; **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
-        expression: 
+        expression:
         {   type: "StringLiteral",
             value: "A"
         }
@@ -88,4 +88,4 @@ continuation"; **/
 /** "use strict"; "\101"; **/
 {},
 
-];
+]

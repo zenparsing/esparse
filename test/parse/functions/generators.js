@@ -1,4 +1,4 @@
-{
+({
 
 /** function *g() {} **/
 "generator declarations":
@@ -209,4 +209,4 @@ x } **/
                        expression: null },
                      { type: 'NullLiteral', start: 23, end: 27 } ] } } ] } } ] },
 
-};
+})

@@ -5,24 +5,24 @@
 { type: 'Script',
   start: 0,
   end: 12,
-  statements: 
+  statements:
    [ { type: 'VariableDeclaration',
        start: 0,
        end: 12,
        kind: 'var',
-       declarations: 
+       declarations:
         [ { type: 'VariableDeclarator',
             start: 4,
             end: 11,
-            pattern: 
+            pattern:
              { type: 'ArrayPattern',
                start: 4,
                end: 7,
-               elements: 
+               elements:
                 [ { type: 'PatternElement',
                     start: 5,
                     end: 6,
-                    pattern: 
+                    pattern:
                      { type: 'Identifier',
                        start: 5,
                        end: 6,
@@ -30,7 +30,7 @@
                        context: 'declaration' },
                     initializer: null } ],
                trailingComma: false },
-            initializer: 
+            initializer:
              { type: 'Identifier',
                start: 10,
                end: 11,
@@ -50,31 +50,31 @@
 { type: 'Script',
   start: 0,
   end: 15,
-  statements: 
+  statements:
    [ { type: 'VariableDeclaration',
        start: 0,
        end: 15,
        kind: 'var',
-       declarations: 
+       declarations:
         [ { type: 'VariableDeclarator',
             start: 4,
             end: 14,
-            pattern: 
+            pattern:
              { type: 'ArrayPattern',
                start: 4,
                end: 10,
-               elements: 
+               elements:
                 [ { type: 'PatternRestElement',
                     start: 5,
                     end: 9,
-                    pattern: 
+                    pattern:
                      { type: 'Identifier',
                        start: 8,
                        end: 9,
                        value: 'a',
                        context: 'declaration' } } ],
                trailingComma: false },
-            initializer: 
+            initializer:
              { type: 'Identifier',
                start: 13,
                end: 14,
@@ -94,22 +94,22 @@
 { type: 'Script',
   start: 0,
   end: 10,
-  statements: 
+  statements:
    [ { type: 'VariableDeclaration',
        start: 0,
        end: 10,
        kind: 'var',
-       declarations: 
+       declarations:
         [ { type: 'VariableDeclarator',
             start: 4,
             end: 10,
-            pattern: 
+            pattern:
              { type: 'ArrayPattern',
                start: 4,
                end: 6,
                elements: [],
                trailingComma: false },
-            initializer: 
+            initializer:
              { type: 'Identifier',
                start: 9,
                end: 10,
@@ -121,25 +121,25 @@
 { type: 'Script',
   start: 0,
   end: 18,
-  statements: 
+  statements:
    [ { type: 'VariableDeclaration',
        start: 0,
        end: 18,
        kind: 'var',
-       declarations: 
+       declarations:
         [ { type: 'VariableDeclarator',
             start: 4,
             end: 18,
-            pattern: 
+            pattern:
              { type: 'ArrayPattern',
                start: 4,
                end: 14,
-               elements: 
+               elements:
                 [ null,
                   { type: 'PatternElement',
                     start: 7,
                     end: 8,
-                    pattern: 
+                    pattern:
                      { type: 'Identifier',
                        start: 7,
                        end: 8,
@@ -150,7 +150,7 @@
                   { type: 'PatternElement',
                     start: 12,
                     end: 13,
-                    pattern: 
+                    pattern:
                      { type: 'Identifier',
                        start: 12,
                        end: 13,
@@ -158,11 +158,11 @@
                        context: 'declaration' },
                     initializer: null } ],
                trailingComma: false },
-            initializer: 
+            initializer:
              { type: 'Identifier',
                start: 17,
                end: 18,
                value: 'x',
                context: 'variable' } } ] } ] },
 
-});
+})

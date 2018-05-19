@@ -183,4 +183,4 @@
 /** switch (x) { default: continue; } **/
 'continue not allowed outside of iteration statement - 2': {}
 
-});
+})

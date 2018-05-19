@@ -1,4 +1,4 @@
-{
+({
 
 /** ({ a: 1, ...b, c: 2, ...d }) **/
 'spread properties': {
@@ -238,4 +238,4 @@
 /** ({ ...[a] } = x); **/
 'rest assignment property must not be an array pattern': {},
 
-};
+})

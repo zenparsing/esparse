@@ -1,4 +1,4 @@
-{
+({
 
 /**
 function x(a, a) {}
@@ -94,4 +94,4 @@ function x(a) { let a }
 'block scope declarations cannot shadown parameter names': {},
 
 
-};
+})

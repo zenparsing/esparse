@@ -1,4 +1,4 @@
-{
+({
 
 /** try {} catch {} **/
 "catch binding is optional":
@@ -21,4 +21,4 @@
           body: { type: 'Block', start: 13, end: 15, statements: [] } },
        finalizer: null } ] }
 
-};
+})

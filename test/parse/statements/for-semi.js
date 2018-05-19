@@ -1,4 +1,4 @@
-{
+({
 
 /** for (;;); **/
 'empty for-;':
@@ -161,4 +161,4 @@
 /** for (let [x, y];;); **/
 'for with let declaration pattern and no initializer': {},
 
-}
+})

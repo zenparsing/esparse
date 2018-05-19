@@ -1,4 +1,4 @@
-{
+({
 
 /** ({ x: 1 }) **/
 'identifier-named data propertes':
@@ -568,4 +568,4 @@
              trailingComma: false } } } ] },
 
 
-};
+})

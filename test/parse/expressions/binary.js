@@ -3,13 +3,13 @@
 /** 4 + 5 << (6) **/
 {   type: "Script",
     statements: [
-    
+
     {   type: "ExpressionStatement",
         expression:
-        
+
         {   type: "BinaryExpression",
             operator: "<<",
-            left: 
+            left:
             {   type: "BinaryExpression",
                 operator: "+",
                 left:
@@ -21,7 +21,7 @@
                     value: 5
                 }
             },
-            
+
             right:
             {   type: "ParenExpression",
                 expression:
@@ -47,7 +47,7 @@
             right:
             {   type: "UnaryExpression",
                 operator: "-",
-                expression:                
+                expression:
                 {   type: "NumberLiteral",
                     value: 1
                 }
