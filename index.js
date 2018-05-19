@@ -1,1 +1,1 @@
-module.exports = require('./dist/esparse');
+module.exports = require('./dist/');
