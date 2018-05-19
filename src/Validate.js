@@ -99,6 +99,7 @@ export class Validate {
       if (node.type !== 'FormalParameter' || node.pattern.type !== 'Identifier')
         continue;
 
+      this.context.allowUseStrict = false;
       let name = node.pattern.value;
 
       if (isPoisonIdent(name))
@@ -160,7 +161,6 @@ export class Validate {
 
   checkInvalidNodes() {
     let context = this.context;
-    let parent = context.parent;
     let list = context.invalidNodes;
 
     for (let i = 0; i < list.length; ++i) {
@@ -172,23 +172,11 @@ export class Validate {
       if (!error)
         continue;
 
-      // Throw if item is not a strict-mode-only error, or if the current
-      // context is strict
-      if (!item.strict || context.mode === 'strict')
-        this.fail(error, node);
-
-      // Skip strict errors in sloppy mode
-      if (context.mode === 'sloppy')
+      // Skip if this is a strict-mode-only error in sloppy mode
+      if (item.strict && !context.strict)
         continue;
 
-      // If the parent context is sloppy, then we ignore. If the parent context
-      // is strict, then this context would also be known to be strict and
-      // therefore handled above.
-
-      // If parent mode has not been determined, add error to
-      // parent context
-      if (!parent.mode)
-        parent.invalidNodes.push(item);
+      this.fail(error, node);
     }
 
   }
@@ -198,13 +186,6 @@ export class Validate {
 
     if (node.type === 'Identifier')
       this.addStrictError('Cannot delete unqualified property in strict mode', node);
-  }
-
-  checkUnaryBind(node) {
-    node = this.unwrapParens(node);
-
-    if (node.type !== 'MemberExpression')
-      this.fail('Unary bind operand must be a property lookup', node);
   }
 
 }

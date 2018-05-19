@@ -146,7 +146,8 @@ class Context {
 
   constructor(parent) {
     this.parent = parent;
-    this.mode = '';
+    this.strict = parent && parent.strict || false;
+    this.allowUseStrict = true;
     this.isFunction = false;
     this.functionBody = false;
     this.isGenerator = false;
@@ -206,8 +207,7 @@ export class Parser {
     this.tokenStash = new Scanner;
     this.tokenEnd = scanner.offset;
 
-    this.context = new Context(null, false);
-    this.setStrict(false);
+    this.context = new Context(null);
 
     let ast = options.module ? this.Module() : this.Script();
 
@@ -412,9 +412,6 @@ export class Parser {
 
     this.context = c;
 
-    if (parent.mode === 'strict')
-      c.mode = 'strict';
-
     if (lexical) {
       c.isMethod = parent.isMethod;
       c.allowSuperCall = parent.allowSuperCall;
@@ -449,7 +446,7 @@ export class Parser {
   }
 
   setStrict(strict) {
-    this.context.mode = strict ? 'strict' : 'sloppy';
+    this.context.strict = strict;
   }
 
   addStrictError(error, node) {
@@ -1840,8 +1837,12 @@ export class Parser {
             node = new AST.Directive(dir, expr, node.start, node.end);
 
             // Check for strict mode
-            if (dir === 'use strict')
+            if (dir === 'use strict') {
+              if (!this.context.allowUseStrict)
+                this.fail('Invalid "use strict" directive', node);
+
               this.setStrict(true);
+            }
           }
         } else {
           prologue = false;
@@ -1908,8 +1909,6 @@ export class Parser {
     let ident = this.BindingIdentifier();
     let params = this.FormalParameters();
     let body = this.FunctionBody();
-
-    this.checkParameters(params);
     this.popContext();
 
     return new AST.FunctionDeclaration(
@@ -1949,8 +1948,6 @@ export class Parser {
 
     let params = this.FormalParameters();
     let body = this.FunctionBody();
-
-    this.checkParameters(params);
     this.popContext();
 
     return new AST.FunctionExpression(
@@ -2002,8 +1999,6 @@ export class Parser {
       this.FormalParameters();
 
     let body = this.FunctionBody();
-
-    this.checkParameters(params);
     this.popContext();
 
     return new AST.MethodDefinition(
@@ -2026,6 +2021,7 @@ export class Parser {
 
     this.read(')');
 
+    this.checkParameters(list);
     return list;
   }
 
@@ -2049,6 +2045,7 @@ export class Parser {
 
     this.read(')');
 
+    this.checkParameters(list);
     return list;
   }
 
