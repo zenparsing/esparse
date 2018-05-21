@@ -367,7 +367,6 @@ export class Parser {
         case 'EOF':
         case '}':
         case ';':
-        case ')':
           break;
 
         default:
@@ -597,7 +596,7 @@ export class Parser {
 
     this.readKeyword('yield');
 
-    if (!this.peekEnd() && this.peek() !== ',') {
+    if (!this.peekEnd() && this.peek() !== ',' && this.peek() !== ')') {
       if (this.peek() === '*') {
         this.read();
         delegate = true;
@@ -2221,12 +2220,25 @@ export class Parser {
     }
 
     let kind = '';
+    let name = null;
 
-    if (!isStatic && token.type === 'IDENTIFIER' && token.value === 'constructor')
-      kind = 'constructor';
+    if (token.type === 'IDENTIFIER' || token.type === '[') {
+      name = this.PropertyName();
 
-    let method = this.MethodDefinition(null, kind, classKind);
-    let name = method.name;
+      switch (this.peek('name')) {
+        case '=':
+        case ';':
+        case '}':
+          // TODO: ASI?
+          return this.ClassField(isStatic, name, start);
+      }
+
+      if (!isStatic && name.type === 'Identifier' && name.value === 'constructor')
+        kind = 'constructor';
+    }
+
+    let method = this.MethodDefinition(name, kind, classKind);
+    name = method.name;
 
     if (name.type === 'Identifier') {
       if (isStatic) {
@@ -2242,6 +2254,19 @@ export class Parser {
     method.static = isStatic;
 
     return method;
+  }
+
+  ClassField(isStatic, name, start) {
+    let init = null;
+
+    if (this.peek('name') === '=') {
+      this.read();
+      init = this.AssignmentExpression(false);
+    }
+
+    this.Semicolon();
+
+    return new AST.ClassField(isStatic, name, init, start, this.nodeEnd());
   }
 
   // === Modules ===
