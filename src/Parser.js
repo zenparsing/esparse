@@ -160,6 +160,7 @@ class Context {
     this.loopDepth = 0;
     this.invalidNodes = [];
   }
+
 }
 
 class ParseResult {
@@ -367,6 +368,10 @@ export class Parser {
         case 'EOF':
         case '}':
         case ';':
+        // yield
+        case ')':
+        case 'in':
+        case ',':
           break;
 
         default:
@@ -596,7 +601,7 @@ export class Parser {
 
     this.readKeyword('yield');
 
-    if (!this.peekEnd() && this.peek() !== ',' && this.peek() !== ')') {
+    if (!this.peekEnd()) {
       if (this.peek() === '*') {
         this.read();
         delegate = true;
