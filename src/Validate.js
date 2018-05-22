@@ -150,9 +150,11 @@ export class Validate {
       let decl = init.declarations[0];
 
       // Initializers are not allowed in for in and for of
-      // TODO: Annex B - Initializers are allowed in non-strict for in
-      if (decl.initializer)
-        this.fail('Invalid initializer in for-' + iterationType + ' statement', init);
+      if (decl.initializer) {
+        let msg = 'Invalid initializer in for-' + iterationType + ' statement';
+        if (iterationType === 'in') this.addStrictError(msg, init);
+        else this.fail(msg);
+      };
 
     } else {
 

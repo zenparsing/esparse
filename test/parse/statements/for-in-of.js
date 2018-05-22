@@ -134,7 +134,47 @@
        body: { type: 'EmptyStatement', start: 18, end: 19 } } ] },
 
 /** for (var i = 0 in x); **/
-'initializers in for-in not allowed':
+'initializer allowed in for-in head in sloppy mode':
+{
+  type: 'Script',
+  start: 0,
+  end: 21,
+  statements:
+   [ {
+       type: 'ForInStatement',
+       start: 0,
+       end: 21,
+       left:
+        {
+          type: 'VariableDeclaration',
+          start: 5,
+          end: 14,
+          kind: 'var',
+          declarations:
+           [ {
+               type: 'VariableDeclarator',
+               start: 9,
+               end: 14,
+               pattern:
+                {
+                  type: 'Identifier',
+                  start: 9,
+                  end: 10,
+                  value: 'i',
+                  context: 'declaration' },
+               initializer: { type: 'NumberLiteral', start: 13, end: 14, value: 0 } } ],
+          error: 'Invalid initializer in for-in statement' },
+       right:
+        {
+          type: 'Identifier',
+          start: 18,
+          end: 19,
+          value: 'x',
+          context: 'variable' },
+       body: { type: 'EmptyStatement', start: 20, end: 21 } } ] },
+
+/** 'use strict'; for (var i = 0 in x); **/
+'initializer in for-in not allowed in strict mode':
 {},
 
 /** for (var x of y); **/
@@ -229,6 +269,6 @@
        body: { type: 'EmptyStatement', start: 18, end: 19 } } ] },
 
 /** for (let [x, y] = foo of z); **/
-'initializers not allowed in for-in/of head': {},
+'initializers not allowed in for-of head': {},
 
 })
