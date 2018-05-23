@@ -248,6 +248,61 @@
                 value: 'a',
                 context: 'variable' } } } } ] },
 
+/** ({ x: (y) } = a); **/
+'simple targets are unwrapped':
+{
+  type: 'Script',
+  start: 0,
+  end: 17,
+  statements:
+   [ {
+       type: 'ExpressionStatement',
+       start: 0,
+       end: 17,
+       expression:
+        {
+          type: 'ParenExpression',
+          start: 0,
+          end: 16,
+          expression:
+           {
+             type: 'AssignmentExpression',
+             start: 1,
+             end: 15,
+             operator: '=',
+             left:
+              {
+                type: 'ObjectPattern',
+                start: 1,
+                end: 11,
+                properties:
+                 [ {
+                     type: 'PatternProperty',
+                     start: 3,
+                     end: 9,
+                     name: { type: 'Identifier', start: 3, end: 4, value: 'x', context: '' },
+                     pattern:
+                      {
+                        type: 'ParenExpression',
+                        start: 6,
+                        end: 9,
+                        expression:
+                         {
+                           type: 'Identifier',
+                           start: 7,
+                           end: 8,
+                           value: 'y',
+                           context: 'variable' } },
+                     initializer: null } ],
+                trailingComma: false },
+             right:
+              {
+                type: 'Identifier',
+                start: 14,
+                end: 15,
+                value: 'a',
+                context: 'variable' } } } } ] },
+
 /** ({ x: f() } = a); **/
 'call expressions are invalid assignment targets': {},
 

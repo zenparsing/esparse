@@ -395,6 +395,49 @@
              value: 'x',
              context: 'variable' } } } ] },
 
+/** [(x)] = 1 **/
+'simple elements are unwrapped':
+{
+  type: 'Script',
+  start: 0,
+  end: 9,
+  statements:
+   [ {
+       type: 'ExpressionStatement',
+       start: 0,
+       end: 9,
+       expression:
+        {
+          type: 'AssignmentExpression',
+          start: 0,
+          end: 9,
+          operator: '=',
+          left:
+           {
+             type: 'ArrayPattern',
+             start: 0,
+             end: 5,
+             elements:
+              [ {
+                  type: 'PatternElement',
+                  start: 1,
+                  end: 4,
+                  pattern:
+                   {
+                     type: 'ParenExpression',
+                     start: 1,
+                     end: 4,
+                     expression:
+                      {
+                        type: 'Identifier',
+                        start: 2,
+                        end: 3,
+                        value: 'x',
+                        context: 'variable' } },
+                  initializer: null } ],
+             trailingComma: false },
+          right: { type: 'NumberLiteral', start: 8, end: 9, value: 1 } } } ] },
+
 /** [([a])] = x **/
 'nested patterns are not unwrapped':
 {},

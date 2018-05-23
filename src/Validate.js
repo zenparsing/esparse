@@ -9,6 +9,11 @@ export class Validate {
 
   // Validates an assignment target
   checkAssignmentTarget(node, simple) {
+    if (!simple && node.type === 'ParenExpression') {
+      node = this.unwrapParens(node);
+      simple = true;
+    }
+
     switch (node.type) {
       case 'Identifier':
         if (isPoisonIdent(node.value))
