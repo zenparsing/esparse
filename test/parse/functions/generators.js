@@ -209,4 +209,113 @@ x } **/
                        expression: null },
                      { type: 'NullLiteral', start: 23, end: 27 } ] } } ] } } ] },
 
+/** function* g() { [yield] } **/
+"yield is allowed as last element of array literal":
+{
+    type: 'Script',
+    start: 0,
+    end: 25,
+    statements:
+     [ {
+         type: 'FunctionDeclaration',
+         start: 0,
+         end: 25,
+         kind: 'generator',
+         identifier:
+          {
+            type: 'Identifier',
+            start: 10,
+            end: 11,
+            value: 'g',
+            context: 'declaration' },
+         params: [],
+         body:
+          {
+            type: 'FunctionBody',
+            start: 14,
+            end: 25,
+            statements:
+             [ {
+                 type: 'ExpressionStatement',
+                 start: 16,
+                 end: 23,
+                 expression:
+                  {
+                    type: 'ArrayLiteral',
+                    start: 16,
+                    end: 23,
+                    elements:
+                     [ {
+                         type: 'YieldExpression',
+                         start: 17,
+                         end: 22,
+                         delegate: false,
+                         expression: null } ],
+                    trailingComma: false } } ] } } ] },
+
+/** function* g() { for (let i = yield in x); } **/
+"empty yield can appear before in in for-in":
+{
+    type: 'Script',
+    start: 0,
+    end: 43,
+    statements:
+     [ {
+         type: 'FunctionDeclaration',
+         start: 0,
+         end: 43,
+         kind: 'generator',
+         identifier:
+          {
+            type: 'Identifier',
+            start: 10,
+            end: 11,
+            value: 'g',
+            context: 'declaration' },
+         params: [],
+         body:
+          {
+            type: 'FunctionBody',
+            start: 14,
+            end: 43,
+            statements:
+             [ {
+                 type: 'ForInStatement',
+                 start: 16,
+                 end: 41,
+                 left:
+                  {
+                    type: 'VariableDeclaration',
+                    start: 21,
+                    end: 34,
+                    kind: 'let',
+                    declarations:
+                     [ {
+                         type: 'VariableDeclarator',
+                         start: 25,
+                         end: 34,
+                         pattern:
+                          {
+                            type: 'Identifier',
+                            start: 25,
+                            end: 26,
+                            value: 'i',
+                            context: 'declaration' },
+                         initializer:
+                          {
+                            type: 'YieldExpression',
+                            start: 29,
+                            end: 34,
+                            delegate: false,
+                            expression: null } } ],
+                    error: 'Invalid initializer in for-in statement' },
+                 right:
+                  {
+                    type: 'Identifier',
+                    start: 38,
+                    end: 39,
+                    value: 'x',
+                    context: 'variable' },
+                 body: { type: 'EmptyStatement', start: 40, end: 41 } } ] } } ] },
+
 })

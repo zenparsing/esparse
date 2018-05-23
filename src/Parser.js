@@ -360,7 +360,7 @@ export class Parser {
     return type === 'function' ? type : '';
   }
 
-  peekEnd() {
+  peekExpressionEnd() {
     let token = this.peekToken();
 
     if (!token.newlineBefore) {
@@ -368,7 +368,8 @@ export class Parser {
         case 'EOF':
         case '}':
         case ';':
-        // yield
+        // yield-specific
+        case ']':
         case ')':
         case 'in':
         case ',':
@@ -601,7 +602,7 @@ export class Parser {
 
     this.readKeyword('yield');
 
-    if (!this.peekEnd()) {
+    if (!this.peekExpressionEnd()) {
       if (this.peek() === '*') {
         this.read();
         delegate = true;
@@ -1456,7 +1457,7 @@ export class Parser {
     let start = this.nodeStart();
 
     this.read('return');
-    let value = this.peekEnd() ? null : this.Expression();
+    let value = this.peekExpressionEnd() ? null : this.Expression();
 
     this.Semicolon();
 
@@ -1468,7 +1469,7 @@ export class Parser {
     let context = this.context;
 
     this.read('break');
-    let label = this.peekEnd() ? null : this.Identifier();
+    let label = this.peekExpressionEnd() ? null : this.Identifier();
     this.Semicolon();
 
     let node = new AST.BreakStatement(label, start, this.nodeEnd());
@@ -1488,7 +1489,7 @@ export class Parser {
     let context = this.context;
 
     this.read('continue');
-    let label = this.peekEnd() ? null : this.Identifier();
+    let label = this.peekExpressionEnd() ? null : this.Identifier();
     this.Semicolon();
 
     let node = new AST.ContinueStatement(label, start, this.nodeEnd());
@@ -1511,7 +1512,7 @@ export class Parser {
 
     this.read('throw');
 
-    let expr = this.peekEnd() ? null : this.Expression();
+    let expr = this.peekExpressionEnd() ? null : this.Expression();
 
     if (expr === null)
       this.fail('Missing throw expression');
