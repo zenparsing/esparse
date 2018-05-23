@@ -326,6 +326,27 @@ export class Parser {
     return false;
   }
 
+  peekTrivialExpression() {
+    switch (this.peek()) {
+      case 'null':
+      case 'false':
+      case 'true':
+      case 'this':
+      case 'NUMBER':
+      case 'IDENTIFIER':
+      case 'STRING':
+        switch (this.peekAt('div', 1)) {
+          case ',':
+          case ';':
+          case '}':
+          case ']':
+            return true;
+        }
+    }
+
+    return false;
+  }
+
   peekYield() {
     return this.context.functionBody &&
       this.context.isGenerator &&
@@ -368,6 +389,8 @@ export class Parser {
         case 'EOF':
         case '}':
         case ';':
+          break;
+
         // yield-specific
         case ']':
         case ')':
@@ -621,6 +644,10 @@ export class Parser {
   }
 
   ConditionalExpression(noIn) {
+    // Bypass the expression grammar if this is a single token expression
+    if (this.peekTrivialExpression())
+      return this.PrimaryExpression();
+
     let start = this.nodeStart();
     let left = this.BinaryExpression(noIn);
     let middle;

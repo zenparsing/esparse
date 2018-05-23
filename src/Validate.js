@@ -159,7 +159,7 @@ export class Validate {
         let msg = 'Invalid initializer in for-' + iterationType + ' statement';
         if (iterationType === 'in') this.addStrictError(msg, init);
         else this.fail(msg);
-      };
+      }
 
     } else {
 
