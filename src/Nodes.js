@@ -12,11 +12,12 @@ export function Identifier(value, context, start, end) {
   this.context = context;
 }
 
-export function NumberLiteral(value, start, end) {
+export function NumberLiteral(value, suffix, start, end) {
   this.type = 'NumberLiteral';
   this.start = start;
   this.end = end;
   this.value = value;
+  this.suffix = suffix;
 }
 
 export function StringLiteral(value, start, end) {

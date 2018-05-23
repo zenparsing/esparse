@@ -132,6 +132,7 @@ function copyToken(from, to) {
   to.type = from.type;
   to.value = from.value;
   to.number = from.number;
+  to.numberSuffix = from.numberSuffix;
   to.regexFlags = from.regexFlags;
   to.templateEnd = from.templateEnd;
   to.newlineBefore = from.newlineBefore;
@@ -1050,7 +1051,7 @@ export class Parser {
 
   NumberLiteral() {
     let token = this.readToken('NUMBER');
-    let node = new AST.NumberLiteral(token.number, token.start, token.end);
+    let node = new AST.NumberLiteral(token.number, token.numberSuffix, token.start, token.end);
 
     if (token.strictError)
       this.addStrictError(token.strictError, node);

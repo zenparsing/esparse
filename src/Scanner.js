@@ -135,6 +135,7 @@ export class Scanner {
 
     this.value = '';
     this.number = 0;
+    this.numberSuffix = '';
     this.regexFlags = '';
     this.templateEnd = false;
     this.newlineBefore = false;
@@ -340,6 +341,17 @@ export class Scanner {
     return this.input.slice(start, this.offset);
   }
 
+  readIntegerSuffix() {
+    if (this.peekCode() === 110) { // n
+      this.numberSuffix = 'n';
+      this.offset++;
+      return true;
+    }
+
+    this.numberSuffix = '';
+    return false;
+  }
+
   readHex(maxLen) {
     let str = '';
     let chr = '';
@@ -365,12 +377,12 @@ export class Scanner {
       return !isIdentifierStart(this.peekCodePoint());
 
     return !(
-      c > 64 && c < 91 ||
-      c > 96 && c < 123 ||
-      c > 47 && c < 58 ||
-      c === 36 ||
-      c === 95 ||
-      c === 92
+      c > 64 && c < 91 || // A-Z
+      c > 96 && c < 123 || // a-z
+      c > 47 && c < 58 || // 0-9
+      c === 36 || // $
+      c === 95 || // _
+      c === 92 // \
     );
   }
 
@@ -725,28 +737,36 @@ export class Scanner {
   Number() {
     let start = this.offset;
     let next = '';
+    let val;
 
-    this.readInteger();
+    let intString = this.readInteger();
 
-    if ((next = this.peekChar()) === '.') {
-      this.offset++;
-      this.readInteger();
-      next = this.peekChar();
-    }
+    if (this.readIntegerSuffix()) {
 
-    if (next === 'e' || next === 'E') {
-      this.offset++;
+      val = parseInt(intString, 10);
 
-      next = this.peekChar();
+    } else {
 
-      if (next === '+' || next === '-')
+      if ((next = this.peekChar()) === '.') {
+        this.offset++;
+        this.readInteger();
+        next = this.peekChar();
+      }
+
+      if (next === 'e' || next === 'E') {
         this.offset++;
 
-      if (!this.readInteger())
-        return this.Error();
-    }
+        next = this.peekChar();
 
-    let val = parseFloat(this.input.slice(start, this.offset));
+        if (next === '+' || next === '-')
+          this.offset++;
+
+        if (!this.readInteger())
+          return this.Error();
+      }
+
+      val = parseFloat(this.input.slice(start, this.offset));
+    }
 
     if (!this.peekNumberFollow())
       return this.Error();
@@ -760,6 +780,7 @@ export class Scanner {
     this.offset += 2;
 
     let val = parseInt(this.readRange(48, 49), 2);
+    this.readIntegerSuffix();
 
     if (!this.peekNumberFollow())
       return this.Error();
@@ -773,6 +794,7 @@ export class Scanner {
     this.offset += 2;
 
     let val = parseInt(this.readRange(48, 55), 8);
+    this.readIntegerSuffix();
 
     if (!this.peekNumberFollow())
       return this.Error();
@@ -786,6 +808,7 @@ export class Scanner {
     this.offset += 2;
 
     let val = parseInt(this.readHex(0), 16);
+    this.readIntegerSuffix();
 
     if (!this.peekNumberFollow())
       return this.Error();

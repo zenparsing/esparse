@@ -8,7 +8,8 @@ const SKIP_KEYS = {
   'end': 1,
   'message': 1,
   'context': 1,
-  'error': 1
+  'error': 1,
+  'suffix': 1,
 }
 
 // Returns true if the specified AST is 'like' another AST
