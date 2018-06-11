@@ -448,4 +448,8 @@ x => 0 **/
 /** async function f() { (a = await 1) => {} } **/
 'await not allowed in arrow function parameter list - 2': {},
 
+/** ({ async
+x() {} }); **/
+'Line terminator must not follow async in methods': {},
+
 })

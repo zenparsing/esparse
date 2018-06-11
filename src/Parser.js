@@ -2007,15 +2007,20 @@ export class Parser {
       let val = keywordFromNode(name);
 
       if (this.peek('name') !== '(') {
-        if (val === 'get' || val === 'set' || val === 'async') {
+        if (val === 'get' || val === 'set') {
           kind = name.value;
-
-          if (kind === 'async' && this.peek('name') === '*') {
-            this.read();
-            kind += '-generator';
-          }
-
           name = this.PropertyName();
+        } else if (val === 'async') {
+          let token = this.peekToken('name');
+          if (!token.newlineBefore) {
+            if (token.type === '*') {
+              this.read();
+              kind = 'async-generator';
+            } else {
+              kind = 'async';
+            }
+            name = this.PropertyName();
+          }
         }
       }
     }
