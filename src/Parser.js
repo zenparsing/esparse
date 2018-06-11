@@ -2005,22 +2005,22 @@ export class Parser {
         name = this.PropertyName();
 
       let val = keywordFromNode(name);
+      let next = this.peekToken('name');
 
-      if (this.peek('name') !== '(') {
+      if (next.type !== '(') {
         if (val === 'get' || val === 'set') {
           kind = name.value;
           name = this.PropertyName();
-        } else if (val === 'async') {
-          let token = this.peekToken('name');
-          if (!token.newlineBefore) {
-            if (token.type === '*') {
-              this.read();
-              kind = 'async-generator';
-            } else {
-              kind = 'async';
-            }
-            name = this.PropertyName();
+        } else if (val === 'async' && !next.newlineBefore) {
+          if (next.type === '*') {
+            this.read();
+            kind = 'async-generator';
+          } else {
+            kind = 'async';
           }
+          name = this.PropertyName();
+        } else if (classKind && next.newlineBefore) {
+          return this.ClassField(false, name, name.start);
         }
       }
     }
@@ -2268,7 +2268,6 @@ export class Parser {
         case '=':
         case ';':
         case '}':
-          // TODO: ASI?
           return this.ClassField(isStatic, name, start);
       }
 
