@@ -107,4 +107,13 @@
                start: 22,
                end: 32 } ] } } ] },
 
+/** class C { static constructor } **/
+'Static constructor field not allowed': {},
+
+/** class C { static prototype } **/
+'Static prototype field not allowed': {},
+
+/** class C { constructor } **/
+'Instance constructor field not allowed': {},
+
 })

@@ -2007,6 +2007,13 @@ export class Parser {
       let val = keywordFromNode(name);
       let next = this.peekToken('name');
 
+      switch (next.type) {
+        case ';':
+        case '}':
+        case '=':
+          return this.ClassField(name);
+      }
+
       if (next.type !== '(') {
         if (val === 'get' || val === 'set') {
           kind = name.value;
@@ -2020,7 +2027,7 @@ export class Parser {
           }
           name = this.PropertyName();
         } else if (classKind && next.newlineBefore) {
-          return this.ClassField(false, name, name.start);
+          return this.ClassField(name);
         }
       }
     }
@@ -2263,14 +2270,6 @@ export class Parser {
 
     if (token.type === 'IDENTIFIER' || token.type === '[') {
       name = this.PropertyName();
-
-      switch (this.peek('name')) {
-        case '=':
-        case ';':
-        case '}':
-          return this.ClassField(isStatic, name, start);
-      }
-
       if (!isStatic && name.type === 'Identifier' && name.value === 'constructor')
         kind = 'constructor';
     }
@@ -2279,13 +2278,16 @@ export class Parser {
     name = method.name;
 
     if (name.type === 'Identifier') {
+      let invalid;
       if (isStatic) {
-        if (name.value === 'prototype')
-          this.fail('Invalid prototype property in class definition', name);
+        invalid =
+          name.value === 'prototype' ||
+          name.value === 'constructor' && method.type === 'ClassField';
       } else {
-        if (name.value === 'constructor' && method.kind !== 'constructor')
-          this.fail('Invalid constructor property in class definition', name);
+        invalid = name.value === 'constructor' && method.kind !== 'constructor';
       }
+      if (invalid)
+        this.fail('Invalid ' + name.value + ' property in class definition', name);
     }
 
     method.start = start;
@@ -2294,7 +2296,7 @@ export class Parser {
     return method;
   }
 
-  ClassField(isStatic, name, start) {
+  ClassField(name) {
     let init = null;
 
     if (this.peek('name') === '=') {
@@ -2304,7 +2306,7 @@ export class Parser {
 
     this.Semicolon();
 
-    return new AST.ClassField(isStatic, name, init, start, this.nodeEnd());
+    return new AST.ClassField(false, name, init, name.start, this.nodeEnd());
   }
 
   // === Modules ===
