@@ -195,24 +195,28 @@ class ParseResult {
 
 export class Parser {
 
-  parse(input, options) {
+  constructor(input, options) {
     options = options || {};
 
-    let scanner = new Scanner(input);
+    let scanner = new Scanner(input, options.offset);
 
     this.onASI = options.onASI || null;
     this.scanner = scanner;
     this.input = input;
-
     this.peek0 = null;
     this.peek1 = null;
-    this.tokenStash = new Scanner;
+    this.tokenStash = new Scanner();
     this.tokenEnd = scanner.offset;
-
     this.context = new Context(null);
+  }
 
-    let ast = options.module ? this.Module() : this.Script();
+  parseModule() {
+    let ast = this.Module();
+    return new ParseResult(this.input, this.scanner.lineMap, ast);
+  }
 
+  parseScript() {
+    let ast = this.Script();
     return new ParseResult(this.input, this.scanner.lineMap, ast);
   }
 

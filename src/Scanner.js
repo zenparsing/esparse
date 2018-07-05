@@ -127,11 +127,11 @@ export function isStrictReservedWord(word) {
 
 export class Scanner {
 
-  constructor(input) {
+  constructor(input, offset) {
     this.input = input || '';
-    this.offset = 0;
+    this.offset = offset || 0;
     this.length = this.input.length;
-    this.lineMap = new LineMap;
+    this.lineMap = new LineMap();
 
     this.value = '';
     this.number = 0;

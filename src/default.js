@@ -14,7 +14,8 @@ function addParentLinks(node) {
 function parse(input, options) {
   options = options || {};
 
-  let result = new Parser().parse(input, options);
+  let parser = new Parser(input, options);
+  let result = options.module ? parser.parseModule() : parser.parseScript();
 
   if (options.resolveScopes)
     new ScopeResolver().resolve(result);
