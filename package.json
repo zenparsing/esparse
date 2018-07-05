@@ -3,6 +3,8 @@
   "version": "0.3.0",
   "description": "An ECMAScript Parser",
   "homepage": "https://github.com/zenparsing/esparse",
+  "main": "dist/default.js",
+  "module": "src/default.js",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",

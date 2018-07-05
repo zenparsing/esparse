@@ -41,7 +41,7 @@
 
 */
 
-const { parse } = require('../../dist/');
+const { parse } = require('../../');
 const { runTests, objectLike } = require('../runner.js');
 const { inspect } = require('util');
 
