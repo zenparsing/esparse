@@ -1,7 +1,7 @@
 ({
 
 /** class C {} **/
-'classes declarations are always block-scoped':
+'class declarations are always block-scoped':
 { type: 'var',
   names: {},
   free: [],

@@ -54,7 +54,7 @@ function process(source, options) {
 }
 
 function compare(a, b) {
-  return objectLike(a, b, { 'message': 1, 'strict': 1, 'parent': 1 });
+  return objectLike(a, b, ['node', 'message', 'strict', 'parent']);
 }
 
 runTests({

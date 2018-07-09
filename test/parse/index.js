@@ -1,16 +1,15 @@
 const { parse } = require('../../');
 const { runTests, objectLike } = require('../runner.js');
+const { inspect } = require('util');
 
-const inspect = require('util').inspect;
-
-const SKIP_KEYS = {
-  'start': 1,
-  'end': 1,
-  'message': 1,
-  'context': 1,
-  'error': 1,
-  'suffix': 1,
-}
+const SKIP_KEYS = [
+  'start',
+  'end',
+  'message',
+  'context',
+  'error',
+  'suffix',
+];
 
 // Returns true if the specified AST is 'like' another AST
 function astLike(a, b) {

@@ -122,7 +122,7 @@ function objectLike(a, b, skipKeys) {
   for (let keys = Object.keys(a), i = 0; i < keys.length; ++i) {
     // Control must have same own property
     if (!HOP.call(b, keys[i])) {
-      if (skipKeys && skipKeys[keys[i]] === 1) continue;
+      if (skipKeys && skipKeys.indexOf(keys[i]) >= 0) continue;
       else return false;
     }
 
