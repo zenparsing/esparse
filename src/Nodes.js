@@ -673,3 +673,11 @@ export function ExportSpecifier(local, exported, start, end) {
   this.local = local;
   this.exported = exported;
 }
+
+export function Annotation(path, args, start, end) {
+  this.type = 'Annotation';
+  this.start = start;
+  this.end = end;
+  this.path = path;
+  this.arguments = args;
+}

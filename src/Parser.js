@@ -2,6 +2,7 @@ import * as AST from './AST.js';
 import { Scanner } from './Scanner.js';
 import { Transform } from './Transform.js';
 import { Validate } from './Validate.js';
+import { WHITESPACE } from './UnicodeData.js';
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -166,11 +167,12 @@ class Context {
 
 class ParseResult {
 
-  constructor(input, lineMap, ast) {
+  constructor(input, lineMap, ast, annotations) {
     this.input = input;
     this.lineMap = lineMap;
     this.ast = ast;
     this.scopeTree = null;
+    this.annotations = annotations;
   }
 
   locate(offset) {
@@ -208,27 +210,41 @@ export class Parser {
     this.tokenStash = new Scanner();
     this.tokenEnd = scanner.offset;
     this.context = new Context(null);
+    this.annotations = [];
   }
 
   parseModule() {
     let ast = this.Module();
-    return new ParseResult(this.input, this.scanner.lineMap, ast);
+    return new ParseResult(this.input, this.scanner.lineMap, ast, this.annotations);
   }
 
   parseScript() {
     let ast = this.Script();
-    return new ParseResult(this.input, this.scanner.lineMap, ast);
+    return new ParseResult(this.input, this.scanner.lineMap, ast, this.annotations);
+  }
+
+  parseAnnotation() {
+    let parser = new Parser(this.input, {
+      onASI: this.onASI,
+      offset: this.scanner.offset,
+    });
+
+    let node = parser.Annotation();
+
+    this.scanner.offset = node.end;
+    this.annotations.push(node);
   }
 
   nextToken(context) {
     let scanner = this.scanner;
-    let type = '';
 
     context = context || '';
 
-    do {
-      type = scanner.next(context);
-    } while (type === 'COMMENT');
+    while (true) {
+      let type = scanner.next(context);
+      if (type === '@') this.parseAnnotation();
+      else if (type !== 'COMMENT') break;
+    }
 
     return scanner;
   }
@@ -2615,6 +2631,26 @@ export class Parser {
     }
 
     return new AST.ExportSpecifier(local, remote, start, this.nodeEnd());
+  }
+
+  Annotation() {
+    let start = this.nodeStart();
+    let path = [this.Identifier(true)];
+
+    while (this.peek() === '.') {
+      this.read();
+      path.push(this.IdentifierName());
+    }
+
+    let args = null;
+
+    if (this.peek() === '(') {
+      this.read();
+      args = this.ArgumentList();
+      this.read(')');
+    }
+
+    return new AST.Annotation(path, args, start, this.nodeEnd());
   }
 
 }
