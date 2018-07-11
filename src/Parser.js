@@ -1305,19 +1305,18 @@ export class Parser {
   TemplateExpression() {
     let atom = this.TemplatePart();
     let start = atom.start;
-    let lit = [atom];
-    let sub = [];
+    let parts = [atom];
 
     while (!atom.templateEnd) {
-      sub.push(this.Expression());
+      parts.push(this.Expression());
 
       // Discard any tokens that have been scanned using a different context
       this.unpeek();
 
-      lit.push(atom = this.TemplatePart());
+      parts.push(atom = this.TemplatePart());
     }
 
-    return new AST.TemplateExpression(lit, sub, start, this.nodeEnd());
+    return new AST.TemplateExpression(parts, start, this.nodeEnd());
   }
 
   // === Statements ===

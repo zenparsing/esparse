@@ -175,6 +175,13 @@ export function CallExpression(callee, args, trailingComma, start, end) {
   this.trailingComma = trailingComma;
 }
 
+export function TemplateExpression(parts, start, end) {
+  this.type = 'TemplateExpression';
+  this.start = start;
+  this.end = end;
+  this.parts = parts;
+}
+
 export function TaggedTemplateExpression(tag, template, start, end) {
   this.type = 'TaggedTemplateExpression';
   this.start = start;
@@ -279,14 +286,6 @@ export function ArrayLiteral(elements, comma, start, end) {
   this.end = end;
   this.elements = elements;
   this.trailingComma = comma;
-}
-
-export function TemplateExpression(lits, subs, start, end) {
-  this.type = 'TemplateExpression';
-  this.start = start;
-  this.end = end;
-  this.literals = lits;
-  this.substitutions = subs;
 }
 
 export function Block(statements, start, end) {

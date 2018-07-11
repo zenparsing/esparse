@@ -13,14 +13,13 @@
         { type: 'TemplateExpression',
           start: 0,
           end: 9,
-          literals:
+          parts:
            [ { type: 'TemplatePart',
                start: 0,
                end: 9,
                value: 'abcdefg',
                raw: 'abcdefg',
-               templateEnd: true } ],
-          substitutions: [] } } ] },
+               templateEnd: true } ] } } ] },
 
 /** `abc$efg`; **/
 'template with a standalone $':
@@ -35,14 +34,13 @@
         { type: 'TemplateExpression',
           start: 0,
           end: 9,
-          literals:
+          parts:
            [ { type: 'TemplatePart',
                start: 0,
                end: 9,
                value: 'abc$efg',
                raw: 'abc$efg',
-               templateEnd: true } ],
-          substitutions: [] } } ] },
+               templateEnd: true } ] } } ] },
 
 /** `abc${ d }efg`; **/
 'template with a single substitution':
@@ -57,25 +55,24 @@
         { type: 'TemplateExpression',
           start: 0,
           end: 14,
-          literals:
+          parts:
            [ { type: 'TemplatePart',
                start: 0,
                end: 6,
                value: 'abc',
                raw: 'abc',
                templateEnd: false },
+             { type: 'Identifier',
+               start: 7,
+               end: 8,
+               value: 'd',
+               context: 'variable' },
              { type: 'TemplatePart',
                start: 9,
                end: 14,
                value: 'efg',
                raw: 'efg',
-               templateEnd: true } ],
-          substitutions:
-           [ { type: 'Identifier',
-               start: 7,
-               end: 8,
-               value: 'd',
-               context: 'variable' } ] } } ] },
+               templateEnd: true } ] } } ] },
 
 /** `abc${ `d` }efg`; **/
 'template with a substitution containing a template':
@@ -90,31 +87,29 @@
         { type: 'TemplateExpression',
           start: 0,
           end: 16,
-          literals:
+          parts:
            [ { type: 'TemplatePart',
                start: 0,
                end: 6,
                value: 'abc',
                raw: 'abc',
                templateEnd: false },
-             { type: 'TemplatePart',
-               start: 11,
-               end: 16,
-               value: 'efg',
-               raw: 'efg',
-               templateEnd: true } ],
-          substitutions:
-           [ { type: 'TemplateExpression',
+             { type: 'TemplateExpression',
                start: 7,
                end: 10,
-               literals:
+               parts:
                 [ { type: 'TemplatePart',
                     start: 7,
                     end: 10,
                     value: 'd',
                     raw: 'd',
-                    templateEnd: true } ],
-               substitutions: [] } ] } } ] },
+                    templateEnd: true } ] },
+             { type: 'TemplatePart',
+               start: 11,
+               end: 16,
+               value: 'efg',
+               raw: 'efg',
+               templateEnd: true } ] } } ] },
 
 /** a.b`z`; **/
 'tagged template with member expression tag':
@@ -145,14 +140,13 @@
            { type: 'TemplateExpression',
              start: 3,
              end: 6,
-             literals:
+             parts:
               [ { type: 'TemplatePart',
                   start: 3,
                   end: 6,
                   value: 'z',
                   raw: 'z',
-                  templateEnd: true } ],
-             substitutions: [] } } } ] },
+                  templateEnd: true } ] } } } ] },
 
 /** `\n` **/
 'raw value does not process escapes':
@@ -167,14 +161,13 @@
         { type: 'TemplateExpression',
           start: 0,
           end: 4,
-          literals:
+          parts:
            [ { type: 'TemplatePart',
                start: 0,
                end: 4,
                value: '\n',
                raw: '\\n',
-               templateEnd: true } ],
-          substitutions: [] } } ] },
+               templateEnd: true } ] } } ] },
 
 /** `` **/
 'empty template':
@@ -189,14 +182,13 @@
         { type: 'TemplateExpression',
           start: 0,
           end: 2,
-          literals:
+          parts:
            [ { type: 'TemplatePart',
                start: 0,
                end: 2,
                value: '',
                raw: '',
-               templateEnd: true } ],
-          substitutions: [] } } ] },
+               templateEnd: true } ] } } ] },
 
 /** `${1}${1}` **/
 'template with empty literals':
@@ -211,28 +203,27 @@
         { type: 'TemplateExpression',
           start: 0,
           end: 10,
-          literals:
+          parts:
            [ { type: 'TemplatePart',
                start: 0,
                end: 3,
                value: '',
                raw: '',
                templateEnd: false },
+             { type: 'NumberLiteral', start: 3, end: 4, value: 1 },
              { type: 'TemplatePart',
                start: 4,
                end: 7,
                value: '',
                raw: '',
                templateEnd: false },
+             { type: 'NumberLiteral', start: 7, end: 8, value: 1 },
              { type: 'TemplatePart',
                start: 8,
                end: 10,
                value: '',
                raw: '',
-               templateEnd: true } ],
-          substitutions:
-           [ { type: 'NumberLiteral', start: 3, end: 4, value: 1 },
-             { type: 'NumberLiteral', start: 7, end: 8, value: 1 } ] } } ] },
+               templateEnd: true } ] } } ] },
 
 /** `\
 ` **/
@@ -248,13 +239,12 @@
         { type: 'TemplateExpression',
           start: 0,
           end: 4,
-          literals:
+          parts:
            [ { type: 'TemplatePart',
                start: 0,
                end: 4,
                value: '\n',
                raw: '\\\n',
-               templateEnd: true } ],
-          substitutions: [] } } ] },
+               templateEnd: true } ] } } ] },
 
 })

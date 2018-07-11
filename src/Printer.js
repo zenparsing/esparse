@@ -151,13 +151,8 @@ export class Printer {
 
   PatternProperty(node) {
     let out = this.js`${ node.name }`;
-
-    if (node.pattern)
-      out += this.js`: ${ node.pattern }`;
-
-    if (node.initializer)
-      out += this.js` = ${ node.initializer }`;
-
+    if (node.pattern) out += this.js`: ${ node.pattern }`;
+    if (node.initializer)out += this.js` = ${ node.initializer }`;
     return out;
   }
 
