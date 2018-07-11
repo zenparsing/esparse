@@ -166,10 +166,12 @@ class Context {
 
 class ParseResult {
 
-  constructor(input, lineMap, ast) {
-    this.input = input;
-    this.lineMap = lineMap;
-    this.ast = ast;
+  constructor(results) {
+    this.input = results.input;
+    this.lineMap = results.lineMap;
+    this.ast = results.ast;
+    this.annotations = results.annotations;
+    this.comments = results.comments;
     this.scopeTree = null;
   }
 
@@ -208,27 +210,51 @@ export class Parser {
     this.tokenStash = new Scanner();
     this.tokenEnd = scanner.offset;
     this.context = new Context(null);
+    this.annotations = [];
+    this.comments = [];
+  }
+
+  createParseResult(ast) {
+    return new ParseResult({
+      ast,
+      input: this.input,
+      lineMap: this.scanner.lineMap,
+      annotations: this.annotations,
+      comments: this.comments,
+    });
   }
 
   parseModule() {
-    let ast = this.Module();
-    return new ParseResult(this.input, this.scanner.lineMap, ast);
+    return this.createParseResult(this.Module());
   }
 
   parseScript() {
-    let ast = this.Script();
-    return new ParseResult(this.input, this.scanner.lineMap, ast);
+    return this.createParseResult(this.Script());
+  }
+
+  parseAnnotation() {
+    let parser = new Parser(this.input, {
+      onASI: this.onASI,
+      offset: this.scanner.offset,
+    });
+
+    let node = parser.Annotation();
+
+    this.scanner.offset = node.end;
+    this.annotations.push(node);
   }
 
   nextToken(context) {
-    let scanner = this.scanner;
-    let type = '';
-
     context = context || '';
 
-    do {
-      type = scanner.next(context);
-    } while (type === 'COMMENT');
+    let scanner = this.scanner;
+
+    while (true) {
+      let type = scanner.next(context);
+      if (type === '@') this.parseAnnotation();
+      else if (type === 'COMMENT') this.addComment(scanner);
+      else break;
+    }
 
     return scanner;
   }
@@ -238,9 +264,18 @@ export class Parser {
       return this.peek0.start;
 
     // Skip over whitespace and comments
-    this.scanner.skip();
+    while (true) {
+      let type = this.scanner.skip();
+      if (type === 'COMMENT') this.addComment(this.scanner);
+      else break;
+    }
 
     return this.scanner.offset;
+  }
+
+  addComment(token) {
+    let node = new AST.Comment(token.value, token.start, token.end);
+    this.comments.push(node);
   }
 
   nodeEnd() {
@@ -426,7 +461,7 @@ export class Parser {
     if (!node)
       node = this.peekToken();
 
-    let result = new ParseResult(this.input, this.scanner.lineMap, null);
+    let result = this.createParseResult(null);
     throw result.createSyntaxError(msg, node);
   }
 
@@ -1289,19 +1324,18 @@ export class Parser {
   TemplateExpression() {
     let atom = this.TemplatePart();
     let start = atom.start;
-    let lit = [atom];
-    let sub = [];
+    let parts = [atom];
 
     while (!atom.templateEnd) {
-      sub.push(this.Expression());
+      parts.push(this.Expression());
 
       // Discard any tokens that have been scanned using a different context
       this.unpeek();
 
-      lit.push(atom = this.TemplatePart());
+      parts.push(atom = this.TemplatePart());
     }
 
-    return new AST.TemplateExpression(lit, sub, start, this.nodeEnd());
+    return new AST.TemplateExpression(parts, start, this.nodeEnd());
   }
 
   // === Statements ===
@@ -2615,6 +2649,31 @@ export class Parser {
     }
 
     return new AST.ExportSpecifier(local, remote, start, this.nodeEnd());
+  }
+
+  Annotation() {
+    let start = this.nodeStart();
+    let ident = this.IdentifierName();
+
+    if (ident.value === 'import' || ident.value === 'export')
+      this.fail('Invalid annotation identifier', ident);
+
+    let path = [ident];
+
+    while (this.peek() === '.') {
+      this.read();
+      path.push(this.IdentifierName());
+    }
+
+    let args = null;
+
+    if (this.peek() === '(') {
+      this.read();
+      args = this.ArgumentList();
+      this.read(')');
+    }
+
+    return new AST.Annotation(path, args, start, this.nodeEnd());
   }
 
 }

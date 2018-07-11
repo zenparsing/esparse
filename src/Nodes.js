@@ -166,21 +166,6 @@ export function MetaProperty(left, right, start, end) {
   this.right = right;
 }
 
-export function BindExpression(left, right, start, end) {
-  this.type = 'BindExpression';
-  this.start = start;
-  this.end = end;
-  this.left = left;
-  this.right = right;
-}
-
-export function BindNewExpression(expr, start, end) {
-  this.type = 'BindNewExpression';
-  this.start = start;
-  this.end = end;
-  this.expression = expr;
-}
-
 export function CallExpression(callee, args, trailingComma, start, end) {
   this.type = 'CallExpression';
   this.start = start;
@@ -188,6 +173,13 @@ export function CallExpression(callee, args, trailingComma, start, end) {
   this.callee = callee;
   this.arguments = args;
   this.trailingComma = trailingComma;
+}
+
+export function TemplateExpression(parts, start, end) {
+  this.type = 'TemplateExpression';
+  this.start = start;
+  this.end = end;
+  this.parts = parts;
 }
 
 export function TaggedTemplateExpression(tag, template, start, end) {
@@ -294,14 +286,6 @@ export function ArrayLiteral(elements, comma, start, end) {
   this.end = end;
   this.elements = elements;
   this.trailingComma = comma;
-}
-
-export function TemplateExpression(lits, subs, start, end) {
-  this.type = 'TemplateExpression';
-  this.start = start;
-  this.end = end;
-  this.literals = lits;
-  this.substitutions = subs;
 }
 
 export function Block(statements, start, end) {
@@ -672,4 +656,19 @@ export function ExportSpecifier(local, exported, start, end) {
   this.end = end;
   this.local = local;
   this.exported = exported;
+}
+
+export function Annotation(path, args, start, end) {
+  this.type = 'Annotation';
+  this.start = start;
+  this.end = end;
+  this.path = path;
+  this.arguments = args;
+}
+
+export function Comment(text, start, end) {
+  this.type = 'Comment';
+  this.start = start;
+  this.end = end;
+  this.text = text;
 }

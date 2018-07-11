@@ -134,11 +134,15 @@ function objectLike(a, b, skipKeys) {
   return true;
 }
 
+function defaultRender(obj) {
+  return inspect(obj, { depth: 20, colors: true });
+}
+
 function runTests(options) {
   let dirname = options.dir;
   let process = options.process;
   let compare = options.compare;
-  let render = options.render;
+  let render = options.render || defaultRender;
 
   // Returns the group name for a test file
   function groupName(path) {
