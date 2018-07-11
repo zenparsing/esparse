@@ -11,7 +11,7 @@ function process(source, options) {
 }
 
 function compare(a, b) {
-  return objectLike(a, b);
+  return objectLike(a, b, ['message']);
 }
 
 runTests({

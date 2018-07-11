@@ -2635,7 +2635,12 @@ export class Parser {
 
   Annotation() {
     let start = this.nodeStart();
-    let path = [this.IdentifierName()];
+    let ident = this.IdentifierName();
+
+    if (ident.value === 'import' || ident.value === 'export')
+      this.fail('Invalid annotation identifier', ident);
+
+    let path = [ident];
 
     while (this.peek() === '.') {
       this.read();
