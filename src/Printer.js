@@ -13,6 +13,10 @@ export class Printer {
     return this[ast.type](ast);
   }
 
+  printList(list, sep = ', ') {
+    return list.map(n => this.print(n)).join(sep);
+  }
+
   js(literals, ...values) {
     let output = '';
     for (let i = 0; i < literals.length; ++i) {
@@ -52,11 +56,11 @@ export class Printer {
   }
 
   Script(node) {
-    return node.statements.map(statement => this.print(statement));
+    return this.printList(node.statements, '');
   }
 
   Module(node) {
-    return node.statements.map(statement => this.print(statement));
+    return this.printList(node.statement, '');
   }
 
   ThisExpression() {
@@ -68,7 +72,7 @@ export class Printer {
   }
 
   SequenceExpression(node) {
-    return node.expressions.map(expr => this.print(expr)).join(', ');
+    return this.printList(node.expressions);
   }
 
   AssignmentExpression(node) {
@@ -112,19 +116,15 @@ export class Printer {
   }
 
   CallExpression(node) {
-    return this.js`${ node.callee }(${
-      node.arguments.map(arg => this.print(arg)).join(', ')
-    })`;
+    return this.js`${ node.callee }(${ this.printList(node.arguments) })`;
   }
 
   TaggedTemplateExpression(node) {
-    return this.js`${ node.tag }\`${ node.template }\``;
+    return this.js`${ node.tag }${ node.template }`;
   }
 
   NewExpression(node) {
-    return this.js`new ${ node.callee }(${
-      node.arguments.map(arg => this.print(arg)).join(', ')
-    })`;
+    return this.js`new ${ node.callee }(${ this.printList(node.arguments) })`;
   }
 
   ParenExpression(node) {
@@ -132,24 +132,24 @@ export class Printer {
   }
 
   ObjectLiteral(node) {
-    return this.js`{ ${ node.properties.map(n => this.print(n)).join(', ') } }`;
+    return this.js`{ ${ this.printList(node.properties) } }`;
   }
 
   ComputedPropertyName(node) {
     return this.js`[${ node.expression }]`;
   }
 
-  PropertyDefinition(name, expr, start, end) {
+  PropertyDefinition(node) {
     return node.expression ?
       this.js`${ node.name }: ${ node.expression }` :
       this.js`${ node.name }`;
   }
 
-  ObjectPattern(props, comma, start, end) {
-    return this.js`{ ${ node.properties.map(n => this.print(n)).join(', ') } }`;
+  ObjectPattern(node) {
+    return this.js`{ ${ this.printList(node.properties) } }`;
   }
 
-  PatternProperty(name, pattern, initializer, start, end) {
+  PatternProperty(node) {
     let out = this.js`${ node.name }`;
 
     if (node.pattern)
@@ -161,41 +161,42 @@ export class Printer {
     return out;
   }
 
-  ArrayPattern(elements, comma, start, end) {
-    return this.js`[${ node.elements.map(n => this.print(n)).join(', ') }]`;
+  ArrayPattern(node) {
+    return this.js`[${ this.printList(node.elements) }]`;
   }
 
-  PatternElement(pattern, initializer, start, end) {
-    this.type = 'PatternElement';
-    this.start = start;
-    this.end = end;
-    this.pattern = pattern;
-    this.initializer = initializer;
+  PatternElement(node) {
+    return node.initializer ?
+      this.js`${ node.pattern } = ${ node.initializer }` :
+      this.js`${ node.pattern }`;;
   }
 
-  PatternRestElement(pattern, start, end) {
-    this.type = 'PatternRestElement';
-    this.start = start;
-    this.end = end;
-    this.pattern = pattern;
+  PatternRestElement(node) {
+    return this.js`...${ node.pattern }`;
   }
 
-  MethodDefinition(isStatic, kind, name, params, body, start, end) {
-    this.type = 'MethodDefinition';
-    this.start = start;
-    this.end = end;
-    this.static = isStatic;
-    this.kind = kind;
-    this.name = name;
-    this.params = params;
-    this.body = body;
+  MethodDefinition(node) {
+    let out = '';
+
+    if (node.static) out += 'static ';
+
+    switch (node.kind) {
+      case 'generator': out += '*'; break;
+      case 'async': out += 'async '; break;
+      case 'async-generator': out += 'async *'; break;
+    }
+
+    out += this.js`${ node.name }(${ this.printList(node.params) })`;
+    out += this.js`{${ node.body }}`;
+
+    return out;
   }
 
-  ArrayLiteral(elements, comma, start, end) {
-    return this.js`[${ node.elements.map(n => this.print(n)).join(', ') }]`;
+  ArrayLiteral(node) {
+    return this.js`[${ this.printList(node.elements) }]`;
   }
 
-  TemplateExpression(lits, subs, start, end) {
+  TemplateExpression(node) {
     this.type = 'TemplateExpression';
     this.start = start;
     this.end = end;
