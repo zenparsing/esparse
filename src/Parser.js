@@ -2635,7 +2635,7 @@ export class Parser {
 
   Annotation() {
     let start = this.nodeStart();
-    let path = [this.Identifier(true)];
+    let path = [this.IdentifierName()];
 
     while (this.peek() === '.') {
       this.read();

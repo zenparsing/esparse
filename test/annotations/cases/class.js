@@ -12,7 +12,7 @@
        start: 1,
        end: 2,
        value: 'A',
-       context: 'variable' } ],
+       context: '' } ],
   arguments: null } ],
 
 /** (@A class {}) **/
@@ -27,7 +27,7 @@
        start: 2,
        end: 3,
        value: 'A',
-       context: 'variable' } ],
+       context: '' } ],
   arguments: null } ],
 
 /** @A.B class C {} **/
@@ -42,7 +42,7 @@
        start: 1,
        end: 2,
        value: 'A',
-       context: 'variable' },
+       context: '' },
      { type: 'Identifier', start: 3, end: 4, value: 'B', context: '' } ],
   arguments: null } ],
 
@@ -58,7 +58,7 @@
        start: 1,
        end: 2,
        value: 'A',
-       context: 'variable' } ],
+       context: '' } ],
   arguments:
    [ {
        type: 'Identifier',
@@ -79,7 +79,7 @@
        start: 1,
        end: 2,
        value: 'A',
-       context: 'variable' } ],
+       context: '' } ],
   arguments: null },
 {
   type: 'Annotation',
@@ -91,7 +91,21 @@
        start: 4,
        end: 5,
        value: 'B',
-       context: 'variable' } ],
+       context: '' } ],
+  arguments: null } ],
+
+/** @private x **/
+'reserved words are allowed': [ {
+  type: 'Annotation',
+  start: 1,
+  end: 8,
+  path:
+   [ {
+       type: 'Identifier',
+       start: 1,
+       end: 8,
+       value: 'private',
+       context: '' } ],
   arguments: null } ],
 
 })
