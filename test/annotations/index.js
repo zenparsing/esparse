@@ -7,7 +7,7 @@ function render(node) {
 }
 
 function process(source, options) {
-  return parse(source, Object.assign(options)).annotations;
+  return parse(source, options).annotations;
 }
 
 function compare(a, b) {

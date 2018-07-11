@@ -1,580 +1,522 @@
+const SPACE = {};
+const NEWLINE = {};
+const INDENT = {};
+const OUTDENT = {};
+
 export class Printer {
   constructor() {
     this.indentWidth = 2;
     this.depth = 0;
     this.stringDelimiter = "'";
+    this.output = '';
   }
 
-  indent(s) {
-    return ' '.repeat(this.indentWidth * this.depth) + s;
+  newline() {
+    this.output += '\n';
+    if (this.indentWidth > 0)
+      this.output += ' '.repeat(this.indentWidth * this.depth);
+  }
+
+  write(...args) {
+    for (let i = 0; i < args.length; ++i) {
+      switch (args[i]) {
+        case SPACE:
+          this.output += ' ';
+          break;
+        case NEWLINE:
+          this.newline();
+          break;
+        case INDENT:
+          this.depth += 1;
+          this.newline();
+          break;
+        case OUTDENT:
+          this.depth -= 1;
+          this.newline();
+          break;
+        default:
+          if (typeof args[i] === 'string') this.output += args[i];
+          else this.printNode(args[i]);
+          break;
+      }
+    }
   }
 
   print(ast) {
-    return this[ast.type](ast);
+    this.output = '';
+    this.printNode(ast);
+    return this.output;
+  }
+
+  printNode(node) {
+    if (node !== null && node !== undefined)
+      this[node.type](node);
   }
 
   printList(list, sep = ', ') {
-    return list.map(n => this.print(n)).join(sep);
-  }
-
-  js(literals, ...values) {
-    let output = '';
-    for (let i = 0; i < literals.length; ++i) {
-      output += literals[i];
-      if (i < values.length)
-        output += typeof values[i] === 'string' ? values[i] : this.print(values[i]);
-    }
-    return output;
+    list.forEach((n, i) => {
+      this.printNode(n);
+      if (i < list.length - 1) this.write(sep);
+    });
   }
 
   Identifier(node) {
-    return node.value;
+    // TODO: escaping
+    this.write(node.value);
   }
 
   NumberLiteral(node) {
-    return String(node.value) + (node.suffix || '');
+    this.write(String(node.value), node.suffix);
   }
 
   StringLiteral(node) {
-    return this.stringDelimiter + this.escapeString(node.value) + this.stringDelimiter;
+    // TODO: escape string
+    this.write(
+      this.stringDelimiter,
+      node.value,
+      this.stringDelimiter
+    );
   }
 
-  TemplatePart() {
-    return node.raw;
+  TemplatePart(node) {
+    this.write(node.raw);
   }
 
   RegularExpression(node) {
-    return `/${ node.value }/${ node.flags }`;
+    this.write('/', node.value, '/', node.flags);
   }
 
   BooleanLiteral(node) {
-    return node.value ? 'true' : 'false';
+    this.write(node.value ? 'true' : 'false');
   }
 
   NullLiteral() {
-    return 'null';
+    this.write('null');
   }
 
   Script(node) {
-    return this.printList(node.statements, '');
+    this.printList(node.statements, NEWLINE);
   }
 
   Module(node) {
-    return this.printList(node.statement, '');
+    this.printList(node.statements, NEWLINE);
   }
 
   ThisExpression() {
-    return 'this';
+    this.write('this');
   }
 
   SuperKeyword() {
-    return 'super';
+    this.write('super');
   }
 
   SequenceExpression(node) {
-    return this.printList(node.expressions);
+    this.printList(node.expressions);
   }
 
   AssignmentExpression(node) {
-    return this.js`${ node.left } ${ node.operator } ${ node.right }`;
+    this.write(
+      node.left,
+      SPACE,
+      node.operator,
+      SPACE,
+      node.right
+    );
   }
 
   SpreadExpression(node) {
-    return this.js`...${ node.expression }`;
+    this.write('...', node.expression);
   }
 
   YieldExpression(node) {
-    return (node.delegate ? 'yield * ' : 'yield ') + this.print(node.expression);
+    this.write('yield');
+    if (node.delegate) this.write(SPACE, '*');
+    this.write(SPACE, node.expresion);
   }
 
   ConditionalExpression(node) {
-    return this.js`${ node.test } ? ${ node.consequent } : ${ node.alternate }`;
+    this.write(
+      node.test, SPACE,
+      '?', node.consequent, SPACE,
+      ':', node.alternate
+    );
   }
 
   BinaryExpression(node) {
-    return this.js`${ node.left } ${ node.operator } ${ node.right }`;
+    this.write(node.left, SPACE, node.right);
   }
 
   UpdateExpression(node) {
-    return prefix ?
-      this.js`${ node.operator }${ node.expression }` :
-      this.js`${ node.expression }${ node.operator }`;
+    if (node.prefix) this.write(node.operator, node.expression);
+    else this.write(node.expression, node.operator);
   }
 
   UnaryExpression(node) {
-    return this.js`${ node.operator } ${ node.expression }`;
+    // TODO: no space if operator char
+    this.write(node.operator, ' ', node.expression);
   }
 
   MemberExpression(node) {
-    return computed ?
-      this.js`${ node.object }[${ node.property }]` :
-      this.js`${ node.object }.${ node.property }`;
+    this.write(node.object);
+    if (node.computed) this.write('[', node.property, ']');
+    else this.write('.', node.property);
   }
 
   MetaProperty(node) {
-    return this.js`${ node.left }.${ node.right }`;
+    this.write(node.left, '.', node.right);
   }
 
   CallExpression(node) {
-    return this.js`${ node.callee }(${ this.printList(node.arguments) })`;
-  }
-
-  TaggedTemplateExpression(node) {
-    return this.js`${ node.tag }${ node.template }`;
-  }
-
-  NewExpression(node) {
-    return this.js`new ${ node.callee }(${ this.printList(node.arguments) })`;
-  }
-
-  ParenExpression(node) {
-    return this.js`(${ node.expression })`;
-  }
-
-  ObjectLiteral(node) {
-    return this.js`{ ${ this.printList(node.properties) } }`;
-  }
-
-  ComputedPropertyName(node) {
-    return this.js`[${ node.expression }]`;
-  }
-
-  PropertyDefinition(node) {
-    return node.expression ?
-      this.js`${ node.name }: ${ node.expression }` :
-      this.js`${ node.name }`;
-  }
-
-  ObjectPattern(node) {
-    return this.js`{ ${ this.printList(node.properties) } }`;
-  }
-
-  PatternProperty(node) {
-    let out = this.js`${ node.name }`;
-    if (node.pattern) out += this.js`: ${ node.pattern }`;
-    if (node.initializer)out += this.js` = ${ node.initializer }`;
-    return out;
-  }
-
-  ArrayPattern(node) {
-    return this.js`[${ this.printList(node.elements) }]`;
-  }
-
-  PatternElement(node) {
-    return node.initializer ?
-      this.js`${ node.pattern } = ${ node.initializer }` :
-      this.js`${ node.pattern }`;;
-  }
-
-  PatternRestElement(node) {
-    return this.js`...${ node.pattern }`;
-  }
-
-  MethodDefinition(node) {
-    let out = '';
-
-    if (node.static) out += 'static ';
-
-    switch (node.kind) {
-      case 'generator': out += '*'; break;
-      case 'async': out += 'async '; break;
-      case 'async-generator': out += 'async *'; break;
-    }
-
-    out += this.js`${ node.name }(${ this.printList(node.params) })`;
-    out += this.js`{${ node.body }}`;
-
-    return out;
-  }
-
-  ArrayLiteral(node) {
-    return this.js`[${ this.printList(node.elements) }]`;
+    this.write(node.callee, '(');
+    this.printList(node.arguments);
+    this.write(')');
   }
 
   TemplateExpression(node) {
-    this.type = 'TemplateExpression';
-    this.start = start;
-    this.end = end;
-    this.literals = lits;
-    this.substitutions = subs;
+    this.write('`');
+    node.parts.forEach(part => {
+      part.type === 'TemplatePart' ?
+        this.write(part) :
+        this.write('${', part, '}');
+    });
+    this.write('`');
   }
 
-  Block(statements, start, end) {
-    this.type = 'Block';
-    this.start = start;
-    this.end = end;
-    this.statements = statements;
+  TaggedTemplateExpression(node) {
+    this.write(node.tag, node.template);
   }
 
-  LabelledStatement(label, statement, start, end) {
-    this.type = 'LabelledStatement';
-    this.start = start;
-    this.end = end;
-    this.label = label;
-    this.statement = statement;
+  NewExpression(node) {
+    this.write('new ', node.callee, '(');
+    this.printList(node.arguments);
+    this.write(')');
   }
 
-  ExpressionStatement(expr, start, end) {
-    this.type = 'ExpressionStatement';
-    this.start = start;
-    this.end = end;
-    this.expression = expr;
+  ParenExpression(node) {
+    this.write('(', node.expression, ')');
   }
 
-  Directive(value, expr, start, end) {
-    this.type = 'Directive';
-    this.start = start;
-    this.end = end;
-    this.value = value;
-    this.expression = expr;
+  ObjectLiteral(node) {
+    this.write('{', INDENT);
+    this.printList(node.properties, NEWLINE);
+    this.write(OUTDENT, '}');
   }
 
-  EmptyStatement(start, end) {
-    this.type = 'EmptyStatement';
-    this.start = start;
-    this.end = end;
+  ComputedPropertyName(node) {
+    this.write('[', node.expression, ']');
   }
 
-  VariableDeclaration(kind, list, start, end) {
-    this.type = 'VariableDeclaration';
-    this.start = start;
-    this.end = end;
-    this.kind = kind;
-    this.declarations = list;
+  PropertyDefinition(node) {
+    this.write(node.name, ':', SPACE, node.expression);
   }
 
-  VariableDeclarator(pattern, initializer, start, end) {
-    this.type = 'VariableDeclarator';
-    this.start = start;
-    this.end = end;
-    this.pattern = pattern;
-    this.initializer = initializer;
+  ObjectPattern(node) {
+    this.write('{', INDENT);
+    this.printList(node.properties, NEWLINE);
+    this.write(OUTDENT, '}');
   }
 
-  ReturnStatement(arg, start, end) {
-    this.type = 'ReturnStatement';
-    this.start = start;
-    this.end = end;
-    this.argument = arg;
+  PatternProperty(node) {
+    this.write(node.name);
+    if (node.pattern) this.write(':', SPACE, node.pattern);
+    if (node.initializer) this.write(SPACE, '=', SPACE, node.initializer);
   }
 
-  BreakStatement(label, start, end) {
-    this.type = 'BreakStatement';
-    this.start = start;
-    this.end = end;
-    this.label = label;
+  ArrayPattern(node) {
+    this.write('[');
+    this.printList(node.elements);
+    this.write(']');
   }
 
-  ContinueStatement(label, start, end) {
-    this.type = 'ContinueStatement';
-    this.start = start;
-    this.end = end;
-    this.label = label;
+  PatternElement(node) {
+    this.write(node.pattern);
+    if (node.initializer) this.write(SPACE, '=', SPACE, node.initializer);
   }
 
-  ThrowStatement(expr, start, end) {
-    this.type = 'ThrowStatement';
-    this.start = start;
-    this.end = end;
-    this.expression = expr;
+  PatternRestElement(node) {
+    this.write('...', node.pattern);
   }
 
-  DebuggerStatement(start, end) {
-    this.type = 'DebuggerStatement';
-    this.start = start;
-    this.end = end;
+  MethodDefinition(node) {
+    if (node.static) this.write('static ');
+
+    switch (node.kind) {
+      case 'generator': this.write('*'); break;
+      case 'async': this.write('async '); break;
+      case 'async-generator': this.write('async *'); break;
+    }
+
+    this.write(node.name, '(');
+    this.printList(node.params);
+    this.write(')', SPACE, '{', INDENT, node.body, OUTDENT, '}');
   }
 
-  IfStatement(test, cons, alt, start, end) {
-    this.type = 'IfStatement';
-    this.start = start;
-    this.end = end;
-    this.test = test;
-    this.consequent = cons;
-    this.alternate = alt;
+  ArrayLiteral(node) {
+    this.write('[');
+    this.printList(node.elements);
+    this.write(']');
   }
 
-  DoWhileStatement(body, test, start, end) {
-    this.type = 'DoWhileStatement';
-    this.start = start;
-    this.end = end;
-    this.body = body;
-    this.test = test;
+  Block(node) {
+    this.write('{', INDENT);
+    this.printList(node.statements, NEWLINE);
+    this.write(OUTDENT, '}');
   }
 
-  WhileStatement(test, body, start, end) {
-    this.type = 'WhileStatement';
-    this.start = start;
-    this.end = end;
-    this.test = test;
-    this.body = body;
+  LabelledStatement(node) {
+    this.write(node.label, ':', SPACE, node.statement);
   }
 
-  ForStatement(initializer, test, update, body, start, end) {
-    this.type = 'ForStatement';
-    this.start = start;
-    this.end = end;
-    this.initializer = initializer;
-    this.test = test;
-    this.update = update;
-    this.body = body;
+  ExpressionStatement(node) {
+    this.write(node.expression, ';');
   }
 
-  ForInStatement(left, right, body, start, end) {
-    this.type = 'ForInStatement';
-    this.start = start;
-    this.end = end;
-    this.left = left;
-    this.right = right;
-    this.body = body;
+  Directive(node) {
+    this.write(node.expression, ';');
   }
 
-  ForOfStatement(async, left, right, body, start, end) {
-    this.type = 'ForOfStatement';
-    this.async = async;
-    this.start = start;
-    this.end = end;
-    this.left = left;
-    this.right = right;
-    this.body = body;
+  EmptyStatement() {
+    this.write(';');
   }
 
-  WithStatement(object, body, start, end) {
-    this.type = 'WithStatement';
-    this.start = start;
-    this.end = end;
-    this.object = object;
-    this.body = body;
+  VariableDeclaration(node) {
+    this.write(node.kind, ' ');
+    this.printList(node.declarations);
+    this.write(';');
   }
 
-  SwitchStatement(desc, cases, start, end) {
-    this.type = 'SwitchStatement';
-    this.start = start;
-    this.end = end;
-    this.descriminant = desc;
-    this.cases = cases;
+  VariableDeclarator(node) {
+    this.write(node.pattern);
+    if (node.initializer)
+      this.write(SPACE, '=', SPACE, node.initializer);
   }
 
-  SwitchCase(test, cons, start, end) {
-    this.type = 'SwitchCase';
-    this.start = start;
-    this.end = end;
-    this.test = test;
-    this.consequent = cons;
+  ReturnStatement(node) {
+    this.write('return ', node.argument, ';');
   }
 
-  TryStatement(block, handler, fin, start, end) {
-    this.type = 'TryStatement';
-    this.start = start;
-    this.end = end;
-    this.block = block;
-    this.handler = handler;
-    this.finalizer = fin;
+  BreakStatement(node) {
+    this.write('break');
+    if (node.label) this.write(' ', node.label);
+    this.write(';');
   }
 
-  CatchClause(param, body, start, end) {
-    this.type = 'CatchClause';
-    this.start = start;
-    this.end = end;
-    this.param = param;
-    this.body = body;
+  ContinueStatement(node) {
+    this.write('continue');
+    if (node.label) this.write(' ', node.label);
+    this.write(';');
   }
 
-  FunctionDeclaration(kind, identifier, params, body, start, end) {
-    this.type = 'FunctionDeclaration';
-    this.start = start;
-    this.end = end;
-    this.kind = kind;
-    this.identifier = identifier;
-    this.params = params;
-    this.body = body;
+  ThrowStatement(node) {
+    this.write('throw ', node.expression, ';');
   }
 
-  FunctionExpression(kind, identifier, params, body, start, end) {
-    this.type = 'FunctionExpression';
-    this.start = start;
-    this.end = end;
-    this.kind = kind;
-    this.identifier = identifier;
-    this.params = params;
-    this.body = body;
+  DebuggerStatement() {
+    this.write('debugger;');
   }
 
-  FormalParameter(pattern, initializer, start, end) {
-    this.type = 'FormalParameter';
-    this.start = start;
-    this.end = end;
-    this.pattern = pattern;
-    this.initializer = initializer;
+  IfStatement(node) {
+    this.write('if', SPACE, '(', node.test, ')', SPACE, node.consequent);
+    if (node.alternate) this.write('else ', node.alternate);
   }
 
-  RestParameter(identifier, start, end) {
-    this.type = 'RestParameter';
-    this.start = start;
-    this.end = end;
-    this.identifier = identifier;
+  DoWhileStatement(node) {
+    this.write('do ', node.body, ' while (', node.test, ')');
   }
 
-  FunctionBody(statements, start, end) {
-    this.type = 'FunctionBody';
-    this.start = start;
-    this.end = end;
-    this.statements = statements;
+  WhileStatement(node) {
+    this.write('while', SPACE, '(', node.test, ')', node.body);
   }
 
-  ArrowFunctionHead(params, start, end) {
-    this.type = 'ArrowFunctionHead';
-    this.start = start;
-    this.end = end;
-    this.parameters = params;
+  ForStatement(node) {
+    this.write(
+      'for', SPACE, '(',
+      node.initializer, ';', SPACE,
+      node.test, ';', SPACE,
+      node.update,
+      ')', SPACE, node.body
+    );
   }
 
-  ArrowFunction(kind, params, body, start, end) {
-    this.type = 'ArrowFunction';
-    this.start = start;
-    this.end = end;
-    this.kind = kind;
-    this.params = params;
-    this.body = body;
+  ForInStatement(node) {
+    this.write(
+      'for', SPACE,
+      '(', node.left, ' in ', node.right, ')', SPACE,
+      node.body
+    );
   }
 
-  ClassDeclaration(identifier, base, body, start, end) {
-    this.type = 'ClassDeclaration';
-    this.start = start;
-    this.end = end;
-    this.identifier = identifier;
-    this.base = base;
-    this.body = body;
+  ForOfStatement(node) {
+    this.write(
+      'for', SPACE,
+      '(', node.left, ' of ', node.right, ')', SPACE,
+      node.body
+    );
   }
 
-  ClassExpression(identifier, base, body, start, end) {
-    this.type = 'ClassExpression';
-    this.start = start;
-    this.end = end;
-    this.identifier = identifier;
-    this.base = base;
-    this.body = body;
+  WithStatement(node) {
+    this.write(
+      'with', SPACE, '(', node.object, ')', SPACE, node.body
+    );
   }
 
-  ClassBody(elems, start, end) {
-    this.type = 'ClassBody';
-    this.start = start;
-    this.end = end;
-    this.elements = elems;
+  SwitchStatement(node) {
+    this.write(
+      'switch', SPACE,
+      '(', node.descriminant, ')', SPACE,
+      '{', INDENT
+    );
+    this.printList(node.cases, NEWLINE);
+    this.write(OUTDENT, '}');
   }
 
-  EmptyClassElement(start, end) {
-    this.type = 'EmptyClassElement';
-    this.start = start;
-    this.end = end;
+  SwitchCase(node) {
+    this.write('case ', node.test, ':', SPACE, node.consequent);
   }
 
-  ClassField(isStatic, name, initializer, start, end) {
-    this.type = 'ClassField';
-    this.static = isStatic;
-    this.name = name;
-    this.initializer = initializer;
-    this.start = start;
-    this.end = end;
+  TryStatement(node) {
+    this.write(
+      'try', SPACE, node.block, SPACE, node.handler, SPACE,
+      'finally', SPACE, node.finalizer
+    );
   }
 
-  ImportCall(argument, start, end) {
-    this.type = 'ImportCall';
-    this.argument = argument;
-    this.start = start;
-    this.end = end;
+  CatchClause(node) {
+    this.write(
+      ' catch', SPACE, '(', node.param, ')', SPACE, node.body
+    );
   }
 
-  ImportDeclaration(imports, from, start, end) {
-    this.type = 'ImportDeclaration';
-    this.start = start;
-    this.end = end;
-    this.imports = imports;
-    this.from = from;
+  FunctionDeclaration(node) {
+    this.FunctionExpression(node);
   }
 
-  NamespaceImport(identifier, start, end) {
-    this.type = 'NamespaceImport';
-    this.start = start;
-    this.end = end;
-    this.identifier = identifier;
+  FunctionExpression(node) {
+    if (node.kind === 'async' || node.kind === 'async-generator')
+      this.write('async ');
+
+    this.write('function');
+
+    if (node.kind === 'generator' || node.kind === 'async-generator')
+      this.write('*');
+
+    if (node.identifier)
+      this.write(' ', node.identifier);
+
+    this.write('(');
+    this.printList(node.params);
+    this.write(')', SPACE, node.body);
   }
 
-  NamedImports(specifiers, start, end) {
-    this.type = 'NamedImports';
-    this.start = start;
-    this.end = end;
-    this.specifiers = specifiers;
+  FormalParameter(node) {
+    this.write(node.pattern);
+    if (node.initializer)
+      this.write(SPACE, '=', SPACE, node.initializer);
   }
 
-  DefaultImport(identifier, imports, start, end) {
-    this.type = 'DefaultImport';
-    this.start = start;
-    this.end = end;
-    this.identifier = identifier;
-    this.imports = imports;
+  RestParameter(node) {
+    this.write('...', node.identifier);
   }
 
-  ImportSpecifier(imported, local, start, end) {
-    this.type = 'ImportSpecifier';
-    this.start = start;
-    this.end = end;
-    this.imported = imported;
-    this.local = local;
+  FunctionBody(node) {
+    this.write('{', INDENT);
+    this.printList(node.statements, NEWLINE);
+    this.write(OUTDENT, '}');
   }
 
-  ExportDeclaration(declaration, start, end) {
-    this.type = 'ExportDeclaration';
-    this.start = start;
-    this.end = end;
-    this.declaration = declaration;
+  ArrowFunction(node) {
+    if (node.kind === 'async')
+      this.write('async ');
+
+    this.write('(');
+    this.printList(node.params);
+    this.write(')', SPACE, '=>', SPACE, node.body);
   }
 
-  ExportDefault(binding, start, end) {
-    this.type = 'ExportDefault';
-    this.binding = binding;
-    this.start = start;
-    this.end = end;
+  ClassDeclaration(node) {
+    this.ClassExpression(node);
   }
 
-  ExportNameList(specifiers, from, start, end) {
-    this.type = 'ExportNameList';
-    this.start = start;
-    this.end = end;
-    this.specifiers = specifiers;
-    this.from = from;
+  ClassExpression(node) {
+    this.write('class');
+    if (node.identifier) this.write(' ', node.identifier);
+    if (node.base) this.write(' extends ', node.base);
+    this.write(SPACE, node.body);
   }
 
-  ExportNamespace(identifier, from, start, end) {
-    this.type = 'ExportNamespace';
-    this.start = start;
-    this.end = end;
-    this.identifier = identifier;
-    this.from = from;
+  ClassBody(node) {
+    this.write('{', INDENT);
+    this.printList(node.elements, NEWLINE);
+    this.write(OUTDENT, '}');
   }
 
-  ExportDefaultFrom(identifier, from, start, end) {
-    this.type = 'ExportDefaultFrom';
-    this.start = start;
-    this.end = end;
-    this.identifier = identifier;
-    this.from = from;
+  EmptyClassElement() {
+    this.write(';');
   }
 
-  ExportSpecifier(local, exported, start, end) {
-    this.type = 'ExportSpecifier';
-    this.start = start;
-    this.end = end;
-    this.local = local;
-    this.exported = exported;
+  ClassField(node) {
+    if (node.static) this.write('static ');
+    this.write(node.name);
+    if (node.initializer) this.write(SPACE, '=', SPACE, node.initializer);
+    this.write(';');
   }
 
-  Annotation(path, args, start, end) {
-    this.type = 'Annotation';
-    this.start = start;
-    this.end = end;
-    this.path = path;
-    this.arguments = args;
+  ImportCall(node) {
+    this.write('import', SPACE, '(', node.argument, ')');
+  }
+
+  ImportDeclaration(node) {
+    this.write('import ');
+    if (node.imports) this.write(node.imports, ' from ');
+    this.write(node.from, ';');
+  }
+
+  NamespaceImport(node) {
+    this.write('* as ', node.identifier);
+  }
+
+  NamedImports(node) {
+    this.write('{', SPACE);
+    this.printList(node.specifiers);
+    this.write(SPACE, '}');
+  }
+
+  DefaultImport(node) {
+    this.write(node.identifier);
+    if (node.imports) this.write(',', SPACE, node.imports);
+  }
+
+  ImportSpecifier(node) {
+    this.write(node.imported);
+    if (node.local) this.write(' as ', node.local);
+  }
+
+  ExportDeclaration(node) {
+    this.write('export ', node.declaration);
+  }
+
+  ExportDefault(node) {
+    this.write('export default ', node.binding);
+  }
+
+  ExportNameList(node) {
+    this.write('export', SPACE, '{', SPACE);
+    this.printList(node.specifiers);
+    this.write(SPACE, '}');
+    if (node.from) this.write(SPACE, 'from', SPACE, node.from);
+  }
+
+  ExportNamespace(node) {
+    this.write('export * as ', node.identifier, ' from ', node.from);
+  }
+
+  ExportDefaultFrom(node) {
+    this.write('export ', node.identifier, ' from ', node.from);
+  }
+
+  ExportSpecifier(node) {
+    this.write(node.local);
+    if (node.exported) this.write(' as ', node.exported);
   }
 
 }

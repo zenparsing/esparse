@@ -2,7 +2,6 @@ import * as AST from './AST.js';
 import { Scanner } from './Scanner.js';
 import { Transform } from './Transform.js';
 import { Validate } from './Validate.js';
-import { WHITESPACE } from './UnicodeData.js';
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
