@@ -665,3 +665,10 @@ export function Annotation(path, args, start, end) {
   this.path = path;
   this.arguments = args;
 }
+
+export function Comment(text, start, end) {
+  this.type = 'Comment';
+  this.start = start;
+  this.end = end;
+  this.text = text;
+}

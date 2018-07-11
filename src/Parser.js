@@ -166,12 +166,13 @@ class Context {
 
 class ParseResult {
 
-  constructor(input, lineMap, ast, annotations) {
-    this.input = input;
-    this.lineMap = lineMap;
-    this.ast = ast;
+  constructor(results) {
+    this.input = results.input;
+    this.lineMap = results.lineMap;
+    this.ast = results.ast;
+    this.annotations = results.annotations;
+    this.comments = results.comments;
     this.scopeTree = null;
-    this.annotations = annotations;
   }
 
   locate(offset) {
@@ -210,16 +211,25 @@ export class Parser {
     this.tokenEnd = scanner.offset;
     this.context = new Context(null);
     this.annotations = [];
+    this.comments = [];
+  }
+
+  createParseResult(ast) {
+    return new ParseResult({
+      ast,
+      input: this.input,
+      lineMap: this.scanner.lineMap,
+      annotations: this.annotations,
+      comments: this.comments,
+    });
   }
 
   parseModule() {
-    let ast = this.Module();
-    return new ParseResult(this.input, this.scanner.lineMap, ast, this.annotations);
+    return this.createParseResult(this.Module());
   }
 
   parseScript() {
-    let ast = this.Script();
-    return new ParseResult(this.input, this.scanner.lineMap, ast, this.annotations);
+    return this.createParseResult(this.Script());
   }
 
   parseAnnotation() {
@@ -235,14 +245,15 @@ export class Parser {
   }
 
   nextToken(context) {
-    let scanner = this.scanner;
-
     context = context || '';
+
+    let scanner = this.scanner;
 
     while (true) {
       let type = scanner.next(context);
       if (type === '@') this.parseAnnotation();
-      else if (type !== 'COMMENT') break;
+      else if (type === 'COMMENT') this.addComment(scanner);
+      else break;
     }
 
     return scanner;
@@ -253,9 +264,18 @@ export class Parser {
       return this.peek0.start;
 
     // Skip over whitespace and comments
-    this.scanner.skip();
+    while (true) {
+      let type = this.scanner.skip();
+      if (type === 'COMMENT') this.addComment(this.scanner);
+      else break;
+    }
 
     return this.scanner.offset;
+  }
+
+  addComment(token) {
+    let node = new AST.Comment(token.value, token.start, token.end);
+    this.comments.push(node);
   }
 
   nodeEnd() {
@@ -441,7 +461,7 @@ export class Parser {
     if (!node)
       node = this.peekToken();
 
-    let result = new ParseResult(this.input, this.scanner.lineMap, null);
+    let result = this.createParseResult(null);
     throw result.createSyntaxError(msg, node);
   }
 
