@@ -108,4 +108,20 @@
        context: '' } ],
   arguments: null } ],
 
+/** @x 'abc'
+    @y 'def' **/
+'ASI works with annotations': [ {
+  type: 'Annotation',
+  start: 1,
+  end: 2,
+  path:
+   [ { type: 'Identifier', start: 1, end: 2, value: 'x', context: '' } ],
+  arguments: null }, {
+  type: 'Annotation',
+  start: 14,
+  end: 15,
+  path:
+   [ { type: 'Identifier', start: 14, end: 15, value: 'y', context: '' } ],
+  arguments: null } ],
+
 })

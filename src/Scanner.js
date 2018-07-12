@@ -149,7 +149,7 @@ export class Scanner {
   }
 
   next(context) {
-    if (this.type !== 'COMMENT')
+    if (this.type !== 'COMMENT' && this.type !== '@')
       this.newlineBefore = false;
 
     this.strictError = '';

@@ -239,7 +239,6 @@ export class Parser {
     });
 
     let node = parser.Annotation();
-
     this.scanner.offset = node.end;
     this.annotations.push(node);
   }
