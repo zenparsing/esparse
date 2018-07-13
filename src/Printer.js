@@ -143,7 +143,7 @@ export class Printer {
   }
 
   BinaryExpression(node) {
-    this.write(node.left, SPACE, node.right);
+    this.write(node.left, SPACE, node.operator, SPACE, node.right);
   }
 
   UpdateExpression(node) {
