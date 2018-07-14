@@ -20,13 +20,13 @@ class AstNode {
 
     for (let i = 0; i < keys.length; ++i) {
       if (keys[i] === 'parent')
-        break;
+        continue;
 
       let value = this[keys[i]];
 
       if (Array.isArray(value)) {
 
-        for (var j = 0; j < value.length; ++j) {
+        for (let j = 0; j < value.length; ++j) {
           if (isNode(value[j]))
             list.push(value[j]);
         }
