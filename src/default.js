@@ -23,7 +23,7 @@ function parse(input, options) {
   let result = options.module ? parser.parseModule() : parser.parseScript();
 
   if (options.resolveScopes)
-    new ScopeResolver().resolve(result);
+    result.scopeTree = new ScopeResolver().resolve(result);
 
   if (options.addParentLinks)
     addParentLinks(result.ast);

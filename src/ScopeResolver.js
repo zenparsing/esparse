@@ -36,7 +36,7 @@ export class ScopeResolver {
     this.visit(parseResult.ast);
     this.flushFree();
 
-    parseResult.scopeTree = this.top;
+    return this.top;
   }
 
   fail(msg, node) {
@@ -258,6 +258,10 @@ export class ScopeResolver {
 
   VariableDeclaration(node) {
     node.children().forEach(n => this.visit(n, node.kind));
+  }
+
+  ImportDeclaration(node) {
+    node.children().forEach(n => this.visit(n, 'const'));
   }
 
   FunctionDeclaration(node, kind) {

@@ -1,5 +1,6 @@
 const Path = require('path');
 const FS = require('fs');
+const { inspect } = require('util');
 
 const TEST_COMMENT = /\/\*\*[\s\S]+?\*\*\//g;
 const COMMENT_TRIM = /^\/\*+\s+|\s+\*+\/$/g;
