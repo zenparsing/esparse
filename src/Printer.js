@@ -1,7 +1,17 @@
+import { LineMap } from './LineMap.js';
+
 const SPACE = {};
 const NEWLINE = {};
 const INDENT = {};
 const OUTDENT = {};
+
+class PrintResult {
+  constructor(output, lineMap, mappings) {
+    this.output = output;
+    this.lineMap = lineMap;
+    this.mappings = mappings;
+  }
+}
 
 export class Printer {
   constructor() {
@@ -9,10 +19,22 @@ export class Printer {
     this.depth = 0;
     this.stringDelimiter = "'";
     this.output = '';
+    this.inputStart = 0;
+    this.mappings = [];
+    this.lineMap = new LineMap();
+  }
+
+  addMapping(node) {
+    if (typeof node.start === 'number' && node.start > this.inputStart) {
+      this.inputStart = node.start;
+      this.mappings.push({ output: this.output.length, input: this.inputStart });
+    }
   }
 
   newline() {
+    this.lineMap.addBreak(this.output.length);
     this.output += '\n';
+
     if (this.indentWidth > 0)
       this.output += ' '.repeat(this.indentWidth * this.depth);
   }
@@ -22,6 +44,7 @@ export class Printer {
       switch (args[i]) {
         case SPACE:
           this.output += ' ';
+          this.outputColumn += 1;
           break;
         case NEWLINE:
           this.newline();
@@ -45,12 +68,14 @@ export class Printer {
   print(ast) {
     this.output = '';
     this.printNode(ast);
-    return this.output;
+    return new PrintResult(this.output, this.lineMap, this.mappings);
   }
 
   printNode(node) {
-    if (node !== null && node !== undefined)
+    if (node !== null && node !== undefined) {
+      this.addMapping(node);
       this[node.type](node);
+    }
   }
 
   printList(list, sep = ', ') {
@@ -62,6 +87,7 @@ export class Printer {
 
   Identifier(node) {
     // TODO: escaping
+    //this.addMapping(node.value);
     this.write(node.value);
   }
 
