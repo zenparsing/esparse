@@ -281,22 +281,22 @@
        start: 0,
        end: 25 } ] },
 
-/*** export default class {}; ***/
-'export default class expression':
+/*** export default class {} ***/
+'export default class with no identifier':
 { type: 'Module',
   start: 0,
-  end: 24,
+  end: 23,
   statements:
    [ { type: 'ExportDefault',
        binding:
-        { type: 'ClassExpression',
+        { type: 'ClassDeclaration',
           start: 15,
           end: 23,
           identifier: null,
           base: null,
           body: { type: 'ClassBody', start: 21, end: 23, elements: [] } },
        start: 0,
-       end: 24 } ] },
+       end: 23 } ] },
 
 /*** export default function F() {} ***/
 'export default function declaration':
@@ -321,15 +321,15 @@
        start: 0,
        end: 30 } ] },
 
-/*** export default function() {}; ***/
-'export default function expression':
+/*** export default function() {} ***/
+'export default function with no identifier':
 { type: 'Module',
   start: 0,
-  end: 29,
+  end: 28,
   statements:
    [ { type: 'ExportDefault',
        binding:
-        { type: 'FunctionExpression',
+        { type: 'FunctionDeclaration',
           start: 15,
           end: 28,
           kind: '',
@@ -337,7 +337,7 @@
           params: [],
           body: { type: 'FunctionBody', start: 26, end: 28, statements: [] } },
        start: 0,
-       end: 29 } ] },
+       end: 28 } ] },
 
 /*** export default 1 + 1; ***/
 'export default assignment expression':

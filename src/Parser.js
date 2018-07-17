@@ -2566,7 +2566,6 @@ export class Parser {
         binding = this.peekAsync() === 'function' ?
           this.FunctionExpression() :
           this.AssignmentExpression();
-
         break;
 
       default:

@@ -179,23 +179,14 @@ export class Transform {
   }
 
   transformDefaultExport(node) {
-    let toType = null;
-
     switch (node.type) {
       case 'ClassExpression':
-        if (node.identifier)
-          toType = 'ClassDeclaration';
-        break;
+        node.type = 'ClassDeclaration';
+        return true;
 
       case 'FunctionExpression':
-        if (node.identifier)
-          toType = 'FunctionDeclaration';
-        break;
-    }
-
-    if (toType) {
-      node.type = toType;
-      return true;
+        node.type = 'FunctionDeclaration';
+        return true;
     }
 
     return false;

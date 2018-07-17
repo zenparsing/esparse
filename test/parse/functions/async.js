@@ -432,7 +432,7 @@ x => 0 **/
   statements:
    [ { type: 'ExportDefault',
        binding:
-        { type: 'FunctionExpression',
+        { type: 'FunctionDeclaration',
           start: 15,
           end: 34,
           kind: 'async',
