@@ -101,12 +101,15 @@ export class Validate {
     for (let i = 0; i < params.length; ++i) {
       let node = params[i];
 
-      if (node.type !== 'FormalParameter' || node.pattern.type !== 'Identifier')
+      if (node.type !== 'FormalParameter' || node.pattern.type !== 'Identifier') {
+        this.context.allowUseStrict = false;
         continue;
+      }
 
-      this.context.allowUseStrict = false;
+      if (node.initializer)
+        this.context.allowUseStrict = false;
+
       let name = node.pattern.value;
-
       if (isPoisonIdent(name))
         this.addStrictError('Parameter name ' + name + ' is not allowed in strict mode', node);
     }
