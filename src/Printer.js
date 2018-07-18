@@ -78,10 +78,11 @@ export class Printer {
     }
   }
 
-  printList(list, sep = ', ') {
+  printList(list, ...sep) {
+    if (sep.length === 0) sep = [',', SPACE];
     list.forEach((n, i) => {
       this.printNode(n);
-      if (i < list.length - 1) this.write(sep);
+      if (i < list.length - 1) this.write(...sep);
     });
   }
 
@@ -224,7 +225,7 @@ export class Printer {
 
   ObjectLiteral(node) {
     this.write('{', INDENT);
-    this.printList(node.properties, NEWLINE);
+    this.printList(node.properties, ',', NEWLINE);
     this.write(OUTDENT, '}');
   }
 
@@ -238,7 +239,7 @@ export class Printer {
 
   ObjectPattern(node) {
     this.write('{', INDENT);
-    this.printList(node.properties, NEWLINE);
+    this.printList(node.properties, ',', NEWLINE);
     this.write(OUTDENT, '}');
   }
 
