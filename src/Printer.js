@@ -39,6 +39,36 @@ export class Printer {
       this.output += ' '.repeat(this.indentWidth * this.depth);
   }
 
+  print(ast) {
+    this.output = '';
+    this.printNode(ast);
+    return new PrintResult(this.output, this.lineMap, this.mappings);
+  }
+
+  printNode(node) {
+    if (node !== null && node !== undefined) {
+      this.addMapping(node);
+      this[node.type](node);
+    }
+  }
+
+  escapeString(value) {
+    // TODO
+    // See: https://github.com/mathiasbynens/jsesc/blob/master/src/jsesc.js
+    return value.replace(/['"\\\b\f\n\r\t]/g, c => {
+      switch (c) {
+        case '"':
+        case '\'': return c === this.stringDelimiter ? '\\' + c : c;
+        case '\\': return '\\\\';
+        case '\b': return '\\b';
+        case '\f': return '\\f';
+        case '\n': return '\\n';
+        case '\r': return '\\r';
+        case '\t': return '\\t';
+      }
+    });
+  }
+
   write(...args) {
     for (let i = 0; i < args.length; ++i) {
       switch (args[i]) {
@@ -65,20 +95,7 @@ export class Printer {
     }
   }
 
-  print(ast) {
-    this.output = '';
-    this.printNode(ast);
-    return new PrintResult(this.output, this.lineMap, this.mappings);
-  }
-
-  printNode(node) {
-    if (node !== null && node !== undefined) {
-      this.addMapping(node);
-      this[node.type](node);
-    }
-  }
-
-  printList(list, ...sep) {
+  writeList(list, ...sep) {
     if (sep.length === 0) sep = [',', SPACE];
     list.forEach((n, i) => {
       this.printNode(n);
@@ -88,28 +105,30 @@ export class Printer {
 
   Identifier(node) {
     // TODO: escaping
-    //this.addMapping(node.value);
     this.write(node.value);
   }
 
   NumberLiteral(node) {
+    // TODO: Other numeric types? BigInt?
     this.write(String(node.value), node.suffix);
   }
 
   StringLiteral(node) {
-    // TODO: escape string
+    // TODO: consider using raw if possible to avoid escaping
     this.write(
       this.stringDelimiter,
-      node.value,
+      this.escapeString(node.value),
       this.stringDelimiter
     );
   }
 
   TemplatePart(node) {
+    // TODO: should we use value if "raw" is not provided?
     this.write(node.raw);
   }
 
   RegularExpression(node) {
+    // TODO: Handle non-escaped forward slashes
     this.write('/', node.value, '/', node.flags);
   }
 
@@ -122,11 +141,11 @@ export class Printer {
   }
 
   Script(node) {
-    this.printList(node.statements, NEWLINE);
+    this.writeList(node.statements, NEWLINE);
   }
 
   Module(node) {
-    this.printList(node.statements, NEWLINE);
+    this.writeList(node.statements, NEWLINE);
   }
 
   ThisExpression() {
@@ -138,7 +157,7 @@ export class Printer {
   }
 
   SequenceExpression(node) {
-    this.printList(node.expressions);
+    this.writeList(node.expressions);
   }
 
   AssignmentExpression(node) {
@@ -170,6 +189,7 @@ export class Printer {
   }
 
   BinaryExpression(node) {
+    // TODO: enforce space if node.right is RegularExpression
     this.write(node.left, SPACE, node.operator, SPACE, node.right);
   }
 
@@ -195,7 +215,7 @@ export class Printer {
 
   CallExpression(node) {
     this.write(node.callee, '(');
-    this.printList(node.arguments);
+    this.writeList(node.arguments);
     this.write(')');
   }
 
@@ -215,7 +235,7 @@ export class Printer {
 
   NewExpression(node) {
     this.write('new ', node.callee, '(');
-    this.printList(node.arguments);
+    this.writeList(node.arguments);
     this.write(')');
   }
 
@@ -225,7 +245,7 @@ export class Printer {
 
   ObjectLiteral(node) {
     this.write('{', INDENT);
-    this.printList(node.properties, ',', NEWLINE);
+    this.writeList(node.properties, ',', NEWLINE);
     this.write(OUTDENT, '}');
   }
 
@@ -239,7 +259,7 @@ export class Printer {
 
   ObjectPattern(node) {
     this.write('{', INDENT);
-    this.printList(node.properties, ',', NEWLINE);
+    this.writeList(node.properties, ',', NEWLINE);
     this.write(OUTDENT, '}');
   }
 
@@ -251,7 +271,7 @@ export class Printer {
 
   ArrayPattern(node) {
     this.write('[');
-    this.printList(node.elements);
+    this.writeList(node.elements);
     this.write(']');
   }
 
@@ -274,19 +294,19 @@ export class Printer {
     }
 
     this.write(node.name, '(');
-    this.printList(node.params);
+    this.writeList(node.params);
     this.write(')', SPACE, '{', INDENT, node.body, OUTDENT, '}');
   }
 
   ArrayLiteral(node) {
     this.write('[');
-    this.printList(node.elements);
+    this.writeList(node.elements);
     this.write(']');
   }
 
   Block(node) {
     this.write('{', INDENT);
-    this.printList(node.statements, NEWLINE);
+    this.writeList(node.statements, NEWLINE);
     this.write(OUTDENT, '}');
   }
 
@@ -308,7 +328,7 @@ export class Printer {
 
   VariableDeclaration(node) {
     this.write(node.kind, ' ');
-    this.printList(node.declarations);
+    this.writeList(node.declarations);
     this.write(';');
   }
 
@@ -393,7 +413,7 @@ export class Printer {
       '(', node.descriminant, ')', SPACE,
       '{', INDENT
     );
-    this.printList(node.cases, NEWLINE);
+    this.writeList(node.cases, NEWLINE);
     this.write(OUTDENT, '}');
   }
 
@@ -431,7 +451,7 @@ export class Printer {
       this.write(' ', node.identifier);
 
     this.write('(');
-    this.printList(node.params);
+    this.writeList(node.params);
     this.write(')', SPACE, node.body);
   }
 
@@ -447,7 +467,7 @@ export class Printer {
 
   FunctionBody(node) {
     this.write('{', INDENT);
-    this.printList(node.statements, NEWLINE);
+    this.writeList(node.statements, NEWLINE);
     this.write(OUTDENT, '}');
   }
 
@@ -456,7 +476,7 @@ export class Printer {
       this.write('async ');
 
     this.write('(');
-    this.printList(node.params);
+    this.writeList(node.params);
     this.write(')', SPACE, '=>', SPACE, node.body);
   }
 
@@ -473,7 +493,7 @@ export class Printer {
 
   ClassBody(node) {
     this.write('{', INDENT);
-    this.printList(node.elements, NEWLINE);
+    this.writeList(node.elements, NEWLINE);
     this.write(OUTDENT, '}');
   }
 
@@ -504,7 +524,7 @@ export class Printer {
 
   NamedImports(node) {
     this.write('{', SPACE);
-    this.printList(node.specifiers);
+    this.writeList(node.specifiers);
     this.write(SPACE, '}');
   }
 
@@ -528,7 +548,7 @@ export class Printer {
 
   ExportNameList(node) {
     this.write('export', SPACE, '{', SPACE);
-    this.printList(node.specifiers);
+    this.writeList(node.specifiers);
     this.write(SPACE, '}');
     if (node.from) this.write(SPACE, 'from', SPACE, node.from);
   }

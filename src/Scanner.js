@@ -343,6 +343,7 @@ export class Scanner {
 
   readIntegerSuffix() {
     if (this.peekCode() === 110) { // n
+      // TODO: For BigInt, parseInt will not generate the correct value
       this.numberSuffix = 'n';
       this.offset++;
       return true;
