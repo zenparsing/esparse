@@ -427,16 +427,13 @@ export class Printer {
   }
 
   TryStatement(node) {
-    this.write(
-      'try', SPACE, node.block, SPACE, node.handler, SPACE,
-      'finally', SPACE, node.finalizer
-    );
+    this.write('try', SPACE, node.block);
+    if (node.handler) this.write(SPACE, node.handler);
+    if (node.finalizer) this.write(SPACE, 'finally', SPACE, node.finalizer);
   }
 
   CatchClause(node) {
-    this.write(
-      ' catch', SPACE, '(', node.param, ')', SPACE, node.body
-    );
+    this.write('catch', SPACE, '(', node.param, ')', SPACE, node.body);
   }
 
   FunctionDeclaration(node) {

@@ -20,4 +20,30 @@
 
 }`,
 
+/** try { x; } catch (e) { y; } **/
+'try-catch':
+`try {
+  x;
+} catch (e) {
+  y;
+}`,
+
+/** try { x; } catch (e) { y; } finally { z; } **/
+'try-catch-finally':
+`try {
+  x;
+} catch (e) {
+  y;
+} finally {
+  z;
+}`,
+
+/** try { x; } finally { z; } **/
+'try-finally':
+`try {
+  x;
+} finally {
+  z;
+}`,
+
 })
