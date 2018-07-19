@@ -367,7 +367,7 @@ export class Printer {
 
   IfStatement(node) {
     this.write('if', SPACE, '(', node.test, ')', SPACE, node.consequent);
-    if (node.alternate) this.write('else ', node.alternate);
+    if (node.alternate) this.write(' else ', node.alternate);
   }
 
   DoWhileStatement(node) {
