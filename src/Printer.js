@@ -183,8 +183,8 @@ export class Printer {
   ConditionalExpression(node) {
     this.write(
       node.test, SPACE,
-      '?', node.consequent, SPACE,
-      ':', node.alternate
+      '?', SPACE, node.consequent, SPACE,
+      ':', SPACE, node.alternate
     );
   }
 
