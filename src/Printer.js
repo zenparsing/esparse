@@ -298,7 +298,7 @@ export class Printer {
 
     this.write(node.name, '(');
     this.writeList(node.params);
-    this.write(')', SPACE, '{', INDENT, node.body, OUTDENT, '}');
+    this.write(')', SPACE, node.body);
   }
 
   ArrayLiteral(node) {

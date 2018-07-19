@@ -7,4 +7,12 @@
   y
 });`,
 
+/** ({ x() { return 1; } }) **/
+'object methods':
+`({
+  x() {
+    return 1;
+  }
+});`,
+
 })
