@@ -416,12 +416,14 @@ export class Printer {
       '(', node.descriminant, ')', SPACE,
       '{', INDENT
     );
-    this.writeList(node.cases, NEWLINE);
+    this.writeList(node.cases, '');
     this.write(OUTDENT, '}');
   }
 
   SwitchCase(node) {
-    this.write('case ', node.test, ':', SPACE, node.consequent);
+    this.write('case ', node.test, ':', INDENT);
+    this.writeList(node.consequent, NEWLINE);
+    this.write(OUTDENT);
   }
 
   TryStatement(node) {
