@@ -254,7 +254,10 @@ export class Printer {
   }
 
   PropertyDefinition(node) {
-    this.write(node.name, ':', SPACE, node.expression);
+    this.write(node.name);
+    if (node.expression) {
+      this.write(':', SPACE, node.expression);
+    }
   }
 
   ObjectPattern(node) {
