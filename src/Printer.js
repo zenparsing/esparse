@@ -99,6 +99,7 @@ export class Printer {
     if (sep.length === 0) sep = [',', SPACE];
     list.forEach((n, i) => {
       this.printNode(n);
+      if (n && n.type === 'VariableDeclaration') this.write(';');
       if (i < list.length - 1) this.write(...sep);
     });
   }
@@ -332,7 +333,6 @@ export class Printer {
   VariableDeclaration(node) {
     this.write(node.kind, ' ');
     this.writeList(node.declarations);
-    this.write(';');
   }
 
   VariableDeclarator(node) {
