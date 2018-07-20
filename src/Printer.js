@@ -295,6 +295,8 @@ export class Printer {
       case 'generator': this.write('*'); break;
       case 'async': this.write('async '); break;
       case 'async-generator': this.write('async *'); break;
+      case 'get': this.write('get '); break;
+      case 'set': this.write('set '); break;
     }
 
     this.write(node.name, '(');
