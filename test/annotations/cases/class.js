@@ -4,7 +4,7 @@
 'class declaration':
 [ {
   type: 'Annotation',
-  start: 1,
+  start: 0,
   end: 2,
   path:
    [ {
@@ -15,26 +15,11 @@
        context: '' } ],
   arguments: null } ],
 
-/** (@A class {}) **/
-'class expression':
-[ {
-  type: 'Annotation',
-  start: 2,
-  end: 3,
-  path:
-   [ {
-       type: 'Identifier',
-       start: 2,
-       end: 3,
-       value: 'A',
-       context: '' } ],
-  arguments: null } ],
-
 /** @A.B class C {} **/
 'with path':
 [ {
   type: 'Annotation',
-  start: 1,
+  start: 0,
   end: 4,
   path:
    [ {
@@ -50,7 +35,7 @@
 'with arguments':
 [ {
   type: 'Annotation',
-  start: 1,
+  start: 0,
   end: 5,
   path:
    [ {
@@ -71,7 +56,7 @@
 'multiple annotations':
 [ {
   type: 'Annotation',
-  start: 1,
+  start: 0,
   end: 2,
   path:
    [ {
@@ -83,7 +68,7 @@
   arguments: null },
 {
   type: 'Annotation',
-  start: 4,
+  start: 3,
   end: 5,
   path:
    [ {
@@ -97,7 +82,7 @@
 /** @private x **/
 'reserved words are allowed': [ {
   type: 'Annotation',
-  start: 1,
+  start: 0,
   end: 8,
   path:
    [ {
@@ -112,13 +97,13 @@
     @y 'def' **/
 'ASI works with annotations': [ {
   type: 'Annotation',
-  start: 1,
+  start: 0,
   end: 2,
   path:
    [ { type: 'Identifier', start: 1, end: 2, value: 'x', context: '' } ],
   arguments: null }, {
   type: 'Annotation',
-  start: 14,
+  start: 13,
   end: 15,
   path:
    [ { type: 'Identifier', start: 14, end: 15, value: 'y', context: '' } ],

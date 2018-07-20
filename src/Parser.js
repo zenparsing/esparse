@@ -232,15 +232,12 @@ export class Parser {
     return this.createParseResult(this.Script());
   }
 
-  parseAnnotation() {
-    let parser = new Parser(this.input, {
-      onASI: this.onASI,
-      offset: this.scanner.offset,
-    });
-
-    let node = parser.Annotation();
-    this.scanner.offset = node.end;
-    this.annotations.push(node);
+  parseAnnotation(context) {
+    if (this.peek(context) === '@') {
+      this.annotations.push(this.Annotation());
+      return true;
+    }
+    return false;
   }
 
   nextToken(context) {
@@ -250,8 +247,7 @@ export class Parser {
 
     while (true) {
       let type = scanner.next(context);
-      if (type === '@') this.parseAnnotation();
-      else if (type === 'COMMENT') this.addComment(scanner);
+      if (type === 'COMMENT') this.addComment(scanner);
       else break;
     }
 
@@ -1195,6 +1191,7 @@ export class Parser {
     this.read('{');
 
     while (this.peekUntil('}', 'name')) {
+      if (this.parseAnnotation('name')) continue;
       if (!comma && node) {
         this.read(',');
         comma = true;
@@ -1890,6 +1887,8 @@ export class Parser {
 
     // TODO: is this wrong for braceless statement lists?
     while (this.peekUntil('}')) {
+      if (this.parseAnnotation()) continue;
+
       node = this.StatementListItem();
 
       // Check for directives
@@ -2255,6 +2254,8 @@ export class Parser {
     this.read('{');
 
     while (this.peekUntil('}', 'name')) {
+      if (this.parseAnnotation('name')) continue;
+
       let elem = this.ClassElement(classKind);
 
       switch (elem.type) {
@@ -2355,6 +2356,9 @@ export class Parser {
       switch (this.peek()) {
         case 'EOF':
           return list;
+        case '@':
+          this.parseAnnotation();
+          break;
         case 'import':
           switch (this.peekAt('', 1)) {
             case '(':
@@ -2651,6 +2655,9 @@ export class Parser {
 
   Annotation() {
     let start = this.nodeStart();
+
+    this.read('@');
+
     let path = [this.IdentifierName()];
 
     while (this.peek() === '.') {
