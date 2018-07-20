@@ -8,7 +8,7 @@
   z;
 }`,
 
-/** switch (x) { case 1: a; break; case 2: b; break; } **/
+/** switch (x) { case 1: a; break; case 2: b; break; default: break; } **/
 'switch-cases':
 `switch (x) {
   case 1:
@@ -16,6 +16,8 @@
     break;
   case 2:
     b;
+    break;
+  default:
     break;
 
 }`,

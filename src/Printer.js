@@ -421,7 +421,8 @@ export class Printer {
   }
 
   SwitchCase(node) {
-    this.write('case ', node.test, ':', INDENT);
+    if (node.test) this.write('case ', node.test, ':', INDENT);
+    else this.write('default:', INDENT);
     this.writeList(node.consequent, NEWLINE);
     this.write(OUTDENT);
   }
