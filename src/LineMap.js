@@ -37,6 +37,7 @@ export class LineMap {
     return {
       line,
       column,
+      offset,
       lineOffset: pos + 1,
     };
   }

@@ -19,28 +19,43 @@ export class Printer {
     this.depth = 0;
     this.stringDelimiter = "'";
     this.output = '';
+    this.inputLineMap = null;
     this.inputStart = 0;
     this.mappings = [];
+    this.currentLine = 1;
+    this.currentLineOffset = 0;
     this.lineMap = new LineMap();
   }
 
   addMapping(node) {
     if (typeof node.start === 'number' && node.start > this.inputStart) {
       this.inputStart = node.start;
-      this.mappings.push({ output: this.output.length, input: this.inputStart });
+
+      let original = this.inputLineMap.locate(this.inputStart);
+
+      let generated = {
+        line: this.currentLine,
+        column: this.output.length - this.currentLineOffset,
+        offset: this.output.length,
+        lineOffset: this.currentLineOffset,
+      };
+
+      this.mappings.push({ original, generated });
     }
   }
 
   newline() {
-    this.lineMap.addBreak(this.output.length);
     this.output += '\n';
+    this.currentLine += 1;
+    this.currentLineOffset = this.output.length;
 
     if (this.indentWidth > 0)
       this.output += ' '.repeat(this.indentWidth * this.depth);
   }
 
-  print(ast) {
+  print(ast, options = {}) {
     this.output = '';
+    this.inputLineMap = options.lineMap || new LineMap();
     this.printNode(ast);
     return new PrintResult(this.output, this.lineMap, this.mappings);
   }
