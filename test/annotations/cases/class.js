@@ -109,4 +109,13 @@
    [ { type: 'Identifier', start: 14, end: 15, value: 'y', context: '' } ],
   arguments: null } ],
 
+/** { @x }  **/
+'not allowed before closing brace': {},
+
+/** a; @x **/
+'not allowed before script end': {},
+
+/*** a; @x ***/
+'not allowed before module end': {},
+
 })

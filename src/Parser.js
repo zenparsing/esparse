@@ -232,12 +232,9 @@ export class Parser {
     return this.createParseResult(this.Script());
   }
 
-  parseAnnotation(context) {
-    if (this.peek(context) === '@') {
+  parseAnnotations(context) {
+    while (this.peek(context) === '@')
       this.annotations.push(this.Annotation());
-      return true;
-    }
-    return false;
   }
 
   nextToken(context) {
@@ -1191,12 +1188,12 @@ export class Parser {
     this.read('{');
 
     while (this.peekUntil('}', 'name')) {
-      if (this.parseAnnotation('name')) continue;
       if (!comma && node) {
         this.read(',');
         comma = true;
       } else {
         comma = false;
+        this.parseAnnotations('name');
         list.push(node = this.PropertyDefinition());
       }
     }
@@ -1887,7 +1884,7 @@ export class Parser {
 
     // TODO: is this wrong for braceless statement lists?
     while (this.peekUntil('}')) {
-      if (this.parseAnnotation()) continue;
+      this.parseAnnotations();
 
       node = this.StatementListItem();
 
@@ -2254,7 +2251,7 @@ export class Parser {
     this.read('{');
 
     while (this.peekUntil('}', 'name')) {
-      if (this.parseAnnotation('name')) continue;
+      this.parseAnnotations();
 
       let elem = this.ClassElement(classKind);
 
@@ -2352,13 +2349,9 @@ export class Parser {
   ModuleItemList() {
     let list = [];
 
-    while (true) {
+    while (this.peekUntil('EOF')) {
+      this.parseAnnotations();
       switch (this.peek()) {
-        case 'EOF':
-          return list;
-        case '@':
-          this.parseAnnotation();
-          break;
         case 'import':
           switch (this.peekAt('', 1)) {
             case '(':
@@ -2378,6 +2371,8 @@ export class Parser {
           break;
       }
     }
+
+    return list;
   }
 
   ImportCall() {
