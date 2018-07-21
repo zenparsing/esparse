@@ -134,8 +134,7 @@
                 end: 1,
                 value: 'a',
                 context: 'variable' },
-             property: { type: 'Identifier', start: 2, end: 3, value: 'b', context: '' },
-             computed: false },
+             property: { type: 'Identifier', start: 2, end: 3, value: 'b', context: '' } },
           template:
            { type: 'TemplateExpression',
              start: 3,

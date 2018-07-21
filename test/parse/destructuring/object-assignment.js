@@ -237,8 +237,7 @@
                            end: 7,
                            value: 'y',
                            context: 'variable' },
-                        property: { type: 'Identifier', start: 8, end: 9, value: 'z', context: '' },
-                        computed: false },
+                        property: { type: 'Identifier', start: 8, end: 9, value: 'z', context: '' } },
                      initializer: null } ],
                 trailingComma: false },
              right:

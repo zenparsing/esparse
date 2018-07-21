@@ -209,8 +209,7 @@
                                         start: 6,
                                         end: 12,
                                         object:  { type: 'ThisExpression', start: 6, end: 10 },
-                                        property:  { type: 'Identifier', start: 11, end: 12, value: 'x', context: '' },
-                                        computed: false } } ],
+                                        property:  { type: 'Identifier', start: 11, end: 12, value: 'x', context: '' } } } ],
                                 trailingComma: false },
                              right:
                                {

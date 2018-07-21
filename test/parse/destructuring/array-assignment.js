@@ -292,8 +292,7 @@
                         end: 5,
                         value: 'a',
                         context: 'variable' },
-                     property: { type: 'Identifier', start: 6, end: 7, value: 'b', context: '' },
-                     computed: false } } ],
+                     property: { type: 'Identifier', start: 6, end: 7, value: 'b', context: '' } } } ],
              trailingComma: false },
           right:
            { type: 'Identifier',

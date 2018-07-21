@@ -150,8 +150,7 @@
                                 start: 26,
                                 end: 29,
                                 value: 'foo',
-                                context: '' },
-                             computed: false },
+                                context: '' } },
                           arguments: null,
                           trailingComma: false } } ] } } ] } } ] },
 
@@ -675,8 +674,7 @@
                                      start: 27,
                                      end: 34,
                                      object: { type: 'SuperKeyword', start: 27, end: 32 },
-                                     property: { type: 'Identifier', start: 33, end: 34, value: 'x', context: '' },
-                                     computed: false } },
+                                     property: { type: 'Identifier', start: 33, end: 34, value: 'x', context: '' } } },
                                params: [],
                                body: { type: 'FunctionBody', start: 38, end: 40, statements: [] } } ] } } ] } } ] } } ] },
 

@@ -221,8 +221,8 @@ export class Printer {
 
   MemberExpression(node) {
     this.write(node.object);
-    if (node.computed) this.write('[', node.property, ']');
-    else this.write('.', node.property);
+    if (node.property.type === 'Identifier') this.write('.');
+    this.write(node.property);
   }
 
   MetaProperty(node) {

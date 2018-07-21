@@ -820,20 +820,16 @@ export class Parser {
           expr = new AST.MemberExpression(
             expr,
             prop,
-            false,
             start,
             this.nodeEnd());
           break;
         }
 
         case '[': {
-          this.read();
-          let prop = this.Expression();
-          this.read(']');
+          let prop = this.ComputedPropertyName();
           expr = new AST.MemberExpression(
             expr,
             prop,
-            true,
             start,
             this.nodeEnd());
           break;

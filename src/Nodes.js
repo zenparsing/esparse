@@ -149,13 +149,12 @@ export function UnaryExpression(op, expr, start, end) {
   this.expression = expr;
 }
 
-export function MemberExpression(obj, prop, computed, start, end) {
+export function MemberExpression(obj, prop, start, end) {
   this.type = 'MemberExpression';
   this.start = start;
   this.end = end;
   this.object = obj;
   this.property = prop;
-  this.computed = computed;
 }
 
 export function MetaProperty(left, right, start, end) {
