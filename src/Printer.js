@@ -250,9 +250,12 @@ export class Printer {
   }
 
   NewExpression(node) {
-    this.write('new ', node.callee, '(');
-    this.writeList(node.arguments);
-    this.write(')');
+    this.write('new ', node.callee);
+    if (node.arguments) {
+      this.write('(');
+      this.writeList(node.arguments);
+      this.write(')');
+    }
   }
 
   ParenExpression(node) {
