@@ -6,9 +6,8 @@ const INDENT = {};
 const OUTDENT = {};
 
 class PrintResult {
-  constructor(output, lineMap, mappings) {
+  constructor(output, mappings) {
     this.output = output;
-    this.lineMap = lineMap;
     this.mappings = mappings;
   }
 }
@@ -24,7 +23,6 @@ export class Printer {
     this.mappings = [];
     this.currentLine = 1;
     this.currentLineOffset = 0;
-    this.lineMap = new LineMap();
   }
 
   addMapping(node) {
@@ -57,7 +55,7 @@ export class Printer {
     this.output = '';
     this.inputLineMap = options.lineMap || new LineMap();
     this.printNode(ast);
-    return new PrintResult(this.output, this.lineMap, this.mappings);
+    return new PrintResult(this.output, this.mappings);
   }
 
   printNode(node) {
