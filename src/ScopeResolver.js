@@ -1,3 +1,5 @@
+import { forEachChild } from './AST.js';
+
 // TODO:  How do we deal with the insanity that is with statements?
 // TODO:  Param scopes have empty free lists, which is strange
 
@@ -111,7 +113,7 @@ export class ScopeResolver {
     if (typeof f === 'function')
       f.call(this, node, kind);
     else
-      node.children().forEach(n => this.visit(n, kind));
+      forEachChild(node, n => this.visit(n, kind));
   }
 
   hasStrictDirective(statements) {
@@ -213,7 +215,7 @@ export class ScopeResolver {
     if (this.hasStrictDirective(node.statements))
       this.top.strict = true;
 
-    node.children().forEach(n => this.visit(n, 'var'));
+    forEachChild(node, n => this.visit(n, 'var'));
 
     this.popScope();
   }
@@ -221,13 +223,13 @@ export class ScopeResolver {
   Module(node) {
     this.pushScope('block', node);
     this.top.strict = true;
-    node.children().forEach(n => this.visit(n, 'var'));
+    forEachChild(node, n => this.visit(n, 'var'));
     this.popScope();
   }
 
   Block(node) {
     this.pushScope('block', node);
-    node.children().forEach(n => this.visit(n));
+    forEachChild(node, n => this.visit(n));
     this.popScope();
   }
 
@@ -245,23 +247,23 @@ export class ScopeResolver {
 
   ForStatement(node) {
     this.pushScope('for', node);
-    node.children().forEach(n => this.visit(n));
+    forEachChild(node, n => this.visit(n));
     this.popScope();
   }
 
   CatchClause(node) {
     this.pushScope('catch', node);
     this.visit(node.param);
-    node.body.children().forEach(n => this.visit(n));
+    forEachChild(node, n => this.visit(n));
     this.popScope();
   }
 
   VariableDeclaration(node) {
-    node.children().forEach(n => this.visit(n, node.kind));
+    forEachChild(node, n => this.visit(n, node.kind));
   }
 
   ImportDeclaration(node) {
-    node.children().forEach(n => this.visit(n, 'const'));
+    forEachChild(node, n => this.visit(n, 'const'));
   }
 
   FunctionDeclaration(node, kind) {

@@ -6,7 +6,7 @@ import * as AST from './AST.js';
 export { AST, parse, print };
 
 function addParentLinks(node) {
-  node.children().forEach(child => {
+  AST.forEachChild(node, child => {
     child.parent = node;
     addParentLinks(child);
   });
