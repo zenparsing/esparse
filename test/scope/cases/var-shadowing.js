@@ -25,7 +25,7 @@ function f(x) { var x }
         references: [],
         const: false } },
   free: [],
-  strict: false,
+  strict: true,
   parent: null,
   children:
    [ { type: 'block',

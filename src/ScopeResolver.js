@@ -5,24 +5,20 @@ import { forEachChild } from './AST.js';
 
 class Scope {
 
-  constructor(type, node = null) {
-    this.type = type || 'block';
-    this.names = Object.create(null);
+  constructor(type, strict, node = null) {
+    this.type = type;
     this.node = node;
+    this.strict = strict;
+    this.names = Object.create(null);
     this.free = [];
-    this.strict = false;
     this.parent = null;
     this.children = [];
     this.varNames = [];
   }
 
   resolveName(name) {
-    if (this.names[name])
-      return this.names[name];
-
-    if (this.parent)
-      return this.parent.resolveName(name);
-
+    if (this.names[name]) return this.names[name];
+    if (this.parent) return this.parent.resolveName(name);
     return null;
   }
 
@@ -33,11 +29,10 @@ export class ScopeResolver {
   resolve(parseResult) {
     this.parseResult = parseResult;
     this.stack = [];
-    this.top = new Scope('var');
+    this.top = new Scope('var', false, parseResult.ast);
 
     this.visit(parseResult.ast);
     this.flushFree();
-
     return this.top;
   }
 
@@ -48,10 +43,7 @@ export class ScopeResolver {
   pushScope(type, node) {
     let strict = this.top.strict;
     this.stack.push(this.top);
-    this.top = new Scope(type, node);
-    this.top.strict = strict;
-
-    return this.top;
+    return this.top = new Scope(type, strict, node);
   }
 
   flushFree() {
@@ -210,19 +202,17 @@ export class ScopeResolver {
   }
 
   Script(node) {
-    this.pushScope('block', node);
-
     if (this.hasStrictDirective(node.statements))
       this.top.strict = true;
 
+    this.pushScope('block', node);
     forEachChild(node, n => this.visit(n, 'var'));
-
     this.popScope();
   }
 
   Module(node) {
-    this.pushScope('block', node);
     this.top.strict = true;
+    this.pushScope('block', node);
     forEachChild(node, n => this.visit(n, 'var'));
     this.popScope();
   }

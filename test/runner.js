@@ -6,9 +6,6 @@ const TEST_COMMENT = /\/\*\*[\s\S]+?\*\*\//g;
 const COMMENT_TRIM = /^\/\*+\s+|\s+\*+\/$/g;
 const HOP = {}.hasOwnProperty;
 
-let testsPassed = 0;
-let testsFailed = 0;
-
 // Returns a stat object for a path
 function statPath(path) {
   try {
@@ -67,13 +64,6 @@ function printMessage(msg) {
 // Prints a group header to the console
 function printHeader(msg) {
   console.log(`\n${ Style.bold('== ' + msg + ' ==') }\n`);
-}
-
-// Prints a test result
-function printResult(msg, pass) {
-  console.log(msg + ' ' + (pass ? Style.green('OK') : Style.bold(Style.red('FAIL'))));
-  if (pass) testsPassed++;
-  else testsFailed++;
 }
 
 // Read a javascript or json file
@@ -140,10 +130,18 @@ function defaultRender(obj) {
 }
 
 function runTests(options) {
+  let testsPassed = 0;
+  let testsFailed = 0;
   let dirname = options.dir;
   let process = options.process;
   let compare = options.compare;
   let render = options.render || defaultRender;
+
+  function printResult(msg, pass) {
+    console.log(msg + ' ' + (pass ? Style.green('OK') : Style.bold(Style.red('FAIL'))));
+    if (pass) testsPassed++;
+    else testsFailed++;
+  }
 
   // Returns the group name for a test file
   function groupName(path) {
@@ -208,10 +206,13 @@ function runTests(options) {
     run();
     printMessage('\nSuccessfully completed ' + testsPassed + ' tests - looks good to me!');
   } catch (err) {
-    if (err !== 'stop') {
-      printMessage('\nSnap! An error has occurred.');
-      throw err;
+    if (err === 'stop') {
+      console.log(' ');
+      global.process.exit(1);
+      return;
     }
+    printMessage('\nSnap! An error has occurred.');
+    throw err;
   } finally {
     console.log('');
   }
