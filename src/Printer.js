@@ -565,6 +565,9 @@ export class Printer {
 
   ExportDefault(node) {
     this.write('export default ', node.binding);
+    if (node.binding !== 'FunctionDeclaration' && node.binding !== 'ClassDeclaration') {
+      this.write(';');
+    }
   }
 
   ExportNameList(node) {
@@ -572,14 +575,15 @@ export class Printer {
     this.writeList(node.specifiers);
     this.write(SPACE, '}');
     if (node.from) this.write(SPACE, 'from', SPACE, node.from);
+    this.write(';');
   }
 
   ExportNamespace(node) {
-    this.write('export * as ', node.identifier, ' from ', node.from);
+    this.write('export * as ', node.identifier, ' from ', node.from, ';');
   }
 
   ExportDefaultFrom(node) {
-    this.write('export ', node.identifier, ' from ', node.from);
+    this.write('export ', node.identifier, ' from ', node.from, ';');
   }
 
   ExportSpecifier(node) {
