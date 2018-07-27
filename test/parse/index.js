@@ -1,6 +1,5 @@
 const { parse } = require('../../');
 const { runTests, objectLike } = require('../runner.js');
-const { inspect } = require('util');
 
 const SKIP_KEYS = [
   'start',
@@ -16,14 +15,8 @@ function astLike(a, b) {
   return objectLike(a, b, SKIP_KEYS);
 }
 
-// Displays an object tree
-function displayTree(tree) {
-  return inspect(tree, false, 20, true);
-}
-
 runTests({
   dir:  __dirname,
-  render: displayTree,
   process: (input, options) => parse(input, options).ast,
   compare: astLike
 });

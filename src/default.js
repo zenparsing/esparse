@@ -5,13 +5,6 @@ import * as AST from './AST.js';
 
 export { AST, parse, print };
 
-function addParentLinks(node) {
-  AST.forEachChild(node, child => {
-    child.parent = node;
-    addParentLinks(child);
-  });
-}
-
 function print(ast) {
   return new Printer().print(ast);
 }
@@ -24,9 +17,6 @@ function parse(input, options) {
 
   if (options.resolveScopes)
     result.scopeTree = new ScopeResolver().resolve(result);
-
-  if (options.addParentLinks)
-    addParentLinks(result.ast);
 
   return result;
 }
