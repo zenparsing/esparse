@@ -487,9 +487,13 @@ export class Printer {
   }
 
   FunctionBody(node) {
-    this.write('{', INDENT);
-    this.writeList(node.statements, NEWLINE);
-    this.write(OUTDENT, '}');
+    if (node.statements.length === 0) {
+      this.write('{}');
+    } else {
+      this.write('{', INDENT);
+      this.writeList(node.statements, NEWLINE);
+      this.write(OUTDENT, '}');
+    }
   }
 
   ArrowFunction(node) {

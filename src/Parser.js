@@ -2139,7 +2139,7 @@ export class Parser {
   RestParameter() {
     let start = this.nodeStart();
     this.read('...');
-    return new AST.RestParameter(this.BindingIdentifier(), start, this.nodeEnd());
+    return new AST.RestParameter(this.BindingPattern(), start, this.nodeEnd());
   }
 
   FunctionBody() {

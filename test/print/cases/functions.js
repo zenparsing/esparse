@@ -6,4 +6,8 @@
   a++;
 }`,
 
+/** function f(...[a]) {} **/
+'function with pattern rest element':
+`function f(...[a]) {}`,
+
 })
