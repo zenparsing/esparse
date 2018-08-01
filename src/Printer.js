@@ -261,9 +261,13 @@ export class Printer {
   }
 
   ObjectLiteral(node) {
-    this.write('{', INDENT);
-    this.writeList(node.properties, ',', NEWLINE);
-    this.write(OUTDENT, '}');
+    if (node.properties.length === 0) {
+      this.write('{}');
+    } else {
+      this.write('{', INDENT);
+      this.writeList(node.properties, ',', NEWLINE);
+      this.write(OUTDENT, '}');
+    }
   }
 
   ComputedPropertyName(node) {
