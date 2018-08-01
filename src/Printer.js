@@ -517,9 +517,13 @@ export class Printer {
   }
 
   ClassBody(node) {
-    this.write('{', INDENT);
-    this.writeList(node.elements, NEWLINE);
-    this.write(OUTDENT, '}');
+    if (node.elements.length === 0) {
+      this.write('{}');
+    } else {
+      this.write('{', INDENT);
+      this.writeList(node.elements, NEWLINE);
+      this.write(OUTDENT, '}');
+    }
   }
 
   EmptyClassElement() {
