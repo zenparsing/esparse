@@ -2,6 +2,7 @@ import * as AST from './AST.js';
 import { Scanner } from './Scanner.js';
 import { Transform } from './Transform.js';
 import { Validate } from './Validate.js';
+import { ScopeResolver } from './ScopeResolver.js';
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -179,20 +180,6 @@ class ParseResult {
     return this.lineMap.locate(offset);
   }
 
-  createSyntaxError(message, node) {
-    let loc = this.lineMap.locate(node.start);
-    let err = new SyntaxError(message);
-
-    err.line = loc.line;
-    err.column = loc.column;
-    err.lineOffset = loc.lineOffset;
-    err.startOffset = node.start;
-    err.endOffset = node.end;
-    err.sourceText = this.input;
-
-    return err;
-  }
-
 }
 
 export class Parser {
@@ -203,6 +190,7 @@ export class Parser {
     let scanner = new Scanner(input, options.offset);
 
     this.onASI = options.onASI || null;
+    this.resolveScopes = Boolean(options.resolveScopes);
     this.scanner = scanner;
     this.input = input;
     this.peek0 = null;
@@ -215,13 +203,23 @@ export class Parser {
   }
 
   createParseResult(ast) {
-    return new ParseResult({
+    let result = new ParseResult({
       ast,
       input: this.input,
       lineMap: this.scanner.lineMap,
       annotations: this.annotations,
       comments: this.comments,
     });
+
+    if (this.resolveScopes) {
+      let resolver = new ScopeResolver({
+        onStaticError: (msg, node) => this.fail(msg, node),
+      });
+
+      result.scopeTree = resolver.resolve(ast);
+    }
+
+    return result;
   }
 
   parseModule() {
@@ -453,8 +451,16 @@ export class Parser {
     if (!node)
       node = this.peekToken();
 
-    let result = this.createParseResult(null);
-    throw result.createSyntaxError(msg, node);
+    let loc = this.scanner.lineMap.locate(node.start);
+    let err = new SyntaxError(msg);
+
+    err.line = loc.line;
+    err.column = loc.column;
+    err.lineOffset = loc.lineOffset;
+    err.startOffset = node.start;
+    err.endOffset = node.end;
+
+    throw err;
   }
 
   unwrapParens(node) {

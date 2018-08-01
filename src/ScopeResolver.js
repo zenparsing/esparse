@@ -26,18 +26,22 @@ class Scope {
 
 export class ScopeResolver {
 
-  resolve(parseResult) {
-    this.parseResult = parseResult;
+  constructor(options = {}) {
     this.stack = [];
-    this.top = new Scope('var', false, parseResult.ast);
+    this.top = null;
+    this.onStaticError = options.onStaticError;
+  }
 
-    this.visit(parseResult.ast);
+  resolve(ast) {
+    this.top = new Scope('var', false, ast);
+    this.visit(ast);
     this.flushFree();
     return this.top;
   }
 
   fail(msg, node) {
-    throw this.parseResult.createSyntaxError(msg, node);
+    if (this.onStaticError) this.onStaticError(msg, node);
+    else throw new SyntaxError(msg);
   }
 
   pushScope(type, node) {

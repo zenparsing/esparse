@@ -13,6 +13,7 @@ class PrintResult {
 }
 
 export class Printer {
+
   constructor() {
     this.indentWidth = 2;
     this.depth = 0;
