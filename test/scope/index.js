@@ -50,7 +50,7 @@ function process(source, options) {
 }
 
 function compare(a, b) {
-  return objectLike(a, b, ['node', 'message', 'strict', 'parent']);
+  return objectLike(a, b, ['node', 'message', 'parent', 'start', 'end']);
 }
 
 runTests({

@@ -1,7 +1,8 @@
 import { forEachChild } from './AST.js';
 
-// TODO:  How do we deal with the insanity that is with statements?
-// TODO:  Param scopes have empty free lists, which is strange
+// TODO: Param scopes have empty free lists, which is strange
+// TODO: Should names be a Map and free be a Set?
+// TODO: Should free be a Map of references?
 
 class Scope {
 
@@ -249,6 +250,13 @@ export class ScopeResolver {
     this.pushScope('catch', node);
     this.visit(node.param);
     forEachChild(node, n => this.visit(n));
+    this.popScope();
+  }
+
+  WithStatement(node) {
+    this.visit(node.object);
+    this.pushScope('with', node);
+    this.visit(node.body);
     this.popScope();
   }
 
