@@ -1,8 +1,6 @@
 import { forEachChild } from './AST.js';
 
 // TODO: Param scopes have empty free lists, which is strange
-// TODO: Should names be a Map and free be a Set?
-// TODO: Should free be a Map of references?
 
 class Scope {
 
@@ -156,13 +154,12 @@ export class ScopeResolver {
       this.top.free.length = 0;
     });
 
-    this.pushScope('var');
-    let blockScope = this.pushScope('block');
+    this.pushScope('var', body);
+    let blockScope = this.pushScope('block', body);
     this.visit(body, 'var');
-    this.popScope();
-    this.popScope();
-
-    this.popScope();
+    this.popScope(); // block
+    this.popScope(); // var
+    this.popScope(); // param
 
     Object.keys(paramScope.names).forEach(name => {
       if (blockScope.names[name])
