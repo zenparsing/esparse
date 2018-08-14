@@ -4,8 +4,8 @@ import * as AST from './AST.js';
 
 export { AST, parse, print };
 
-function print(ast) {
-  return new Printer().print(ast);
+function print(ast, options) {
+  return new Printer().print(ast, options);
 }
 
 function parse(input, options = {}) {
