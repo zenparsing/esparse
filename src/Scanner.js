@@ -276,15 +276,14 @@ export class Scanner {
         return '\n';
 
       case '\r':
-        this.lineMap.addBreak(this.offset - 1);
-        if (this.peekChar() === '\n')
-          this.offset++;
+        if (this.peekChar() === '\n') this.offset++;
+        this.lineMap.addBreak(this.offset);
         return continuationChar;
 
       case '\n':
       case '\u2028':
       case '\u2029':
-        this.lineMap.addBreak(this.offset - 1);
+        this.lineMap.addBreak(this.offset);
         return continuationChar;
 
       case '0':
@@ -529,12 +528,13 @@ export class Scanner {
   }
 
   Newline(code) {
-    this.lineMap.addBreak(this.offset++);
+    this.offset++;
 
     // Treat /r/n as a single newline
     if (code === 13 && this.peekCode() === 10)
       this.offset++;
 
+    this.lineMap.addBreak(this.offset);
     this.newlineBefore = true;
 
     return '';

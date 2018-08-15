@@ -22,7 +22,7 @@ export class Printer {
     this.inputLineMap = null;
     this.inputStart = 0;
     this.mappings = [];
-    this.currentLine = 1;
+    this.currentLine = 0;
     this.currentLineOffset = 0;
   }
 
@@ -35,7 +35,6 @@ export class Printer {
       let generated = {
         line: this.currentLine,
         column: this.output.length - this.currentLineOffset,
-        offset: this.output.length,
         lineOffset: this.currentLineOffset,
       };
 
