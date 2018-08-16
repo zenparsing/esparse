@@ -442,9 +442,9 @@ export function ForInStatement(left, right, body, start, end) {
 
 export function ForOfStatement(async, left, right, body, start, end) {
   this.type = 'ForOfStatement';
-  this.async = async;
   this.start = start;
   this.end = end;
+  this.async = async;
   this.left = left;
   this.right = right;
   this.body = body;
@@ -582,18 +582,18 @@ export function EmptyClassElement(start, end) {
 
 export function ClassField(isStatic, name, initializer, start, end) {
   this.type = 'ClassField';
+  this.start = start;
+  this.end = end;
   this.static = isStatic;
   this.name = name;
   this.initializer = initializer;
-  this.start = start;
-  this.end = end;
 }
 
 export function ImportCall(argument, start, end) {
   this.type = 'ImportCall';
-  this.argument = argument;
   this.start = start;
   this.end = end;
+  this.argument = argument;
 }
 
 export function ImportDeclaration(imports, from, start, end) {
@@ -643,9 +643,9 @@ export function ExportDeclaration(declaration, start, end) {
 
 export function ExportDefault(binding, start, end) {
   this.type = 'ExportDefault';
-  this.binding = binding;
   this.start = start;
   this.end = end;
+  this.binding = binding;
 }
 
 export function ExportNameList(specifiers, from, start, end) {
