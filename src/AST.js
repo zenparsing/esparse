@@ -4,24 +4,24 @@ function isNode(x) {
 
 export function forEachChild(node, fn) {
   let keys = Object.keys(node);
+  let stop = {};
 
   for (let i = 0; i < keys.length; ++i) {
     let key = keys[i];
-    if (key === 'parent')
-      continue;
-
     let value = node[key];
 
     if (Array.isArray(value)) {
 
       for (let j = 0; j < value.length; ++j) {
         if (isNode(value[j]))
-          fn(value[j], key, j);
+          if (fn(value[j], key, j, stop) === stop)
+            return;
       }
 
     } else if (isNode(value)) {
 
-      fn(value, key, null);
+      if (fn(value, key, null, stop) === stop)
+        return;
 
     }
   }
