@@ -135,7 +135,7 @@ export class Validate {
         if (decl.initializer)
           return;
 
-        // Enforce const intilization in for(;;)
+        // Enforce const initialization in for(;;)
         if (init.kind === 'const')
           this.fail('Missing const initializer', decl.pattern);
 

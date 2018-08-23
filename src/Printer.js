@@ -27,19 +27,20 @@ export class Printer {
   }
 
   addMapping(node) {
-    if (typeof node.start === 'number' && node.start > this.inputStart) {
-      this.inputStart = node.start;
+    if (typeof node.start !== 'number' || node.start < 0 || node.start > this.inputStart)
+      return;
 
-      let original = this.inputLineMap.locate(this.inputStart);
+    this.inputStart = node.start;
 
-      let generated = {
-        line: this.currentLine,
-        column: this.output.length - this.currentLineOffset,
-        lineOffset: this.currentLineOffset,
-      };
+    let original = this.inputLineMap.locate(this.inputStart);
 
-      this.mappings.push({ original, generated });
-    }
+    let generated = {
+      line: this.currentLine,
+      column: this.output.length - this.currentLineOffset,
+      lineOffset: this.currentLineOffset,
+    };
+
+    this.mappings.push({ original, generated });
   }
 
   newline() {

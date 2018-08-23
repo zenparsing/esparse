@@ -27,274 +27,274 @@ export function forEachChild(node, fn) {
   }
 }
 
-export function Identifier(value, context, start, end) {
+export function Identifier(value, context) {
   this.type = 'Identifier';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.value = value;
   this.context = context;
 }
 
-export function NumberLiteral(value, suffix, start, end) {
+export function NumberLiteral(value, suffix) {
   this.type = 'NumberLiteral';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.value = value;
   this.suffix = suffix;
 }
 
-export function StringLiteral(value, start, end) {
+export function StringLiteral(value) {
   this.type = 'StringLiteral';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.value = value;
 }
 
-export function TemplatePart(value, raw, isEnd, start, end) {
+export function TemplatePart(value, raw, isEnd) {
   this.type = 'TemplatePart';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.value = value;
   this.raw = raw;
   this.templateEnd = isEnd;
 }
 
-export function RegularExpression(value, flags, start, end) {
+export function RegularExpression(value, flags) {
   this.type = 'RegularExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.value = value;
   this.flags = flags;
 }
 
-export function BooleanLiteral(value, start, end) {
+export function BooleanLiteral(value) {
   this.type = 'BooleanLiteral';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.value = value;
 }
 
 export function NullLiteral(start, end) {
   this.type = 'NullLiteral';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
 }
 
-export function Script(statements, start, end) {
+export function Script(statements) {
   this.type = 'Script';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.statements = statements;
 }
 
-export function Module(statements, start, end) {
+export function Module(statements) {
   this.type = 'Module';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.statements = statements;
 }
 
 export function ThisExpression(start, end) {
   this.type = 'ThisExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
 }
 
 export function SuperKeyword(start, end) {
   this.type = 'SuperKeyword';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
 }
 
-export function SequenceExpression(list, start, end) {
+export function SequenceExpression(list) {
   this.type = 'SequenceExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.expressions = list;
 }
 
-export function AssignmentExpression(op, left, right, start, end) {
+export function AssignmentExpression(left, op, right) {
   this.type = 'AssignmentExpression';
-  this.start = start;
-  this.end = end;
-  this.operator = op;
+  this.start = -1;
+  this.end = -1;
   this.left = left;
+  this.operator = op;
   this.right = right;
 }
 
-export function SpreadExpression(expr, start, end) {
+export function SpreadExpression(expr) {
   this.type = 'SpreadExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.expression = expr;
 }
 
-export function YieldExpression(expr, delegate, start, end) {
+export function YieldExpression(expr, delegate) {
   this.type = 'YieldExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.delegate = delegate;
   this.expression = expr;
 }
 
-export function ConditionalExpression(test, cons, alt, start, end) {
+export function ConditionalExpression(test, cons, alt) {
   this.type = 'ConditionalExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.test = test;
   this.consequent = cons;
   this.alternate = alt;
 }
 
-export function BinaryExpression(op, left, right, start, end) {
+export function BinaryExpression(left, op, right) {
   this.type = 'BinaryExpression';
-  this.start = start;
-  this.end = end;
-  this.operator = op;
+  this.start = -1;
+  this.end = -1;
   this.left = left;
+  this.operator = op;
   this.right = right;
 }
 
-export function UpdateExpression(op, expr, prefix, start, end) {
+export function UpdateExpression(op, expr, prefix) {
   this.type = 'UpdateExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.operator = op;
   this.expression = expr;
   this.prefix = prefix;
 }
 
-export function UnaryExpression(op, expr, start, end) {
+export function UnaryExpression(op, expr) {
   this.type = 'UnaryExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.operator = op;
   this.expression = expr;
 }
 
-export function MemberExpression(obj, prop, start, end) {
+export function MemberExpression(obj, prop) {
   this.type = 'MemberExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.object = obj;
   this.property = prop;
 }
 
-export function MetaProperty(left, right, start, end) {
+export function MetaProperty(left, right) {
   this.type = 'MetaProperty';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.left = left;
   this.right = right;
 }
 
-export function CallExpression(callee, args, trailingComma, start, end) {
+export function CallExpression(callee, args, trailingComma) {
   this.type = 'CallExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.callee = callee;
   this.arguments = args;
   this.trailingComma = trailingComma;
 }
 
-export function TemplateExpression(parts, start, end) {
+export function TemplateExpression(parts) {
   this.type = 'TemplateExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.parts = parts;
 }
 
-export function TaggedTemplateExpression(tag, template, start, end) {
+export function TaggedTemplateExpression(tag, template) {
   this.type = 'TaggedTemplateExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.tag = tag;
   this.template = template;
 }
 
-export function NewExpression(callee, args, trailingComma, start, end) {
+export function NewExpression(callee, args, trailingComma) {
   this.type = 'NewExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.callee = callee;
   this.arguments = args;
   this.trailingComma = trailingComma;
 }
 
-export function ParenExpression(expr, start, end) {
+export function ParenExpression(expr) {
   this.type = 'ParenExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.expression = expr;
 }
 
-export function ObjectLiteral(props, comma, start, end) {
+export function ObjectLiteral(props, comma) {
   this.type = 'ObjectLiteral';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.properties = props;
   this.trailingComma = comma;
 }
 
-export function ComputedPropertyName(expr, start, end) {
+export function ComputedPropertyName(expr) {
   this.type = 'ComputedPropertyName';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.expression = expr;
 }
 
-export function PropertyDefinition(name, expr, start, end) {
+export function PropertyDefinition(name, expr) {
   this.type = 'PropertyDefinition';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.name = name;
   this.expression = expr;
 }
 
-export function ObjectPattern(props, comma, start, end) {
+export function ObjectPattern(props, comma) {
   this.type = 'ObjectPattern';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.properties = props;
   this.trailingComma = comma;
 }
 
-export function PatternProperty(name, pattern, initializer, start, end) {
+export function PatternProperty(name, pattern, initializer) {
   this.type = 'PatternProperty';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.name = name;
   this.pattern = pattern;
   this.initializer = initializer;
 }
 
-export function ArrayPattern(elements, comma, start, end) {
+export function ArrayPattern(elements, comma) {
   this.type = 'ArrayPattern';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.elements = elements;
   this.trailingComma = comma;
 }
 
-export function PatternElement(pattern, initializer, start, end) {
+export function PatternElement(pattern, initializer) {
   this.type = 'PatternElement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.pattern = pattern;
   this.initializer = initializer;
 }
 
-export function PatternRestElement(pattern, start, end) {
+export function PatternRestElement(pattern) {
   this.type = 'PatternRestElement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.pattern = pattern;
 }
 
-export function MethodDefinition(isStatic, kind, name, params, body, start, end) {
+export function MethodDefinition(isStatic, kind, name, params, body) {
   this.type = 'MethodDefinition';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.static = isStatic;
   this.kind = kind;
   this.name = name;
@@ -302,395 +302,395 @@ export function MethodDefinition(isStatic, kind, name, params, body, start, end)
   this.body = body;
 }
 
-export function ArrayLiteral(elements, comma, start, end) {
+export function ArrayLiteral(elements, comma) {
   this.type = 'ArrayLiteral';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.elements = elements;
   this.trailingComma = comma;
 }
 
-export function Block(statements, start, end) {
+export function Block(statements) {
   this.type = 'Block';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.statements = statements;
 }
 
-export function LabelledStatement(label, statement, start, end) {
+export function LabelledStatement(label, statement) {
   this.type = 'LabelledStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.label = label;
   this.statement = statement;
 }
 
-export function ExpressionStatement(expr, start, end) {
+export function ExpressionStatement(expr) {
   this.type = 'ExpressionStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.expression = expr;
 }
 
-export function Directive(value, expr, start, end) {
+export function Directive(value, expr) {
   this.type = 'Directive';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.value = value;
   this.expression = expr;
 }
 
 export function EmptyStatement(start, end) {
   this.type = 'EmptyStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
 }
 
-export function VariableDeclaration(kind, list, start, end) {
+export function VariableDeclaration(kind, list) {
   this.type = 'VariableDeclaration';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.kind = kind;
   this.declarations = list;
 }
 
-export function VariableDeclarator(pattern, initializer, start, end) {
+export function VariableDeclarator(pattern, initializer) {
   this.type = 'VariableDeclarator';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.pattern = pattern;
   this.initializer = initializer;
 }
 
-export function ReturnStatement(arg, start, end) {
+export function ReturnStatement(arg) {
   this.type = 'ReturnStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.argument = arg;
 }
 
-export function BreakStatement(label, start, end) {
+export function BreakStatement(label) {
   this.type = 'BreakStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.label = label;
 }
 
-export function ContinueStatement(label, start, end) {
+export function ContinueStatement(label) {
   this.type = 'ContinueStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.label = label;
 }
 
-export function ThrowStatement(expr, start, end) {
+export function ThrowStatement(expr) {
   this.type = 'ThrowStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.expression = expr;
 }
 
 export function DebuggerStatement(start, end) {
   this.type = 'DebuggerStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
 }
 
-export function IfStatement(test, cons, alt, start, end) {
+export function IfStatement(test, cons, alt) {
   this.type = 'IfStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.test = test;
   this.consequent = cons;
   this.alternate = alt;
 }
 
-export function DoWhileStatement(body, test, start, end) {
+export function DoWhileStatement(body, test) {
   this.type = 'DoWhileStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.body = body;
   this.test = test;
 }
 
-export function WhileStatement(test, body, start, end) {
+export function WhileStatement(test, body) {
   this.type = 'WhileStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.test = test;
   this.body = body;
 }
 
-export function ForStatement(initializer, test, update, body, start, end) {
+export function ForStatement(initializer, test, update, body) {
   this.type = 'ForStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.initializer = initializer;
   this.test = test;
   this.update = update;
   this.body = body;
 }
 
-export function ForInStatement(left, right, body, start, end) {
+export function ForInStatement(left, right, body) {
   this.type = 'ForInStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.left = left;
   this.right = right;
   this.body = body;
 }
 
-export function ForOfStatement(async, left, right, body, start, end) {
+export function ForOfStatement(async, left, right, body) {
   this.type = 'ForOfStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.async = async;
   this.left = left;
   this.right = right;
   this.body = body;
 }
 
-export function WithStatement(object, body, start, end) {
+export function WithStatement(object, body) {
   this.type = 'WithStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.object = object;
   this.body = body;
 }
 
-export function SwitchStatement(desc, cases, start, end) {
+export function SwitchStatement(desc, cases) {
   this.type = 'SwitchStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.descriminant = desc;
   this.cases = cases;
 }
 
-export function SwitchCase(test, cons, start, end) {
+export function SwitchCase(test, cons) {
   this.type = 'SwitchCase';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.test = test;
   this.consequent = cons;
 }
 
-export function TryStatement(block, handler, fin, start, end) {
+export function TryStatement(block, handler, fin) {
   this.type = 'TryStatement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.block = block;
   this.handler = handler;
   this.finalizer = fin;
 }
 
-export function CatchClause(param, body, start, end) {
+export function CatchClause(param, body) {
   this.type = 'CatchClause';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.param = param;
   this.body = body;
 }
 
-export function FunctionDeclaration(kind, identifier, params, body, start, end) {
+export function FunctionDeclaration(kind, identifier, params, body) {
   this.type = 'FunctionDeclaration';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.kind = kind;
   this.identifier = identifier;
   this.params = params;
   this.body = body;
 }
 
-export function FunctionExpression(kind, identifier, params, body, start, end) {
+export function FunctionExpression(kind, identifier, params, body) {
   this.type = 'FunctionExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.kind = kind;
   this.identifier = identifier;
   this.params = params;
   this.body = body;
 }
 
-export function FormalParameter(pattern, initializer, start, end) {
+export function FormalParameter(pattern, initializer) {
   this.type = 'FormalParameter';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.pattern = pattern;
   this.initializer = initializer;
 }
 
-export function RestParameter(identifier, start, end) {
+export function RestParameter(identifier) {
   this.type = 'RestParameter';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.identifier = identifier;
 }
 
-export function FunctionBody(statements, start, end) {
+export function FunctionBody(statements) {
   this.type = 'FunctionBody';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.statements = statements;
 }
 
-export function ArrowFunctionHead(params, start, end) {
+export function ArrowFunctionHead(params) {
   this.type = 'ArrowFunctionHead';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.parameters = params;
 }
 
-export function ArrowFunction(kind, params, body, start, end) {
+export function ArrowFunction(kind, params, body) {
   this.type = 'ArrowFunction';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.kind = kind;
   this.params = params;
   this.body = body;
 }
 
-export function ClassDeclaration(identifier, base, body, start, end) {
+export function ClassDeclaration(identifier, base, body) {
   this.type = 'ClassDeclaration';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.identifier = identifier;
   this.base = base;
   this.body = body;
 }
 
-export function ClassExpression(identifier, base, body, start, end) {
+export function ClassExpression(identifier, base, body) {
   this.type = 'ClassExpression';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.identifier = identifier;
   this.base = base;
   this.body = body;
 }
 
-export function ClassBody(elems, start, end) {
+export function ClassBody(elems) {
   this.type = 'ClassBody';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.elements = elems;
 }
 
 export function EmptyClassElement(start, end) {
   this.type = 'EmptyClassElement';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
 }
 
-export function ClassField(isStatic, name, initializer, start, end) {
+export function ClassField(isStatic, name, initializer) {
   this.type = 'ClassField';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.static = isStatic;
   this.name = name;
   this.initializer = initializer;
 }
 
-export function ImportCall(argument, start, end) {
+export function ImportCall(argument) {
   this.type = 'ImportCall';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.argument = argument;
 }
 
-export function ImportDeclaration(imports, from, start, end) {
+export function ImportDeclaration(imports, from) {
   this.type = 'ImportDeclaration';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.imports = imports;
   this.from = from;
 }
 
-export function NamespaceImport(identifier, start, end) {
+export function NamespaceImport(identifier) {
   this.type = 'NamespaceImport';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.identifier = identifier;
 }
 
-export function NamedImports(specifiers, start, end) {
+export function NamedImports(specifiers) {
   this.type = 'NamedImports';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.specifiers = specifiers;
 }
 
-export function DefaultImport(identifier, imports, start, end) {
+export function DefaultImport(identifier, imports) {
   this.type = 'DefaultImport';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.identifier = identifier;
   this.imports = imports;
 }
 
-export function ImportSpecifier(imported, local, start, end) {
+export function ImportSpecifier(imported, local) {
   this.type = 'ImportSpecifier';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.imported = imported;
   this.local = local;
 }
 
-export function ExportDeclaration(declaration, start, end) {
+export function ExportDeclaration(declaration) {
   this.type = 'ExportDeclaration';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.declaration = declaration;
 }
 
-export function ExportDefault(binding, start, end) {
+export function ExportDefault(binding) {
   this.type = 'ExportDefault';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.binding = binding;
 }
 
-export function ExportNameList(specifiers, from, start, end) {
+export function ExportNameList(specifiers, from) {
   this.type = 'ExportNameList';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.specifiers = specifiers;
   this.from = from;
 }
 
-export function ExportNamespace(identifier, from, start, end) {
+export function ExportNamespace(identifier, from) {
   this.type = 'ExportNamespace';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.identifier = identifier;
   this.from = from;
 }
 
-export function ExportDefaultFrom(identifier, from, start, end) {
+export function ExportDefaultFrom(identifier, from) {
   this.type = 'ExportDefaultFrom';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.identifier = identifier;
   this.from = from;
 }
 
-export function ExportSpecifier(local, exported, start, end) {
+export function ExportSpecifier(local, exported) {
   this.type = 'ExportSpecifier';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.local = local;
   this.exported = exported;
 }
 
-export function Annotation(path, args, start, end) {
+export function Annotation(path, args) {
   this.type = 'Annotation';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.path = path;
   this.arguments = args;
 }
 
-export function Comment(text, start, end) {
+export function Comment(text) {
   this.type = 'Comment';
-  this.start = start;
-  this.end = end;
+  this.start = -1;
+  this.end = -1;
   this.text = text;
 }

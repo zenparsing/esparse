@@ -48,11 +48,11 @@ export class Transform {
         // Clear parser error for invalid spread expression
         node.error = '';
 
-        param = new AST.RestParameter(expr, node.start, node.end);
+        param = this.node(new AST.RestParameter(expr), node.start, node.end);
 
       } else {
 
-        param = new AST.FormalParameter(node, null, node.start, node.end);
+        param = this.node(new AST.FormalParameter(node, null), node.start, node.end);
         this.transformPatternElement(param, true);
       }
 
@@ -80,7 +80,7 @@ export class Transform {
           if (i < elems.length - 1 || node.trailingComma)
             this.fail('Invalid destructuring pattern', elem);
 
-          elem = new AST.PatternRestElement(elem.expression, elem.start, elem.end);
+          elem = this.node(new AST.PatternRestElement(elem.expression), elem.start, elem.end);
           this.checkPatternTarget(elem.pattern, binding);
           break;
 
@@ -93,7 +93,7 @@ export class Transform {
           break;
 
         default:
-          elem = new AST.PatternElement(elem, null, elem.start, elem.end);
+          elem = this.node(new AST.PatternElement(elem, null), elem.start, elem.end);
           this.transformPatternElement(elem, binding);
           break;
       }
@@ -116,12 +116,11 @@ export class Transform {
 
       switch (prop.type) {
         case 'PropertyDefinition':
-          prop = new AST.PatternProperty(
-            prop.name,
-            prop.expression,
-            null,
+          prop = this.node(
+            new AST.PatternProperty(prop.name, prop.expression, null),
             prop.start,
-            prop.end);
+            prop.end
+          );
           break;
 
         case 'SpreadExpression':
@@ -138,7 +137,7 @@ export class Transform {
               this.fail('Invalid rest pattern', prop.expression);
           }
 
-          prop = new AST.PatternRestElement(prop.expression, prop.start, prop.end);
+          prop = this.node(new AST.PatternRestElement(prop.expression), prop.start, prop.end);
           break;
 
         case 'PatternProperty':
