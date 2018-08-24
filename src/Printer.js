@@ -27,7 +27,7 @@ export class Printer {
   }
 
   addMapping(node) {
-    if (typeof node.start !== 'number' || node.start < 0 || node.start !== this.inputStart)
+    if (typeof node.start !== 'number' || node.start < 0 || node.start === this.inputStart)
       return;
 
     this.inputStart = node.start;
