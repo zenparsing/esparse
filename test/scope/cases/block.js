@@ -29,7 +29,7 @@
             children: [],
             varNames: null } ],
        varNames: null } ],
-  varNames: [] },
+  varNames: null },
 
 /** class C {} class C {} **/
 'duplicate class declarations not allowed': {},

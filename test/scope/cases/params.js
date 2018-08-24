@@ -63,7 +63,7 @@ function x(a, a) {}
                  varNames: null } ],
             varNames: null } ],
        varNames: null } ],
-  varNames: [] },
+  varNames: null },
 
 /**
 function x(a, a) { 'use strict' }
@@ -93,7 +93,7 @@ function x(a, {b:a}) {}
 /**
 function x(a) { let a }
 **/
-'block scope declarations cannot shadown parameter names': {},
+'block scope declarations cannot shadow parameter names': {},
 
 
 })

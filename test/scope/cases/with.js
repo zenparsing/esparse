@@ -20,6 +20,6 @@
             children: [],
             varNames: null } ],
        varNames: null } ],
-  varNames: [] },
+  varNames: null },
 
 })

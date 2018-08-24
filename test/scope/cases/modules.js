@@ -24,6 +24,6 @@
        strict: true,
        children: [],
        varNames: null } ],
-  varNames: [] },
+  varNames: null },
 
 })

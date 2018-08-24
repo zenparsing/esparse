@@ -76,6 +76,6 @@ function f(x) { var x }
                  varNames: null } ],
             varNames: null } ],
        varNames: null } ],
-  varNames: [] },
+  varNames: null },
 
 })

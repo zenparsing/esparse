@@ -35,6 +35,7 @@ export class ScopeResolver {
     this.top = new Scope('var', false, ast);
     this.visit(ast);
     this.flushFree();
+    this.top.varNames = null;
     return this.top;
   }
 
@@ -245,7 +246,6 @@ export class ScopeResolver {
 
   CatchClause(node) {
     this.pushScope('catch', node);
-    this.visit(node.param);
     forEachChild(node, n => this.visit(n));
     this.popScope();
   }
