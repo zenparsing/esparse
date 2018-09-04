@@ -9,4 +9,10 @@
 /*** export default x; ***/
 'exports default expression': `export default x;`,
 
+/*** export * as m from 'foo'; ***/
+'export namespace as': `export * as m from 'foo';`,
+
+/*** export * from 'foo'; ***/
+'export namespace': `export * from 'foo';`,
+
 })

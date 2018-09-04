@@ -592,7 +592,9 @@ export class Printer {
   }
 
   ExportNamespace(node) {
-    this.write('export * as ', node.identifier, ' from ', node.from, ';');
+    this.write('export *');
+    if (node.identifier) this.write(' as ', node.identifier);
+    this.write(' from ', node.from, ';');
   }
 
   ExportDefaultFrom(node) {
