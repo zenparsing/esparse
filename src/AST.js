@@ -74,7 +74,7 @@ export function BooleanLiteral(value) {
   this.value = value;
 }
 
-export function NullLiteral(start, end) {
+export function NullLiteral() {
   this.type = 'NullLiteral';
   this.start = -1;
   this.end = -1;
@@ -94,13 +94,13 @@ export function Module(statements) {
   this.statements = statements;
 }
 
-export function ThisExpression(start, end) {
+export function ThisExpression() {
   this.type = 'ThisExpression';
   this.start = -1;
   this.end = -1;
 }
 
-export function SuperKeyword(start, end) {
+export function SuperKeyword() {
   this.type = 'SuperKeyword';
   this.start = -1;
   this.end = -1;
@@ -340,7 +340,7 @@ export function Directive(value, expr) {
   this.expression = expr;
 }
 
-export function EmptyStatement(start, end) {
+export function EmptyStatement() {
   this.type = 'EmptyStatement';
   this.start = -1;
   this.end = -1;
@@ -390,7 +390,7 @@ export function ThrowStatement(expr) {
   this.expression = expr;
 }
 
-export function DebuggerStatement(start, end) {
+export function DebuggerStatement() {
   this.type = 'DebuggerStatement';
   this.start = -1;
   this.end = -1;
@@ -574,7 +574,7 @@ export function ClassBody(elems) {
   this.elements = elems;
 }
 
-export function EmptyClassElement(start, end) {
+export function EmptyClassElement() {
   this.type = 'EmptyClassElement';
   this.start = -1;
   this.end = -1;

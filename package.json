@@ -1,6 +1,6 @@
 {
   "name": "esparse",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "An ECMAScript Parser",
   "homepage": "https://github.com/zenparsing/esparse",
   "main": "dist/default.js",
@@ -13,7 +13,8 @@
   "scripts": {
     "lint": "eslint src/*",
     "test": "npm run build && node test",
-    "build": "babel src --out-dir dist --plugins=transform-es2015-modules-commonjs"
+    "build": "babel src --out-dir dist --plugins=transform-es2015-modules-commonjs",
+    "prepublishOnly": "npm run lint && npm test"
   },
   "dependencies": {}
 }
