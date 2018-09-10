@@ -46,9 +46,10 @@ export class Printer {
   newline(count = 1) {
     while (count > 0) {
       this.output += '\n';
+      this.currentLine += 1;
       count -= 1;
     }
-    this.currentLine += 1;
+
     this.currentLineOffset = this.output.length;
 
     if (this.indentWidth > 0)
