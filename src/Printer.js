@@ -128,17 +128,29 @@ export class Printer {
     }
   }
 
+  isClassOrFunction(node) {
+    switch (node.type) {
+      case 'ExportDeclaration':
+        node = node.declaration;
+        break;
+      case 'ExportDefault':
+        node = node.binding;
+        break;
+    }
+
+    switch (node.type) {
+      case 'FunctionDeclaration':
+      case 'ClassDeclaration':
+        return true;
+      default:
+        return false;
+    }
+  }
+
   writeStatements(list) {
-    this.writeList(list, node => {
-      switch (node.type) {
-        case 'FunctionDeclaration':
-        case 'ClassDeclaration':
-          this.newline(2);
-          break;
-        default:
-          this.newline(1);
-          break;
-      }
+    this.writeList(list, (node, prev) => {
+      let extra = this.isClassOrFunction(node) || this.isClassOrFunction(prev);
+      this.newline(extra ? 2 : 1);
     });
   }
 
@@ -622,7 +634,7 @@ export class Printer {
 
   ExportDefault(node) {
     this.write('export default ', node.binding);
-    if (node.binding !== 'FunctionDeclaration' && node.binding !== 'ClassDeclaration') {
+    if (node.binding.type !== 'FunctionDeclaration' && node.binding.type !== 'ClassDeclaration') {
       this.write(';');
     }
   }

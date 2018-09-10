@@ -15,4 +15,28 @@
 /*** export * from 'foo'; ***/
 'export namespace': `export * from 'foo';`,
 
+/*** var x; export function f() {} var y; ***/
+'export function spacing':
+`var x;
+
+export function f() {}
+
+var y;`,
+
+/*** var x; export class C {} var y; ***/
+'export class spacing':
+`var x;
+
+export class C {}
+
+var y;`,
+
+/*** var x; export default class C {} var y; ***/
+'export default spacing':
+`var x;
+
+export default class C {}
+
+var y;`,
+
 })
