@@ -10,4 +10,11 @@
 'function with pattern rest element':
 `function f(...[a]) {}`,
 
+/** function* g() { yield 1; yield * []; } **/
+'generator functions':
+`function* g() {
+  yield 1;
+  yield * [];
+}`,
+
 })

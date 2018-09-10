@@ -192,7 +192,7 @@ export class Printer {
   YieldExpression(node) {
     this.write('yield');
     if (node.delegate) this.write(SPACE, '*');
-    this.write(SPACE, node.expresion);
+    this.write(SPACE, node.expression);
   }
 
   ConditionalExpression(node) {
@@ -214,8 +214,9 @@ export class Printer {
   }
 
   UnaryExpression(node) {
-    // TODO: no space if operator char
-    this.write(node.operator, ' ', node.expression);
+    this.write(node.operator);
+    if (node.operator.length > 1) this.write(' ');
+    this.write(node.expression);
   }
 
   MemberExpression(node) {

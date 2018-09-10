@@ -12,4 +12,10 @@
 /** new a **/
 'new expression without parens': `new a;`,
 
+/** delete x.y **/
+'keyword unary expression': `delete x.y;`,
+
+/** !x **/
+'operator char unary expression': `!x;`,
+
 })
