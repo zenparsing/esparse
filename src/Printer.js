@@ -43,8 +43,11 @@ export class Printer {
     this.mappings.push({ original, generated });
   }
 
-  newline() {
-    this.output += '\n';
+  newline(count = 1) {
+    while (count > 0) {
+      this.output += '\n';
+      count -= 1;
+    }
     this.currentLine += 1;
     this.currentLineOffset = this.output.length;
 
@@ -127,11 +130,13 @@ export class Printer {
 
   writeStatements(list) {
     this.writeList(list, node => {
-      this.write(NEWLINE);
       switch (node.type) {
         case 'FunctionDeclaration':
         case 'ClassDeclaration':
-          this.write(NEWLINE);
+          this.newline(2);
+          break;
+        default:
+          this.newline(1);
           break;
       }
     });
@@ -561,9 +566,11 @@ export class Printer {
     if (node.elements.length === 0) {
       this.write('{}');
     } else {
-      // TODO: Elements that are not fields should have an extra newline between them
       this.write('{', INDENT);
-      this.writeList(node.elements, NEWLINE);
+      this.writeList(node.elements, (node, prev) => {
+        if (!(node.type === 'ClassField' && prev.type === 'ClassField')) this.newline(2);
+        else this.newline();
+      });
       this.write(OUTDENT, '}');
     }
   }
