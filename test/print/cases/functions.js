@@ -21,4 +21,10 @@
 'destructuring params':
 `function f({ x, y }) {}`,
 
+/** var x; function f() {}  **/
+'newline before function':
+`var x;
+
+function f() {}`,
+
 })

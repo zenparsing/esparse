@@ -109,12 +109,31 @@ export class Printer {
     }
   }
 
-  writeList(list, ...sep) {
-    if (sep.length === 0) sep = [',', SPACE];
-    list.forEach((n, i) => {
-      this.printNode(n);
-      if (n && n.type === 'VariableDeclaration') this.write(';');
-      if (i < list.length - 1) this.write(...sep);
+  writeList(list, sep) {
+    let prev = null;
+    for (let i = 0; i < list.length; ++i) {
+      let node = list[i];
+      if (i > 0) {
+        if (typeof sep === 'function') sep(node, prev);
+        else if (sep === undefined) this.write(',', SPACE);
+        else if (Array.isArray(sep)) this.write(...sep);
+        else this.write(sep);
+      }
+      this.printNode(node);
+      if (node && node.type === 'VariableDeclaration') this.write(';');
+      prev = node;
+    }
+  }
+
+  writeStatements(list) {
+    this.writeList(list, node => {
+      this.write(NEWLINE);
+      switch (node.type) {
+        case 'FunctionDeclaration':
+        case 'ClassDeclaration':
+          this.write(NEWLINE);
+          break;
+      }
     });
   }
 
@@ -156,11 +175,11 @@ export class Printer {
   }
 
   Script(node) {
-    this.writeList(node.statements, NEWLINE);
+    this.writeStatements(node.statements);
   }
 
   Module(node) {
-    this.writeList(node.statements, NEWLINE);
+    this.writeStatements(node.statements, NEWLINE);
   }
 
   ThisExpression() {
@@ -272,7 +291,7 @@ export class Printer {
       this.write(' }');
     } else {
       this.write('{', INDENT);
-      this.writeList(props, ',', NEWLINE);
+      this.writeList(props, [',', NEWLINE]);
       this.write(OUTDENT, '}');
     }
   }
@@ -294,11 +313,11 @@ export class Printer {
       this.write('{}');
     } else if (props.every(p => p.type === 'PatternProperty' && !p.pattern)) {
       this.write('{ ');
-      this.writeList(props, ', ');
+      this.writeList(props);
       this.write(' }');
     } else {
       this.write('{', INDENT);
-      this.writeList(props, ',', NEWLINE);
+      this.writeList(props, [',', NEWLINE]);
       this.write(OUTDENT, '}');
     }
   }
@@ -310,6 +329,7 @@ export class Printer {
   }
 
   ArrayPattern(node) {
+    // TODO: Use newlines for long lists
     this.write('[');
     this.writeList(node.elements);
     this.write(']');
@@ -341,6 +361,7 @@ export class Printer {
   }
 
   ArrayLiteral(node) {
+    // TODO: Use newlines for long lists
     this.write('[');
     this.writeList(node.elements);
     this.write(']');
@@ -348,7 +369,7 @@ export class Printer {
 
   Block(node) {
     this.write('{', INDENT);
-    this.writeList(node.statements, NEWLINE);
+    this.writeStatements(node.statements);
     this.write(OUTDENT, '}');
   }
 
@@ -461,7 +482,7 @@ export class Printer {
   SwitchCase(node) {
     if (node.test) this.write('case ', node.test, ':', INDENT);
     else this.write('default:', INDENT);
-    this.writeList(node.consequent, NEWLINE);
+    this.writeStatements(node.consequent);
     this.write(OUTDENT);
   }
 
@@ -511,7 +532,7 @@ export class Printer {
       this.write('{}');
     } else {
       this.write('{', INDENT);
-      this.writeList(node.statements, NEWLINE);
+      this.writeStatements(node.statements);
       this.write(OUTDENT, '}');
     }
   }
@@ -540,6 +561,7 @@ export class Printer {
     if (node.elements.length === 0) {
       this.write('{}');
     } else {
+      // TODO: Elements that are not fields should have an extra newline between them
       this.write('{', INDENT);
       this.writeList(node.elements, NEWLINE);
       this.write(OUTDENT, '}');
