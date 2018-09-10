@@ -17,4 +17,8 @@
   yield * [];
 }`,
 
+/** function f({ x, y }) {} **/
+'destructuring params':
+`function f({ x, y }) {}`,
+
 })

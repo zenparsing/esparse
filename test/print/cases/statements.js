@@ -50,9 +50,6 @@
 
 /** for (let { x, y } of z); **/
 'for-of':
-`for (let {
-  x,
-  y
-} of z) ;`,
+`for (let { x, y } of z) ;`,
 
 })

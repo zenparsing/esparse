@@ -263,11 +263,16 @@ export class Printer {
   }
 
   ObjectLiteral(node) {
-    if (node.properties.length === 0) {
+    let props = node.properties;
+    if (props.length === 0) {
       this.write('{}');
+    } else if (props.every(p => p.type === 'PropertyDefinition' && !p.expression)) {
+      this.write('{ ');
+      this.writeList(props, ', ');
+      this.write(' }');
     } else {
       this.write('{', INDENT);
-      this.writeList(node.properties, ',', NEWLINE);
+      this.writeList(props, ',', NEWLINE);
       this.write(OUTDENT, '}');
     }
   }
@@ -284,9 +289,18 @@ export class Printer {
   }
 
   ObjectPattern(node) {
-    this.write('{', INDENT);
-    this.writeList(node.properties, ',', NEWLINE);
-    this.write(OUTDENT, '}');
+    let props = node.properties;
+    if (props.length === 0) {
+      this.write('{}');
+    } else if (props.every(p => p.type === 'PatternProperty' && !p.pattern)) {
+      this.write('{ ');
+      this.writeList(props, ', ');
+      this.write(' }');
+    } else {
+      this.write('{', INDENT);
+      this.writeList(props, ',', NEWLINE);
+      this.write(OUTDENT, '}');
+    }
   }
 
   PatternProperty(node) {
