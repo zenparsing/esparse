@@ -13,7 +13,7 @@
   "scripts": {
     "lint": "eslint src/*",
     "test": "npm run build && node test",
-    "build": "babel src --out-dir dist --plugins=transform-es2015-modules-commonjs",
+    "build": "git clean -dfX ./dist && babel src --out-dir dist --plugins=transform-es2015-modules-commonjs",
     "prepublishOnly": "npm run lint && npm test"
   },
   "dependencies": {}
