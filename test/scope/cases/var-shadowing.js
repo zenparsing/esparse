@@ -26,7 +26,6 @@ function f(x) { var x }
         const: false } },
   free: [],
   strict: true,
-  parent: null,
   children:
    [ { type: 'block',
        names: {},

@@ -6,7 +6,6 @@
   names: {},
   free: [ { type: 'Identifier', value: 'x', context: 'variable' } ],
   strict: false,
-  parent: null,
   children:
    [ { type: 'block',
        names: {},

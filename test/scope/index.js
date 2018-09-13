@@ -43,42 +43,43 @@
 
 const { parse } = require('../../');
 const { runTests, objectLike } = require('../runner.js');
-const { inspect } = require('util');
 
 function process(source, options) {
   options = Object.assign(options, { resolveScopes: true });
-  return parse(source, options).scopeTree;
+  return cleanResult(parse(source, options).scopeTree);
+}
+
+function cleanResult(x) {
+  if (!x || typeof x !== 'object')
+    return x;
+
+  if (x instanceof Map) {
+    let obj = {};
+    x.forEach((value, key) => obj[key] = value);
+    return obj;
+  }
+
+  for (let k of Object.keys(x)) {
+    switch (k) {
+      case 'node':
+      case 'parent':
+        delete x[k];
+        break;
+      default:
+        x[k] = cleanResult(x[k]);
+        break;
+    }
+  }
+
+  return x;
 }
 
 function compare(a, b) {
   return objectLike(a, b, ['node', 'message', 'parent', 'start', 'end']);
 }
 
-function render(obj) {
-  function filter(x) {
-    if (x && typeof x === 'object') {
-      for (let k of Object.keys(x)) {
-        switch (k) {
-          case 'node':
-          case 'parent':
-            delete x[k];
-            break;
-          default:
-            filter(x[k]);
-            break;
-        }
-      }
-    }
-  }
-
-  filter(obj);
-
-  return inspect(obj, { depth: 20, colors: true });
-}
-
 runTests({
   dir:  __dirname,
   process,
   compare,
-  render,
 });

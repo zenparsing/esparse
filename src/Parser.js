@@ -531,16 +531,13 @@ export class Parser {
 
   setLabel(label, value) {
     let m = this.context.labelMap;
-
-    if (!m)
-      m = this.context.labelMap = Object.create(null);
-
-    m[label] = value;
+    if (!m) m = this.context.labelMap = new Map();
+    m.set(label, value);
   }
 
   getLabel(label) {
     let m = this.context.labelMap;
-    return (m && m[label]) | 0;
+    return (m && m.get(label)) | 0;
   }
 
   setFunctionType(kind) {

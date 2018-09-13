@@ -6,7 +6,6 @@
   names: {},
   free: [],
   strict: false,
-  parent: null,
   children:
    [ { type: 'block',
        names:

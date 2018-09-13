@@ -17,7 +17,6 @@ function x(a, a) {}
         const: false } },
   free: [],
   strict: false,
-  parent: null,
   children:
    [ { type: 'block',
        names: {},

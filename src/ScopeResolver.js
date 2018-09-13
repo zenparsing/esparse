@@ -8,7 +8,7 @@ class Scope {
     this.type = type;
     this.node = node;
     this.strict = strict;
-    this.names = Object.create(null);
+    this.names = new Map();
     this.free = [];
     this.parent = null;
     this.children = [];
@@ -16,7 +16,8 @@ class Scope {
   }
 
   resolveName(name) {
-    if (this.names[name]) return this.names[name];
+    let record = this.names.get(name);
+    if (record) return record;
     if (this.parent) return this.parent.resolveName(name);
     return null;
   }
@@ -63,9 +64,10 @@ export class ScopeResolver {
 
     free.forEach(r => {
       let name = r.value;
+      let record = map.get(name);
 
-      if (map[name]) {
-        map[name].references.push(r);
+      if (record) {
+        record.references.push(r);
       } else {
         freeList.push(r);
         if (next)
@@ -91,7 +93,7 @@ export class ScopeResolver {
     this.linkScope(scope);
 
     varNames.forEach(n => {
-      if (scope.names[n.value])
+      if (scope.names.has(n.value))
         this.fail('Cannot shadow lexical declaration with var', n);
       else if (this.top.type === 'var')
         this.addName(n, 'var');
@@ -162,27 +164,26 @@ export class ScopeResolver {
     this.popScope(); // var
     this.popScope(); // param
 
-    Object.keys(paramScope.names).forEach(name => {
-      if (blockScope.names[name])
-        this.fail('Duplicate block declaration', blockScope.names[name].declarations[0]);
+    paramScope.names.forEach((record, name) => {
+      if (blockScope.names.has(name))
+        this.fail('Duplicate block declaration', blockScope.names.get(name).declarations[0]);
 
-      if (strictParams && paramScope.names[name].declarations.length > 1)
-        this.fail('Duplicate parameter names', paramScope.names[name].declarations[1]);
+      if (strictParams && record.declarations.length > 1)
+        this.fail('Duplicate parameter names', record.declarations[1]);
     });
   }
 
   addReference(node) {
     let name = node.value;
-    let map = this.top.names;
+    let record = this.top.names.get(name);
 
-    if (map[name]) map[name].references.push(node);
+    if (record) record.references.push(node);
     else this.top.free.push(node);
   }
 
   addName(node, kind) {
     let name = node.value;
-    let map = this.top.names;
-    let record = map[name];
+    let record = this.top.names.get(name);
 
     if (record) {
 
@@ -194,11 +195,11 @@ export class ScopeResolver {
       if (name === 'let' && (kind === 'let' || kind === 'const'))
         this.fail('Invalid binding identifier', node);
 
-      map[name] = record = {
+      this.top.names.set(name, record = {
         declarations: [],
         references: [],
         const: kind === 'const',
-      };
+      });
     }
 
     record.declarations.push(node);
