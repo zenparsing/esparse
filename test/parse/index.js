@@ -1,4 +1,4 @@
-const { parse } = require('../../');
+const { parse } = require('../../src');
 const { runTests, objectLike } = require('../runner.js');
 
 const SKIP_KEYS = [

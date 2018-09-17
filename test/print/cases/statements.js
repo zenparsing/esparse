@@ -75,4 +75,10 @@ else 2;`,
 
 1;`,
 
+/** async function f() { for await (let x of y); } **/
+'for-await':
+`async function f() {
+  for await (let x of y) ;
+}`,
+
 })

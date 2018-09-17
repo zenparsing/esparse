@@ -491,11 +491,9 @@ export class Printer {
   }
 
   ForOfStatement(node) {
-    this.write(
-      'for', SPACE,
-      '(', node.left, ' of ', node.right, ')', SPACE,
-      node.body
-    );
+    this.write('for');
+    if (node.async) this.write(' await');
+    this.write(SPACE, '(', node.left, ' of ', node.right, ')', SPACE, node.body);
   }
 
   WithStatement(node) {

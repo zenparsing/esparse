@@ -1,4 +1,4 @@
-const { parse, print } = require('../../');
+const { parse, print } = require('../../src');
 const { runTests } = require('../runner.js');
 
 function process(source, options) {

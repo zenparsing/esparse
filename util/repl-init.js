@@ -1,4 +1,4 @@
-const esparse = require('../');
+const esparse = require('../src');
 const util = require('util');
 
 const HELP = `

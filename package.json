@@ -3,8 +3,8 @@
   "version": "0.6.8",
   "description": "An ECMAScript Parser",
   "homepage": "https://github.com/zenparsing/esparse",
-  "main": "dist/default.js",
-  "module": "src/default.js",
+  "main": "dist/index.js",
+  "module": "src/index.js",
   "devDependencies": {
     "annotated": "^0.3.3",
     "eslint": "^4.19.1"
