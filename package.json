@@ -6,15 +6,14 @@
   "main": "dist/default.js",
   "module": "src/default.js",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "annotated": "^0.3.3",
     "eslint": "^4.19.1"
   },
   "scripts": {
     "lint": "eslint src/*",
-    "test": "npm run build && node test",
-    "build": "git clean -dfX ./dist && babel src --out-dir dist --plugins=transform-es2015-modules-commonjs",
-    "prepublishOnly": "npm run lint && npm test"
+    "test": "node -r annotated test",
+    "build": "git clean -dfX ./dist && annotated src -o dist -m",
+    "prepublishOnly": "npm run lint && npm test && npm run build"
   },
   "dependencies": {}
 }
