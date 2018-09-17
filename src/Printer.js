@@ -73,7 +73,7 @@ export class Printer {
   escapeString(value) {
     // TODO: Should we convert non-ASCII to unicode escapes?
     // See: https://github.com/mathiasbynens/jsesc/blob/master/src/jsesc.js
-    return value.replace(/['"\\\b\f\n\r\t\u2028\u2029]/g, c => {
+    return value.replace(/['"\\\b\f\n\r\t\v\u2028\u2029]/g, c => {
       switch (c) {
         case '"':
         case '\'': return c === this.stringDelimiter ? '\\' + c : c;
@@ -83,6 +83,7 @@ export class Printer {
         case '\n': return '\\n';
         case '\r': return '\\r';
         case '\t': return '\\t';
+        case '\v': return '\\v';
         case '\u2028': return '\\u2028';
         case '\u2029': return '\\u2029';
       }
@@ -392,9 +393,13 @@ export class Printer {
   }
 
   Block(node) {
-    this.write('{', INDENT);
-    this.writeStatements(node.statements);
-    this.write(OUTDENT, '}');
+    if (node.statements.length === 0) {
+      this.write('{}');
+    } else {
+      this.write('{', INDENT);
+      this.writeStatements(node.statements);
+      this.write(OUTDENT, '}');
+    }
   }
 
   LabelledStatement(node) {
@@ -406,7 +411,7 @@ export class Printer {
   }
 
   Directive(node) {
-    this.write(node.expression, ';');
+    this.write(node.expression, ';', NEWLINE);
   }
 
   EmptyStatement() {
@@ -450,7 +455,13 @@ export class Printer {
 
   IfStatement(node) {
     this.write('if', SPACE, '(', node.test, ')', SPACE, node.consequent);
-    if (node.alternate) this.write(' else ', node.alternate);
+    if (node.alternate) {
+      this.write(
+        node.consequent.type === 'Block' ? SPACE : NEWLINE,
+        'else ',
+        node.alternate
+      );
+    }
   }
 
   DoWhileStatement(node) {
@@ -458,7 +469,7 @@ export class Printer {
   }
 
   WhileStatement(node) {
-    this.write('while', SPACE, '(', node.test, ')', node.body);
+    this.write('while', SPACE, '(', node.test, ')', SPACE, node.body);
   }
 
   ForStatement(node) {
@@ -499,15 +510,18 @@ export class Printer {
       '(', node.descriminant, ')', SPACE,
       '{', INDENT
     );
-    this.writeList(node.cases, '');
+    this.writeList(node.cases, NEWLINE);
     this.write(OUTDENT, '}');
   }
 
   SwitchCase(node) {
-    if (node.test) this.write('case ', node.test, ':', INDENT);
-    else this.write('default:', INDENT);
-    this.writeStatements(node.consequent);
-    this.write(OUTDENT);
+    if (node.test) this.write('case ', node.test, ':');
+    else this.write('default:');
+    if (node.consequent.length > 0) {
+      this.write(INDENT);
+      this.writeStatements(node.consequent);
+      this.depth--;
+    }
   }
 
   TryStatement(node) {

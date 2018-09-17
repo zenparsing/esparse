@@ -19,7 +19,6 @@
     break;
   default:
     break;
-
 }`,
 
 /** try { x; } catch (e) { y; } **/
@@ -51,5 +50,29 @@
 /** for (let { x, y } of z); **/
 'for-of':
 `for (let { x, y } of z) ;`,
+
+/** if (x) {} else {} **/
+'if-else':
+`if (x) {} else {}`,
+
+/** if (x) 1; else 2; **/
+'if-else-short':
+`if (x) 1;
+else 2;`,
+
+/** switch (x) { case 1: case 2: case 3: a; } **/
+'switch-case-empty-case':
+`switch (x) {
+  case 1:
+  case 2:
+  case 3:
+    a;
+}`,
+
+/** 'use strict'; 1; **/
+'use strict directive':
+`'use strict';
+
+1;`,
 
 })
