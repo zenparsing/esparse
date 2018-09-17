@@ -71,9 +71,9 @@ export class Printer {
   }
 
   escapeString(value) {
-    // TODO
+    // TODO: Should we convert non-ASCII to unicode escapes?
     // See: https://github.com/mathiasbynens/jsesc/blob/master/src/jsesc.js
-    return value.replace(/['"\\\b\f\n\r\t]/g, c => {
+    return value.replace(/['"\\\b\f\n\r\t\u2028\u2029]/g, c => {
       switch (c) {
         case '"':
         case '\'': return c === this.stringDelimiter ? '\\' + c : c;
@@ -83,8 +83,14 @@ export class Printer {
         case '\n': return '\\n';
         case '\r': return '\\r';
         case '\t': return '\\t';
+        case '\u2028': return '\\u2028';
+        case '\u2029': return '\\u2029';
       }
     });
+  }
+
+  escapeRegexp(value) {
+    return value.replace(/([^\\])\//g, '$1\\/');
   }
 
   write(...args) {
@@ -166,7 +172,6 @@ export class Printer {
   }
 
   StringLiteral(node) {
-    // TODO: consider using raw if possible to avoid escaping
     this.write(
       this.stringDelimiter,
       this.escapeString(node.value),
@@ -175,13 +180,11 @@ export class Printer {
   }
 
   TemplatePart(node) {
-    // TODO: should we use value if "raw" is not provided?
-    this.write(node.raw);
+    this.write(typeof node.raw === 'string' ? node.raw : node.value);
   }
 
   RegularExpression(node) {
-    // TODO: Handle non-escaped forward slashes
-    this.write('/', node.value, '/', node.flags);
+    this.write('/', this.escapeRegexp(node.value), '/', node.flags);
   }
 
   BooleanLiteral(node) {
@@ -241,8 +244,11 @@ export class Printer {
   }
 
   BinaryExpression(node) {
-    // TODO: enforce space if node.right is RegularExpression
-    this.write(node.left, SPACE, node.operator, SPACE, node.right);
+    this.write(
+      node.left, SPACE,
+      node.operator, node.right.type === 'RegularExpression' ? ' ' : SPACE,
+      node.right
+    );
   }
 
   UpdateExpression(node) {
