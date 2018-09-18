@@ -25,10 +25,7 @@
             names: {},
             free: [],
             strict: true,
-            children: [],
-            varNames: null } ],
-       varNames: null } ],
-  varNames: null },
+            children: [] } ] } ] },
 
 /** class C {} class C {} **/
 'duplicate class declarations not allowed': {},

@@ -25,8 +25,7 @@
               names: {},
               free: [],
               strict: false,
-              children: [],
-              varNames: null },
+              children: [] },
             { type: 'catch',
               names:
               { e:
@@ -55,10 +54,6 @@
                         const: false } },
                   free: [],
                   strict: false,
-                  children: [],
-                  varNames: null } ],
-              varNames: null } ],
-         varNames: null } ],
-    varNames: null },
+                  children: [] } ] } ] } ] },
 
   })

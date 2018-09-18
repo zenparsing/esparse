@@ -16,9 +16,6 @@
             names: {},
             free: [],
             strict: false,
-            children: [],
-            varNames: null } ],
-       varNames: null } ],
-  varNames: null },
+            children: [] } ] } ] },
 
 })

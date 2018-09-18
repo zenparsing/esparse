@@ -22,8 +22,6 @@
              const: true } },
        free: [],
        strict: true,
-       children: [],
-       varNames: null } ],
-  varNames: null },
+       children: [] } ] },
 
 })

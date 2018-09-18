@@ -2,6 +2,8 @@ import { forEachChild } from './AST.js';
 
 // TODO: Param scopes have empty free lists, which is strange
 
+const VarNames = Symbol();
+
 class Scope {
 
   constructor(type, strict, node = null) {
@@ -12,7 +14,7 @@ class Scope {
     this.free = [];
     this.parent = null;
     this.children = [];
-    this.varNames = [];
+    this[VarNames] = [];
   }
 
   resolveName(name) {
@@ -36,7 +38,7 @@ export class ScopeResolver {
     this.top = new Scope('var', false, ast);
     this.visit(ast);
     this.flushFree();
-    this.top.varNames = null;
+    this.top[VarNames] = null;
     return this.top;
   }
 
@@ -84,9 +86,9 @@ export class ScopeResolver {
 
   popScope() {
     let scope = this.top;
-    let varNames = scope.varNames;
+    let varNames = scope[VarNames];
 
-    scope.varNames = null;
+    scope[VarNames] = null;
 
     this.flushFree();
     this.top = this.stack.pop();
@@ -98,7 +100,7 @@ export class ScopeResolver {
       else if (this.top.type === 'var')
         this.addName(n, 'var');
       else
-        this.top.varNames.push(n);
+        this.top[VarNames].push(n);
     });
   }
 
@@ -318,7 +320,7 @@ export class ScopeResolver {
 
       case 'declaration':
         if (kind === 'var' && this.top.type !== 'var')
-          this.top.varNames.push(node);
+          this.top[VarNames].push(node);
         else
           this.addName(node, kind);
         break;

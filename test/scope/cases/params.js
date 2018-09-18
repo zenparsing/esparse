@@ -56,13 +56,7 @@ function x(a, a) {}
                            names: {},
                            free: [],
                            strict: false,
-                           children: [],
-                           varNames: null } ],
-                      varNames: null } ],
-                 varNames: null } ],
-            varNames: null } ],
-       varNames: null } ],
-  varNames: null },
+                           children: [] } ] } ] } ] } ] } ] },
 
 /**
 function x(a, a) { 'use strict' }

@@ -69,12 +69,6 @@ function f(x) { var x }
                            names: {},
                            free: [],
                            strict: true,
-                           children: [],
-                           varNames: null } ],
-                      varNames: null } ],
-                 varNames: null } ],
-            varNames: null } ],
-       varNames: null } ],
-  varNames: null },
+                           children: [] } ] } ] } ] } ] } ] },
 
 })
