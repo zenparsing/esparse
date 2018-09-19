@@ -9,7 +9,7 @@
   children:
    [ { type: 'block',
        names: {},
-       free: [ { type: 'Identifier', value: 'x', context: 'variable' } ],
+       free: [],
        strict: false,
        children:
         [ { type: 'with',

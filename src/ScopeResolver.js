@@ -1,7 +1,5 @@
 import { forEachChild } from './AST.js';
 
-// TODO: Param scopes have empty free lists, which is strange
-
 const VarNames = Symbol();
 
 class Scope {
@@ -70,10 +68,10 @@ export class ScopeResolver {
 
       if (record) {
         record.references.push(r);
+      } else if (next) {
+        next.free.push(r);
       } else {
         freeList.push(r);
-        if (next)
-          next.free.push(r);
       }
     });
   }
