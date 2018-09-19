@@ -175,6 +175,7 @@ export class Transform {
       this.fail('Unexpected token ' + value, node);
 
     this.checkIdentifier(node);
+    node.context = 'variable';
   }
 
   transformDefaultExport(node) {

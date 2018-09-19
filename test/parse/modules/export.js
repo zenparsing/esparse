@@ -139,7 +139,7 @@
         [ { type: 'ExportSpecifier',
             start: 9,
             end: 10,
-            local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
+            local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: 'variable' },
             exported: null } ],
        from: null } ] },
 
@@ -156,12 +156,12 @@
         [ { type: 'ExportSpecifier',
             start: 9,
             end: 10,
-            local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
+            local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: 'variable' },
             exported: null },
           { type: 'ExportSpecifier',
             start: 12,
             end: 13,
-            local: { type: 'Identifier', start: 12, end: 13, value: 'y', context: '' },
+            local: { type: 'Identifier', start: 12, end: 13, value: 'y', context: 'variable' },
             exported: null } ],
        from: null } ] },
 
@@ -178,7 +178,7 @@
         [ { type: 'ExportSpecifier',
             start: 9,
             end: 15,
-            local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
+            local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: 'variable' },
             exported: { type: 'Identifier', start: 14, end: 15, value: 'y', context: '' } } ],
        from: null } ] },
 
@@ -195,7 +195,7 @@
         [ { type: 'ExportSpecifier',
             start: 9,
             end: 21,
-            local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: '' },
+            local: { type: 'Identifier', start: 9, end: 10, value: 'x', context: 'variable' },
             exported:
              { type: 'Identifier',
                start: 14,
