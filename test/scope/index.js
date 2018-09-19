@@ -41,12 +41,13 @@
 
 */
 
-const { parse } = require('../../src');
+const { parse, resolveScopes } = require('../../src');
 const { runTests, objectLike } = require('../runner.js');
 
 function process(source, options) {
-  options = Object.assign(options, { resolveScopes: true });
-  return cleanResult(parse(source, options).scopeTree);
+  let result = parse(source, options);
+  let scope = resolveScopes(result.ast, result);
+  return cleanResult(scope);
 }
 
 function cleanResult(x) {

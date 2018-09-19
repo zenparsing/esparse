@@ -26,13 +26,14 @@ class Scope {
 
 export class ScopeResolver {
 
-  constructor(options = {}) {
+  constructor() {
     this.stack = [];
     this.top = null;
-    this.onStaticError = options.onStaticError;
+    this.lineMap = null;
   }
 
-  resolve(ast) {
+  resolve(ast, options = {}) {
+    this.lineMap = options.lineMap;
     this.top = new Scope('var', false, ast);
     this.visit(ast);
     this.flushFree();
@@ -41,8 +42,18 @@ export class ScopeResolver {
   }
 
   fail(msg, node) {
-    if (this.onStaticError) this.onStaticError(msg, node);
-    else throw new SyntaxError(msg);
+    let err = new SyntaxError(msg);
+
+    if (this.lineMap) {
+      let loc = this.lineMap.locate(node.start);
+      err.line = loc.line;
+      err.column = loc.column;
+      err.lineOffset = loc.lineOffset;
+      err.startOffset = node.start;
+      err.endOffset = node.end;
+    }
+
+    throw err;
   }
 
   pushScope(type, node) {

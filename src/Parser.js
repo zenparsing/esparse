@@ -2,7 +2,6 @@ import * as AST from './AST.js';
 import { Scanner } from './Scanner.js';
 import { Transform } from './Transform.js';
 import { Validate } from './Validate.js';
-import { ScopeResolver } from './ScopeResolver.js';
 
 // Returns true if the specified operator is an increment operator
 function isIncrement(op) {
@@ -173,7 +172,6 @@ class ParseResult {
     this.ast = results.ast;
     this.annotations = results.annotations;
     this.comments = results.comments;
-    this.scopeTree = null;
   }
 
   locate(offset) {
@@ -190,7 +188,6 @@ export class Parser {
     let scanner = new Scanner(input, options.offset);
 
     this.onASI = options.onASI || null;
-    this.resolveScopes = Boolean(options.resolveScopes);
     this.scanner = scanner;
     this.input = input;
     this.peek0 = null;
@@ -203,23 +200,13 @@ export class Parser {
   }
 
   createParseResult(ast) {
-    let result = new ParseResult({
+    return new ParseResult({
       ast,
       input: this.input,
       lineMap: this.scanner.lineMap,
       annotations: this.annotations,
       comments: this.comments,
     });
-
-    if (this.resolveScopes) {
-      let resolver = new ScopeResolver({
-        onStaticError: (msg, node) => this.fail(msg, node),
-      });
-
-      result.scopeTree = resolver.resolve(ast);
-    }
-
-    return result;
   }
 
   parseModule() {
