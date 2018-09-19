@@ -157,7 +157,11 @@ export class Printer {
 
   writeStatements(list) {
     this.writeList(list, (node, prev) => {
-      let extra = this.isClassOrFunction(node) || this.isClassOrFunction(prev) || prev.type === 'Directive';
+      let extra = (
+        this.isClassOrFunction(node) ||
+        this.isClassOrFunction(prev) ||
+        prev.type === 'Directive'
+      );
       this.newline(extra ? 2 : 1);
     });
   }
